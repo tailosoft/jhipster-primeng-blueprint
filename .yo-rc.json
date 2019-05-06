@@ -1,0 +1,10 @@
+{
+  "generator-jhipster-blueprint": {
+    "promptValues": {
+      "githubName": "yelhouti",
+      "authorName": "Youssef El Houti",
+      "authorEmail": "elhouti@elhouti.com",
+      "authorUrl": "https://elhouti.com"
+    }
+  }
+}
