@@ -88,6 +88,11 @@ jhipster -d --blueprint primeng
 
 ```
 
+Contribute:
+
+- To make it it easy to keep up with the latest jhipster version, we have a branch jhipster-upstream with the original content of the original jhipster generator.
+On each upgrade we edit the needed file and merge back into master (or feature branch). 
+
 # License
 
 
