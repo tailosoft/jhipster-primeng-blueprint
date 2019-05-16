@@ -1,72 +1,81 @@
-/**
- * Copyright 2013-2019 the original author or authors from the JHipster project.
- *
- * This file is part of the JHipster project, see https://www.jhipster.tech/
- * for more information.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 /* eslint-disable consistent-return */
-const chalk = require('chalk');
+const EntityClientGenerator = require('generator-jhipster/generators/entity-client');
 const writeFiles = require('./files').writeFiles;
-const utils = require('../utils');
-const BaseBlueprintGenerator = require('../generator-base-blueprint');
 
-let useBlueprint;
-
-module.exports = class extends BaseBlueprintGenerator {
+module.exports = class extends EntityClientGenerator {
     constructor(args, opts) {
-        super(args, opts);
-        utils.copyObjectProps(this, this.options.context);
-        this.configOptions = this.options.configOptions || {};
-        const blueprint = this.options.blueprint || this.configOptions.blueprint || this.config.get('blueprint');
-        if (!opts.fromBlueprint) {
-            // use global variable since getters dont have access to instance property
-            useBlueprint = this.composeBlueprint(blueprint, 'entity-client', {
-                ...this.options,
-                context: opts.context,
-                debug: opts.context.isDebugEnabled,
-                configOptions: this.configOptions
-            });
-        } else {
-            useBlueprint = false;
-        }
-    }
+        super(args, Object.assign({ fromBlueprint: true }, opts)); // fromBlueprint variable is important
 
-    // Public API method used by the getter and also by Blueprints
-    _writing() {
-        return writeFiles();
+        //TODO issue to report to jhipster
+        // super overrides this this.options with this.options.context.options losing the refernce of options
+        // thankfully we can retreive it from the opts param
+        // MAYBE we should do another check for blueprint in the if below
+        const jhContext = (this.jhipsterContext = opts.jhipsterContext);
+
+        // TODO check with jhispter team what this is supposed to do:
+        //- in case of EntityClientGenerator options doesn't contain jhipsterContext
+
+        if (!jhContext) {
+            this.error(
+                `This is a JHipster blueprint and should be used only like ${chalk.yellow('jhipster --blueprint primeng-blueprint')}`
+            );
+        }
+
+        this.configOptions = jhContext.configOptions || {};
+        // This sets up options for this sub generator and is being reused from JHipster
+        jhContext.setupEntityOptions(this, jhContext);
     }
 
     get writing() {
-        if (useBlueprint) return;
-        return this._writing();
-    }
-
-    // Public API method used by the getter and also by Blueprints
-    _end() {
-        return {
-            end() {
-                if (!this.options['skip-install'] && !this.skipClient) {
-                    this.rebuildClient();
-                }
-                this.log(chalk.bold.green(`Entity ${this.entityNameCapitalized} generated successfully.`));
+        /**
+         * Any method beginning with _ can be reused from the superclass `EntityClientGenerator`
+         *
+         * There are multiple ways to customize a phase from JHipster.
+         *
+         * 1. Let JHipster handle a phase, blueprint doesnt override anything.
+         * ```
+         *      return super._writing();
+         * ```
+         *
+         * 2. Override the entire phase, this is when the blueprint takes control of a phase
+         * ```
+         *      return {
+         *          myCustomWritePhaseStep() {
+         *              // Do all your stuff here
+         *          },
+         *          myAnotherCustomWritePhaseStep(){
+         *              // Do all your stuff here
+         *          }
+         *      };
+         * ```
+         *
+         * 3. Partially override a phase, this is when the blueprint gets the phase from JHipster and customizes it.
+         * ```
+         *      const phaseFromJHipster = super._writing();
+         *      const myCustomPhaseSteps = {
+         *          writeClientFiles() {
+         *              // override the writeClientFiles method from the _writing phase of JHipster
+         *          },
+         *          myCustomInitPhaseStep() {
+         *              // Do all your stuff here
+         *          },
+         *      }
+         *      return Object.assign(phaseFromJHipster, myCustomPhaseSteps);
+         * ```
+         */
+        console.log('YEH before phases');
+        const phaseFromJHipster = super._writing();
+        const customPhaseSteps = {
+            writeClientFiles() {
+                //override the writeClientFiles method from the _writing phase of JHipster
+                writeFiles().writeClientFiles.call(this);
             }
         };
+        return Object.assign(phaseFromJHipster, customPhaseSteps);
     }
 
     get end() {
-        if (useBlueprint) return;
-        return this._end();
+        // Here we are not overriding this phase and hence its being handled by JHipster
+        return super._end();
     }
 };

@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const constants = require('../generator-constants');
+const constants = require('generator-jhipster/generators/generator-constants');
 
 /* Constants use throughout */
 const CLIENT_TEST_SRC_DIR = constants.CLIENT_TEST_SRC_DIR;
@@ -235,7 +235,7 @@ function writeFiles() {
                     angularFiles,
                     this,
                     false,
-                    this.fetchFromInstalledJHipster(`entity-client/templates/${CLIENT_NG2_TEMPLATES_DIR}`)
+                    `./${CLIENT_NG2_TEMPLATES_DIR}`
                 );
                 this.addEntityToModule(
                     this.entityInstance,

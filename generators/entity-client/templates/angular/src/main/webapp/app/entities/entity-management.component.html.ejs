@@ -18,7 +18,7 @@
 -%>
 <div>
     <h2 id="page-heading">
-        <span jhiTranslate="<%= i18nKeyPrefix %>.home.title"><%= entityClassPluralHumanized %></span>
+        <span jhiTranslate="<%= i18nKeyPrefix %>.home.title">primeng <%= entityClassPluralHumanized %></span>
         <button id="jh-create-entity" class="btn btn-primary float-right jh-create-entity create-<%= entityUrl %>" [routerLink]="['/<%= entityUrl %>/new']">
             <fa-icon [icon]="'plus'"></fa-icon>
             <span <% if (searchEngine === 'elasticsearch') { %>class="hidden-sm-down" <% } %> jhiTranslate="<%= i18nKeyPrefix %>.home.createLabel">
