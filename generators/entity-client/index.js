@@ -17,7 +17,7 @@ module.exports = class extends EntityClientGenerator {
 
         if (!jhContext) {
             this.error(
-                `This is a JHipster blueprint and should be used only like ${chalk.yellow('jhipster --blueprint primeng-blueprint')}`
+                `This is a JHipster blueprint and should be used only like ${chalk.yellow('jhipster --blueprint primeng')}`
             );
         }
 

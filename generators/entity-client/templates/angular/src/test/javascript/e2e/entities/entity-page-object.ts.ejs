@@ -173,16 +173,3 @@ export class <%= entityClass %>UpdatePage {
         return this.saveButton;
     }
 }
-
-export class <%= entityClass %>DeleteDialog {
-    private dialogTitle = element(by.id('<%= jhiPrefixDashed %>-delete-<%= entityInstance %>-heading'));
-    private confirmButton = element(by.id('<%= jhiPrefixDashed %>-confirm-delete-<%= entityInstance %>'));
-
-    async getDialogTitle() {
-        return this.dialogTitle.<%- elementGetter %>;
-    }
-
-    async clickOnConfirmButton(timeout?: number) {
-        await this.confirmButton.click();
-    }
-}

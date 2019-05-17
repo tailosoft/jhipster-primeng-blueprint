@@ -28,15 +28,11 @@ import {
     <%= entityAngularName %>Component,
     <%= entityAngularName %>DetailComponent,
     <%= entityAngularName %>UpdateComponent,
-    <%= entityAngularName %>DeletePopupComponent,
-    <%= entityAngularName %>DeleteDialogComponent,
-    <%= entityInstance %>Route,
-    <%= entityInstance %>PopupRoute
+    <%= entityInstance %>Route
 } from './';
 
 const ENTITY_STATES = [
     ...<%= entityInstance %>Route,
-    ...<%= entityInstance %>PopupRoute,
 ];
 
 @NgModule({
@@ -48,14 +44,10 @@ const ENTITY_STATES = [
         <%= entityAngularName %>Component,
         <%= entityAngularName %>DetailComponent,
         <%= entityAngularName %>UpdateComponent,
-        <%= entityAngularName %>DeleteDialogComponent,
-        <%= entityAngularName %>DeletePopupComponent,
     ],
     entryComponents: [
         <%= entityAngularName %>Component,
         <%= entityAngularName %>UpdateComponent,
-        <%= entityAngularName %>DeleteDialogComponent,
-        <%= entityAngularName %>DeletePopupComponent,
     ],
     <%_ if (enableTranslation) { _%>
     providers: [ { provide: JhiLanguageService, useClass: JhiLanguageService } ],
