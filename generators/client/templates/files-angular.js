@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 const mkdirp = require('mkdirp');
-const constants = require('../generator-constants');
+const constants = require('generator-jhipster/generators/generator-constants');
 
 /* Constants use throughout */
 const MAIN_SRC_DIR = constants.CLIENT_MAIN_SRC_DIR;
@@ -343,6 +343,7 @@ const files = {
                 'shared/shared.module.ts',
                 'shared/shared-libs.module.ts',
                 'shared/shared-common.module.ts',
+                'shared/primeng-common.module.ts',
                 'shared/constants/error.constants.ts',
                 'shared/constants/input.constants.ts',
                 'shared/constants/pagination.constants.ts',

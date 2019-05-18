@@ -30,6 +30,10 @@ eg $input-color: red;
 <%_ if (clientTheme !== 'none') { _%>
 @import "~bootswatch/dist/<%= clientTheme %>/bootswatch";
 <%_ } _%>
+@import '~primeicons/primeicons.css';
+@import '~primeng/resources/themes/nova-colored/theme.css';
+@import '~primeng/resources/primeng.css';
+@import '~primeflex/primeflex.css';
 
 <%_ if (enableI18nRTL) { _%>
 @import '<%= CLIENT_MAIN_SRC_DIR %>content/scss/rtl.scss';

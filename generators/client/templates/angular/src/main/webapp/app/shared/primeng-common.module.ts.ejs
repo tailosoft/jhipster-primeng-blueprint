@@ -1,0 +1,47 @@
+import { NgModule } from '@angular/core';
+import { CalendarModule } from 'primeng/calendar';
+import { CheckboxModule } from 'primeng/checkbox';
+import { DropdownModule } from 'primeng/dropdown';
+import { InputSwitchModule } from 'primeng/inputswitch';
+import { InputTextareaModule } from 'primeng/inputtextarea';
+import { ButtonModule } from 'primeng/button';
+import { TableModule } from 'primeng/table';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import {MessageModule} from 'primeng/message';
+import { TooltipModule } from 'primeng/tooltip';
+import { ConfirmationService } from 'primeng/api';
+
+@NgModule({
+  imports: [
+    CalendarModule,
+    CheckboxModule,
+    DropdownModule,
+    InputSwitchModule,
+    InputTextareaModule,
+    ButtonModule,
+    TableModule,
+    ConfirmDialogModule,
+    MessageModule,
+    TooltipModule,
+  ],
+  providers: [ConfirmationService],
+  exports: [
+    CalendarModule,
+    CheckboxModule,
+    DropdownModule,
+    InputSwitchModule,
+    InputTextareaModule,
+    ButtonModule,
+    TableModule,
+    ConfirmDialogModule,
+    MessageModule,
+    TooltipModule,
+  ]
+})
+export class PrimeNGCommonModule {
+  static forRoot() {
+    return {
+      ngModule: PrimeNGCommonModule,
+    };
+  }
+}
