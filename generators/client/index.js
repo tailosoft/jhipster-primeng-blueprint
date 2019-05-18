@@ -1,7 +1,7 @@
 /* eslint-disable consistent-return */
 const chalk = require('chalk');
 const ClientGenerator = require('generator-jhipster/generators/client');
-const writeFiles = require('./files').writeFiles;
+const writeAngularFiles = require('./templates/files-angular').writeFiles;
 
 module.exports = class extends ClientGenerator {
     constructor(args, opts) {
@@ -87,12 +87,11 @@ module.exports = class extends ClientGenerator {
     }
 
     get writing() {
-        // The writing phase is being overriden so that we can write our own templates as well.
-        // If the templates doesnt need to be overrriden then just return `super._writing()` here
+        // override the write method from the _writing phase of JHipster
         const phaseFromJHipster = super._writing();
         const customPhaseSteps = {
-            writeAdditionalFile() {
-                writeFiles.call(this);
+            write() {
+                writeAngularFiles.call(this);
             }
         };
         return Object.assign(phaseFromJHipster, customPhaseSteps);
