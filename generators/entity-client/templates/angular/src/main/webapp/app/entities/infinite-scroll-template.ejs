@@ -40,7 +40,9 @@
         <%_ if (searchEngine === 'elasticsearch') { _%>
         protected activatedRoute: ActivatedRoute,
         <%_ } _%>
-        protected accountService: AccountService
+        protected accountService: AccountService,
+        protected confirmationService: ConfirmationService,
+        protected translateService: TranslateService
     ) {
         this.<%= entityInstancePlural %> = [];
         this.itemsPerPage = ITEMS_PER_PAGE;

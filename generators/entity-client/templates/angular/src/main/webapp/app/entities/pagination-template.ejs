@@ -45,7 +45,9 @@
         protected dataUtils: JhiDataUtils,
         <%_ } _%>
         protected router: Router,
-        protected eventManager: JhiEventManager
+        protected eventManager: JhiEventManager,
+        protected confirmationService: ConfirmationService,
+        protected translateService: TranslateService
     ) {
         <%_ if (databaseType !== 'cassandra') { _%>
         this.itemsPerPage = ITEMS_PER_PAGE;

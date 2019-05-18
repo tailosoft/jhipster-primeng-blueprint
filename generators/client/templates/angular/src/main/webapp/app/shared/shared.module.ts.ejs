@@ -19,7 +19,6 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import {
     <%=angularXAppName%>SharedCommonModule,
-    PrimeNGCommonModule,
     <%_ if (authenticationType !== 'oauth2') { _%>
     <%=jhiPrefixCapitalized%>LoginModalComponent,
     <%_ } _%>
@@ -29,7 +28,6 @@ import {
 @NgModule({
     imports: [
         <%=angularXAppName%>SharedCommonModule,
-        PrimeNGCommonModule
     ],
     declarations: [
         <%_ if (authenticationType !== 'oauth2') { _%>
@@ -42,7 +40,6 @@ import {
     <%_ } _%>
     exports: [
         <%=angularXAppName%>SharedCommonModule,
-        PrimeNGCommonModule,
         <%_ if (authenticationType !== 'oauth2') { _%>
         <%=jhiPrefixCapitalized%>LoginModalComponent,
         <%_ } _%>

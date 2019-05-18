@@ -20,6 +20,7 @@
 import { browser, ExpectedConditions as ec, <% if ( fieldsContainInstant || fieldsContainZonedDateTime ) { %>protractor, <% } %>promise } from 'protractor';
 import { NavBarPage, SignInPage } from '../../<%= entityParentPathAddition %>page-objects/jhi-page-objects';
 
+import { <%= entityClass %>ComponentsPage, <%= entityClass %>UpdatePage } from './<%= entityFileName %>.page-object';
 <%_ if (fieldsContainBlobOrImage) { _%>
 import * as path from 'path';
 <%_ } _%>

@@ -32,7 +32,7 @@ import { AuthInterceptor } from './blocks/interceptor/auth.interceptor';
 import { AuthExpiredInterceptor } from './blocks/interceptor/auth-expired.interceptor';
 import { ErrorHandlerInterceptor } from './blocks/interceptor/errorhandler.interceptor';
 import { NotificationInterceptor } from './blocks/interceptor/notification.interceptor';
-import { <%=angularXAppName%>SharedModule } from 'app/shared';
+import { <%=angularXAppName%>SharedModule, PrimeNGCommonModule } from 'app/shared';
 import { <%=angularXAppName%>CoreModule } from 'app/core';
 import { <%=angularXAppName%>AppRoutingModule} from './app-routing.module';
 import { <%=angularXAppName%>HomeModule } from './home/home.module';
@@ -68,6 +68,7 @@ import {
             <%_ } _%>
         }),
         <%=angularXAppName%>SharedModule.forRoot(),
+        PrimeNGCommonModule,
         <%=angularXAppName%>CoreModule,
         <%=angularXAppName%>HomeModule,
         <%_ if (authenticationType !== 'oauth2') { _%>
