@@ -88,10 +88,20 @@ jhipster -d --blueprint primeng
 
 ```
 
-Contribute:
+#Contribute
 
-- To make it it easy to keep up with the latest jhipster version, we have a branch jhipster-upstream with the original content of the original jhipster generator.
-On each upgrade we edit the needed file and merge back into master (or feature branch). 
+To make it it easy to keep up with the latest jhipster version, we have a branch jhipster-upstream with the original content of the original jhipster generator.
+On each upgrade we edit the needed file and merge back into master (or feature branch).
+
+To use the blueprint: `jhipster --blueprint primeng import-jdl jhipster.jh --force`
+
+Sometimes, it looks like the blueprint is not detected, this causes by some dependencies not getting correctly installed, to fix that:
+```
+cd node_modules/generator-jhipster/
+npm install
+```
+This usually happens with using npm link, npm install doesn't install dependencies of dependencies
+
 
 # License
 
