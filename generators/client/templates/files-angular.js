@@ -416,7 +416,9 @@ const files = {
                 'spec/helpers/mock-event-manager.service.ts',
                 'spec/helpers/mock-active-modal.service.ts',
                 'spec/helpers/mock-state-storage.service.ts',
-                'spec/helpers/mock-alert.service.ts'
+                'spec/helpers/mock-alert.service.ts',
+                'spec/helpers/mock-confirmation.service.ts',
+                'spec/helpers/mock-translate.service.ts'
             ]
         },
         {

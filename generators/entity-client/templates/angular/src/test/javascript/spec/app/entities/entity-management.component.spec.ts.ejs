@@ -20,7 +20,7 @@
 const tsKeyId = generateTestEntityId(pkType, prodDatabaseType);
 _%>
 /* tslint:disable max-line-length */
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, inject } from '@angular/core/testing';
 import { Observable, of } from 'rxjs';
 import { HttpHeaders, HttpResponse } from '@angular/common/http';
 <%_ if (pagination !== 'no') { _%>
@@ -31,12 +31,16 @@ import { <%=angularXAppName%>TestModule } from '../../../<%= entityParentPathAdd
 import { <%= entityAngularName %>Component } from 'app/entities/<%= entityFolderName %>/<%= entityFileName %>.component';
 import { <%= entityAngularName %>Service } from 'app/entities/<%= entityFolderName %>/<%= entityFileName %>.service';
 import { <%= entityAngularName %> } from 'app/shared/model/<%= entityModelFileName %>.model';
+import { ConfirmationService } from 'primeng/api';
+import { JhiEventManager } from 'ng-jhipster';
 
 describe('Component Tests', () => {
     describe('<%= entityAngularName %> Management Component', () => {
         let comp: <%= entityAngularName %>Component;
         let fixture: ComponentFixture<<%= entityAngularName %>Component>;
         let service: <%= entityAngularName %>Service;
+        let mockConfirmationService: any;
+        let mockEventManager: any;
 
         beforeEach(() => {
             TestBed.configureTestingModule({
@@ -64,6 +68,8 @@ describe('Component Tests', () => {
             fixture = TestBed.createComponent(<%= entityAngularName %>Component);
             comp = fixture.componentInstance;
             service = fixture.debugElement.injector.get(<%= entityAngularName %>Service);
+            mockConfirmationService = fixture.debugElement.injector.get(ConfirmationService);
+            mockEventManager = fixture.debugElement.injector.get(JhiEventManager);
         });
 
         it('Should call load all on init', () => {
@@ -180,7 +186,23 @@ describe('Component Tests', () => {
         });
         <%_ } _%>
     <%_ } _%>
-    });
 
-    // TODO add delete test
+    it('should call delete service using confirmDialog',
+        inject([],
+            fakeAsync(() => {
+                // GIVEN
+                spyOn(service, 'delete').and.returnValue(of({}));
+
+                // WHEN
+                comp.delete(<%- tsKeyId %>);
+
+                // THEN
+                expect(mockConfirmationService.confirmSpy).toHaveBeenCalled();
+                expect(service.delete).toHaveBeenCalledWith(<%- tsKeyId %>);
+                expect(mockEventManager.broadcastSpy).toHaveBeenCalled();
+            })
+        )
+    );
+
+    });
 });

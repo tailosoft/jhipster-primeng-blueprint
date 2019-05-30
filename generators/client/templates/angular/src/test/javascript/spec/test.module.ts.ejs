@@ -35,6 +35,10 @@ import { MockAccountService } from './helpers/mock-account.service';
 import { MockActivatedRoute, MockRouter } from './helpers/mock-route.service';
 import { MockActiveModal } from './helpers/mock-active-modal.service';
 import { MockEventManager } from './helpers/mock-event-manager.service';
+import { ConfirmationService } from 'primeng/api';
+import { MockConfirmationService } from './helpers/mock-confirmation.service';
+import { TranslateService } from '@ngx-translate/core';
+import { MockTranslateService } from './helpers/mock-translate.service';
 <%_
 const tsKeyId = generateTestEntityId(pkType, prodDatabaseType);
 _%>
@@ -64,6 +68,14 @@ _%>
         {
             provide: JhiEventManager,
             useClass:  MockEventManager
+        },
+        {
+            provide: TranslateService,
+            useValue: new MockTranslateService(),
+        },
+        {
+            provide: ConfirmationService,
+            useValue: new MockConfirmationService(),
         },
         {
             provide: NgbActiveModal,
