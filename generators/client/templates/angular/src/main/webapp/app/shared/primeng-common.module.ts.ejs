@@ -9,7 +9,6 @@ import { TableModule } from 'primeng/table';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import {MessageModule} from 'primeng/message';
 import { TooltipModule } from 'primeng/tooltip';
-import { ConfirmationService } from 'primeng/api';
 
 @NgModule({
   imports: [
@@ -24,7 +23,6 @@ import { ConfirmationService } from 'primeng/api';
     MessageModule,
     TooltipModule,
   ],
-  providers: [ConfirmationService],
   exports: [
     CalendarModule,
     CheckboxModule,

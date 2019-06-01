@@ -19,9 +19,6 @@
 import { Injectable } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
 import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot, Routes } from '@angular/router';
-<%_ if (pagination === 'pagination' || pagination === 'pager') { _%>
-import { JhiPaginationUtil, JhiResolvePagingParams } from 'ng-jhipster';
-<%_ } _%>
 import { UserRouteAccessService } from 'app/core';
 import { Observable, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -55,16 +52,8 @@ export const <%= entityInstance %>Route: Routes = [
     {
         path: '',
         component: <%= entityAngularName %>Component,
-        <%_ if (pagination === 'pagination' || pagination === 'pager'){ _%>
-        resolve: {
-            'pagingParams': JhiResolvePagingParams
-        },
-        <%_ } _%>
         data: {
             authorities: ['ROLE_USER'],
-            <%_ if (pagination === 'pagination' || pagination === 'pager'){ _%>
-            defaultSort: 'id,asc',
-            <%_ } _%>
             pageTitle: <% if (enableTranslation){ %>'<%= angularAppName %>.<%= entityTranslationKey %>.home.title'<% }else{ %>'<%= entityClassPlural %>'<% } %>
         },
         canActivate: [UserRouteAccessService]

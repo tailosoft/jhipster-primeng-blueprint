@@ -22,12 +22,14 @@ import {
     <%_ if (authenticationType !== 'oauth2') { _%>
     <%=jhiPrefixCapitalized%>LoginModalComponent,
     <%_ } _%>
-    HasAnyAuthorityDirective
+    HasAnyAuthorityDirective,
+    PrimeNGCommonModule
 } from './';
 
 @NgModule({
     imports: [
         <%=angularXAppName%>SharedCommonModule,
+        PrimeNGCommonModule
     ],
     declarations: [
         <%_ if (authenticationType !== 'oauth2') { _%>
@@ -43,7 +45,8 @@ import {
         <%_ if (authenticationType !== 'oauth2') { _%>
         <%=jhiPrefixCapitalized%>LoginModalComponent,
         <%_ } _%>
-        HasAnyAuthorityDirective
+        HasAnyAuthorityDirective,
+        PrimeNGCommonModule
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 

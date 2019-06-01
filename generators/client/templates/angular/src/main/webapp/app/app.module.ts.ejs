@@ -41,6 +41,7 @@ import { <%=angularXAppName%>AccountModule } from './account/account.module';
 <%_ } _%>
 import { <%=angularXAppName%>EntityModule } from './entities/entity.module';
 import * as moment from 'moment';
+import { ConfirmationService } from 'primeng/api';
 // jhipster-needle-angular-add-module-import JHipster will add new module here
 import {
     <%=jhiPrefixCapitalized%>MainComponent,
@@ -110,7 +111,8 @@ import {
             provide: HTTP_INTERCEPTORS,
             useClass: NotificationInterceptor,
             multi: true
-        }
+        },
+        ConfirmationService,
     ],
     bootstrap: [ <%=jhiPrefixCapitalized%>MainComponent ]
 })

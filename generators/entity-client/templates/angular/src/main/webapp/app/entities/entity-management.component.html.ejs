@@ -18,13 +18,10 @@
 -%>
 <div>
     <h2 id="page-heading">
-        <span jhiTranslate="<%= i18nKeyPrefix %>.home.title">primeng <%= entityClassPluralHumanized %></span>
-        <button id="jh-create-entity" class="btn btn-primary float-right jh-create-entity create-<%= entityUrl %>" [routerLink]="['/<%= entityUrl %>/new']">
-            <fa-icon [icon]="'plus'"></fa-icon>
-            <span <% if (searchEngine === 'elasticsearch') { %>class="hidden-sm-down" <% } %> jhiTranslate="<%= i18nKeyPrefix %>.home.createLabel">
-            Create new <%= entityClassHumanized %>
-            </span>
-        </button>
+        <span jhiTranslate="<%= i18nKeyPrefix %>.home.title"><%= entityClassPluralHumanized %></span>
+        <p-button id="jh-create-entity" class="float-right jh-create-entity create-<%= entityUrl %>" [routerLink]="['/<%= entityUrl %>/new']"
+            [label]="'<%= i18nKeyPrefix %>.home.createLabel' | translate" icon="pi pi-plus" iconPos="left">
+        </p-button>
     </h2>
     <<%= jhiPrefixDashed %>-alert></<%= jhiPrefixDashed %>-alert>
     <%_ if (searchEngine === 'elasticsearch') { _%>
@@ -45,27 +42,86 @@
     </div>
     <%_ } _%>
     <br/>
-    <div class="table-responsive" *ngIf="<%=entityInstancePlural %>">
-        <table class="table table-striped">
-            <thead>
-            <tr<% if (pagination !== 'no') { %> jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="<%=pagination !== 'infinite-scroll' ? 'transition.bind(this)' : 'reset.bind(this)'%>"<% } %>>
-            <th<% if (pagination !== 'no') { %> jhiSortBy="id"<% } %>><span jhiTranslate="global.field.id">ID</span><% if (pagination !== 'no') { %> <fa-icon [icon]="'sort'"></fa-icon><% } %></th>
+    <p-table #<%= entityInstance %>Table [value]="<%= entityInstancePlural %>" [rowTrackBy]="trackId" [responsive]="true"<%
+    if (pagination !== 'no') {
+        %>[lazy]="true" [rows]="itemsPerPage" [totalRecords]="totalItems" [loading]="loading" sortMode="multiple" [lazyLoadOnInit]="false"<%
+        if (pagination === 'infinite-scroll') {
+            %> [scrollable]="true" [virtualScroll]="true" (onLazyLoad)="onLazyLoadEvent($event)" scrollHeight="200px" [virtualRowHeight]="34" <%
+        } else if (pagination === 'pagination') {
+            %>[paginator]="true" (onLazyLoad)="onLazyLoadEvent($event)" <%
+        }
+    }
+    %>>
+        <%_ if (searchEngine === 'elasticsearch') { _%>
+        <ng-template pTemplate="caption">
+            <div style="text-align: right">
+                <i class="fa fa-search" style="margin:4px 4px 0 0"></i>
+                <input type="text" pInputText size="50" placeholder="Global Filter" (input)="dt.filterGlobal($event.target.value, 'contains')" style="width:auto">
+            </div>
+        </ng-template>
+        <%_ } _%>
+        <ng-template pTemplate="header">
+        <tr>
+            <th<% if (pagination !== 'no') { %> pSortableColumn="id"<% } %>>
+                <span jhiTranslate="global.field.id">ID</span>
+                <%_ if (pagination !== 'no') { _%>
+                <p-sortIcon field="id"></p-sortIcon>
+                <%_ } _%>
+            </th>
             <%_ for (idx in fields) { _%>
-            <th<% if (pagination !== 'no') { %> jhiSortBy="<%= fields[idx].fieldName%>"<% } %>><span jhiTranslate="<%=`${i18nKeyPrefix}.${fields[idx].fieldName}` %>"><%= fields[idx].fieldNameHumanized %></span><% if (pagination !== 'no') { %> <fa-icon [icon]="'sort'"></fa-icon><% } %></th>
+            <th<% if (pagination !== 'no') { %> pSortableColumn="<%= fields[idx].fieldName %>"<% } %>>
+                <span jhiTranslate="<%=`${i18nKeyPrefix}.${fields[idx].fieldName}` %>"><%= fields[idx].fieldNameHumanized %></span>
+                <%_ if (pagination !== 'no') { _%>
+                <p-sortIcon field="<%= fields[idx].fieldName %>"></p-sortIcon>
+                <%_ } _%>
+            </th>
             <%_ } _%>
             <%_ for (idx in relationships) { _%>
             <%_ if (relationships[idx].relationshipType === 'many-to-one'
             || (relationships[idx].relationshipType === 'one-to-one' && relationships[idx].ownerSide === true)
             || (relationships[idx].relationshipType === 'many-to-many' && relationships[idx].ownerSide === true && pagination === 'no')) {
             const fieldName = dto === 'no' ? "." + relationships[idx].otherEntityField : relationships[idx].otherEntityFieldCapitalized;_%>
-            <th<% if (pagination !== 'no') { %> jhiSortBy="<%=relationships[idx].relationshipName + (fieldName)%>"<% } %>><span jhiTranslate="<%= `${i18nKeyPrefix}.${relationships[idx].relationshipName}` %>"><%= relationships[idx].relationshipNameHumanized %></span><% if (pagination !== 'no') { %> <fa-icon [icon]="'sort'"></fa-icon><% } %></th>
+            <th<% if (pagination !== 'no') { %> pSortableColumn="<%=relationships[idx].relationshipName%>"<% } %>>
+                <span jhiTranslate="<%= `${i18nKeyPrefix}.${relationships[idx].relationshipName}` %>"><%= relationships[idx].relationshipNameHumanized %></span>
+                <% if (pagination !== 'no') { %> <p-sortIcon field="<%= relationships[idx].relationshipName %>"></p-sortIcon><% } %>
+            </th>
             <%_ } _%>
+            <%_ } _%>
+            <th style="width: 124px"></th>
+        </tr>
+        <%_ if (jpaMetamodelFiltering) { _%>
+        <tr>
+            <th>
+                <input pInputText type="text" [value]="<%= entityInstance %>Table.filters.id?.value"
+                       (input)="<%= entityInstance %>Table.filter($event.target.value, 'id', 'equals')">
+            </th>
+            <%_ for (idx in fields) {
+                const fieldType = fields[idx].fieldType;_%>
+            <th>
+                <%_ if (['byte[]', 'ByteBuffer'].includes(fieldType)) { _%>
+            <%_ } else if (fields[idx].fieldIsEnum) { _%>
+
+            <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
+                <p-calendar [(ngModel)]="<%= fields[idx].fieldName %>Range" selectionMode="range" [readonlyInput]="true" [showButtonBar]="true" showTime="true" hourFormat="24"
+                            (onSelect)="onDateSelect(<%= fields[idx].fieldName %>Range, '<%= fields[idx].fieldName %>', true)" (onClearClick)="onDateSelect(<%= fields[idx].fieldName %>Range, '<%= fields[idx].fieldName %>', true)"></p-calendar>
+            <%_ } else if (fieldType === 'LocalDate') { _%>
+                <p-calendar [(ngModel)]="<%= fields[idx].fieldName %>Range" selectionMode="range" [readonlyInput]="true" [showButtonBar]="true"
+                            (onSelect)="onDateSelect(<%= fields[idx].fieldName %>Range, '<%= fields[idx].fieldName %>')" (onClearClick)="onDateSelect(<%= fields[idx].fieldName %>Range, '<%= fields[idx].fieldName %>')"></p-calendar>
+            <%_ } else { _%>
+                <input pInputText type="text" [value]="<%= entityInstance %>Table.filters.<%= fields[idx].fieldName %>?.value"
+                       (input)="<%= entityInstance %>Table.filter($event.target.value, '<%= fields[idx].fieldName %>', 'contains')">
+            <%_ } _%>
+            </th>
+            <%_ } _%>
+            <%_ for (idx in relationships) { _%>
+            <th>Select</th>
             <%_ } _%>
             <th></th>
-            </tr>
-            </thead>
-            <tbody<% if (pagination === 'infinite-scroll') { %> infinite-scroll (scrolled)="loadPage(page + 1)" [infiniteScrollDisabled]="page >= links['last']" [infiniteScrollDistance]="0"<% } %>>
-            <tr *ngFor="let <%=entityInstance %> of <%=entityInstancePlural %> ;trackBy: trackId">
+        </tr>
+        <%_ } _%>
+        </ng-template>
+        <ng-template pTemplate="body" let-<%=entityInstance %>>
+            <tr>
                 <td><a [routerLink]="['/<%= entityUrl %>', <%= entityInstance %>.id, 'view' ]">{{<%=entityInstance %>.id}}</a></td>
                 <%_ for (idx in fields) {
                 const fieldName = fields[idx].fieldName;
@@ -139,52 +195,20 @@
                 </td>
                 <%_ } _%>
                 <%_ } _%>
-                <td class="text-right">
-                    <div class="btn-group">
-                        <button type="submit"
-                                [routerLink]="['/<%= entityUrl %>', <%= entityInstance %>.id, 'view' ]"
-                                class="btn btn-info btn-sm">
-                            <fa-icon [icon]="'eye'"></fa-icon>
-                            <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
-                        </button>
-                        <button type="submit"
-                                [routerLink]="['/<%= entityUrl %>', <%= entityInstance %>.id, 'edit']"
-                                class="btn btn-primary btn-sm">
-                            <fa-icon [icon]="'pencil-alt'"></fa-icon>
-                            <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
-                        </button>
-                        <button type="submit"
-                                (click)="delete(<%= entityInstance %>.id)"
-                                class="btn btn-danger btn-sm">
-                            <fa-icon [icon]="'times'"></fa-icon>
-                            <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>
-                        </button>
+                <td>
+                    <div class="btn-group flex-btn-group-container">
+                        <p-button type="submit" [routerLink]="['/<%= entityUrl %>', <%= entityInstance %>.id, 'view' ]"
+                                  icon="pi pi-eye" styleClass="ui-button-info">
+                        </p-button>
+                        <p-button type="submit" [routerLink]="['/<%= entityUrl %>', <%= entityInstance %>.id, 'edit' ]"
+                                  icon="pi pi-pencil" styleClass="ui-button-warning">
+                        </p-button>
+                        <p-button type="submit" (click)="delete(<%= entityInstance %>.id)"
+                                  icon="pi pi-times" styleClass="ui-button-danger">
+                        </p-button>
                     </div>
                 </td>
             </tr>
-            </tbody>
-        </table>
-    </div>
-<%_ if (databaseType !== 'cassandra') { _%>
-    <%_ if (pagination === 'pager') { _%>
-    <!-- Pager is not implemented yet, so this is normal pagination instead -->
-    <div *ngIf="<%=entityInstancePlural %> && <%=entityInstancePlural %>.length">
-        <div class="row justify-content-center">
-            <jhi-item-count [page]="page" [total]="totalItems" [itemsPerPage]="itemsPerPage"></jhi-item-count>
-        </div>
-        <div class="row justify-content-center">
-            <ngb-pagination [collectionSize]="totalItems" [(page)]="page" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" [boundaryLinks]="true" (pageChange)="loadPage(page)"></ngb-pagination>
-        </div>
-    </div>
-    <%_ } else if (pagination === 'pagination') { _%>
-    <div *ngIf="<%=entityInstancePlural %> && <%=entityInstancePlural %>.length">
-        <div class="row justify-content-center">
-            <jhi-item-count [page]="page" [total]="totalItems" [maxSize]="5" [itemsPerPage]="itemsPerPage"></jhi-item-count>
-        </div>
-        <div class="row justify-content-center">
-            <ngb-pagination [collectionSize]="totalItems" [(page)]="page" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" [boundaryLinks]="true" (pageChange)="loadPage(page)"></ngb-pagination>
-        </div>
-    </div>
-    <%_ } _%>
-<%_ } _%>
+        </ng-template>
+    </p-table>
 </div>
