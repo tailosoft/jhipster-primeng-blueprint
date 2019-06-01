@@ -99,18 +99,22 @@
                 const fieldType = fields[idx].fieldType;_%>
             <th>
                 <%_ if (['byte[]', 'ByteBuffer'].includes(fieldType)) { _%>
-            <%_ } else if (fields[idx].fieldIsEnum) { _%>
-
-            <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
+                <%_ } else if (fieldType === 'Boolean') { _%>
+                <p-triStateCheckbox [ngModel]="<%= entityInstance %>Table.filters.billable?.value"
+                                    (ngModelChange)="<%= entityInstance %>Table.filter($event, '<%= fields[idx].fieldName %>', 'equals')"></p-triStateCheckbox>
+                <%_ } else if (fields[idx].fieldIsEnum) { _%>
+                <p-multiSelect [options]="<%= fields[idx].fieldName %>Options" [ngModel]="<%= entityInstance %>Table.filters.<%= fields[idx].fieldName %>?.value"
+                               (ngModelChange)="<%= entityInstance %>Table.filter($event, '<%= fields[idx].fieldName %>', 'in')"></p-multiSelect>
+                <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
                 <p-calendar [(ngModel)]="<%= fields[idx].fieldName %>Range" selectionMode="range" [readonlyInput]="true" [showButtonBar]="true" showTime="true" hourFormat="24"
                             (onSelect)="onDateSelect(<%= fields[idx].fieldName %>Range, '<%= fields[idx].fieldName %>', true)" (onClearClick)="onDateSelect(<%= fields[idx].fieldName %>Range, '<%= fields[idx].fieldName %>', true)"></p-calendar>
-            <%_ } else if (fieldType === 'LocalDate') { _%>
+                <%_ } else if (fieldType === 'LocalDate') { _%>
                 <p-calendar [(ngModel)]="<%= fields[idx].fieldName %>Range" selectionMode="range" [readonlyInput]="true" [showButtonBar]="true"
                             (onSelect)="onDateSelect(<%= fields[idx].fieldName %>Range, '<%= fields[idx].fieldName %>')" (onClearClick)="onDateSelect(<%= fields[idx].fieldName %>Range, '<%= fields[idx].fieldName %>')"></p-calendar>
-            <%_ } else { _%>
+                <%_ } else { _%>
                 <input pInputText type="text" [value]="<%= entityInstance %>Table.filters.<%= fields[idx].fieldName %>?.value"
                        (input)="<%= entityInstance %>Table.filter($event.target.value, '<%= fields[idx].fieldName %>', 'contains')">
-            <%_ } _%>
+                <%_ } _%>
             </th>
             <%_ } _%>
             <%_ for (idx in relationships) { _%>

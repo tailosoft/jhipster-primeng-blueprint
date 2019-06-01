@@ -26,8 +26,19 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { filter, map<%_ if (pagination !== 'no') { _%>, debounceTime<%_ } _%> } from 'rxjs/operators';
 import { JhiEventManager, JhiAlertService<% if (fieldsContainBlob) { %>, JhiDataUtils<% } %> } from 'ng-jhipster';
-
-import { I<%= entityAngularName %> } from 'app/shared/model/<%= entityModelFileName %>.model';
+<%_
+let enumOptions = '';
+if ( jpaMetamodelFiltering) {
+    const enumsAlreadyDeclared = [];
+    fields.forEach(field => {
+        if (field.fieldIsEnum && !enumsAlreadyDeclared.includes(field.fieldType)) {
+            enumsAlreadyDeclared.push(field.fieldType);
+            field.fieldTypeUnderscoreCapitalized = _.snakeCase(field.fieldType).toUpperCase();
+            enumOptions = fields.filter(f => f.fieldIsEnum).map(f => f.fieldTypeUnderscoreCapitalized + '_ARRAY').join(', ');
+        }
+    });
+} _%>
+import { I<%= entityAngularName %><%= enumOptions ? ', ' + enumOptions : '' %> } from 'app/shared/model/<%= entityModelFileName %>.model';
 <%_ if (pagination !== 'no') { %>
 import { ITEMS_PER_PAGE, lazyLoadEventToQueryParams } from 'app/shared';
 <%_ } _%>
@@ -53,11 +64,16 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
     totalItems: number;
     itemsPerPage: number;
     loading: boolean;
-    <%_ for ( idx in fields ) {
-        if ( jpaMetamodelFiltering && ['LocalDate', 'Instant', 'ZonedDateTime'].includes(fields[idx].fieldType)) { _%>
-    <%= fields[idx].fieldName %>Range: Date[];
+<%_ for ( idx in fields ) {
+    if ( jpaMetamodelFiltering) {
+        if(['LocalDate', 'Instant', 'ZonedDateTime'].includes(fields[idx].fieldType)){ _%>
+        <%= fields[idx].fieldName %>Range: Date[];
+        <%_ } else if(fields[idx].fieldIsEnum) {_%>
+        // this to be removed once dropdown, multiselect... support optionValue
+        <%= fields[idx].fieldName %>Options = <%= fields[idx].fieldTypeUnderscoreCapitalized %>_ARRAY.map(s => ({ label: s.toString(), value: s }));;
         <%_ } _%>
     <%_ } _%>
+<%_ } _%>
 
     @ViewChild('<%= entityInstance %>Table')
         <%= entityInstance %>Table: Table;
@@ -138,14 +154,20 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
                 map(data => (<any>unflatten(data)).lle || {})
             )
             .subscribe(event => {
+                Object.assign(this.<%= entityInstance %>Table, event);
+            <%_ if(jpaMetamodelFiltering) { _%>
                 <%_ for ( idx in fields ) {
-                    if ( jpaMetamodelFiltering && ['LocalDate', 'Instant', 'ZonedDateTime'].includes(fields[idx].fieldType) ) { _%>
+                    if (['LocalDate', 'Instant', 'ZonedDateTime'].includes(fields[idx].fieldType) ) { _%>
                 // once data type string works with range no need for this: https://github.com/primefaces/primeng/issues/7758
                 this.<%= fields[idx].fieldName %>Range = event.filters && event.filters.<%= fields[idx].fieldName %> && event.filters.<%= fields[idx].fieldName %>.value &&
                     event.filters.<%= fields[idx].fieldName %>.value.map(x => new Date(x));
+                    <%_ } else if (fields[idx].fieldType === 'Boolean') { _%>
+                if (event.filters && event.filters.<%= fields[idx].fieldName %>) {
+                    this.<%= entityInstance %>Table.filters.<%= fields[idx].fieldName %>.value = event.filters.<%= fields[idx].fieldName %>.value === 'true';
+                }
                     <%_ } _%>
                 <%_ } _%>
-                Object.assign(this.<%= entityInstance %>Table, event);
+            <%_ } _%>
                 this.loadPage(event);
             });
     }

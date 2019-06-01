@@ -31,6 +31,7 @@ import { <%- importedType %> } from '<%- importedPath %>';
 <%_ const enumsAlreadyDeclared = [];
 fields.forEach(field => {
     if (field.fieldIsEnum && !enumsAlreadyDeclared.includes(field.fieldType)) {
+        field.fieldTypeUnderscoreCapitalized = _.snakeCase(field.fieldType).toUpperCase();
         enumsAlreadyDeclared.push(field.fieldType); _%>
 export const enum <%= field.fieldType %> {<%
         const enums = field.fieldValues.split(',');
@@ -38,6 +39,12 @@ export const enum <%= field.fieldType %> {<%
     <%= enums[i] %> = '<%= enums[i] %>'<%if (i < enums.length - 1) { %>,<% }
         } %>
 }
+
+export const <%= field.fieldTypeUnderscoreCapitalized %>_ARRAY = [<%
+        for (let i = 0; i < enums.length; i++) { %>
+    <%= field.fieldType %>.<%= enums[i] %><%if (i < enums.length - 1) { %>,<% }
+        } %>
+];
 
 <%_ }
 }); _%>
