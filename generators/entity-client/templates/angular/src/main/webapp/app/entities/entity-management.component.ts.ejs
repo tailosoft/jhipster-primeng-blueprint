@@ -24,7 +24,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 <%_ } _%>
 import { Subscription } from 'rxjs';
-import { filter, map<%_ if (pagination !== 'no') { _%>, debounceTime<%_ } _%> } from 'rxjs/operators';
+import { filter, map<%_ if (pagination !== 'no') { _%>, tap, take, debounceTime, switchMap<%_ } _%> } from 'rxjs/operators';
 import { JhiEventManager, JhiAlertService<% if (fieldsContainBlob) { %>, JhiDataUtils<% } %> } from 'ng-jhipster';
 <%_
 let enumOptions = '';
@@ -148,12 +148,15 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
     }
     <%_ } else { _%>
     ngAfterViewInit() {
-        this.activatedRoute.queryParams
-            .pipe(
-                debounceTime(300),
-                map(data => (<any>unflatten(data)).lle || {})
-            )
-            .subscribe(event => {
+        const lazyLoadEvent$ = this.activatedRoute.queryParams.pipe(
+            debounceTime(300),
+            map(data => <LazyLoadEvent>((<any>unflatten(data)).lle))
+        );
+
+        lazyLoadEvent$.pipe(
+            take(1),
+            filter(event => event !== undefined)
+        ).subscribe(event => {
                 Object.assign(this.<%= entityInstance %>Table, event);
             <%_ if(jpaMetamodelFiltering) { _%>
                 <%_ for ( idx in fields ) {
@@ -168,44 +171,33 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
                     <%_ } _%>
                 <%_ } _%>
             <%_ } _%>
-                this.loadPage(event);
-            });
-    }
+        });
 
-    loadPage(event: LazyLoadEvent) {
-        const params = lazyLoadEventToQueryParams(event);
-        this.loading = true;
+        lazyLoadEvent$.pipe(
+            map(event => lazyLoadEventToQueryParams(event || {})),
+            tap(() => this.loading = true),
         <%_ if (searchEngine === 'elasticsearch') { _%>
-        if (this.currentSearch) {
-            this.<%= entityInstance %>Service
-                .search(params)
-                .subscribe(
-                    (res: HttpResponse<I<%= entityAngularName %>[]>) => {
-                        this.paginate<%= entityClassPlural %>(res.body, res.headers);
-                        this.loading = false;
-                    },
-                    (res: HttpErrorResponse) => {
-                        this.onError(res.message);
-                        this.loading = false;
-                    }
-                );
-            return;
-        }
-        <%_ } _%>
-        this.<%= entityInstance %>Service
-            .query(params)
-            .pipe(
-                filter((res: HttpResponse<I<%= entityAngularName %>[]>) => res.ok)
-            ).subscribe(
-                (res: HttpResponse<I<%= entityAngularName %>[]>) => {
-                    this.paginate<%= entityClassPlural %>(res.body, res.headers);
-                    this.loading = false;
-                },
-                (res: HttpErrorResponse) => {
-                    this.onError(res.message);
-                    this.loading = false;
+            switchMap(params => {
+                if (this.currentSearch) {
+                    return this.<%= entityInstance %>Service.search(params)
+                } else {
+                    return this.<%= entityInstance %>Service.query(params)
                 }
-            );
+            }),
+        <%_ } else { _%>
+            switchMap(params => this.<%= entityInstance %>Service.query(params)),
+        <%_ } _%>
+            filter((res: HttpResponse<I<%= entityAngularName %>[]>) => res.ok)
+        ).subscribe(
+            (res: HttpResponse<I<%= entityAngularName %>[]>) => {
+                this.paginate<%= entityClassPlural %>(res.body, res.headers);
+                this.loading = false;
+            },
+            (res: HttpErrorResponse) => {
+                this.onError(res.message);
+                this.loading = false;
+            }
+        );
     }
 
     onLazyLoadEvent(event: LazyLoadEvent) {
