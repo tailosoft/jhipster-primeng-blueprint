@@ -111,6 +111,9 @@
                 <%_ } else if (fieldType === 'LocalDate') { _%>
                 <p-calendar [(ngModel)]="<%= fields[idx].fieldName %>Range" selectionMode="range" [readonlyInput]="true" [showButtonBar]="true"
                             (onSelect)="onDateSelect(<%= fields[idx].fieldName %>Range, '<%= fields[idx].fieldName %>')" (onClearClick)="onDateSelect(<%= fields[idx].fieldName %>Range, '<%= fields[idx].fieldName %>')"></p-calendar>
+                <%_ } else if (['Integer', 'Long', 'Float', 'Double', 'BigDecimal', 'Duration'].includes(fieldType)) { _%>
+                <input pInputText type="number" [value]="<%= entityInstance %>Table.filters.<%= fields[idx].fieldName %>?.value"
+                       (input)="<%= entityInstance %>Table.filter($event.target.value, '<%= fields[idx].fieldName %>', 'equals')">
                 <%_ } else { _%>
                 <input pInputText type="text" [value]="<%= entityInstance %>Table.filters.<%= fields[idx].fieldName %>?.value"
                        (input)="<%= entityInstance %>Table.filter($event.target.value, '<%= fields[idx].fieldName %>', 'contains')">
