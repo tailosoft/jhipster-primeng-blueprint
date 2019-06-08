@@ -46,6 +46,12 @@ import { <%= entityAngularName %>Service } from './<%= entityFileName %>.service
 import { ConfirmationService<%_ if (pagination !== 'no') { _%>, LazyLoadEvent<% } %> } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
 <%_ if (pagination !== 'no') { %>
+<%_ if(jpaMetamodelFiltering){ _%>
+    <%_ for (idx in relationships) { _%>
+import { <%= relationships[idx].otherEntityAngularName %>Service } from 'app/entities/<%= relationships[idx].otherEntityModulePath %>/<%= relationships[idx].otherEntityPath %>.service';;
+import { I<%= relationships[idx].otherEntityAngularName %> } from  'app/shared/model/<%= relationships[idx].otherEntityPath%>.model';
+    <%_ } %>
+<%_ } %>
 import { Table } from 'primeng/table';
 import { flatten, unflatten } from 'flat';
 <%_ } _%>
@@ -64,15 +70,17 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
     totalItems: number;
     itemsPerPage: number;
     loading: boolean;
-<%_ for ( idx in fields ) {
-    if ( jpaMetamodelFiltering) {
+<%_ if ( jpaMetamodelFiltering) {
+    for ( idx in fields ) {
         if(['LocalDate', 'Instant', 'ZonedDateTime'].includes(fields[idx].fieldType)){ _%>
-        <%= fields[idx].fieldName %>Range: Date[];
+    <%= fields[idx].fieldName %>Range: Date[];
         <%_ } else if(fields[idx].fieldIsEnum) {_%>
-        // this to be removed once dropdown, multiselect... support optionValue
-        <%= fields[idx].fieldName %>Options = <%= fields[idx].fieldTypeUnderscoreCapitalized %>_ARRAY.map(s => ({ label: s.toString(), value: s }));;
+    <%= fields[idx].fieldName %>Options = <%= fields[idx].fieldTypeUnderscoreCapitalized %>_ARRAY.map(s => ({ label: s.toString(), value: s }));
         <%_ } _%>
     <%_ } _%>
+    <%_ for (idx in relationships) { _%>
+    <%= relationships[idx].relationshipName %>Options: I<%= relationships[idx].otherEntityAngularName %>[];
+    <%_ } %>
 <%_ } _%>
 
     @ViewChild('<%= entityInstance %>Table')
@@ -81,6 +89,11 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
 
     constructor(
         protected <%= entityInstance %>Service: <%= entityAngularName %>Service,
+<%_ if(jpaMetamodelFiltering){ _%>
+        <%_ for (idx in relationships) { _%>
+        protected <%= relationships[idx].otherEntityName %>Service: <%= relationships[idx].otherEntityAngularName %>Service,
+    <%_ } %>
+<%_ } %>
         protected jhiAlertService: JhiAlertService,
         <%_ if (fieldsContainBlob) { _%>
         protected dataUtils: JhiDataUtils,
@@ -110,6 +123,13 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
         <%_ if (pagination === 'no') { %>
         this.loadAll();
         <%_ } _%>
+    <%_ if(jpaMetamodelFiltering){ _%>
+        <%_ for (idx in relationships) { _%>
+            <%_ if (relationships[idx].pagination == 'no') { _%>
+        this.loadAll<%= relationships[idx].relationshipNameCapitalizedPlural %>();
+            <%_ } _%>
+        <%_ } _%>
+    <%_ } _%>
         this.registerChangeIn<%= entityClassPlural %>();
     }
 
@@ -160,15 +180,23 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
                 Object.assign(this.<%= entityInstance %>Table, event);
             <%_ if(jpaMetamodelFiltering) { _%>
                 <%_ for ( idx in fields ) {
-                    if (['LocalDate', 'Instant', 'ZonedDateTime'].includes(fields[idx].fieldType) ) { _%>
-                // once data type string works with range no need for this: https://github.com/primefaces/primeng/issues/7758
+                    if (['LocalDate', 'Instant', 'ZonedDateTime'].includes(fields[idx].fieldType)) { _%>
                 this.<%= fields[idx].fieldName %>Range = event.filters && event.filters.<%= fields[idx].fieldName %> && event.filters.<%= fields[idx].fieldName %>.value &&
                     event.filters.<%= fields[idx].fieldName %>.value.map(x => new Date(x));
                     <%_ } else if (fields[idx].fieldType === 'Boolean') { _%>
                 if (event.filters && event.filters.<%= fields[idx].fieldName %>) {
                     this.<%= entityInstance %>Table.filters.<%= fields[idx].fieldName %>.value = event.filters.<%= fields[idx].fieldName %>.value === 'true';
                 }
+                    <%_ } else if (['Integer', 'Long', 'Float', 'Double', 'BigDecimal', 'Duration'].includes(fields[idx].fieldType)) {  _%>
+                if (event.filters && event.filters.<%= fields[idx].fieldName %>) {
+                    this.<%= entityInstance %>Table.filters.<%= fields[idx].fieldName %>.value = +event.filters.<%= fields[idx].fieldName %>.value;
+                }
                     <%_ } _%>
+                <%_ } _%>
+                <%_ for ( idx in relationships ) { _%>
+                if (event.filters && event.filters.<%= relationships[idx].relationshipFieldName %>Id && event.filters.<%= relationships[idx].relationshipFieldName %>Id.value) {
+                    this.<%= entityInstance %>Table.filters.<%= relationships[idx].relationshipFieldName %>Id.value = event.filters.<%= relationships[idx].relationshipFieldName %>Id.value.map(x => +x);
+                }
                 <%_ } _%>
             <%_ } _%>
         });
@@ -229,6 +257,23 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
             }
         });
     }
+    <%_ if(jpaMetamodelFiltering){ _%>
+        <%_ for (idx in relationships) { _%>
+            <%_ if (relationships[idx].pagination == 'no') { _%>
+
+    loadAll<%= relationships[idx].relationshipNameCapitalizedPlural %>() {
+        this.<%= relationships[idx].otherEntityName %>Service.query()
+            .subscribe(res => this.<%= relationships[idx].relationshipName %>Options = res.body);
+    }
+            <%_ } else {_%>
+
+    on<%= relationships[idx].relationshipNameCapitalized %>LazyLoadEvent(event: LazyLoadEvent) {
+        this.<%= relationships[idx].otherEntityName %>Service.query(lazyLoadEventToQueryParams(event || {}))
+            .subscribe(res => this.<%= relationships[idx].relationshipName %>Options = res.body);
+    }
+            <%_ } _%>
+        <%_ } _%>
+    <%_ } _%>
 
     trackId(index: number, item: I<%= entityAngularName %>) {
         return item.id;
@@ -277,7 +322,6 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
     <%_ if(jpaMetamodelFiltering && fields.some(f => ['LocalDate', 'Instant', 'ZonedDateTime'].includes(f.fieldType) )){ _%>
 
     onDateSelect(dateRange: Date[], column: string, time = false) {
-        // once data type string works with range no need for this: https://github.com/primefaces/primeng/issues/7758
         const dateToString =  time ? (x => x && x.toISOString()) : (x => x && this.datePipe.transform(x, 'yyyy-MM-dd'));
         if (dateRange) {
             this.<%= entityInstance %>Table.filter(dateRange.map(dateToString), column, 'between');

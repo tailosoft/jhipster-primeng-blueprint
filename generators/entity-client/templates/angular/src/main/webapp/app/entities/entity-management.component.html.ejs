@@ -121,7 +121,11 @@
             </th>
             <%_ } _%>
             <%_ for (idx in relationships) { _%>
-            <th>Select</th>
+            <th>
+                <p-multiSelect [options]="<%= relationships[idx].relationshipName %>Options" [ngModel]="<%= entityInstance %>Table.filters.<%= relationships[idx].relationshipName %>Id?.value" optionLabel="<%= relationships[idx].otherEntityField %>" optionValue="id" <% if(relationships[idx].pagination !== 'no') { %>
+                               [lazy]="true" [rows]="10" (onLazyLoad)="on<%= relationships[idx].relationshipNameCapitalized %>LazyLoadEvent($event)"<% } %>
+                               (ngModelChange)="<%= entityInstance %>Table.filter($event, '<%= relationships[idx].relationshipFieldName %>Id', 'in')"></p-multiSelect>
+            </th>
             <%_ } _%>
             <th></th>
         </tr>
@@ -132,7 +136,6 @@
                 <td><a [routerLink]="['/<%= entityUrl %>', <%= entityInstance %>.id, 'view' ]">{{<%=entityInstance %>.id}}</a></td>
                 <%_ for (idx in fields) {
                 const fieldName = fields[idx].fieldName;
-                const fieldNameCapitalized = fields[idx].fieldNameCapitalized;
                 const fieldType = fields[idx].fieldType;
                 const fieldTypeBlobContent = fields[idx].fieldTypeBlobContent; _%>
                 <%_ if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent === 'image') { _%>
