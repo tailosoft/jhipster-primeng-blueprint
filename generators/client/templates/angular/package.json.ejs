@@ -44,7 +44,7 @@
     "@ngx-translate/http-loader": "4.0.0",
     "bootstrap": "4.3.1",
     <%_ if (clientTheme !== 'none') { _%>
-    "bootswatch": "4.2.1",
+    "bootswatch": "4.3.1",
     <%_ } _%>
     "core-js": "2.6.5",
     "flat": "^4.1.0",
@@ -182,7 +182,7 @@
     "clean-www": "rimraf <%= DIST_DIR %>app/{src,<%= BUILD_DIR %>}",
     <%_ if (protractorTests) { _%>
     "e2e": "protractor <%= TEST_SRC_DIR %>protractor.conf.js",
-    "postinstall": "./node_modules/webdriver-manager/bin/webdriver-manager update --gecko false",
+    "postinstall": "node node_modules/webdriver-manager/bin/webdriver-manager update --gecko false",
     <%_ } _%>
     "start": "<%= clientPackageManager %> run webpack:dev",
     "start-tls": "<%= clientPackageManager %> run webpack:dev <%= optionsForwarder %>--env.tls",
