@@ -79,7 +79,7 @@
             <%_ for (idx in relationships) { _%>
             <%_ if (relationships[idx].relationshipType === 'many-to-one'
             || (relationships[idx].relationshipType === 'one-to-one' && relationships[idx].ownerSide === true)
-            || (relationships[idx].relationshipType === 'many-to-many' && relationships[idx].ownerSide === true && pagination === 'no')) {
+            || (relationships[idx].relationshipType === 'many-to-many' && relationships[idx].ownerSide === true)) {
             const fieldName = dto === 'no' ? "." + relationships[idx].otherEntityField : relationships[idx].otherEntityFieldCapitalized;_%>
             <th<% if (pagination !== 'no') { %> pSortableColumn="<%=relationships[idx].relationshipName%>"<% } %>>
                 <span jhiTranslate="<%= `${i18nKeyPrefix}.${relationships[idx].relationshipName}` %>"><%= relationships[idx].relationshipNameHumanized %></span>
@@ -173,7 +173,7 @@
                 const otherEntityFieldCapitalized = relationships[idx].otherEntityFieldCapitalized; _%>
                 <%_ if (relationshipType === 'many-to-one'
                 || (relationshipType === 'one-to-one' && ownerSide === true)
-                || (relationshipType === 'many-to-many' && ownerSide === true && pagination === 'no')) { _%>
+                || (relationshipType === 'many-to-many' && ownerSide === true)) { _%>
                 <td>
                     <%_ if (otherEntityName === 'user') { _%>
                         <%_ if (relationshipType === 'many-to-many') { _%>

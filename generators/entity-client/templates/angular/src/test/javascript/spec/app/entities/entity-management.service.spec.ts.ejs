@@ -26,9 +26,9 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { of } from 'rxjs';
 import { take, map } from 'rxjs/operators';
-<%_ if (fieldsContainDate) { _%>
-import * as moment from 'moment';
-import { <%_ if (fieldsContainLocalDate) { _%>DATE_FORMAT,<%_ } if (fieldsContainInstant || fieldsContainZonedDateTime) {_%> DATE_TIME_FORMAT<%_ } _%> } from 'app/shared/constants/input.constants';
+<%_ if (fieldsContainLocalDate) { _%>
+import { DATE_FORMAT } from 'app/shared/constants/input.constants';
+import { DatePipe } from '@angular/common';
 <%_ } _%>
 import { <%= entityAngularName %>Service } from 'app/entities/<%= entityFolderName %>/<%= entityFileName %>.service';
 import { I<%= entityAngularName %>, <%= entityAngularName %>, <%_ const enumsAlreadyDeclared = [];
@@ -49,7 +49,10 @@ describe('Service Tests', () => {
         let elemDefault: I<%= entityAngularName %>;
         let expectedResult;
         <%_ if (fieldsContainDate) { _%>
-        let currentDate: moment.Moment;
+        let currentDate: Date;
+            <%_ if (fieldsContainLocalDate) { _%>
+        let datePipe: DatePipe;
+            <%_ } _%>
         <%_ } _%>
         beforeEach(() => {
             TestBed.configureTestingModule({
@@ -62,7 +65,10 @@ describe('Service Tests', () => {
             service = injector.get(<%= entityAngularName %>Service);
             httpMock = injector.get(HttpTestingController);
             <%_ if (fieldsContainDate) { _%>
-            currentDate = moment();
+            currentDate = new Date();
+                <%_ if (fieldsContainLocalDate) { _%>
+            datePipe = injector.get(DatePipe);
+                <%_ } _%>
             <%_ } _%>
 
             elemDefault = new <%= entityAngularName %>(
@@ -99,9 +105,9 @@ describe('Service Tests', () => {
 <%_ fields.forEach((field) => {
     const fieldType = field.fieldType; _%>
     <%_ if (['LocalDate'].includes(fieldType)) { _%>
-                    <%= field.fieldName%>: currentDate.format(DATE_FORMAT),
+                    <%= field.fieldName%>: datePipe.transform(currentDate, DATE_FORMAT),
     <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
-                    <%= field.fieldName%>: currentDate.format(DATE_TIME_FORMAT),
+                    <%= field.fieldName%>: currentDate.toISOString(),
     <%_ } _%>
 <%_ }) _%>
                 }, elemDefault);
@@ -124,9 +130,9 @@ describe('Service Tests', () => {
 <%_ fields.forEach((field) => {
     const fieldType = field.fieldType; _%>
     <%_ if (['LocalDate'].includes(fieldType)) { _%>
-                    <%= field.fieldName%>: currentDate.format(DATE_FORMAT),
+                    <%= field.fieldName%>: datePipe.transform(currentDate, DATE_FORMAT),
     <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
-                    <%= field.fieldName%>: currentDate.format(DATE_TIME_FORMAT),
+                    <%= field.fieldName%>: currentDate.toISOString(),
     <%_ } _%>
 <%_ }) _%>
                 }, elemDefault);
@@ -159,9 +165,9 @@ describe('Service Tests', () => {
     <%_ } else if (fieldType === 'String' || fieldType === 'UUID') { _%>
                     <%= field.fieldName%>: 'BBBBBB',
     <%_ } else if (['LocalDate'].includes(fieldType)) { _%>
-                    <%= field.fieldName%>: currentDate.format(DATE_FORMAT),
+                    <%= field.fieldName%>: datePipe.transform(currentDate, DATE_FORMAT),
     <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
-                    <%= field.fieldName%>: currentDate.format(DATE_TIME_FORMAT),
+                    <%= field.fieldName%>: currentDate.toISOString(),
     <%_ } else { _%>
                     <%= field.fieldName%>: 'BBBBBB',
     <%_ } _%>
@@ -197,9 +203,9 @@ describe('Service Tests', () => {
     <%_ } else if (fieldType === 'String' || fieldType === 'UUID') { _%>
                     <%= field.fieldName%>: 'BBBBBB',
     <%_ } else if (['LocalDate'].includes(fieldType)) { _%>
-                    <%= field.fieldName%>: currentDate.format(DATE_FORMAT),
+                    <%= field.fieldName%>: datePipe.transform(currentDate, DATE_FORMAT),
     <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
-                    <%= field.fieldName%>: currentDate.format(DATE_TIME_FORMAT),
+                    <%= field.fieldName%>: currentDate.toISOString(),
     <%_ } else { // (fieldType === 'byte[]' || fieldType === 'ByteBuffer') && fieldTypeBlobContent === 'any' || (fieldType === 'byte[]' || fieldType === 'ByteBuffer') && fieldTypeBlobContent === 'image' || fieldType === 'LocalDate' _%>
                     <%= field.fieldName%>: 'BBBBBB',
     <%_ } _%>

@@ -19,27 +19,32 @@
 <%_
 const query = generateEntityQueries(relationships, entityInstance, dto);
 const queries = query.queries;
-const variables = query.variables;
-let hasManyToMany = query.hasManyToMany;
+const hasPaginationRelationship = relationships && relationships.some(r => (r.relationshipType === 'many-to-one' || ((r.relationshipType === 'one-to-one' || r.relationshipType === 'many-to-many') && r.ownerSide === true)) && r.pagination != 'no');
 _%>
 import { Component, OnInit<% if (fieldsContainImageBlob) { %>, ElementRef<% } %> } from '@angular/core';
 import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
-<%_ if (queries && queries.length > 0) { _%>
-import { filter, map } from 'rxjs/operators';
-<%_ } _%>
-<%_ if ( fieldsContainDate ) { _%>
-import * as moment from 'moment';
-    <%_ if ( fieldsContainInstant || fieldsContainZonedDateTime ) { _%>
-import { DATE_TIME_FORMAT } from 'app/shared/constants/input.constants';
-    <%_ } _%>
+<%_ if (hasPaginationRelationship) { _%>
+import { lazyLoadEventToQueryParams } from 'app/shared';
+import { LazyLoadEvent } from 'primeng/api';
 <%_ } _%>
 <%_ if (queries && queries.length > 0 || fieldsContainBlob) { _%>
 import { <% if (fieldsContainBlob || queries && queries.length > 0) { %>JhiAlertService, <% } %><% if (fieldsContainBlob) { %>JhiDataUtils<% } %> } from 'ng-jhipster';
 <%_ } _%>
-import { I<%= entityAngularName %>, <%= entityAngularName %> } from 'app/shared/model/<%= entityModelFileName %>.model';
+<%_
+let enumOptions = '';
+const enumsAlreadyDeclared = [];
+fields.forEach(field => {
+    if (field.fieldIsEnum && !enumsAlreadyDeclared.includes(field.fieldType)) {
+        enumsAlreadyDeclared.push(field.fieldType);
+        field.fieldTypeUnderscoreCapitalized = _.snakeCase(field.fieldType).toUpperCase();
+        enumOptions = fields.filter(f => f.fieldIsEnum).map(f => f.fieldTypeUnderscoreCapitalized + '_ARRAY').join(', ');
+    }
+});
+_%>
+import { I<%= entityAngularName %>, <%= entityAngularName %><%= enumOptions ? ', ' + enumOptions : '' %> } from 'app/shared/model/<%= entityModelFileName %>.model';
 import { <%= entityAngularName %>Service } from './<%= entityFileName %>.service';
 <%_
 let hasRelationshipQuery = false;
@@ -72,16 +77,20 @@ import { <%= uniqueRel.otherEntityAngularName%>Service } from 'app/entities/<%= 
 export class <%= entityAngularName %>UpdateComponent implements OnInit {
 
     isSaving: boolean;
-<%_
-for ( const idx in variables ) { %>
-    <%- variables[idx] %>
-<%_ } _%>
-<%_ for ( idx in fields ) {
-    const fieldName = fields[idx].fieldName;
-    const fieldType = fields[idx].fieldType;
-        if ( fieldType === 'LocalDate' ) { _%>
-    <%= fieldName %>Dp: any;
+<%_ for (idx in relationships) { _%>
+    <%_ if (relationships[idx].relationshipType === 'many-to-one' || ((relationships[idx].relationshipType === 'one-to-one' || relationships[idx].relationshipType === 'many-to-many') && relationships[idx].ownerSide === true)) { _%>
+    <%= relationships[idx].relationshipName %>Options: I<%= relationships[idx].otherEntityAngularName %>[];
+        <%_ if (relationships[idx].relationshipType === 'many-to-one' || (relationships[idx].relationshipType === 'one-to-one' && relationships[idx].ownerSide === true)) { _%>
+    <%= relationships[idx].relationshipName %>FilterValue: any;
         <%_ } _%>
+    <%_ } _%>
+<%_ } _%>
+<%_ for ( idx in fields ) { _%>
+    <%_ if(fields[idx].fieldIsEnum) { _%>
+    <%= fields[idx].fieldName %>Options = <%= fields[idx].fieldTypeUnderscoreCapitalized %>_ARRAY.map(s => ({ label: s.toString(), value: s }));
+    <%_ } else if (['byte[]', 'ByteBuffer'].includes(fields[idx].fieldType) && fields[idx].fieldTypeBlobContent !== 'text') { _%>
+    <%= fields[idx].fieldName %>File: File;
+    <%_ } _%>
 <%_ } _%>
 
     editForm = this.fb.group({
@@ -139,9 +148,6 @@ for ( const idx in variables ) { %>
         }
     }
 }); _%>
-<%_ if (fieldsContainImageBlob) { _%>
-        protected elementRef: ElementRef,
-<%_ } _%>
         protected activatedRoute: ActivatedRoute,
         private fb: FormBuilder
     ) {
@@ -152,10 +158,35 @@ for ( const idx in variables ) { %>
         this.activatedRoute.data.subscribe(({<%= entityInstance %>}) => {
             this.updateForm(<%= entityInstance %>);
         });
-<%_ for (idx in queries) { _%>
-        <%- queries[idx] %>
+<%_ for (idx in relationships) { _%>
+    <%_ if (relationships[idx].relationshipType === 'many-to-one' || ((relationships[idx].relationshipType === 'one-to-one' || relationships[idx].relationshipType === 'many-to-many') && relationships[idx].ownerSide === true)) { _%>
+        <%_ if (relationships[idx].pagination == 'no') { _%>
+        this.loadAll<%= relationships[idx].relationshipNameCapitalizedPlural %>();
+        <%_ } _%>
+    <%_ } _%>
 <%_ } _%>
     }
+
+<%_ for (idx in relationships) { _%>
+    <%_ if (relationships[idx].relationshipType === 'many-to-one' || ((relationships[idx].relationshipType === 'one-to-one' || relationships[idx].relationshipType === 'many-to-many') && relationships[idx].ownerSide === true)) { _%>
+        <%_ if (relationships[idx].pagination == 'no') { _%>
+
+    loadAll<%= relationships[idx].relationshipNameCapitalizedPlural %>() {
+            <%_ if (relationships[idx].relationshipType === 'one-to-one' && relationships[idx].ownerSide === true && relationships[idx].jpaMetamodelFiltering) { _%>
+        //TODO change this to load only unspecified + add selectedTo options if any
+            <%_ } _%>
+        this.<%= relationships[idx].otherEntityName %>Service.query()
+            .subscribe(res => this.<%= relationships[idx].relationshipName %>Options = res.body, (res: HttpErrorResponse) => this.onError(res.message));
+    }
+        <%_ } else { _%>
+
+    on<%= relationships[idx].relationshipNameCapitalized %>LazyLoadEvent(event: LazyLoadEvent) {
+        this.<%= relationships[idx].otherEntityName %>Service.query(lazyLoadEventToQueryParams(event || {}))
+            .subscribe(res => this.<%= relationships[idx].relationshipName %>Options = res.body, (res: HttpErrorResponse) => this.onError(res.message));
+    }
+        <%_ } _%>
+    <%_ } _%>
+<%_ } _%>
 
     updateForm(<%= entityInstance %>: I<%= entityAngularName %>) {
         this.editForm.patchValue({
@@ -165,9 +196,7 @@ for ( const idx in variables ) { %>
     const fieldType = fields[idx].fieldType;
     const fieldTypeBlobContent = fields[idx].fieldTypeBlobContent;
 _%>
-    <%_ if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
-            <%= fieldName %>: <%= entityInstance %>.<%= fieldName %> != null ? <%= entityInstance %>.<%= fieldName %>.format(DATE_TIME_FORMAT) : null,
-    <%_ } else if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent !== 'text') { _%>
+    <%_ if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent !== 'text') { _%>
             <%= fieldName %>: <%= entityInstance %>.<%= fieldName %>,
             <%= fieldName %>ContentType: <%= entityInstance %>.<%= fieldName %>ContentType,
     <%_ } else { _%>
@@ -199,51 +228,46 @@ _%>
     <%_ } _%>
 <%_ } _%>
         });
+<%_ for (idx in fields) {
+    const fieldName = fields[idx].fieldName;
+    const fieldType = fields[idx].fieldType;
+    const fieldTypeBlobContent = fields[idx].fieldTypeBlobContent;
+_%>
+    <%_ if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent !== 'text') { _%>
+        if (<%= entityInstance %>.<%= fieldName %>) {
+            fetch(`data:${<%= entityInstance %>.<%= fieldName %>ContentType};base64,${<%= entityInstance %>.<%= fieldName %>}`)
+                .then(res => res.blob())
+                .then(blob => {
+                    this.<%= fieldName %>File = new File([blob], '', {type: <%= entityInstance %>.<%= fieldName %>ContentType});
+                });
+        }
+    <%_ } _%>
+<%_ } _%>
+<%_ for (idx in relationships) { _%>
+    <%_ if (relationships[idx].relationshipType === 'many-to-one' || (relationships[idx].relationshipType === 'one-to-one' && relationships[idx].ownerSide === true)) { _%>
+        this.<%= relationships[idx].relationshipName %>FilterValue = <%= entityInstance %>.<%=relationships[idx].otherEntityField %>;
+    <%_ } _%>
+<%_ } _%>
     }
 
 <%_ if (fieldsContainBlob) { _%>
-    byteSize(field) {
-        return this.dataUtils.byteSize(field);
+    onFileSelect(event, field) {
+        const file = event.files[0];
+        this.dataUtils.toBase64(file, base64Data => {
+            this.editForm.patchValue({
+                [field]: base64Data,
+                [field + 'ContentType']: file.type
+            });
+        });
     }
 
-    openFile(contentType, field) {
-        return this.dataUtils.openFile(contentType, field);
-    }
-
-    setFileData(event, field: string, isImage) {
-        return new Promise((resolve, reject) => {
-            if (event && event.target && event.target.files && event.target.files[0]) {
-                const file = event.target.files[0];
-                if (isImage && !/^image\//.test(file.type)) {
-                    reject(`File was expected to be an image but was found to be ${file.type}`);
-                } else {
-                    const filedContentType: string = field + 'ContentType';
-                    this.dataUtils.toBase64(file, (base64Data) => {
-                        this.editForm.patchValue({
-                            [field]: base64Data,
-                            [filedContentType]: file.type
-                        });
-                    });
-                }
-            } else {
-                reject(`Base64 data was not set as file could not be extracted from passed parameter: ${event}`);
-            }
-        }).then(() => console.log('blob added'),// sucess
-                this.onError);
-    }
-
-    <%_ if (fieldsContainImageBlob) { _%>
-    clearInputImage(field: string, fieldContentType: string, idInput: string) {
+    onFileRemove(event, field) {
         this.editForm.patchValue({
             [field]: null,
-            [fieldContentType]: null
+            [field + 'ContentType']: null
         });
-        if (this.elementRef && idInput && this.elementRef.nativeElement.querySelector('#' + idInput)) {
-            this.elementRef.nativeElement.querySelector('#' + idInput).value = null;
-        }
     }
 
-    <%_ } _%>
 <%_ } _%>
     previousState() {
         window.history.back();
@@ -270,9 +294,7 @@ _%>
         const fieldType = fields[idx].fieldType;
         const fieldTypeBlobContent = fields[idx].fieldTypeBlobContent;
     _%>
-        <%_ if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
-            <%= fieldName %>: this.editForm.get(['<%= fieldName %>']).value != null ? moment(this.editForm.get(['<%= fieldName %>']).value, DATE_TIME_FORMAT) : undefined,
-        <%_ } else if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent !== 'text') { _%>
+        <%_ if  (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent !== 'text') { _%>
             <%= fieldName %>ContentType: this.editForm.get(['<%= fieldName %>ContentType']).value,
             <%= fieldName %>: this.editForm.get(['<%= fieldName %>']).value,
         <%_ } else { _%>
@@ -335,17 +357,4 @@ _%>
         return item.id;
     }
 <%_ entitiesSeen.push(otherEntityNameCapitalized); } } _%>
-<%_ if (hasManyToMany) { _%>
-
-    getSelected(selectedVals: Array<any>, option: any) {
-        if (selectedVals) {
-            for (let i = 0; i < selectedVals.length; i++) {
-                if (option.id === selectedVals[i].id) {
-                    return selectedVals[i];
-                }
-            }
-        }
-        return option;
-    }
-<%_ } _%>
 }

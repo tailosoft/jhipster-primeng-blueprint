@@ -83,7 +83,7 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
     <%_ } %>
 <%_ } _%>
 
-    @ViewChild('<%= entityInstance %>Table')
+    @ViewChild('<%= entityInstance %>Table', { static: false })
         <%= entityInstance %>Table: Table;
     <%_ } _%>
 

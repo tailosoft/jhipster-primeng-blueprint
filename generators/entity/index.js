@@ -75,6 +75,7 @@ module.exports = class extends EntityGenerator {
                  this.context.relationships.forEach(relationship => {
                      const otherEntityData = this.getEntityJson(relationship.otherEntityName);
                      relationship.pagination = otherEntityData.pagination;
+                     relationship.jpaMetamodelFiltering = otherEntityData.jpaMetamodelFiltering;
                  });
              },
          }
