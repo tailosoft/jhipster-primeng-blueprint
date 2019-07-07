@@ -62,7 +62,7 @@ _%>
                     <textarea pInputTextarea name="<%= fieldName %>" id="field_<%= fieldName %>"
                               formControlName="<%= fieldName %>"></textarea>
         <%_ } else if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent !== 'text') { _%>
-                    <p-fileUpload name="<%= fieldName %>" id="field_<%= fieldName %>" [showUploadButton]="false" (onSelect)="onFileSelect($event, 'picture')"
+                    <p-fileUpload name="<%= fieldName %>" id="field_<%= fieldName %>" [showUploadButton]="false" (onSelect)="onFileSelect($event, 'picture')"<% if (fieldTypeBlobContent === 'image') { %> accept="image/*"<% } %>
                                   (onClear)="onFileRemove($event, 'picture')" (onRemove)="onFileRemove($event, 'picture')" [files]="<%= fieldName %>File?[<%= fieldName %>File]:null"></p-fileUpload>
         <%_ } else if (fieldType === 'Boolean') { _%>
                     <p-inputSwitch name="<%= fieldName %>" id="field_<%= fieldName %>" formControlName="<%= fieldName %>"></p-inputSwitch>
