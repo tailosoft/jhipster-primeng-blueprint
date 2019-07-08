@@ -121,7 +121,6 @@ const files = {
                 'polyfills.ts',
                 'vendor.ts',
                 'blocks/config/prod.config.ts',
-                'blocks/config/uib-pagination.config.ts',
                 // interceptors
                 'blocks/interceptor/errorhandler.interceptor.ts',
                 'blocks/interceptor/notification.interceptor.ts',
