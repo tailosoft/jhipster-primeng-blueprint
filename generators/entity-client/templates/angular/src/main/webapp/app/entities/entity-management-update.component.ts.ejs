@@ -17,9 +17,7 @@
  limitations under the License.
 -%>
 <%_
-//TODO remove queries
-const query = generateEntityQueries(relationships, entityInstance, dto);
-const queries = query.queries;
+const hasRelationshipQuery = relationships && relationships.some(r => (r.relationshipType === 'many-to-one' || ((r.relationshipType === 'one-to-one' || r.relationshipType === 'many-to-many') && r.ownerSide === true)));
 const hasPaginationRelationship = relationships && relationships.some(r => (r.relationshipType === 'many-to-one' || ((r.relationshipType === 'one-to-one' || r.relationshipType === 'many-to-many') && r.ownerSide === true)) && r.pagination != 'no');
 _%>
 import { Component, OnInit<% if (fieldsContainImageBlob) { %>, ElementRef<% } %> } from '@angular/core';
@@ -31,7 +29,7 @@ import { Observable } from 'rxjs';
 import { lazyLoadEventToQueryParams } from 'app/shared';
 import { LazyLoadEvent } from 'primeng/api';
 <%_ } _%>
-<%_ if (queries && queries.length > 0 || fieldsContainBlob) { _%>
+<%_ if (hasRelationshipQuery || fieldsContainBlob) { _%>
 import { <% if (fieldsContainBlob) { %>JhiDataUtils<% } %> } from 'ng-jhipster';
 import { MessageService } from 'primeng/api';
 <%_ } _%>
@@ -49,15 +47,7 @@ _%>
 import { I<%= entityAngularName %>, <%= entityAngularName %><%= enumOptions ? ', ' + enumOptions : '' %> } from 'app/shared/model/<%= entityModelFileName %>.model';
 import { <%= entityAngularName %>Service } from './<%= entityFileName %>.service';
 <%_
-let hasRelationshipQuery = false;
 Object.keys(differentRelationships).forEach(key => {
-    const hasAnyRelationshipQuery = differentRelationships[key].some(rel =>
-        (rel.relationshipType === 'one-to-one' && rel.ownerSide === true && rel.otherEntityName !== 'user')
-            || rel.relationshipType !== 'one-to-many'
-    );
-    if (hasAnyRelationshipQuery) {
-        hasRelationshipQuery = true;
-    }
     if (differentRelationships[key].some(rel => rel.relationshipType !== 'one-to-many')) {
         const uniqueRel = differentRelationships[key][0];
         if (uniqueRel.otherEntityAngularName !== entityAngularName) {
@@ -137,7 +127,7 @@ export class <%= entityAngularName %>UpdateComponent implements OnInit {
 <%_ if (fieldsContainBlob) { _%>
         protected dataUtils: JhiDataUtils,
 <%_ } _%>
-<%_ if (fieldsContainBlob || queries && queries.length > 0) { _%>
+<%_ if (fieldsContainBlob || hasRelationshipQuery) { _%>
         protected messageService: MessageService,
 <%_ } _%>
         protected <%= entityInstance %>Service: <%= entityAngularName %>Service,
@@ -343,7 +333,7 @@ _%>
     protected onSaveError() {
         this.isSaving = false;
     }
-<%_ if (fieldsContainBlob || queries && queries.length > 0) { _%>
+<%_ if (fieldsContainBlob || hasRelationshipQuery) { _%>
     protected onError(errorMessage: string) {
         this.messageService.add({severity:'error', summary: errorMessage});
     }

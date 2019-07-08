@@ -48,84 +48,84 @@
         fieldInputType = 'hidden';
     }
 _%>
-                    <label jhiTranslate="<%= translationKey %>" for="field_<%= fieldName %>"<% if (fields[idx].javadoc) { if (enableTranslation) { %> [pTooltip]="'<%= i18nKeyPrefix %>.help.<%= fieldName %>' | translate"<% } else { %> pTooltip="<%= fields[idx].javadoc %>"<% } } %>><%= fieldNameHumanized %></label>
+                <label jhiTranslate="<%= translationKey %>" for="field_<%= fieldName %>"<% if (fields[idx].javadoc) { if (enableTranslation) { %> [pTooltip]="'<%= i18nKeyPrefix %>.help.<%= fieldName %>' | translate"<% } else { %> pTooltip="<%= fields[idx].javadoc %>"<% } } %>><%= fieldNameHumanized %></label>
     <%_ if (fields[idx].fieldIsEnum) { _%>
-                    <p-dropdown [options]="<%= fields[idx].fieldName %>Options" name="<%= fieldName %>" formControlName="<%= fieldName %>" id="field_<%= fieldName %>" placeholder="Choose"<%_ if(!fields[idx].fieldValidateRules.includes('required')){ %> [showClear]="true"<%_ } _%>>
-                        <ng-template let-<%= fields[idx].fieldName %> pTemplate="item">{{'<%= `${angularAppName}.${fields[idx].fieldType}` %>.' + <%= fields[idx].fieldName %>.label | translate}}</ng-template>
-                    </p-dropdown>
+                <p-dropdown [options]="<%= fields[idx].fieldName %>Options" name="<%= fieldName %>" formControlName="<%= fieldName %>" id="field_<%= fieldName %>" placeholder="Choose"<%_ if(!fields[idx].fieldValidateRules.includes('required')){ %> [showClear]="true"<%_ } _%>>
+                    <ng-template let-<%= fields[idx].fieldName %> pTemplate="item">{{'<%= `${angularAppName}.${fields[idx].fieldType}` %>.' + <%= fields[idx].fieldName %>.label | translate}}</ng-template>
+                </p-dropdown>
     <%_ } else { _%>
         <%_ if (fieldType === 'LocalDate') { _%>
-                    <p-calendar id="field_<%= fieldName %>" formControlName="<%= fieldName %>" [showIcon]="true"></p-calendar>
+                <p-calendar id="field_<%= fieldName %>" formControlName="<%= fieldName %>" [showIcon]="true"></p-calendar>
         <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
                     <p-calendar id="field_<%= fieldName %>" formControlName="<%= fieldName %>" [showIcon]="true" [showTime]="true"></p-calendar>
         <%_ } else if (fieldTypeBlobContent === 'text') { _%>
-                    <textarea pInputTextarea name="<%= fieldName %>" id="field_<%= fieldName %>"
-                              formControlName="<%= fieldName %>"></textarea>
+                <textarea pInputTextarea name="<%= fieldName %>" id="field_<%= fieldName %>"
+                          formControlName="<%= fieldName %>"></textarea>
         <%_ } else if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent !== 'text') { _%>
-                    <p-fileUpload name="<%= fieldName %>" id="field_<%= fieldName %>" [showUploadButton]="false" (onSelect)="onFileSelect($event, 'picture')"<% if (fieldTypeBlobContent === 'image') { %> accept="image/*"<% } %>
-                                  (onClear)="onFileRemove($event, 'picture')" (onRemove)="onFileRemove($event, 'picture')" [files]="<%= fieldName %>File?[<%= fieldName %>File]:null"></p-fileUpload>
+                <p-fileUpload name="<%= fieldName %>" id="field_<%= fieldName %>" [showUploadButton]="false" (onSelect)="onFileSelect($event, 'picture')"<% if (fieldTypeBlobContent === 'image') { %> accept="image/*"<% } %>
+                              (onClear)="onFileRemove($event, 'picture')" (onRemove)="onFileRemove($event, 'picture')" [files]="<%= fieldName %>File?[<%= fieldName %>File]:null"></p-fileUpload>
         <%_ } else if (fieldType === 'Boolean') { _%>
-                    <p-inputSwitch name="<%= fieldName %>" id="field_<%= fieldName %>" formControlName="<%= fieldName %>"></p-inputSwitch>
-         <%_ } else { _%>
-                    <input pInputText type="<%= fieldInputType %>" name="<%= fieldName %>" id="field_<%= fieldName %>" formControlName="<%= fieldName %>"/>
+                <p-inputSwitch name="<%= fieldName %>" id="field_<%= fieldName %>" formControlName="<%= fieldName %>"></p-inputSwitch>
+        <%_ } else { _%>
+                <input pInputText type="<%= fieldInputType %>" name="<%= fieldName %>" id="field_<%= fieldName %>" formControlName="<%= fieldName %>"/>
         <%_ } _%>
     <%_ } _%>
-                    <div class="validation-messages">
+                <div class="validation-messages">
     <%_ if (fields[idx].fieldValidate === true) { _%>
-                        <ng-container *ngIf="editForm.get('<%= fieldName %>').invalid && (editForm.get('<%= fieldName %>').dirty || editForm.get('<%= fieldName %>').touched)">
+                    <ng-container *ngIf="editForm.get('<%= fieldName %>').invalid && (editForm.get('<%= fieldName %>').dirty || editForm.get('<%= fieldName %>').touched)">
         <%_ if (fields[idx].fieldValidateRules.includes('required')) { _%>
-                            <p-message severity="error"
-                                       *ngIf="editForm.get('<%= fieldName %>').errors.required" [text]="'entity.validation.required' | translate">
-                            </p-message>
+                        <p-message severity="error"
+                                   *ngIf="editForm.get('<%= fieldName %>').errors.required" [text]="'entity.validation.required' | translate">
+                        </p-message>
         <%_ } _%>
         <%_ if (fields[idx].fieldValidateRules.includes('minlength')) { _%>
-                            <p-message severity="error"
-                                   *ngIf="editForm.get('<%= fieldName %>').errors.minlength" [text]="'entity.validation.minlength' | translate : { min: <%= fields[idx].fieldValidateRulesMinlength %> }">
-                            </p-message>
+                        <p-message severity="error"
+                               *ngIf="editForm.get('<%= fieldName %>').errors.minlength" [text]="'entity.validation.minlength' | translate : { min: <%= fields[idx].fieldValidateRulesMinlength %> }">
+                        </p-message>
         <%_ } _%>
         <%_ if (fields[idx].fieldValidateRules.includes('maxlength')) { _%>
-                            <p-message severity="error"
-                                   *ngIf="editForm.get('<%= fieldName %>').errors.maxlength" [text]="'entity.validation.maxlength' | translate : { max: <%= fields[idx].fieldValidateRulesMaxlength %> }">
-                            </p-message>
+                        <p-message severity="error"
+                               *ngIf="editForm.get('<%= fieldName %>').errors.maxlength" [text]="'entity.validation.maxlength' | translate : { max: <%= fields[idx].fieldValidateRulesMaxlength %> }">
+                        </p-message>
         <%_ } _%>
         <%_ if (fields[idx].fieldValidateRules.includes('min')) { _%>
-                            <p-message severity="error"
-                                   *ngIf="editForm.get('<%= fieldName %>').errors.min" [text]="'entity.validation.min' | translate : { min: <%= fields[idx].fieldValidateRulesMin %> }">
-                            </p-message>
+                        <p-message severity="error"
+                               *ngIf="editForm.get('<%= fieldName %>').errors.min" [text]="'entity.validation.min' | translate : { min: <%= fields[idx].fieldValidateRulesMin %> }">
+                        </p-message>
         <%_ } _%>
         <%_ if (fields[idx].fieldValidateRules.includes('max')) { _%>
-                            <p-message severity="error"
-                                   *ngIf="editForm.get('<%= fieldName %>').errors.max" [text]="'entity.validation.max' | translate : { max: <%= fields[idx].fieldValidateRulesMax %> }">
-                            </p-message>
+                        <p-message severity="error"
+                               *ngIf="editForm.get('<%= fieldName %>').errors.max" [text]="'entity.validation.max' | translate : { max: <%= fields[idx].fieldValidateRulesMax %> }">
+                        </p-message>
         <%_ } _%>
         <%_ if (fields[idx].fieldValidateRules.includes('minbytes')) { _%>
-                        <p-message severity="error"
-                               *ngIf="editForm.get('<%= fieldName %>').errors.minbytes" [text]="'entity.validation.minbytes' | translate : { min: <%= fields[idx].fieldValidateRulesMinbytes %> }">
-                            </p-message>
+                    <p-message severity="error"
+                           *ngIf="editForm.get('<%= fieldName %>').errors.minbytes" [text]="'entity.validation.minbytes' | translate : { min: <%= fields[idx].fieldValidateRulesMinbytes %> }">
+                        </p-message>
         <%_ } _%>
         <%_ if (fields[idx].fieldValidateRules.includes('maxbytes')) { _%>
-                            <p-message severity="error"
-                                   *ngIf="editForm.get('<%= fieldName %>').errors.maxbytes" [text]="'entity.validation.maxbytes' | translate : { max: <%= fields[idx].fieldValidateRulesMaxbytes %> }">
-                            </p-message>
+                        <p-message severity="error"
+                               *ngIf="editForm.get('<%= fieldName %>').errors.maxbytes" [text]="'entity.validation.maxbytes' | translate : { max: <%= fields[idx].fieldValidateRulesMaxbytes %> }">
+                        </p-message>
         <%_ } _%>
         <%_ if (fields[idx].fieldValidateRules.includes('pattern')) { _%>
-                            <p-message severity="error"
-                                   *ngIf="editForm.get('<%= fieldName %>').errors.pattern" [text]="'entity.validation.pattern' | translate : { pattern: '<%= fieldNameHumanized %>' }">
-                            </p-message>
+                        <p-message severity="error"
+                               *ngIf="editForm.get('<%= fieldName %>').errors.pattern" [text]="'entity.validation.pattern' | translate : { pattern: '<%= fieldNameHumanized %>' }">
+                        </p-message>
         <%_ } _%>
         <%_ if (['Integer', 'Long', 'Float', 'Double', 'BigDecimal', 'Duration'].includes(fieldType)) { _%>
-                            <p-message severity="error"
-                                [hidden]="!editForm.get('<%= fieldName %>')?.errors?.number" [text]="'entity.validation.number' | translate">
-                            </p-message>
+                        <p-message severity="error"
+                            [hidden]="!editForm.get('<%= fieldName %>')?.errors?.number" [text]="'entity.validation.number' | translate">
+                        </p-message>
         <%_ } _%>
         <%_ if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
-                            <p-message severity="error"
-                                [hidden]="!editForm.get('<%= fieldName %>').errors?.ZonedDateTimelocal" [text]="'entity.validation.ZonedDateTimelocal' | translate">
-                            </p-message>
+                        <p-message severity="error"
+                            [hidden]="!editForm.get('<%= fieldName %>').errors?.ZonedDateTimelocal" [text]="'entity.validation.ZonedDateTimelocal' | translate">
+                        </p-message>
         <%_ } _%>
-                        </ng-container>
+                    </ng-container>
     <%_ } _%>
-                    </div>
+                </div>
 <%_ } _%>
 
 <%_ for (idx in relationships) {
@@ -143,32 +143,32 @@ _%>
     const relationshipRequired = relationships[idx].relationshipRequired;
     const translationKey = `${i18nKeyPrefix}.${relationshipName}`; _%>
     <%_ if (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true && otherEntityName === 'user')) { _%>
-                    <label jhiTranslate="<%= translationKey %>" for="field_<%= relationshipName %>"><%= relationshipNameHumanized %></label>
-                    <p-dropdown id="field_<%= relationshipName %>" name="<%= relationshipName %>" [options]="<%= relationshipName %>Options" formControlName="<%= relationshipName %><%- dto === 'no'?'':'Id' %>"<% if(relationships[idx].pagination !== 'no') { %>
-                                [virtualScroll]="true" [lazy]="true" [rows]="10" (onLazyLoad)="on<%= relationshipNameCapitalized %>LazyLoadEvent($event)"<% } %> [lazyLoadOnInit]="true" [filterValue]="<%= relationships[idx].relationshipName %>FilterValue"
-                                placeholder="Choose" optionLabel="<%=otherEntityField %>"<%- dto === 'no'?'':' optionValue="id"' %><%- relationshipRequired?'':' [showClear]="true"' %>></p-dropdown>
+                <label jhiTranslate="<%= translationKey %>" for="field_<%= relationshipName %>"><%= relationshipNameHumanized %></label>
+                <p-dropdown id="field_<%= relationshipName %>" name="<%= relationshipName %>" [options]="<%= relationshipName %>Options" formControlName="<%= relationshipName %><%- dto === 'no'?'':'Id' %>"<% if(relationships[idx].pagination !== 'no') { %>
+                            [virtualScroll]="true" [lazy]="true" [rows]="10" (onLazyLoad)="on<%= relationshipNameCapitalized %>LazyLoadEvent($event)"<% } %> [lazyLoadOnInit]="true" [filterValue]="<%= relationships[idx].relationshipName %>FilterValue"
+                            placeholder="Choose" optionLabel="<%=otherEntityField %>"<%- dto === 'no'?'':' optionValue="id"' %><%- relationshipRequired?'':' [showClear]="true"' %>></p-dropdown>
     <%_ } else if (relationshipType === 'one-to-one' && ownerSide === true) { _%>
-                    <label jhiTranslate="<%= translationKey %>" for="field_<%= relationshipName %>"><%= relationshipNameHumanized %></label>
-                    <p-dropdown id="field_<%= relationshipName %>" name="<%= relationshipName %>" [options]="<%= relationshipName %>Options" formControlName="<%= relationshipName %><%- dto === 'no'?'':'Id' %>"<% if(relationships[idx].pagination !== 'no') { %>
-                                [virtualScroll]="true" [lazy]="true" [rows]="10" (onLazyLoad)="on<%= relationshipNameCapitalized %>LazyLoadEvent($event)"<% } %> [lazyLoadOnInit]="true" [filterValue]="<%= relationships[idx].relationshipName %>FilterValue"
-                                placeholder="Choose" optionLabel="<%=otherEntityField %>"<%- dto === 'no'?'':' optionValue="id"' %><%- relationshipRequired?'':' [showClear]="true"' %>></p-dropdown>
+                <label jhiTranslate="<%= translationKey %>" for="field_<%= relationshipName %>"><%= relationshipNameHumanized %></label>
+                <p-dropdown id="field_<%= relationshipName %>" name="<%= relationshipName %>" [options]="<%= relationshipName %>Options" formControlName="<%= relationshipName %><%- dto === 'no'?'':'Id' %>"<% if(relationships[idx].pagination !== 'no') { %>
+                            [virtualScroll]="true" [lazy]="true" [rows]="10" (onLazyLoad)="on<%= relationshipNameCapitalized %>LazyLoadEvent($event)"<% } %> [lazyLoadOnInit]="true" [filterValue]="<%= relationships[idx].relationshipName %>FilterValue"
+                            placeholder="Choose" optionLabel="<%=otherEntityField %>"<%- dto === 'no'?'':' optionValue="id"' %><%- relationshipRequired?'':' [showClear]="true"' %>></p-dropdown>
     <%_ } else if (relationshipType === 'many-to-many' && relationships[idx].ownerSide === true) { _%>
-                    <label jhiTranslate="<%= translationKey %>" for="field_<%= relationshipFieldNamePlural %>"><%= relationshipNameHumanized %></label>
-                    <p-multiSelect id="field_<%= relationshipFieldNamePlural %>" name="<%= relationshipFieldNamePlural %>" formControlName="<%=relationshipFieldNamePlural %>"<% if(relationships[idx].pagination !== 'no') { %>
-                                   [virtualScroll]="true" [lazy]="true" [rows]="10" (onLazyLoad)="on<%= relationshipNameCapitalized %>LazyLoadEvent($event)"<% } %>
-                        [options]="<%= relationshipName %>Options" optionLabel="<%=otherEntityField %>">
-                    </p-multiSelect>
+                <label jhiTranslate="<%= translationKey %>" for="field_<%= relationshipFieldNamePlural %>"><%= relationshipNameHumanized %></label>
+                <p-multiSelect id="field_<%= relationshipFieldNamePlural %>" name="<%= relationshipFieldNamePlural %>" formControlName="<%=relationshipFieldNamePlural %>"<% if(relationships[idx].pagination !== 'no') { %>
+                               [virtualScroll]="true" [lazy]="true" [rows]="10" (onLazyLoad)="on<%= relationshipNameCapitalized %>LazyLoadEvent($event)"<% } %>
+                    [options]="<%= relationshipName %>Options" optionLabel="<%=otherEntityField %>">
+                </p-multiSelect>
     <%_ } _%>
-    <%_ if (relationships[idx].relationshipValidate === true) { _%>
-        <div class="validation-messages">
-            <%_ if (relationshipRequired) { _%>
-            <ng-container *ngIf="editForm.get('<% if (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true)) { %><%= relationshipName %><% if (dto !== 'no') { %>Id<% } %><%_ } else if (relationshipType === 'many-to-many' && relationships[idx].ownerSide === true) { _%><%=relationshipFieldNamePlural %><% } %>').invalid && (editForm.get('<% if (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true)) { %><%= relationshipName %><% if (dto !== 'no') { %>Id<% } %><%_ } else if (relationshipType === 'many-to-many' && relationships[idx].ownerSide === true) { _%><%=relationshipFieldNamePlural %><% } %>').dirty || editForm.get('<% if (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true)) { %><%= relationshipName %><% if (dto !== 'no') { %>Id<% } %><%_ } else if (relationshipType === 'many-to-many' && relationships[idx].ownerSide === true) { _%><%=relationshipFieldNamePlural %><% } %>').touched)">
-                <p-message severity="error"
-                           *ngIf="editForm.get('<% if (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true)) { %><%= relationshipName %><% if (dto !== 'no') { %>Id<% } %><%_ } else if (relationshipType === 'many-to-many' && relationships[idx].ownerSide === true) { _%><%=relationshipFieldNamePlural %><% } %>').errors.required" [text]="'entity.validation.required' | translate">
-                </p-message>
-            </ng-container>
-            <%_ } _%>
-        </div>
+    <%_ if (relationships[idx].relationshipValidate === true && (relationshipType === 'many-to-one' || (relationshipType === 'many-to-many' && ownerSide === true) || (relationshipType === 'one-to-one' && ownerSide === true))) { _%>
+                <div class="validation-messages">
+                    <%_ if (relationshipRequired) { _%>
+                    <ng-container *ngIf="editForm.get('<% if (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true)) { %><%= relationshipName %><% if (dto !== 'no') { %>Id<% } %><%_ } else if (relationshipType === 'many-to-many' && relationships[idx].ownerSide === true) { _%><%=relationshipFieldNamePlural %><% } %>').invalid && (editForm.get('<% if (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true)) { %><%= relationshipName %><% if (dto !== 'no') { %>Id<% } %><%_ } else if (relationshipType === 'many-to-many' && relationships[idx].ownerSide === true) { _%><%=relationshipFieldNamePlural %><% } %>').dirty || editForm.get('<% if (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true)) { %><%= relationshipName %><% if (dto !== 'no') { %>Id<% } %><%_ } else if (relationshipType === 'many-to-many' && relationships[idx].ownerSide === true) { _%><%=relationshipFieldNamePlural %><% } %>').touched)">
+                        <p-message severity="error"
+                                   *ngIf="editForm.get('<% if (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true)) { %><%= relationshipName %><% if (dto !== 'no') { %>Id<% } %><%_ } else if (relationshipType === 'many-to-many' && relationships[idx].ownerSide === true) { _%><%=relationshipFieldNamePlural %><% } %>').errors.required" [text]="'entity.validation.required' | translate">
+                        </p-message>
+                    </ng-container>
+                    <%_ } _%>
+                </div>
     <%_ } _%>
 <%_ } _%>
             </div>
