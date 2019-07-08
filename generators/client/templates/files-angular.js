@@ -351,8 +351,6 @@ const files = {
                 'shared/util/request-util.ts',
                 // alert service code
                 'shared/alert/alert-error.service.ts',
-                // dates
-                'shared/util/datepicker-adapter.ts'
             ]
         },
         {

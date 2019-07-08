@@ -22,7 +22,6 @@ import { NgModule } from '@angular/core';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { BrowserModule } from '@angular/platform-browser';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { NgbDatepickerConfig } from '@ng-bootstrap/ng-bootstrap';
 import { NgxWebstorageModule } from 'ngx-webstorage';
 import { NgJhipsterModule } from 'ng-jhipster';
 
@@ -118,7 +117,5 @@ import {
     bootstrap: [ <%=jhiPrefixCapitalized%>MainComponent ]
 })
 export class <%=angularXAppName%>AppModule {
-    constructor(private dpConfig: NgbDatepickerConfig) {
-        this.dpConfig.minDate = {year: moment().year() - 100, month: 1, day: 1};
-    }
+    constructor() {}
 }
