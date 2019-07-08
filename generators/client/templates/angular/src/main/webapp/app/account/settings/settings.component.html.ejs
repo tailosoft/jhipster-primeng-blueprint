@@ -25,8 +25,6 @@
                 <strong>Settings saved!</strong>
             </div>
 
-            <<%= jhiPrefixDashed %>-alert-error></<%= jhiPrefixDashed %>-alert-error>
-
             <form name="form" role="form" (ngSubmit)="save()" [formGroup]="settingsForm" *ngIf="settingsForm.get('login').value" novalidate>
 
                 <div class="form-group">

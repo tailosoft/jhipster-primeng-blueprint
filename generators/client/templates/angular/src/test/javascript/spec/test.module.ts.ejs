@@ -22,13 +22,13 @@ import { NgModule, ElementRef, Renderer } from '@angular/core';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 <%_ if (enableTranslation) { _%>
-import { JhiLanguageService, JhiDataUtils, JhiDateUtils, JhiEventManager, JhiAlertService, JhiParseLinks } from 'ng-jhipster';
-
+import { JhiLanguageService, JhiDataUtils, JhiDateUtils, JhiEventManager, JhiParseLinks } from 'ng-jhipster';
+import { MessageService } from 'primeng/api';
 import { MockLanguageService, MockLanguageHelper } from './helpers/mock-language.service';
 import { JhiLanguageHelper, AccountService<% if (authenticationType !== 'oauth2') { %>, LoginModalService<% } %><% if (websocket === 'spring-websocket') { %>, <%=jhiPrefixCapitalized%>TrackerService<% } %> } from 'app/core';
 <%_ } else { _%>
-import { JhiDataUtils, JhiDateUtils, JhiEventManager, JhiAlertService, JhiParseLinks } from 'ng-jhipster';
-
+import { JhiDataUtils, JhiDateUtils, JhiEventManager, JhiParseLinks } from 'ng-jhipster';
+import { MessageService } from 'primeng/api';
 import { AccountService<% if (authenticationType !== 'oauth2') { %>, LoginModalService<% } %><% if (websocket === 'spring-websocket') { %>, <%=jhiPrefixCapitalized%>TrackerService<% } %> } from 'app/core';
 <%_ } _%>
 import { MockAccountService } from './helpers/mock-account.service';
@@ -108,7 +108,7 @@ _%>
             useValue: null
         },
         {
-            provide: JhiAlertService,
+            provide: MessageService,
             useValue: null
         },
         {

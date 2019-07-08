@@ -17,6 +17,7 @@
  limitations under the License.
 -%>
 <%_
+//TODO remove queries
 const query = generateEntityQueries(relationships, entityInstance, dto);
 const queries = query.queries;
 const hasPaginationRelationship = relationships && relationships.some(r => (r.relationshipType === 'many-to-one' || ((r.relationshipType === 'one-to-one' || r.relationshipType === 'many-to-many') && r.ownerSide === true)) && r.pagination != 'no');
@@ -31,7 +32,8 @@ import { lazyLoadEventToQueryParams } from 'app/shared';
 import { LazyLoadEvent } from 'primeng/api';
 <%_ } _%>
 <%_ if (queries && queries.length > 0 || fieldsContainBlob) { _%>
-import { <% if (fieldsContainBlob || queries && queries.length > 0) { %>JhiAlertService, <% } %><% if (fieldsContainBlob) { %>JhiDataUtils<% } %> } from 'ng-jhipster';
+import { <% if (fieldsContainBlob) { %>JhiDataUtils<% } %> } from 'ng-jhipster';
+import { MessageService } from 'primeng/api';
 <%_ } _%>
 <%_
 let enumOptions = '';
@@ -136,7 +138,7 @@ export class <%= entityAngularName %>UpdateComponent implements OnInit {
         protected dataUtils: JhiDataUtils,
 <%_ } _%>
 <%_ if (fieldsContainBlob || queries && queries.length > 0) { _%>
-        protected jhiAlertService: JhiAlertService,
+        protected messageService: MessageService,
 <%_ } _%>
         protected <%= entityInstance %>Service: <%= entityAngularName %>Service,
 <%_ Object.keys(differentRelationships).forEach(key => {
@@ -343,7 +345,7 @@ _%>
     }
 <%_ if (fieldsContainBlob || queries && queries.length > 0) { _%>
     protected onError(errorMessage: string) {
-        this.jhiAlertService.error(errorMessage, null, null);
+        this.messageService.add({severity:'error', summary: errorMessage});
     }
 <%_ } _%>
 <%_

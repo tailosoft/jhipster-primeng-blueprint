@@ -25,7 +25,8 @@ import { ActivatedRoute } from '@angular/router';
 <%_ } _%>
 import { Subscription } from 'rxjs';
 import { filter, map<%_ if (pagination !== 'no') { _%>, tap, take, debounceTime, switchMap<%_ } _%> } from 'rxjs/operators';
-import { JhiEventManager, JhiAlertService<% if (fieldsContainBlob) { %>, JhiDataUtils<% } %> } from 'ng-jhipster';
+import { JhiEventManager<% if (fieldsContainBlob) { %>, JhiDataUtils<% } %> } from 'ng-jhipster';
+import { MessageService } from 'primeng/api';
 <%_
 let enumOptions = '';
 if ( jpaMetamodelFiltering) {
@@ -94,7 +95,7 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
         protected <%= relationships[idx].otherEntityName %>Service: <%= relationships[idx].otherEntityAngularName %>Service,
     <%_ } %>
 <%_ } %>
-        protected jhiAlertService: JhiAlertService,
+        protected messageService: MessageService,
         <%_ if (fieldsContainBlob) { _%>
         protected dataUtils: JhiDataUtils,
         <%_ } _%>
@@ -317,7 +318,7 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
     <%_ }} _%>
 
     protected onError(errorMessage: string) {
-        this.jhiAlertService.error(errorMessage, null, null);
+        this.messageService.add({severity:'error', summary: errorMessage});
     }
     <%_ if(jpaMetamodelFiltering && fields.some(f => ['LocalDate', 'Instant', 'ZonedDateTime'].includes(f.fieldType) )){ _%>
 

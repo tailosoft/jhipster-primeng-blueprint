@@ -23,8 +23,6 @@ import {
     <%_ if (enableTranslation) { _%>
     FindLanguageFromKeyPipe,
     <%_ } _%>
-    <%=jhiPrefixCapitalized%>AlertComponent,
-    <%=jhiPrefixCapitalized%>AlertErrorComponent
 } from './';
 
 @NgModule({
@@ -35,16 +33,12 @@ import {
         <%_ if (enableTranslation) { _%>
         FindLanguageFromKeyPipe,
         <%_ } _%>
-        <%=jhiPrefixCapitalized%>AlertComponent,
-        <%=jhiPrefixCapitalized%>AlertErrorComponent
     ],
     exports: [
         <%=angularXAppName%>SharedLibsModule,
         <%_ if (enableTranslation) { _%>
         FindLanguageFromKeyPipe,
         <%_ } _%>
-        <%=jhiPrefixCapitalized%>AlertComponent,
-        <%=jhiPrefixCapitalized%>AlertErrorComponent
     ]
 })
 export class <%=angularXAppName%>SharedCommonModule {}

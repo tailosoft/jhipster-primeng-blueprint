@@ -1,65 +1,50 @@
-import { ComponentFixture, TestBed, async, inject, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { JhiAlertService, JhiEventManager } from 'ng-jhipster';
 <%_ if (enableTranslation) { _%>
 import { TranslateModule } from '@ngx-translate/core';
 <%_ } _%>
-
 import { <%=angularXAppName%>TestModule } from '../../../test.module';
-import { <%=jhiPrefixCapitalized%>AlertErrorComponent } from 'app/shared/alert/alert-error.component';
-import { MockAlertService } from "../../../helpers/mock-alert.service";
+import { <%=jhiPrefixCapitalized%>AlertErrorService } from 'app/shared/alert/alert-error.service';
+import { MessageService } from 'primeng/api';
 
 describe('Component Tests', () => {
     describe('Alert Error Component', () => {
-        let comp: <%=jhiPrefixCapitalized%>AlertErrorComponent;
-        let fixture: ComponentFixture<<%=jhiPrefixCapitalized%>AlertErrorComponent>;
-        let eventManager: JhiEventManager;
-
-        beforeEach(async(() => {
-            TestBed.configureTestingModule({
-                imports: [<%=angularXAppName%>TestModule<% if (enableTranslation) { %>, TranslateModule.forRoot()<% } %>],
-                declarations: [<%=jhiPrefixCapitalized%>AlertErrorComponent],
-                providers: [
-                    JhiEventManager,
-                    {
-                        provide: JhiAlertService,
-                        useClass: MockAlertService
-                    }
-                ]
-            })
-                .overrideTemplate(<%=jhiPrefixCapitalized%>AlertErrorComponent, '')
-                .compileComponents();
-        }));
+        let service: <%=jhiPrefixCapitalized%>AlertErrorService;
+        let messageService: MessageService;
 
         beforeEach(() => {
-            fixture = TestBed.createComponent(<%=jhiPrefixCapitalized%>AlertErrorComponent);
-            comp = fixture.componentInstance;
-            eventManager = fixture.debugElement.injector.get(JhiEventManager);
+            TestBed.configureTestingModule({
+                imports: [<%=angularXAppName%>TestModule<% if (enableTranslation) { %>, TranslateModule.forRoot()<% } %>],
+                providers: [<%=jhiPrefixCapitalized%>AlertErrorService, MessageService]
+            })
+            service = TestBed.get(<%=jhiPrefixCapitalized%>AlertErrorService);
+            messageService = TestBed.get(MessageService);
+            spyOn(messageService, 'add');
         });
 
         describe('Error Handling', () => {
             it('Should display an alert on status 0', () => {
                 // GIVEN
-                eventManager.broadcast({name: '<%=angularAppName%>.httpError', content: {status: 0}});
+                service.displayError(<HttpErrorResponse>{status: 0});
                 // THEN
-                expect(comp.alerts.length).toBe(1);
-                expect(comp.alerts[0].msg).toBe(<% if (enableTranslation) { %>'error.server.not.reachable'<% } else { %>'Server not reachable'<% } %>);
+                expect(messageService.add).toHaveBeenCalledTimes(1);
+                expect(messageService.add).toHaveBeenCalledWith({severity: 'error', summary: <% if (enableTranslation) { %>'error.server.not.reachable'<% } else { %>'Server not reachable'<% } %>});
             });
             it('Should display an alert on status 404', () => {
                 // GIVEN
-                eventManager.broadcast({name: '<%=angularAppName%>.httpError', content: {status: 404}});
+                service.displayError(<HttpErrorResponse>{status: 404});
                 // THEN
-                expect(comp.alerts.length).toBe(1);
-                expect(comp.alerts[0].msg).toBe(<% if (enableTranslation) { %>'error.url.not.found'<% } else { %>'Not found'<% } %>);
+                expect(messageService.add).toHaveBeenCalledTimes(1);
+                expect(messageService.add).toHaveBeenCalledWith({severity: 'error', summary: <% if (enableTranslation) { %>'error.url.not.found'<% } else { %>'Not found'<% } %>});
             });
             it('Should display an alert on generic error', () => {
                 // GIVEN
-                eventManager.broadcast({name: '<%=angularAppName%>.httpError', content: {error: {message: "Error Message"}}});
-                eventManager.broadcast({name: '<%=angularAppName%>.httpError', content: {error: "Second Error Message"}});
+                service.displayError(<HttpErrorResponse>{status: 111, error: {message: "Error Message"}});
+                service.displayError(<HttpErrorResponse>{status: 111, error: "Second Error Message"});
                 // THEN
-                expect(comp.alerts.length).toBe(2);
-                expect(comp.alerts[0].msg).toBe('Error Message');
-                expect(comp.alerts[1].msg).toBe('Second Error Message');
+                expect(messageService.add).toHaveBeenCalledTimes(2);
+                expect(messageService.add).toHaveBeenCalledWith({severity: 'error', summary: 'Error Message'});
+                expect(messageService.add).toHaveBeenCalledWith({severity: 'error', summary: 'Second Error Message'});
             });
            it('Should display an alert on status 400 for generic error', () => {
                 // GIVEN
@@ -76,10 +61,10 @@ describe('Component Tests', () => {
                        "message":"error.validation"
                    }
                 });
-                eventManager.broadcast({name: '<%=angularAppName%>.httpError', content: response});
+                service.displayError(response);
                 // THEN
-                expect(comp.alerts.length).toBe(1);
-                expect(comp.alerts[0].msg).toBe('error.validation');
+                expect(messageService.add).toHaveBeenCalledTimes(1);
+                expect(messageService.add).toHaveBeenCalledWith({severity: 'error', summary: 'error.validation'});
             });
            it('Should display an alert on status 400 for generic error without message', () => {
                 // GIVEN
@@ -89,10 +74,10 @@ describe('Component Tests', () => {
                    status: 400,
                    error: "Bad Request"
                 });
-                eventManager.broadcast({name: '<%=angularAppName%>.httpError', content: response});
+                service.displayError(response);
                 // THEN
-                expect(comp.alerts.length).toBe(1);
-                expect(comp.alerts[0].msg).toBe('Bad Request');
+                expect(messageService.add).toHaveBeenCalledTimes(1);
+                expect(messageService.add).toHaveBeenCalledWith({severity: 'error', summary: 'Bad Request'});
             });
             it('Should display an alert on status 400 for invalid parameters', () => {
                 // GIVEN
@@ -110,10 +95,10 @@ describe('Component Tests', () => {
                         "fieldErrors":[{"objectName":"foo","field":"minField","message":"Min"}]
                     }
                 });
-                eventManager.broadcast({name: '<%=angularAppName%>.httpError', content: response});
+                service.displayError(response);
                 // THEN
-                expect(comp.alerts.length).toBe(1);
-                expect(comp.alerts[0].msg).toBe(<% if (enableTranslation) { %>'error.Size'<% } else { %>'Error on field "MinField"'<% } %>);
+                expect(messageService.add).toHaveBeenCalledTimes(1);
+                expect(messageService.add).toHaveBeenCalledWith({severity: 'error', summary: <% if (enableTranslation) { %>'error.Size'<% } else { %>'Error on field "MinField"'<% } %>});
             });
             it('Should display an alert on status 400 for error headers', () => {
                 // GIVEN
@@ -127,10 +112,10 @@ describe('Component Tests', () => {
                         "message":"error.validation",
                     }
                 });
-                eventManager.broadcast({name: '<%=angularAppName%>.httpError', content: response});
+                service.displayError(response);
                 // THEN
-                expect(comp.alerts.length).toBe(1);
-                expect(comp.alerts[0].msg).toBe('Error Message');
+                expect(messageService.add).toHaveBeenCalledTimes(1);
+                expect(messageService.add).toHaveBeenCalledWith({severity: 'error', summary: 'Error Message'});
             });
         });
     });

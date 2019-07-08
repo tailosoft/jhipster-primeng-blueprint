@@ -22,11 +22,12 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 <%_ if (prodDatabaseType !== 'cassandra') { _%>
 import { ActivatedRoute, Router } from '@angular/router';
-import { JhiEventManager, JhiParseLinks, JhiAlertService } from 'ng-jhipster';
-
+import { JhiEventManager, JhiParseLinks } from 'ng-jhipster'
+import { MessageService } from 'primeng/api';
 import { ITEMS_PER_PAGE } from 'app/shared';
 <%_ } else { _%>
-import { JhiEventManager, JhiAlertService } from 'ng-jhipster';
+import { JhiEventManager } from 'ng-jhipster';
+import { MessageService } from 'primeng/api';
 <%_ } _%>
 import { AccountService, UserService, User } from 'app/core';
 import { UserMgmtDeleteDialogComponent } from './user-management-delete-dialog.component';
@@ -54,7 +55,7 @@ export class UserMgmtComponent implements OnInit, OnDestroy {
 
     constructor(
         private userService: UserService,
-        private alertService: JhiAlertService,
+        private messageService: MessageService,
         private accountService: AccountService,
         <%_ if (prodDatabaseType !== 'cassandra') { _%>
         private parseLinks: JhiParseLinks,
@@ -173,6 +174,6 @@ export class UserMgmtComponent implements OnInit, OnDestroy {
     }
 
     private onError(error) {
-        this.alertService.error(error.error, error.message, null);
+        this.messageService.add({severity:'error', summary: error.error, detail: error.message});
     }
 }

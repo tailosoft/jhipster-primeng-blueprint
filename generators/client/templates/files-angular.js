@@ -350,8 +350,7 @@ const files = {
                 // models
                 'shared/util/request-util.ts',
                 // alert service code
-                'shared/alert/alert.component.ts',
-                'shared/alert/alert-error.component.ts',
+                'shared/alert/alert-error.service.ts',
                 // dates
                 'shared/util/datepicker-adapter.ts'
             ]
@@ -416,7 +415,6 @@ const files = {
                 'spec/helpers/mock-event-manager.service.ts',
                 'spec/helpers/mock-active-modal.service.ts',
                 'spec/helpers/mock-state-storage.service.ts',
-                'spec/helpers/mock-alert.service.ts',
                 'spec/helpers/mock-confirmation.service.ts',
                 'spec/helpers/mock-translate.service.ts'
             ]
@@ -434,7 +432,7 @@ const files = {
                 'spec/app/account/settings/settings.component.spec.ts',
                 // login component tests
                 'spec/app/shared/login/login.component.spec.ts',
-                'spec/app/shared/alert/alert-error.component.spec.ts'
+                'spec/app/shared/alert/alert-error.service.spec.ts'
             ]
         },
         {

@@ -20,7 +20,8 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { JhiParseLinks, JhiAlertService } from 'ng-jhipster';
+import { JhiParseLinks } from 'ng-jhipster';
+import { MessageService } from 'primeng/api';
 
 import { ITEMS_PER_PAGE } from 'app/shared';
 import { Audit } from './audit.model';
@@ -45,7 +46,7 @@ export class AuditsComponent implements OnInit, OnDestroy {
 
     constructor(
         private auditsService: AuditsService,
-        private alertService: JhiAlertService,
+        private messageService: MessageService,
         private parseLinks: JhiParseLinks,
         private activatedRoute: ActivatedRoute,
         private datePipe: DatePipe,
@@ -136,7 +137,7 @@ export class AuditsComponent implements OnInit, OnDestroy {
     }
 
     private onError(error) {
-        this.alertService.error(error.error, error.message, null);
+        this.messageService.add({severity:'error', summary: error.error, detail: error.message});
     }
 
 }
