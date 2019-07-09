@@ -41,7 +41,8 @@ if ( jpaMetamodelFiltering) {
 } _%>
 import { I<%= entityAngularName %><%= enumOptions ? ', ' + enumOptions : '' %> } from 'app/shared/model/<%= entityModelFileName %>.model';
 <%_ if (pagination !== 'no') { %>
-import { ITEMS_PER_PAGE, lazyLoadEventToQueryParams } from 'app/shared';
+import { ITEMS_PER_PAGE } from 'app/shared';
+import { lazyLoadEventToQueryParams } from 'app/shared/util/request-util';
 <%_ } _%>
 import { <%= entityAngularName %>Service } from './<%= entityFileName %>.service';
 import { ConfirmationService<%_ if (pagination !== 'no') { _%>, LazyLoadEvent<% } %> } from 'primeng/api';
@@ -85,7 +86,7 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
 <%_ } _%>
 
     @ViewChild('<%= entityInstance %>Table', { static: false })
-        <%= entityInstance %>Table: Table;
+    <%= entityInstance %>Table: Table;
     <%_ } _%>
 
     constructor(
@@ -320,7 +321,7 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
     protected onError(errorMessage: string) {
         this.messageService.add({severity:'error', summary: errorMessage});
     }
-    <%_ if(jpaMetamodelFiltering && fields.some(f => ['LocalDate', 'Instant', 'ZonedDateTime'].includes(f.fieldType) )){ _%>
+    <%_ if(pagination !== 'no' && jpaMetamodelFiltering && fields.some(f => ['LocalDate', 'Instant', 'ZonedDateTime'].includes(f.fieldType) )){ _%>
 
     onDateSelect(dateRange: Date[], column: string, time = false) {
         const dateToString =  time ? (x => x && x.toISOString()) : (x => x && this.datePipe.transform(x, 'yyyy-MM-dd'));

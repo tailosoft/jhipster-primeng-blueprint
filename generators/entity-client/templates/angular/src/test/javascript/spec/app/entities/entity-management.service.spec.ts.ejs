@@ -56,9 +56,10 @@ describe('Service Tests', () => {
         <%_ } _%>
         beforeEach(() => {
             TestBed.configureTestingModule({
-                imports: [
-                    HttpClientTestingModule
-                ]
+                imports: [HttpClientTestingModule],
+<%_ if (fieldsContainLocalDate) { _%>
+                providers: [DatePipe]
+<%_ } _%>
             });
             expectedResult = {};
             injector = getTestBed();
