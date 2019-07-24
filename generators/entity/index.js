@@ -68,18 +68,18 @@ module.exports = class extends EntityGenerator {
     }
 
     get configuring() {
-         const phaseFromJHipster = super._configuring();
-         const myCustomPhaseSteps = {
-             // making sure name is uniique to not override any step
-             primengBlueprintPopulatingRelationshipPagination() {
-                 this.context.relationships.forEach(relationship => {
-                     const otherEntityData = this.getEntityJson(relationship.otherEntityName);
-                     relationship.pagination = otherEntityData.pagination;
-                     relationship.jpaMetamodelFiltering = otherEntityData.jpaMetamodelFiltering;
-                 });
-             },
-         }
-         return Object.assign(phaseFromJHipster, myCustomPhaseSteps);
+        const phaseFromJHipster = super._configuring();
+        const myCustomPhaseSteps = {
+            // making sure name is uniique to not override any step
+            primengBlueprintPopulatingRelationshipPagination() {
+                this.context.relationships.forEach(relationship => {
+                    const otherEntityData = this.getEntityJson(relationship.otherEntityName);
+                    relationship.pagination = otherEntityData.pagination;
+                    relationship.jpaMetamodelFiltering = otherEntityData.jpaMetamodelFiltering;
+                });
+            },
+        };
+        return Object.assign(phaseFromJHipster, myCustomPhaseSteps);
     }
 
     get writing() {
