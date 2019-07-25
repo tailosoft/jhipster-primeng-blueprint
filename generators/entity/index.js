@@ -70,7 +70,7 @@ module.exports = class extends EntityGenerator {
     get configuring() {
         const phaseFromJHipster = super._configuring();
         const myCustomPhaseSteps = {
-            // making sure name is uniique to not override any step
+            // making sure name is unique to not override any step
             primengBlueprintPopulatingRelationshipPagination() {
                 this.context.relationships.forEach(relationship => {
                     const otherEntityData = this.getEntityJson(relationship.otherEntityName);

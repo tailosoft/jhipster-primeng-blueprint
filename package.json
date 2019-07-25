@@ -1,16 +1,16 @@
 {
-  "name": "generator-jhipster-primeng",
+  "name": "generator-jhipster-primeng-blueprint",
   "version": "0.0.0",
-  "description": "this blueprint allows to use primeng instead of bootstrap",
+  "description": "This blueprint generated code that uses primeng components instead of bootstrap ones",
   "keywords": [
     "yeoman-generator",
     "jhipster-blueprint",
     "jhipster-5"
   ],
-  "homepage": "https://github.com/yelhouti/generator-jhipster-primeng",
+  "homepage": "https://github.com/yelhouti/generator-jhipster-primeng-blueprint",
   "author": {
     "name": "Youssef El Houti",
-    "email": "elhouti@elhouti.com",
+    "email": "youssef.elhouti@elhouti.com",
     "url": "https://elhouti.com"
   },
   "files": [
@@ -19,7 +19,7 @@
   "main": "generators/app/index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yelhouti/generator-jhipster-primeng.git"
+    "url": "git+https://github.com/yelhouti/generator-jhipster-primeng-blueprint.git"
   },
   "dependencies": {
     "chalk": "2.4.1",
@@ -70,7 +70,8 @@
     "release:minor": "npm version minor -a -m \"Update to %s\" && npm run release",
     "release:major": "npm version major -a -m \"Update to %s\" && npm run release"
   },
+  "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/yelhouti/generator-jhipster-primeng/issues"
+    "url": "https://github.com/yelhouti/generator-jhipster-primeng-blueprint/issues"
   }
 }

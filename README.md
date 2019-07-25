@@ -1,6 +1,6 @@
-# generator-jhipster-primeng
+# generator-jhipster-primeng-blueprint
 [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url]
-> JHipster blueprint, this blueprint allows to use primeng instead of bootstrap
+> JHipster blueprint, This blueprint generated code that uses primeng components instead of bootstrap ones
 
 # Introduction
 
@@ -19,13 +19,13 @@ As this is a [JHipster](https://www.jhipster.tech/) blueprint, we expect you hav
 To install this blueprint:
 
 ```bash
-npm install -g generator-jhipster-primeng
+npm install -g generator-jhipster-primeng-blueprint
 ```
 
 To update this blueprint:
 
 ```bash
-npm update -g generator-jhipster-primeng
+npm update -g generator-jhipster-primeng-blueprint
 ```
 
 ## With Yarn
@@ -33,13 +33,13 @@ npm update -g generator-jhipster-primeng
 To install this blueprint:
 
 ```bash
-yarn global add generator-jhipster-primeng
+yarn global add generator-jhipster-primeng-blueprint
 ```
 
 To update this blueprint:
 
 ```bash
-yarn global upgrade generator-jhipster-primeng
+yarn global upgrade generator-jhipster-primeng-blueprint
 ```
 
 # Usage
@@ -47,7 +47,7 @@ yarn global upgrade generator-jhipster-primeng
 To use this blueprint, run the below command
 
 ```bash
-jhipster --blueprint primeng
+jhipster --blueprint primeng-blueprint
 ```
 
 
@@ -60,7 +60,7 @@ During development of blueprint, please note the below steps. They are very impo
 Note: If you do not want to link the blueprint(step 3) to each project being created, use NPM instead of Yarn as yeoman doesn't seem to fetch globally linked Yarn modules. On the other hand, this means you have to use NPM in all the below steps as well.
 
 ```bash
-cd primeng
+cd primeng-blueprint
 npm link
 ```
 
@@ -72,7 +72,7 @@ You could also use Yarn for this if you prefer
 cd generator-jhipster
 npm link
 
-cd primeng
+cd primeng-blueprint
 npm link generator-jhipster
 ```
 
@@ -81,10 +81,10 @@ npm link generator-jhipster
 ```bash
 mkdir my-app && cd my-app
 
-npm link generator-jhipster-primeng
+npm link generator-jhipster-primeng-blueprint
 npm link generator-jhipster (Optional: Needed only if you are using a non-released JHipster version)
 
-jhipster -d --blueprint primeng
+jhipster -d --blueprint primeng-blueprint
 
 ```
 
@@ -105,11 +105,12 @@ This usually happens with using npm link, npm install doesn't install dependenci
 
 # License
 
+Apache-2.0 © [Youssef El Houti](https://elhouti.com)
 
 
-[npm-image]: https://img.shields.io/npm/v/generator-jhipster-primeng.svg
-[npm-url]: https://npmjs.org/package/generator-jhipster-primeng
-[travis-image]: https://travis-ci.org/yelhouti/generator-jhipster-primeng.svg?branch=master
-[travis-url]: https://travis-ci.org/yelhouti/generator-jhipster-primeng
-[daviddm-image]: https://david-dm.org/yelhouti/generator-jhipster-primeng.svg?theme=shields.io
-[daviddm-url]: https://david-dm.org/yelhouti/generator-jhipster-primeng
+[npm-image]: https://img.shields.io/npm/v/generator-jhipster-primeng-blueprint.svg
+[npm-url]: https://npmjs.org/package/generator-jhipster-primeng-blueprint
+[travis-image]: https://travis-ci.org/yelhouti/generator-jhipster-primeng-blueprint.svg?branch=master
+[travis-url]: https://travis-ci.org/yelhouti/generator-jhipster-primeng-blueprint
+[daviddm-image]: https://david-dm.org/yelhouti/generator-jhipster-primeng-blueprint.svg?theme=shields.io
+[daviddm-url]: https://david-dm.org/yelhouti/generator-jhipster-primeng-blueprint

@@ -2,7 +2,7 @@ const path = require('path');
 const assert = require('yeoman-assert');
 const helpers = require('yeoman-test');
 
-describe('Subgenerator client of primeng JHipster blueprint', () => {
+describe('Subgenerator client of primeng-blueprint JHipster blueprint', () => {
     describe('Sample test', () => {
         before(done => {
             helpers
@@ -10,13 +10,13 @@ describe('Subgenerator client of primeng JHipster blueprint', () => {
                 .withOptions({
                     'from-cli': true,
                     skipInstall: true,
-                    blueprint: 'primeng',
+                    blueprint: 'primeng-blueprint',
                     skipChecks: true
                 })
                 .withGenerators([
                     [
                         require('../generators/client/index.js'), // eslint-disable-line global-require
-                        'jhipster-primeng:client',
+                        'jhipster-primeng-blueprint:client',
                         path.join(__dirname, '../generators/client/index.js')
                     ]
                 ])
