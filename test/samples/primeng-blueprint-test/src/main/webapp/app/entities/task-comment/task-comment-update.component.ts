@@ -51,7 +51,7 @@ export class TaskCommentUpdateComponent implements OnInit {
       value: taskComment.value,
       taskId: taskComment.taskId
     });
-    this.taskFilterValue = taskComment.name;
+    this.taskFilterValue = taskComment.taskId;
   }
 
   previousState() {
@@ -91,9 +91,5 @@ export class TaskCommentUpdateComponent implements OnInit {
   }
   protected onError(errorMessage: string) {
     this.messageService.add({ severity: 'error', summary: errorMessage });
-  }
-
-  trackTaskById(index: number, item: ITask) {
-    return item.id;
   }
 }

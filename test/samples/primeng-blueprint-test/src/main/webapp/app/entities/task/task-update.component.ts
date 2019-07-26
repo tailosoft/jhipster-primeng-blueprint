@@ -5,8 +5,6 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { ITask, Task } from 'app/shared/model/task.model';
 import { TaskService } from './task.service';
-import { IEmployeeSkill } from 'app/shared/model/employee-skill.model';
-import { EmployeeSkillService } from 'app/entities/employee-skill';
 
 @Component({
   selector: 'jhi-task-update',
@@ -20,12 +18,7 @@ export class TaskUpdateComponent implements OnInit {
     name: [null, [Validators.required]]
   });
 
-  constructor(
-    protected taskService: TaskService,
-    protected employeeSkillService: EmployeeSkillService,
-    protected activatedRoute: ActivatedRoute,
-    private fb: FormBuilder
-  ) {}
+  constructor(protected taskService: TaskService, protected activatedRoute: ActivatedRoute, private fb: FormBuilder) {}
 
   ngOnInit() {
     this.isSaving = false;
@@ -74,9 +67,5 @@ export class TaskUpdateComponent implements OnInit {
 
   protected onSaveError() {
     this.isSaving = false;
-  }
-
-  trackEmployeeSkillById(index: number, item: IEmployeeSkill) {
-    return item.id;
   }
 }

@@ -1,38 +1,59 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild } from '@angular/core';
+import { HttpErrorResponse, HttpHeaders, HttpResponse } from '@angular/common/http';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { filter, map, tap, take, debounceTime, switchMap } from 'rxjs/operators';
 import { JhiEventManager } from 'ng-jhipster';
 import { MessageService } from 'primeng/api';
 import { IEmployeeSkill } from 'app/shared/model/employee-skill.model';
+
+import { ITEMS_PER_PAGE } from 'app/shared';
+import { lazyLoadEventToQueryParams } from 'app/shared/util/request-util';
 import { EmployeeSkillService } from './employee-skill.service';
-import { ConfirmationService } from 'primeng/api';
+import { ConfirmationService, LazyLoadEvent } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
+import { TaskService } from 'app/entities/task/task.service';
+import { ITask } from 'app/shared/model/task.model';
+import { EmployeeService } from 'app/entities/employee/employee.service';
+import { IEmployee } from 'app/shared/model/employee.model';
+
+import { Table } from 'primeng/table';
+import { flatten, unflatten } from 'flat';
 
 @Component({
   selector: 'jhi-employee-skill',
   templateUrl: './employee-skill.component.html'
 })
-export class EmployeeSkillComponent implements OnInit, OnDestroy {
+export class EmployeeSkillComponent implements OnInit, OnDestroy, AfterViewInit {
   employeeSkills: IEmployeeSkill[];
   eventSubscriber: Subscription;
+  taskOptions: ITask[];
+  employeeOptions: IEmployee[];
+
+  totalItems: number;
+  itemsPerPage: number;
+  loading: boolean;
+
+  @ViewChild('employeeSkillTable', { static: false })
+  employeeSkillTable: Table;
 
   constructor(
     protected employeeSkillService: EmployeeSkillService,
-    protected employeeSkillCertificateService: EmployeeSkillCertificateService,
     protected taskService: TaskService,
     protected employeeService: EmployeeService,
     protected messageService: MessageService,
+    protected activatedRoute: ActivatedRoute,
+    protected router: Router,
     protected eventManager: JhiEventManager,
     protected confirmationService: ConfirmationService,
     protected translateService: TranslateService
-  ) {}
+  ) {
+    this.itemsPerPage = ITEMS_PER_PAGE;
+    this.loading = true;
+  }
 
   ngOnInit() {
-    this.loadAll();
-    this.loadAllEmployeeSkillCertificates();
     this.loadAllTasks();
-    this.loadAllEmployees();
     this.registerChangeInEmployeeSkills();
   }
 
@@ -40,19 +61,59 @@ export class EmployeeSkillComponent implements OnInit, OnDestroy {
     this.eventManager.destroy(this.eventSubscriber);
   }
 
-  loadAll() {
-    this.employeeSkillService
-      .query()
+  ngAfterViewInit() {
+    const lazyLoadEvent$ = this.activatedRoute.queryParams.pipe(
+      debounceTime(300),
+      map(data => <LazyLoadEvent>(<any>unflatten(data)).lle)
+    );
+
+    lazyLoadEvent$
       .pipe(
-        filter((res: HttpResponse<IEmployeeSkill[]>) => res.ok),
-        map((res: HttpResponse<IEmployeeSkill[]>) => res.body)
+        take(1),
+        filter(event => event !== undefined)
+      )
+      .subscribe(event => {
+        Object.assign(this.employeeSkillTable, event);
+        if (event.filters && event.filters.level) {
+          this.employeeSkillTable.filters.level.value = +event.filters.level.value;
+        }
+        if (event.filters && event.filters.taskId && event.filters.taskId.value) {
+          this.employeeSkillTable.filters.taskId.value = event.filters.taskId.value.map(x => +x);
+        }
+        if (event.filters && event.filters.employeeId && event.filters.employeeId.value) {
+          this.employeeSkillTable.filters.employeeId.value = event.filters.employeeId.value.map(x => +x);
+        }
+      });
+
+    lazyLoadEvent$
+      .pipe(
+        map(event => lazyLoadEventToQueryParams(event || {})),
+        tap(() => (this.loading = true)),
+        switchMap(params => this.employeeSkillService.query(params)),
+        filter((res: HttpResponse<IEmployeeSkill[]>) => res.ok)
       )
       .subscribe(
-        (res: IEmployeeSkill[]) => {
-          this.employeeSkills = res;
+        (res: HttpResponse<IEmployeeSkill[]>) => {
+          this.paginateEmployeeSkills(res.body, res.headers);
+          this.loading = false;
         },
-        (res: HttpErrorResponse) => this.onError(res.message)
+        (res: HttpErrorResponse) => {
+          this.onError(res.message);
+          this.loading = false;
+        }
       );
+  }
+
+  onLazyLoadEvent(event: LazyLoadEvent) {
+    const queryParams = flatten({ lle: event });
+    Object.entries(queryParams).forEach(([key, value]) => {
+      if (value && typeof value === 'object' && Object.entries(value).length === 0) {
+        delete queryParams[key];
+      }
+    });
+    this.router.navigate(['/employee-skill'], {
+      queryParams
+    });
   }
 
   delete(id: number) {
@@ -70,16 +131,12 @@ export class EmployeeSkillComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadAllEmployeeSkillCertificates() {
-    this.employeeSkillCertificateService.query().subscribe(res => (this.employeeSkillCertificateOptions = res.body));
-  }
-
   loadAllTasks() {
     this.taskService.query().subscribe(res => (this.taskOptions = res.body));
   }
 
-  loadAllEmployees() {
-    this.employeeService.query().subscribe(res => (this.employeeOptions = res.body));
+  onEmployeeLazyLoadEvent(event: LazyLoadEvent) {
+    this.employeeService.query(lazyLoadEventToQueryParams(event || {})).subscribe(res => (this.employeeOptions = res.body));
   }
 
   trackId(index: number, item: IEmployeeSkill) {
@@ -87,7 +144,12 @@ export class EmployeeSkillComponent implements OnInit, OnDestroy {
   }
 
   registerChangeInEmployeeSkills() {
-    this.eventSubscriber = this.eventManager.subscribe('employeeSkillListModification', response => this.loadAll());
+    this.eventSubscriber = this.eventManager.subscribe('employeeSkillListModification', response => this.employeeSkillTable.ngOnInit());
+  }
+
+  protected paginateEmployeeSkills(data: IEmployeeSkill[], headers: HttpHeaders) {
+    this.totalItems = parseInt(headers.get('X-Total-Count'), 10);
+    this.employeeSkills = data;
   }
 
   protected onError(errorMessage: string) {

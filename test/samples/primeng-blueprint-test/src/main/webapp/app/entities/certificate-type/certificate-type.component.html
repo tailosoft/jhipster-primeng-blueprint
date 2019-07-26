@@ -26,10 +26,6 @@
                 <input pInputText type="text" [value]="certificateTypeTable.filters.name?.value"
                        (input)="certificateTypeTable.filter($event.target.value, 'name', 'contains')">
             </th>
-            <th>
-                <p-multiSelect [options]="employeeSkillCertificateOptions" [ngModel]="certificateTypeTable.filters.employeeSkillCertificateId?.value" optionLabel="" optionValue="id" 
-                               (ngModelChange)="certificateTypeTable.filter($event, 'employeeSkillCertificateId', 'in')"></p-multiSelect>
-            </th>
             <th></th>
         </tr>
         </ng-template>

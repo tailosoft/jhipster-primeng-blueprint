@@ -48,7 +48,7 @@ import { I<%= entityAngularName %>, <%= entityAngularName %><%= enumOptions ? ',
 import { <%= entityAngularName %>Service } from './<%= entityFileName %>.service';
 <%_
 Object.keys(differentRelationships).forEach(key => {
-    if (differentRelationships[key].some(rel => rel.relationshipType !== 'one-to-many')) {
+    if (differentRelationships[key].some(rel => rel.inForm)) {
         const uniqueRel = differentRelationships[key][0];
         if (uniqueRel.otherEntityAngularName !== entityAngularName) {
             if (uniqueRel.otherEntityAngularName === 'User') {
@@ -70,7 +70,7 @@ export class <%= entityAngularName %>UpdateComponent implements OnInit {
 
     isSaving: boolean;
 <%_ for (idx in relationships) { _%>
-    <%_ if (relationships[idx].relationshipType === 'many-to-one' || ((relationships[idx].relationshipType === 'one-to-one' || relationships[idx].relationshipType === 'many-to-many') && relationships[idx].ownerSide === true)) { _%>
+    <%_ if (relationships[idx].inForm) { _%>
     <%= relationships[idx].relationshipName %>Options: I<%= relationships[idx].otherEntityAngularName %>[];
         <%_ if (relationships[idx].relationshipType === 'many-to-one' || (relationships[idx].relationshipType === 'one-to-one' && relationships[idx].ownerSide === true)) { _%>
     <%= relationships[idx].relationshipName %>FilterValue: any;
@@ -132,7 +132,7 @@ export class <%= entityAngularName %>UpdateComponent implements OnInit {
 <%_ } _%>
         protected <%= entityInstance %>Service: <%= entityAngularName %>Service,
 <%_ Object.keys(differentRelationships).forEach(key => {
-    if (differentRelationships[key].some(rel => rel.relationshipType !== 'one-to-many')) {
+    if (differentRelationships[key].some(rel => rel.inForm)) {
         const uniqueRel = differentRelationships[key][0];
         if (uniqueRel.otherEntityAngularName !== entityAngularName) { _%>
         protected <%= uniqueRel.otherEntityName %>Service: <%= uniqueRel.otherEntityAngularName %>Service,
@@ -151,7 +151,7 @@ export class <%= entityAngularName %>UpdateComponent implements OnInit {
             this.updateForm(<%= entityInstance %>);
         });
 <%_ for (idx in relationships) { _%>
-    <%_ if (relationships[idx].relationshipType === 'many-to-one' || ((relationships[idx].relationshipType === 'one-to-one' || relationships[idx].relationshipType === 'many-to-many') && relationships[idx].ownerSide === true)) { _%>
+    <%_ if (relationships[idx].inForm) { _%>
         <%_ if (relationships[idx].pagination == 'no') { _%>
         this.loadAll<%= relationships[idx].relationshipNameCapitalizedPlural %>();
         <%_ } _%>
@@ -160,7 +160,7 @@ export class <%= entityAngularName %>UpdateComponent implements OnInit {
     }
 
 <%_ for (idx in relationships) { _%>
-    <%_ if (relationships[idx].relationshipType === 'many-to-one' || ((relationships[idx].relationshipType === 'one-to-one' || relationships[idx].relationshipType === 'many-to-many') && relationships[idx].ownerSide === true)) { _%>
+    <%_ if (relationships[idx].inForm) { _%>
         <%_ if (relationships[idx].pagination == 'no') { _%>
 
     loadAll<%= relationships[idx].relationshipNameCapitalizedPlural %>() {
@@ -237,7 +237,7 @@ _%>
 <%_ } _%>
 <%_ for (idx in relationships) { _%>
     <%_ if (relationships[idx].relationshipType === 'many-to-one' || (relationships[idx].relationshipType === 'one-to-one' && relationships[idx].ownerSide === true)) { _%>
-        this.<%= relationships[idx].relationshipName %>FilterValue = <%= entityInstance %>.<%=relationships[idx].otherEntityField %>;
+        this.<%= relationships[idx].relationshipName %>FilterValue = <%= entityInstance %>.<%= relationships[idx].relationshipName %>Id;
     <%_ } _%>
 <%_ } _%>
     }
@@ -338,15 +338,4 @@ _%>
         this.messageService.add({severity:'error', summary: errorMessage});
     }
 <%_ } _%>
-<%_
-const entitiesSeen = [];
-for (idx in relationships) {
-    const otherEntityNameCapitalized = relationships[idx].otherEntityNameCapitalized;
-    if (relationships[idx].relationshipType !== 'one-to-many' && !entitiesSeen.includes(otherEntityNameCapitalized)) {
-_%>
-
-    track<%= otherEntityNameCapitalized %>ById(index: number, item: I<%= relationships[idx].otherEntityAngularName %>) {
-        return item.id;
-    }
-<%_ entitiesSeen.push(otherEntityNameCapitalized); } } _%>
 }

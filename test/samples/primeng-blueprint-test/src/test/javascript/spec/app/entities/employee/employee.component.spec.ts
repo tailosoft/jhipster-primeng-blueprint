@@ -1,12 +1,15 @@
 /* tslint:disable max-line-length */
-import { ComponentFixture, TestBed, fakeAsync } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { of, BehaviorSubject } from 'rxjs';
 import { HttpResponse } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
 import { PrimengtestTestModule } from '../../../test.module';
 import { EmployeeComponent } from 'app/entities/employee/employee.component';
 import { EmployeeService } from 'app/entities/employee/employee.service';
 import { Employee } from 'app/shared/model/employee.model';
 import { ConfirmationService } from 'primeng/api';
+
+import { MockActivatedRoute } from '../../../helpers/mock-route.service';
 import { JhiEventManager } from 'ng-jhipster';
 
 describe('Component Tests', () => {
@@ -15,6 +18,8 @@ describe('Component Tests', () => {
     let fixture: ComponentFixture<EmployeeComponent>;
     let service: EmployeeService;
     let mockConfirmationService: any;
+
+    let activatedRoute: MockActivatedRoute;
     let mockEventManager: any;
 
     beforeEach(() => {
@@ -29,6 +34,7 @@ describe('Component Tests', () => {
       comp = fixture.componentInstance;
       service = fixture.debugElement.injector.get(EmployeeService);
       mockConfirmationService = fixture.debugElement.injector.get(ConfirmationService);
+      activatedRoute = fixture.debugElement.injector.get(ActivatedRoute);
       mockEventManager = fixture.debugElement.injector.get(JhiEventManager);
     });
 
@@ -44,6 +50,32 @@ describe('Component Tests', () => {
 
       // WHEN
       fixture.detectChanges();
+      comp.employeeTable = <any>{};
+      // wait for debounce
+      tick(300);
+
+      // THEN
+      expect(service.query).toHaveBeenCalled();
+      expect(comp.employees[0]).toEqual(jasmine.objectContaining({ id: 123 }));
+    }));
+
+    it('should load a page', fakeAsync(() => {
+      // GIVEN
+      spyOn(service, 'query').and.returnValue(
+        of(
+          new HttpResponse({
+            body: [new Employee(123)]
+          })
+        )
+      );
+
+      // WHEN
+      fixture.detectChanges();
+      comp.employeeTable = <any>{};
+      tick(100);
+      (<BehaviorSubject<any>>activatedRoute.queryParams).next({ lle: { page: 3 } });
+      // wait for debounce
+      tick(300);
 
       // THEN
       expect(service.query).toHaveBeenCalled();

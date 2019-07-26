@@ -3,6 +3,8 @@ import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
+import { lazyLoadEventToQueryParams } from 'app/shared/util/request-util';
+import { LazyLoadEvent } from 'primeng/api';
 import {} from 'ng-jhipster';
 import { MessageService } from 'primeng/api';
 import { IEmployeeSkill, EmployeeSkill } from 'app/shared/model/employee-skill.model';
@@ -45,15 +47,16 @@ export class EmployeeSkillUpdateComponent implements OnInit {
       this.updateForm(employeeSkill);
     });
     this.loadAllTasks();
-    this.loadAllEmployees();
   }
 
   loadAllTasks() {
     this.taskService.query().subscribe(res => (this.taskOptions = res.body), (res: HttpErrorResponse) => this.onError(res.message));
   }
 
-  loadAllEmployees() {
-    this.employeeService.query().subscribe(res => (this.employeeOptions = res.body), (res: HttpErrorResponse) => this.onError(res.message));
+  onEmployeeLazyLoadEvent(event: LazyLoadEvent) {
+    this.employeeService
+      .query(lazyLoadEventToQueryParams(event || {}))
+      .subscribe(res => (this.employeeOptions = res.body), (res: HttpErrorResponse) => this.onError(res.message));
   }
 
   updateForm(employeeSkill: IEmployeeSkill) {
@@ -64,7 +67,7 @@ export class EmployeeSkillUpdateComponent implements OnInit {
       tasks: employeeSkill.tasks,
       employeeId: employeeSkill.employeeId
     });
-    this.employeeFilterValue = employeeSkill.fullname;
+    this.employeeFilterValue = employeeSkill.employeeId;
   }
 
   previousState() {
@@ -106,13 +109,5 @@ export class EmployeeSkillUpdateComponent implements OnInit {
   }
   protected onError(errorMessage: string) {
     this.messageService.add({ severity: 'error', summary: errorMessage });
-  }
-
-  trackTaskById(index: number, item: ITask) {
-    return item.id;
-  }
-
-  trackEmployeeById(index: number, item: IEmployee) {
-    return item.id;
   }
 }

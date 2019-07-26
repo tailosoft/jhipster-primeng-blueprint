@@ -63,3 +63,5 @@ relationship ManyToMany {
 dto * with mapstruct
 service * with serviceImpl
 filter *
+paginate TaskComment, Employee, EmployeeSkill, EmployeeSkillCertificate with pagination
+

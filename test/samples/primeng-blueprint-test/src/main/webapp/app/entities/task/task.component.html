@@ -26,14 +26,6 @@
                 <input pInputText type="text" [value]="taskTable.filters.name?.value"
                        (input)="taskTable.filter($event.target.value, 'name', 'contains')">
             </th>
-            <th>
-                <p-multiSelect [options]="commentOptions" [ngModel]="taskTable.filters.commentId?.value" optionLabel="" optionValue="id" 
-                               (ngModelChange)="taskTable.filter($event, 'commentId', 'in')"></p-multiSelect>
-            </th>
-            <th>
-                <p-multiSelect [options]="employeeSkillOptions" [ngModel]="taskTable.filters.employeeSkillId?.value" optionLabel="id" optionValue="id" 
-                               (ngModelChange)="taskTable.filter($event, 'employeeSkillId', 'in')"></p-multiSelect>
-            </th>
             <th></th>
         </tr>
         </ng-template>

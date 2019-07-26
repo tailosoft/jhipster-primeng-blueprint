@@ -1,34 +1,50 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild } from '@angular/core';
+import { HttpErrorResponse, HttpHeaders, HttpResponse } from '@angular/common/http';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { filter, map, tap, take, debounceTime, switchMap } from 'rxjs/operators';
 import { JhiEventManager } from 'ng-jhipster';
 import { MessageService } from 'primeng/api';
 import { IEmployee } from 'app/shared/model/employee.model';
+
+import { ITEMS_PER_PAGE } from 'app/shared';
+import { lazyLoadEventToQueryParams } from 'app/shared/util/request-util';
 import { EmployeeService } from './employee.service';
-import { ConfirmationService } from 'primeng/api';
+import { ConfirmationService, LazyLoadEvent } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
+
+import { Table } from 'primeng/table';
+import { flatten, unflatten } from 'flat';
 
 @Component({
   selector: 'jhi-employee',
   templateUrl: './employee.component.html'
 })
-export class EmployeeComponent implements OnInit, OnDestroy {
+export class EmployeeComponent implements OnInit, OnDestroy, AfterViewInit {
   employees: IEmployee[];
   eventSubscriber: Subscription;
 
+  totalItems: number;
+  itemsPerPage: number;
+  loading: boolean;
+
+  @ViewChild('employeeTable', { static: false })
+  employeeTable: Table;
+
   constructor(
     protected employeeService: EmployeeService,
-    protected employeeSkillService: EmployeeSkillService,
     protected messageService: MessageService,
+    protected activatedRoute: ActivatedRoute,
+    protected router: Router,
     protected eventManager: JhiEventManager,
     protected confirmationService: ConfirmationService,
     protected translateService: TranslateService
-  ) {}
+  ) {
+    this.itemsPerPage = ITEMS_PER_PAGE;
+    this.loading = true;
+  }
 
   ngOnInit() {
-    this.loadAll();
-    this.loadAllSkills();
     this.registerChangeInEmployees();
   }
 
@@ -36,19 +52,50 @@ export class EmployeeComponent implements OnInit, OnDestroy {
     this.eventManager.destroy(this.eventSubscriber);
   }
 
-  loadAll() {
-    this.employeeService
-      .query()
+  ngAfterViewInit() {
+    const lazyLoadEvent$ = this.activatedRoute.queryParams.pipe(
+      debounceTime(300),
+      map(data => <LazyLoadEvent>(<any>unflatten(data)).lle)
+    );
+
+    lazyLoadEvent$
       .pipe(
-        filter((res: HttpResponse<IEmployee[]>) => res.ok),
-        map((res: HttpResponse<IEmployee[]>) => res.body)
+        take(1),
+        filter(event => event !== undefined)
+      )
+      .subscribe(event => {
+        Object.assign(this.employeeTable, event);
+      });
+
+    lazyLoadEvent$
+      .pipe(
+        map(event => lazyLoadEventToQueryParams(event || {})),
+        tap(() => (this.loading = true)),
+        switchMap(params => this.employeeService.query(params)),
+        filter((res: HttpResponse<IEmployee[]>) => res.ok)
       )
       .subscribe(
-        (res: IEmployee[]) => {
-          this.employees = res;
+        (res: HttpResponse<IEmployee[]>) => {
+          this.paginateEmployees(res.body, res.headers);
+          this.loading = false;
         },
-        (res: HttpErrorResponse) => this.onError(res.message)
+        (res: HttpErrorResponse) => {
+          this.onError(res.message);
+          this.loading = false;
+        }
       );
+  }
+
+  onLazyLoadEvent(event: LazyLoadEvent) {
+    const queryParams = flatten({ lle: event });
+    Object.entries(queryParams).forEach(([key, value]) => {
+      if (value && typeof value === 'object' && Object.entries(value).length === 0) {
+        delete queryParams[key];
+      }
+    });
+    this.router.navigate(['/employee'], {
+      queryParams
+    });
   }
 
   delete(id: number) {
@@ -66,16 +113,17 @@ export class EmployeeComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadAllSkills() {
-    this.employeeSkillService.query().subscribe(res => (this.skillOptions = res.body));
-  }
-
   trackId(index: number, item: IEmployee) {
     return item.id;
   }
 
   registerChangeInEmployees() {
-    this.eventSubscriber = this.eventManager.subscribe('employeeListModification', response => this.loadAll());
+    this.eventSubscriber = this.eventManager.subscribe('employeeListModification', response => this.employeeTable.ngOnInit());
+  }
+
+  protected paginateEmployees(data: IEmployee[], headers: HttpHeaders) {
+    this.totalItems = parseInt(headers.get('X-Total-Count'), 10);
+    this.employees = data;
   }
 
   protected onError(errorMessage: string) {

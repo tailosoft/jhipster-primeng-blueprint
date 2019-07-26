@@ -1,12 +1,15 @@
 /* tslint:disable max-line-length */
-import { ComponentFixture, TestBed, fakeAsync } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { of, BehaviorSubject } from 'rxjs';
 import { HttpResponse } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
 import { PrimengtestTestModule } from '../../../test.module';
 import { EmployeeSkillCertificateComponent } from 'app/entities/employee-skill-certificate/employee-skill-certificate.component';
 import { EmployeeSkillCertificateService } from 'app/entities/employee-skill-certificate/employee-skill-certificate.service';
 import { EmployeeSkillCertificate } from 'app/shared/model/employee-skill-certificate.model';
 import { ConfirmationService } from 'primeng/api';
+
+import { MockActivatedRoute } from '../../../helpers/mock-route.service';
 import { JhiEventManager } from 'ng-jhipster';
 
 describe('Component Tests', () => {
@@ -15,6 +18,8 @@ describe('Component Tests', () => {
     let fixture: ComponentFixture<EmployeeSkillCertificateComponent>;
     let service: EmployeeSkillCertificateService;
     let mockConfirmationService: any;
+
+    let activatedRoute: MockActivatedRoute;
     let mockEventManager: any;
 
     beforeEach(() => {
@@ -29,6 +34,7 @@ describe('Component Tests', () => {
       comp = fixture.componentInstance;
       service = fixture.debugElement.injector.get(EmployeeSkillCertificateService);
       mockConfirmationService = fixture.debugElement.injector.get(ConfirmationService);
+      activatedRoute = fixture.debugElement.injector.get(ActivatedRoute);
       mockEventManager = fixture.debugElement.injector.get(JhiEventManager);
     });
 
@@ -44,6 +50,32 @@ describe('Component Tests', () => {
 
       // WHEN
       fixture.detectChanges();
+      comp.employeeSkillCertificateTable = <any>{};
+      // wait for debounce
+      tick(300);
+
+      // THEN
+      expect(service.query).toHaveBeenCalled();
+      expect(comp.employeeSkillCertificates[0]).toEqual(jasmine.objectContaining({ id: 123 }));
+    }));
+
+    it('should load a page', fakeAsync(() => {
+      // GIVEN
+      spyOn(service, 'query').and.returnValue(
+        of(
+          new HttpResponse({
+            body: [new EmployeeSkillCertificate(123)]
+          })
+        )
+      );
+
+      // WHEN
+      fixture.detectChanges();
+      comp.employeeSkillCertificateTable = <any>{};
+      tick(100);
+      (<BehaviorSubject<any>>activatedRoute.queryParams).next({ lle: { page: 3 } });
+      // wait for debounce
+      tick(300);
 
       // THEN
       expect(service.query).toHaveBeenCalled();

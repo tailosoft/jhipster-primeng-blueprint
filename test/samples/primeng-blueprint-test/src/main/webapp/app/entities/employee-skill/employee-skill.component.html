@@ -6,25 +6,28 @@
         </p-button>
     </h2>
     <br/>
-    <p-table #employeeSkillTable [value]="employeeSkills" [rowTrackBy]="trackId" [responsive]="true">
+    <p-table #employeeSkillTable [value]="employeeSkills" [rowTrackBy]="trackId" [responsive]="true"[lazy]="true" [rows]="itemsPerPage" [totalRecords]="totalItems" [loading]="loading" sortMode="multiple" [lazyLoadOnInit]="false"[paginator]="true" (onLazyLoad)="onLazyLoadEvent($event)" >
         <ng-template pTemplate="header">
         <tr>
-            <th>
+            <th pSortableColumn="id">
                 <span jhiTranslate="global.field.id">ID</span>
+                <p-sortIcon field="id"></p-sortIcon>
             </th>
-            <th>
+            <th pSortableColumn="name">
                 <span jhiTranslate="primengtestApp.employeeSkill.name">Name</span>
+                <p-sortIcon field="name"></p-sortIcon>
             </th>
-            <th>
+            <th pSortableColumn="level">
                 <span jhiTranslate="primengtestApp.employeeSkill.level">Level</span>
+                <p-sortIcon field="level"></p-sortIcon>
             </th>
-            <th>
+            <th pSortableColumn="task">
                 <span jhiTranslate="primengtestApp.employeeSkill.task">Task</span>
-                
+                 <p-sortIcon field="task"></p-sortIcon>
             </th>
-            <th>
+            <th pSortableColumn="employee">
                 <span jhiTranslate="primengtestApp.employeeSkill.employee">Employee</span>
-                
+                 <p-sortIcon field="employee"></p-sortIcon>
             </th>
             <th style="width: 124px"></th>
         </tr>
@@ -42,15 +45,12 @@
                        (input)="employeeSkillTable.filter($event.target.value, 'level', 'equals')">
             </th>
             <th>
-                <p-multiSelect [options]="employeeSkillCertificateOptions" [ngModel]="employeeSkillTable.filters.employeeSkillCertificateId?.value" optionLabel="" optionValue="id" 
-                               (ngModelChange)="employeeSkillTable.filter($event, 'employeeSkillCertificateId', 'in')"></p-multiSelect>
-            </th>
-            <th>
                 <p-multiSelect [options]="taskOptions" [ngModel]="employeeSkillTable.filters.taskId?.value" optionLabel="name" optionValue="id" 
                                (ngModelChange)="employeeSkillTable.filter($event, 'taskId', 'in')"></p-multiSelect>
             </th>
             <th>
                 <p-multiSelect [options]="employeeOptions" [ngModel]="employeeSkillTable.filters.employeeId?.value" optionLabel="fullname" optionValue="id" 
+                               [lazy]="true" [rows]="10" (onLazyLoad)="onEmployeeLazyLoadEvent($event)"
                                (ngModelChange)="employeeSkillTable.filter($event, 'employeeId', 'in')"></p-multiSelect>
             </th>
             <th></th>

@@ -76,9 +76,7 @@
             </th>
             <%_ } _%>
             <%_ for (idx in relationships) { _%>
-            <%_ if (relationships[idx].relationshipType === 'many-to-one'
-            || (relationships[idx].relationshipType === 'one-to-one' && relationships[idx].ownerSide === true)
-            || (relationships[idx].relationshipType === 'many-to-many' && relationships[idx].ownerSide === true)) {
+            <%_ if (relationships[idx].inList) {
             const fieldName = dto === 'no' ? "." + relationships[idx].otherEntityField : relationships[idx].otherEntityFieldCapitalized;_%>
             <th<% if (pagination !== 'no') { %> pSortableColumn="<%=relationships[idx].relationshipName%>"<% } %>>
                 <span jhiTranslate="<%= `${i18nKeyPrefix}.${relationships[idx].relationshipName}` %>"><%= relationships[idx].relationshipNameHumanized %></span>
@@ -126,11 +124,13 @@
             </th>
             <%_ } _%>
             <%_ for (idx in relationships) { _%>
+                <%_ if (relationships[idx].inList) { _%>
             <th>
                 <p-multiSelect [options]="<%= relationships[idx].relationshipName %>Options" [ngModel]="<%= entityInstance %>Table.filters.<%= relationships[idx].relationshipName %>Id?.value" optionLabel="<%= relationships[idx].otherEntityField %>" optionValue="id" <% if(relationships[idx].pagination !== 'no') { %>
                                [lazy]="true" [rows]="10" (onLazyLoad)="on<%= relationships[idx].relationshipNameCapitalized %>LazyLoadEvent($event)"<% } %>
                                (ngModelChange)="<%= entityInstance %>Table.filter($event, '<%= relationships[idx].relationshipFieldName %>Id', 'in')"></p-multiSelect>
             </th>
+                <%_ } _%>
             <%_ } _%>
             <th></th>
         </tr>
@@ -174,9 +174,7 @@
                 const otherEntityStateName = relationships[idx].otherEntityStateName;
                 const otherEntityField = relationships[idx].otherEntityField;
                 const otherEntityFieldCapitalized = relationships[idx].otherEntityFieldCapitalized; _%>
-                <%_ if (relationshipType === 'many-to-one'
-                || (relationshipType === 'one-to-one' && ownerSide === true)
-                || (relationshipType === 'many-to-many' && ownerSide === true)) { _%>
+                <%_ if (relationships[idx].inList) { _%>
                 <td>
                     <%_ if (otherEntityName === 'user') { _%>
                         <%_ if (relationshipType === 'many-to-many') { _%>

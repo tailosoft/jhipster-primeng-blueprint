@@ -19,8 +19,6 @@ export class TaskComponent implements OnInit, OnDestroy {
 
   constructor(
     protected taskService: TaskService,
-    protected taskCommentService: TaskCommentService,
-    protected employeeSkillService: EmployeeSkillService,
     protected messageService: MessageService,
     protected eventManager: JhiEventManager,
     protected confirmationService: ConfirmationService,
@@ -29,8 +27,6 @@ export class TaskComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadAll();
-    this.loadAllComments();
-    this.loadAllEmployeeSkills();
     this.registerChangeInTasks();
   }
 
@@ -66,14 +62,6 @@ export class TaskComponent implements OnInit, OnDestroy {
         });
       }
     });
-  }
-
-  loadAllComments() {
-    this.taskCommentService.query().subscribe(res => (this.commentOptions = res.body));
-  }
-
-  loadAllEmployeeSkills() {
-    this.employeeSkillService.query().subscribe(res => (this.employeeSkillOptions = res.body));
   }
 
   trackId(index: number, item: ITask) {

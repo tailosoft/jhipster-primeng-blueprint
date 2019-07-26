@@ -6,17 +6,20 @@
         </p-button>
     </h2>
     <br/>
-    <p-table #employeeTable [value]="employees" [rowTrackBy]="trackId" [responsive]="true">
+    <p-table #employeeTable [value]="employees" [rowTrackBy]="trackId" [responsive]="true"[lazy]="true" [rows]="itemsPerPage" [totalRecords]="totalItems" [loading]="loading" sortMode="multiple" [lazyLoadOnInit]="false"[paginator]="true" (onLazyLoad)="onLazyLoadEvent($event)" >
         <ng-template pTemplate="header">
         <tr>
-            <th>
+            <th pSortableColumn="id">
                 <span jhiTranslate="global.field.id">ID</span>
+                <p-sortIcon field="id"></p-sortIcon>
             </th>
-            <th>
+            <th pSortableColumn="username">
                 <span jhiTranslate="primengtestApp.employee.username">Username</span>
+                <p-sortIcon field="username"></p-sortIcon>
             </th>
-            <th>
+            <th pSortableColumn="fullname">
                 <span jhiTranslate="primengtestApp.employee.fullname">Fullname</span>
+                <p-sortIcon field="fullname"></p-sortIcon>
             </th>
             <th style="width: 124px"></th>
         </tr>
@@ -32,10 +35,6 @@
             <th>
                 <input pInputText type="text" [value]="employeeTable.filters.fullname?.value"
                        (input)="employeeTable.filter($event.target.value, 'fullname', 'contains')">
-            </th>
-            <th>
-                <p-multiSelect [options]="skillOptions" [ngModel]="employeeTable.filters.skillId?.value" optionLabel="" optionValue="id" 
-                               (ngModelChange)="employeeTable.filter($event, 'skillId', 'in')"></p-multiSelect>
             </th>
             <th></th>
         </tr>

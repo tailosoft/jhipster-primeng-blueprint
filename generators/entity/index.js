@@ -76,6 +76,12 @@ module.exports = class extends EntityGenerator {
                     const otherEntityData = this.getEntityJson(relationship.otherEntityName);
                     relationship.pagination = otherEntityData.pagination;
                     relationship.jpaMetamodelFiltering = otherEntityData.jpaMetamodelFiltering;
+                    if (relationship.relationshipType === 'many-to-one'
+                        || (relationship.relationshipType === 'one-to-one' && relationship.ownerSide === true)
+                        || (relationship.relationshipType === 'many-to-many' && relationship.ownerSide === true)) {
+                        relationship.inList = true;
+                        relationship.inForm = true;
+                    }
                 });
             },
         };

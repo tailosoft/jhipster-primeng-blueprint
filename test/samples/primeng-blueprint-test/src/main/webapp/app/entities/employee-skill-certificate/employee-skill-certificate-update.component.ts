@@ -3,6 +3,8 @@ import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
+import { lazyLoadEventToQueryParams } from 'app/shared/util/request-util';
+import { LazyLoadEvent } from 'primeng/api';
 import {} from 'ng-jhipster';
 import { MessageService } from 'primeng/api';
 import { IEmployeeSkillCertificate, EmployeeSkillCertificate } from 'app/shared/model/employee-skill-certificate.model';
@@ -46,7 +48,6 @@ export class EmployeeSkillCertificateUpdateComponent implements OnInit {
       this.updateForm(employeeSkillCertificate);
     });
     this.loadAllTypes();
-    this.loadAllSkills();
   }
 
   loadAllTypes() {
@@ -55,9 +56,9 @@ export class EmployeeSkillCertificateUpdateComponent implements OnInit {
       .subscribe(res => (this.typeOptions = res.body), (res: HttpErrorResponse) => this.onError(res.message));
   }
 
-  loadAllSkills() {
+  onSkillLazyLoadEvent(event: LazyLoadEvent) {
     this.employeeSkillService
-      .query()
+      .query(lazyLoadEventToQueryParams(event || {}))
       .subscribe(res => (this.skillOptions = res.body), (res: HttpErrorResponse) => this.onError(res.message));
   }
 
@@ -69,8 +70,8 @@ export class EmployeeSkillCertificateUpdateComponent implements OnInit {
       typeId: employeeSkillCertificate.typeId,
       skillId: employeeSkillCertificate.skillId
     });
-    this.typeFilterValue = employeeSkillCertificate.name;
-    this.skillFilterValue = employeeSkillCertificate.id;
+    this.typeFilterValue = employeeSkillCertificate.typeId;
+    this.skillFilterValue = employeeSkillCertificate.skillId;
   }
 
   previousState() {
@@ -112,13 +113,5 @@ export class EmployeeSkillCertificateUpdateComponent implements OnInit {
   }
   protected onError(errorMessage: string) {
     this.messageService.add({ severity: 'error', summary: errorMessage });
-  }
-
-  trackCertificateTypeById(index: number, item: ICertificateType) {
-    return item.id;
-  }
-
-  trackEmployeeSkillById(index: number, item: IEmployeeSkill) {
-    return item.id;
   }
 }

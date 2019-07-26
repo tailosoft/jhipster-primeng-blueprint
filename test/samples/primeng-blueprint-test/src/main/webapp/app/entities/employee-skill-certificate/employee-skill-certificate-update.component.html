@@ -42,7 +42,8 @@
                     </ng-container>
                 </div>
                 <label jhiTranslate="primengtestApp.employeeSkillCertificate.skill" for="field_skill">Skill</label>
-                <p-dropdown id="field_skill" name="skill" [options]="skillOptions" formControlName="skillId" [lazyLoadOnInit]="true" [filterValue]="skillFilterValue"
+                <p-dropdown id="field_skill" name="skill" [options]="skillOptions" formControlName="skillId"
+                            [virtualScroll]="true" [lazy]="true" [rows]="10" (onLazyLoad)="onSkillLazyLoadEvent($event)" [lazyLoadOnInit]="true" [filterValue]="skillFilterValue"
                             placeholder="Choose" optionLabel="id" optionValue="id"></p-dropdown>
                 <div class="validation-messages">
                     <ng-container *ngIf="editForm.get('skillId').invalid && (editForm.get('skillId').dirty || editForm.get('skillId').touched)">

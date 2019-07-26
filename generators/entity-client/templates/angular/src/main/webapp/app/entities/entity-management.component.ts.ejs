@@ -47,13 +47,15 @@ import { lazyLoadEventToQueryParams } from 'app/shared/util/request-util';
 import { <%= entityAngularName %>Service } from './<%= entityFileName %>.service';
 import { ConfirmationService<%_ if (pagination !== 'no') { _%>, LazyLoadEvent<% } %> } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
-<%_ if (pagination !== 'no') { %>
 <%_ if(jpaMetamodelFiltering){ _%>
     <%_ for (idx in relationships) { _%>
+        <%_ if (relationships[idx].inList) { _%>
 import { <%= relationships[idx].otherEntityAngularName %>Service } from 'app/entities/<%= relationships[idx].otherEntityModulePath %>/<%= relationships[idx].otherEntityPath %>.service';;
 import { I<%= relationships[idx].otherEntityAngularName %> } from  'app/shared/model/<%= relationships[idx].otherEntityPath%>.model';
+        <%_ } _%>
     <%_ } %>
 <%_ } %>
+<%_ if (pagination !== 'no') { %>
 import { Table } from 'primeng/table';
 import { flatten, unflatten } from 'flat';
 <%_ } _%>
@@ -68,12 +70,8 @@ import { DatePipe } from '@angular/common';
 export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if (pagination !== 'no') { %>, AfterViewInit<% } %> {
     <%= entityInstancePlural %>: I<%= entityAngularName %>[];
     eventSubscriber: Subscription;
-    <%_ if (pagination !== 'no') { _%>
-    totalItems: number;
-    itemsPerPage: number;
-    loading: boolean;
-<%_ if ( jpaMetamodelFiltering) {
-    for ( idx in fields ) {
+<%_ if (jpaMetamodelFiltering) {
+    for (idx in fields) {
         if(['LocalDate', 'Instant', 'ZonedDateTime'].includes(fields[idx].fieldType)){ _%>
     <%= fields[idx].fieldName %>Range: Date[];
         <%_ } else if(fields[idx].fieldIsEnum) {_%>
@@ -81,19 +79,27 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
         <%_ } _%>
     <%_ } _%>
     <%_ for (idx in relationships) { _%>
+        <%_ if (relationships[idx].inList) { _%>
     <%= relationships[idx].relationshipName %>Options: I<%= relationships[idx].otherEntityAngularName %>[];
+        <%_ } _%>
     <%_ } %>
 <%_ } _%>
+<%_ if (pagination !== 'no') { _%>
+    totalItems: number;
+    itemsPerPage: number;
+    loading: boolean;
 
     @ViewChild('<%= entityInstance %>Table', { static: false })
     <%= entityInstance %>Table: Table;
-    <%_ } _%>
+<%_ } _%>
 
     constructor(
         protected <%= entityInstance %>Service: <%= entityAngularName %>Service,
 <%_ if(jpaMetamodelFiltering){ _%>
-        <%_ for (idx in relationships) { _%>
+    <%_ for (idx in relationships) { _%>
+        <%_ if (relationships[idx].inList) { _%>
         protected <%= relationships[idx].otherEntityName %>Service: <%= relationships[idx].otherEntityAngularName %>Service,
+        <%_ } _%>
     <%_ } %>
 <%_ } %>
         protected messageService: MessageService,
@@ -127,7 +133,7 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
         <%_ } _%>
     <%_ if(jpaMetamodelFiltering){ _%>
         <%_ for (idx in relationships) { _%>
-            <%_ if (relationships[idx].pagination == 'no') { _%>
+            <%_ if (relationships[idx].inList && relationships[idx].pagination == 'no') { _%>
         this.loadAll<%= relationships[idx].relationshipNameCapitalizedPlural %>();
             <%_ } _%>
         <%_ } _%>
@@ -196,9 +202,11 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
                     <%_ } _%>
                 <%_ } _%>
                 <%_ for ( idx in relationships ) { _%>
+                    <%_ if (relationships[idx].inList) { _%>
                 if (event.filters && event.filters.<%= relationships[idx].relationshipFieldName %>Id && event.filters.<%= relationships[idx].relationshipFieldName %>Id.value) {
                     this.<%= entityInstance %>Table.filters.<%= relationships[idx].relationshipFieldName %>Id.value = event.filters.<%= relationships[idx].relationshipFieldName %>Id.value.map(x => +x);
                 }
+                    <%_ } _%>
                 <%_ } _%>
             <%_ } _%>
         });
@@ -261,18 +269,20 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
     }
     <%_ if(jpaMetamodelFiltering){ _%>
         <%_ for (idx in relationships) { _%>
-            <%_ if (relationships[idx].pagination == 'no') { _%>
+            <%_ if (relationships[idx].inList) { _%>
+                <%_ if (relationships[idx].pagination == 'no') { _%>
 
     loadAll<%= relationships[idx].relationshipNameCapitalizedPlural %>() {
         this.<%= relationships[idx].otherEntityName %>Service.query()
             .subscribe(res => this.<%= relationships[idx].relationshipName %>Options = res.body);
     }
-            <%_ } else {_%>
+                <%_ } else {_%>
 
     on<%= relationships[idx].relationshipNameCapitalized %>LazyLoadEvent(event: LazyLoadEvent) {
         this.<%= relationships[idx].otherEntityName %>Service.query(lazyLoadEventToQueryParams(event || {}))
             .subscribe(res => this.<%= relationships[idx].relationshipName %>Options = res.body);
     }
+                <%_ } _%>
             <%_ } _%>
         <%_ } _%>
     <%_ } _%>

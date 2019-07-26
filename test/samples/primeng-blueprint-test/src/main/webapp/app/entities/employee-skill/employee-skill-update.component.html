@@ -36,7 +36,8 @@
                     [options]="taskOptions" optionLabel="name">
                 </p-multiSelect>
                 <label jhiTranslate="primengtestApp.employeeSkill.employee" for="field_employee">Employee</label>
-                <p-dropdown id="field_employee" name="employee" [options]="employeeOptions" formControlName="employeeId" [lazyLoadOnInit]="true" [filterValue]="employeeFilterValue"
+                <p-dropdown id="field_employee" name="employee" [options]="employeeOptions" formControlName="employeeId"
+                            [virtualScroll]="true" [lazy]="true" [rows]="10" (onLazyLoad)="onEmployeeLazyLoadEvent($event)" [lazyLoadOnInit]="true" [filterValue]="employeeFilterValue"
                             placeholder="Choose" optionLabel="fullname" optionValue="id"></p-dropdown>
                 <div class="validation-messages">
                     <ng-container *ngIf="editForm.get('employeeId').invalid && (editForm.get('employeeId').dirty || editForm.get('employeeId').touched)">

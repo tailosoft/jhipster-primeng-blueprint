@@ -19,7 +19,6 @@ export class CertificateTypeComponent implements OnInit, OnDestroy {
 
   constructor(
     protected certificateTypeService: CertificateTypeService,
-    protected employeeSkillCertificateService: EmployeeSkillCertificateService,
     protected messageService: MessageService,
     protected eventManager: JhiEventManager,
     protected confirmationService: ConfirmationService,
@@ -28,7 +27,6 @@ export class CertificateTypeComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadAll();
-    this.loadAllEmployeeSkillCertificates();
     this.registerChangeInCertificateTypes();
   }
 
@@ -64,10 +62,6 @@ export class CertificateTypeComponent implements OnInit, OnDestroy {
         });
       }
     });
-  }
-
-  loadAllEmployeeSkillCertificates() {
-    this.employeeSkillCertificateService.query().subscribe(res => (this.employeeSkillCertificateOptions = res.body));
   }
 
   trackId(index: number, item: ICertificateType) {
