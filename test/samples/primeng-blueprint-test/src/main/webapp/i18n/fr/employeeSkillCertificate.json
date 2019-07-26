@@ -1,0 +1,25 @@
+{
+  "primengtestApp": {
+    "employeeSkillCertificate": {
+      "home": {
+        "title": "EmployeeSkillCertificates",
+        "createLabel": "Créer un nouveau Employee Skill Certificate",
+        "createOrEditLabel": "Créer ou éditer un Employee Skill Certificate",
+        "notFound": "Aucun Employee Skill Certificate trouvé"
+      },
+      "created": "Un nouveau Employee Skill Certificate a été créé avec l'identifiant {{ param }}",
+      "updated": "Le Employee Skill Certificate avec l'identifiant {{ param }} a été mis à jour",
+      "deleted": "Le Employee Skill Certificate avec l'identifiant {{ param }} a été supprimé",
+      "delete": {
+        "question": "Etes-vous certain de vouloir supprimer le Employee Skill Certificate {{ id }} ?"
+      },
+      "detail": {
+        "title": "Employee Skill Certificate"
+      },
+      "grade": "Grade",
+      "date": "Date",
+      "type": "Type",
+      "skill": "Skill"
+    }
+  }
+}

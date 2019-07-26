@@ -1,0 +1,42 @@
+<div class="row justify-content-center">
+    <div class="col-8">
+        <div *ngIf="employeeSkill">
+            <h2><span jhiTranslate="primengtestApp.employeeSkill.detail.title">Employee Skill</span> {{employeeSkill.id}}</h2>
+            <hr>
+            <dl class="row-md jh-entity-details">
+                <dt><span jhiTranslate="primengtestApp.employeeSkill.name">Name</span></dt>
+                <dd>
+                    <span>{{employeeSkill.name}}</span>
+                </dd>
+                <dt><span jhiTranslate="primengtestApp.employeeSkill.level">Level</span></dt>
+                <dd>
+                    <span>{{employeeSkill.level}}</span>
+                </dd>
+                <dt><span jhiTranslate="primengtestApp.employeeSkill.task">Task</span></dt>
+                <dd>
+                    <span *ngFor="let task of employeeSkill.tasks; let last = last">
+                        <a [routerLink]="['/task', task?.id, 'view' ]">{{task.name}}</a>{{last ? '' : ', '}}
+                    </span>
+                </dd>
+                <dt><span jhiTranslate="primengtestApp.employeeSkill.employee">Employee</span></dt>
+                <dd>
+                    <div *ngIf="employeeSkill.employeeId">
+                        <a [routerLink]="['/employee', employeeSkill.employeeId, 'view']">{{employeeSkill.employeeFullname}}</a>
+                    </div>
+                </dd>
+            </dl>
+
+            <button type="submit"
+                    (click)="previousState()"
+                    class="btn btn-info">
+                <fa-icon [icon]="'arrow-left'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back"> Back</span>
+            </button>
+
+            <button type="button"
+                    [routerLink]="['/employee-skill', employeeSkill.id, 'edit']"
+                    class="btn btn-primary">
+                <fa-icon [icon]="'pencil-alt'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit"> Edit</span>
+            </button>
+        </div>
+    </div>
+</div>

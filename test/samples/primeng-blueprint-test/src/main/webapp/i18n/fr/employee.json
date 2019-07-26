@@ -1,0 +1,24 @@
+{
+  "primengtestApp": {
+    "employee": {
+      "home": {
+        "title": "Employees",
+        "createLabel": "Créer un nouveau Employee",
+        "createOrEditLabel": "Créer ou éditer un Employee",
+        "notFound": "Aucun Employee trouvé"
+      },
+      "created": "Un nouveau Employee a été créé avec l'identifiant {{ param }}",
+      "updated": "Le Employee avec l'identifiant {{ param }} a été mis à jour",
+      "deleted": "Le Employee avec l'identifiant {{ param }} a été supprimé",
+      "delete": {
+        "question": "Etes-vous certain de vouloir supprimer le Employee {{ id }} ?"
+      },
+      "detail": {
+        "title": "Employee"
+      },
+      "username": "Username",
+      "fullname": "Fullname",
+      "skill": "Skill"
+    }
+  }
+}

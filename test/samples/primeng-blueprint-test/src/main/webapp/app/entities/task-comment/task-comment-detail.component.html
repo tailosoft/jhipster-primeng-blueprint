@@ -1,0 +1,32 @@
+<div class="row justify-content-center">
+    <div class="col-8">
+        <div *ngIf="taskComment">
+            <h2><span jhiTranslate="primengtestApp.taskComment.detail.title">Task Comment</span> {{taskComment.id}}</h2>
+            <hr>
+            <dl class="row-md jh-entity-details">
+                <dt><span jhiTranslate="primengtestApp.taskComment.value">Value</span></dt>
+                <dd>
+                    <span>{{taskComment.value}}</span>
+                </dd>
+                <dt><span jhiTranslate="primengtestApp.taskComment.task">Task</span></dt>
+                <dd>
+                    <div *ngIf="taskComment.taskId">
+                        <a [routerLink]="['/task', taskComment.taskId, 'view']">{{taskComment.taskName}}</a>
+                    </div>
+                </dd>
+            </dl>
+
+            <button type="submit"
+                    (click)="previousState()"
+                    class="btn btn-info">
+                <fa-icon [icon]="'arrow-left'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back"> Back</span>
+            </button>
+
+            <button type="button"
+                    [routerLink]="['/task-comment', taskComment.id, 'edit']"
+                    class="btn btn-primary">
+                <fa-icon [icon]="'pencil-alt'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit"> Edit</span>
+            </button>
+        </div>
+    </div>
+</div>

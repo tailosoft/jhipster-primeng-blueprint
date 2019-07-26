@@ -1,0 +1,26 @@
+{
+  "primengtestApp": {
+    "employeeSkill": {
+      "home": {
+        "title": "Employee Skills",
+        "createLabel": "Create a new Employee Skill",
+        "createOrEditLabel": "Create or edit a Employee Skill",
+        "notFound": "No Employee Skills found"
+      },
+      "created": "A new Employee Skill is created with identifier {{ param }}",
+      "updated": "A Employee Skill is updated with identifier {{ param }}",
+      "deleted": "A Employee Skill is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Employee Skill {{ id }}?"
+      },
+      "detail": {
+        "title": "Employee Skill"
+      },
+      "name": "Name",
+      "level": "Level",
+      "employeeSkillCertificate": "Employee Skill Certificate",
+      "task": "Task",
+      "employee": "Employee"
+    }
+  }
+}

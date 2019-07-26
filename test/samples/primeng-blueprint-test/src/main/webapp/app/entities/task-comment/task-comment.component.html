@@ -1,0 +1,65 @@
+<div>
+    <h2 id="page-heading">
+        <span jhiTranslate="primengtestApp.taskComment.home.title">Task Comments</span>
+        <p-button id="jh-create-entity" class="float-right jh-create-entity create-task-comment" [routerLink]="['/task-comment/new']"
+            [label]="'primengtestApp.taskComment.home.createLabel' | translate" icon="pi pi-plus" iconPos="left">
+        </p-button>
+    </h2>
+    <br/>
+    <p-table #taskCommentTable [value]="taskComments" [rowTrackBy]="trackId" [responsive]="true">
+        <ng-template pTemplate="header">
+        <tr>
+            <th>
+                <span jhiTranslate="global.field.id">ID</span>
+            </th>
+            <th>
+                <span jhiTranslate="primengtestApp.taskComment.value">Value</span>
+            </th>
+            <th>
+                <span jhiTranslate="primengtestApp.taskComment.task">Task</span>
+                
+            </th>
+            <th style="width: 124px"></th>
+        </tr>
+        <tr>
+            <th>
+                <input pInputText type="text" [value]="taskCommentTable.filters.id?.value"
+                       (input)="taskCommentTable.filter($event.target.value, 'id', 'equals')">
+            </th>
+            <th>
+                <input pInputText type="text" [value]="taskCommentTable.filters.value?.value"
+                       (input)="taskCommentTable.filter($event.target.value, 'value', 'contains')">
+            </th>
+            <th>
+                <p-multiSelect [options]="taskOptions" [ngModel]="taskCommentTable.filters.taskId?.value" optionLabel="name" optionValue="id" 
+                               (ngModelChange)="taskCommentTable.filter($event, 'taskId', 'in')"></p-multiSelect>
+            </th>
+            <th></th>
+        </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-taskComment>
+            <tr>
+                <td><a [routerLink]="['/task-comment', taskComment.id, 'view' ]">{{taskComment.id}}</a></td>
+                <td>{{taskComment.value}}</td>
+                <td>
+                    <div *ngIf="taskComment.taskId">
+                        <a [routerLink]="['../task', taskComment.taskId , 'view' ]" >{{taskComment.taskName}}</a>
+                    </div>
+                </td>
+                <td>
+                    <div class="btn-group flex-btn-group-container">
+                        <p-button type="submit" [routerLink]="['/task-comment', taskComment.id, 'view' ]"
+                                  icon="pi pi-eye" styleClass="ui-button-info">
+                        </p-button>
+                        <p-button type="submit" [routerLink]="['/task-comment', taskComment.id, 'edit' ]"
+                                  icon="pi pi-pencil" styleClass="ui-button-warning">
+                        </p-button>
+                        <p-button type="submit" (click)="delete(taskComment.id)"
+                                  icon="pi pi-times" styleClass="ui-button-danger">
+                        </p-button>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>

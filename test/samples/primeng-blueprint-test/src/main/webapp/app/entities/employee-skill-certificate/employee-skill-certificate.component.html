@@ -1,0 +1,84 @@
+<div>
+    <h2 id="page-heading">
+        <span jhiTranslate="primengtestApp.employeeSkillCertificate.home.title">Employee Skill Certificates</span>
+        <p-button id="jh-create-entity" class="float-right jh-create-entity create-employee-skill-certificate" [routerLink]="['/employee-skill-certificate/new']"
+            [label]="'primengtestApp.employeeSkillCertificate.home.createLabel' | translate" icon="pi pi-plus" iconPos="left">
+        </p-button>
+    </h2>
+    <br/>
+    <p-table #employeeSkillCertificateTable [value]="employeeSkillCertificates" [rowTrackBy]="trackId" [responsive]="true">
+        <ng-template pTemplate="header">
+        <tr>
+            <th>
+                <span jhiTranslate="global.field.id">ID</span>
+            </th>
+            <th>
+                <span jhiTranslate="primengtestApp.employeeSkillCertificate.grade">Grade</span>
+            </th>
+            <th>
+                <span jhiTranslate="primengtestApp.employeeSkillCertificate.date">Date</span>
+            </th>
+            <th>
+                <span jhiTranslate="primengtestApp.employeeSkillCertificate.type">Type</span>
+                
+            </th>
+            <th>
+                <span jhiTranslate="primengtestApp.employeeSkillCertificate.skill">Skill</span>
+                
+            </th>
+            <th style="width: 124px"></th>
+        </tr>
+        <tr>
+            <th>
+                <input pInputText type="text" [value]="employeeSkillCertificateTable.filters.id?.value"
+                       (input)="employeeSkillCertificateTable.filter($event.target.value, 'id', 'equals')">
+            </th>
+            <th>
+                <input pInputText type="number" [value]="employeeSkillCertificateTable.filters.grade?.value"
+                       (input)="employeeSkillCertificateTable.filter($event.target.value, 'grade', 'equals')">
+            </th>
+            <th>
+            </th>
+            <th>
+                <p-multiSelect [options]="typeOptions" [ngModel]="employeeSkillCertificateTable.filters.typeId?.value" optionLabel="name" optionValue="id" 
+                               (ngModelChange)="employeeSkillCertificateTable.filter($event, 'typeId', 'in')"></p-multiSelect>
+            </th>
+            <th>
+                <p-multiSelect [options]="skillOptions" [ngModel]="employeeSkillCertificateTable.filters.skillId?.value" optionLabel="id" optionValue="id" 
+                               (ngModelChange)="employeeSkillCertificateTable.filter($event, 'skillId', 'in')"></p-multiSelect>
+            </th>
+            <th></th>
+        </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-employeeSkillCertificate>
+            <tr>
+                <td><a [routerLink]="['/employee-skill-certificate', employeeSkillCertificate.id, 'view' ]">{{employeeSkillCertificate.id}}</a></td>
+                <td>{{employeeSkillCertificate.grade}}</td>
+                <td>{{employeeSkillCertificate.date | date:'mediumDate'}}</td>
+                <td>
+                    <div *ngIf="employeeSkillCertificate.typeId">
+                        <a [routerLink]="['../certificate-type', employeeSkillCertificate.typeId , 'view' ]" >{{employeeSkillCertificate.typeName}}</a>
+                    </div>
+                </td>
+                <td>
+                    <div *ngIf="employeeSkillCertificate.skillId">
+                        <a [routerLink]="['../employee-skill', employeeSkillCertificate.skillId , 'view' ]" >{{employeeSkillCertificate.skillId}}</a>
+                    </div>
+                </td>
+                <td>
+                    <div class="btn-group flex-btn-group-container">
+                        <p-button type="submit" [routerLink]="['/employee-skill-certificate', employeeSkillCertificate.id, 'view' ]"
+                                  icon="pi pi-eye" styleClass="ui-button-info">
+                        </p-button>
+                        <p-button type="submit" [routerLink]="['/employee-skill-certificate', employeeSkillCertificate.id, 'edit' ]"
+                                  icon="pi pi-pencil" styleClass="ui-button-warning">
+                        </p-button>
+                        <p-button type="submit" (click)="delete(employeeSkillCertificate.id)"
+                                  icon="pi pi-times" styleClass="ui-button-danger">
+                        </p-button>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>

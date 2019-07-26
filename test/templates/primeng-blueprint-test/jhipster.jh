@@ -1,0 +1,65 @@
+application {
+  config {
+    baseName primengtest
+    applicationType monolith
+    prodDatabaseType mysql
+    buildTool gradle
+    testFrameworks [protractor]
+  }
+  entities *
+}
+
+entity Employee{
+	@id username String required
+	fullname String required
+}
+
+entity EmployeeSkill{
+	// compositeId employeeSkill.name, employee.id
+	@id name String required
+	level Integer required
+}
+
+relationship OneToMany{
+	@id Employee{skill(name)} to EmployeeSkill{employee(fullname) required}
+}
+
+entity CertificateType{
+	name String required
+}
+
+entity EmployeeSkillCertificate{
+    // compositeId EmployeeSkill.employee.id, EmployeeSkill.name, CertficiateType.id
+	grade Integer required
+    date LocalDate required
+}
+
+relationship OneToMany{
+	@id CertificateType to EmployeeSkillCertificate{type(name) required}
+}
+
+relationship OneToMany{
+	@id EmployeeSkill to EmployeeSkillCertificate{skill required}
+}
+
+entity Task {
+    name String required
+}
+
+entity TaskComment {
+    value String required
+}
+
+//relationship with name and without id to make sure we do not brake those
+relationship ManyToOne {
+    TaskComment{task(name) required} to Task{comment}
+}
+
+//ManyToMany with complex ids
+relationship ManyToMany {
+    EmployeeSkill{task(name)} to Task{employeeSkill}
+}
+
+dto * with mapstruct
+service * with serviceImpl
+filter *

@@ -1,0 +1,23 @@
+{
+  "primengtestApp": {
+    "certificateType": {
+      "home": {
+        "title": "CertificateTypes",
+        "createLabel": "Créer un nouveau Certificate Type",
+        "createOrEditLabel": "Créer ou éditer un Certificate Type",
+        "notFound": "Aucun Certificate Type trouvé"
+      },
+      "created": "Un nouveau Certificate Type a été créé avec l'identifiant {{ param }}",
+      "updated": "Le Certificate Type avec l'identifiant {{ param }} a été mis à jour",
+      "deleted": "Le Certificate Type avec l'identifiant {{ param }} a été supprimé",
+      "delete": {
+        "question": "Etes-vous certain de vouloir supprimer le Certificate Type {{ id }} ?"
+      },
+      "detail": {
+        "title": "Certificate Type"
+      },
+      "name": "Name",
+      "employeeSkillCertificate": "Employee Skill Certificate"
+    }
+  }
+}

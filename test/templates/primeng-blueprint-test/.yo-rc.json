@@ -1,0 +1,51 @@
+{
+    "generator-jhipster": {
+        "databaseType": "sql",
+        "devDatabaseType": "h2Disk",
+        "enableHibernateCache": true,
+        "enableSwaggerCodegen": false,
+        "enableTranslation": true,
+        "jhiPrefix": "jhi",
+        "languages": ["en", "fr"],
+        "messageBroker": false,
+        "nativeLanguage": "en",
+        "packageName": "com.mycompany.myapp",
+        "packageFolder": "com/mycompany/myapp",
+        "prodDatabaseType": "mysql",
+        "searchEngine": false,
+        "serviceDiscoveryType": false,
+        "skipClient": false,
+        "skipServer": false,
+        "testFrameworks": ["protractor"],
+        "websocket": false,
+        "baseName": "compositekey",
+        "applicationType": "monolith",
+        "buildTool": "gradle",
+        "jhipsterVersion": "6.1.2",
+        "skipUserManagement": false,
+        "clientPackageManager": "npm",
+        "authenticationType": "jwt",
+        "cacheProvider": "ehcache",
+        "clientFramework": "angularX",
+        "clientTheme": "none",
+        "clientThemeVariant": "",
+        "serverPort": "8080",
+        "useSass": true,
+        "jwtSecretKey": "YTQ1MzZmMzdmYTgzNmNmZGM0NjdjNzBiMTI1MTVhZGY1Yjg5MWVjZmIyZDE4ODczMTg1YjZkODRhYzA2ZTNhZTRjZWYxZWY1ZjI0YTFmMDliZmM0MDdlZjliMmIxOTE1ODZmMTk3NTg5OWVlNmY1MmQwYTRiMzZkNjNlMGYzODE=",
+        "entitySuffix": "",
+        "dtoSuffix": "DTO",
+        "otherModules": [
+            {
+                "name": "generator-jhipster-primeng-blueprint",
+                "version": "0.0.0"
+            }
+        ],
+        "blueprints": [
+            {
+                "name": "generator-jhipster-primeng-blueprint",
+                "version": "0.0.0"
+            }
+        ]
+    },
+    "entities": ["Employee", "EmployeeSkill", "CertificateType", "EmployeeSkillCertificate"]
+}

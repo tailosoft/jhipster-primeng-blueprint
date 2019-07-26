@@ -63,7 +63,6 @@ module.exports = class extends EntityClientGenerator {
          *      return Object.assign(phaseFromJHipster, myCustomPhaseSteps);
          * ```
          */
-        console.log('YEH before phases');
         const phaseFromJHipster = super._writing();
         const customPhaseSteps = {
             writeClientFiles() {

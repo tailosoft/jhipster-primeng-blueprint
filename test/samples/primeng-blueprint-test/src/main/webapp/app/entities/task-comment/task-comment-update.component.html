@@ -1,0 +1,39 @@
+<div class="row justify-content-center">
+    <div class="col-8">
+        <form name="editForm" role="form" novalidate (ngSubmit)="save()" [formGroup]="editForm">
+            <h2 id="jhi-task-comment-heading" jhiTranslate="primengtestApp.taskComment.home.createOrEditLabel">Create or edit a Task Comment</h2>
+            <div class="form-grid">
+                <ng-container *ngIf="editForm.get('id').value">
+                    <label for="id" jhiTranslate="global.field.id">ID</label>
+                    <input pInputText type="text" id="id" name="id" formControlName="id"
+                           readonly />
+                    <div class="validation-messages"></div>
+                </ng-container>
+                <label jhiTranslate="primengtestApp.taskComment.value" for="field_value">Value</label>
+                <input pInputText type="text" name="value" id="field_value" formControlName="value"/>
+                <div class="validation-messages">
+                    <ng-container *ngIf="editForm.get('value').invalid && (editForm.get('value').dirty || editForm.get('value').touched)">
+                        <p-message severity="error"
+                                   *ngIf="editForm.get('value').errors.required" [text]="'entity.validation.required' | translate">
+                        </p-message>
+                    </ng-container>
+                </div>
+
+                <label jhiTranslate="primengtestApp.taskComment.task" for="field_task">Task</label>
+                <p-dropdown id="field_task" name="task" [options]="taskOptions" formControlName="taskId" [lazyLoadOnInit]="true" [filterValue]="taskFilterValue"
+                            placeholder="Choose" optionLabel="name" optionValue="id"></p-dropdown>
+                <div class="validation-messages">
+                    <ng-container *ngIf="editForm.get('taskId').invalid && (editForm.get('taskId').dirty || editForm.get('taskId').touched)">
+                        <p-message severity="error"
+                                   *ngIf="editForm.get('taskId').errors.required" [text]="'entity.validation.required' | translate">
+                        </p-message>
+                    </ng-container>
+                </div>
+            </div>
+            <div>
+                <button pButton type="button" id="cancel-save" icon="pi pi-ban" class="ui-button-secondary" (click)="previousState()" [label]="'entity.action.cancel' | translate"></button>
+                <button pButton type="submit" id="save-entity" icon="pi pi-save" [disabled]="editForm.invalid || isSaving" [label]="'entity.action.save' | translate"></button>
+            </div>
+        </form>
+    </div>
+</div>
