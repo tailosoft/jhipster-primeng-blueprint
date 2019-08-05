@@ -19,7 +19,7 @@ export const createRequestOption = (req?: any): HttpParams => {
   return options;
 };
 
-export const lazyLoadEventToQueryParams = (event: LazyLoadEvent) => {
+export const lazyLoadEventToQueryParams = (event: LazyLoadEvent, globalFilter?: string) => {
   const params = {};
   if (event.filters) {
     for (const filterField of Object.keys(event.filters)) {
@@ -34,6 +34,9 @@ export const lazyLoadEventToQueryParams = (event: LazyLoadEvent) => {
         params[filterField + '.' + event.filters[filterField].matchMode] = event.filters[filterField].value;
       }
     }
+  }
+  if (event.globalFilter && globalFilter) {
+    params[globalFilter] = event.globalFilter;
   }
   if (event.multiSortMeta) {
     params['sort'] = event.multiSortMeta.map(s => s.field + (s.order === -1 ? ',desc' : ',asc'));

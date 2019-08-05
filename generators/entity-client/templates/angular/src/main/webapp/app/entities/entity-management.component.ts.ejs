@@ -290,7 +290,7 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
                     <%_ } else {_%>
 
     on<%= _.upperFirst(pk.formName) %>LazyLoadEvent(event: LazyLoadEvent) {
-        this.<%= _.lowerFirst(pk.entity.name) %>Service.query(lazyLoadEventToQueryParams(event || {}))
+        this.<%= _.lowerFirst(pk.entity.name) %>Service.query(lazyLoadEventToQueryParams(event || {}, '<%= pk.otherEntityField %>.contains'))
             .subscribe(res => this.<%= pk.formName %>Options = res.body);
     }
                     <%_ } _%>

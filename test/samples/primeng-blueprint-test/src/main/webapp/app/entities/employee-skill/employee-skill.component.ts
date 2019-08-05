@@ -136,7 +136,9 @@ export class EmployeeSkillComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   onEmployeeLazyLoadEvent(event: LazyLoadEvent) {
-    this.employeeService.query(lazyLoadEventToQueryParams(event || {})).subscribe(res => (this.employeeOptions = res.body));
+    this.employeeService
+      .query(lazyLoadEventToQueryParams(event || {}, 'fullname.contains'))
+      .subscribe(res => (this.employeeOptions = res.body));
   }
 
   trackId(index: number, item: IEmployeeSkill) {

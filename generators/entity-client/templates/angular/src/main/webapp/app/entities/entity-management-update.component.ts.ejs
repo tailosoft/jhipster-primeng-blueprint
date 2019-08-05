@@ -193,7 +193,7 @@ relationships.filter(r => r.inForm).forEach(r => {
             <%_ } else { _%>
 
     on<%= _.upperFirst(pk.formName) %>LazyLoadEvent(event: LazyLoadEvent) {
-        this.<%= _.lowerFirst(pk.entityName) %>Service.query(lazyLoadEventToQueryParams(event || {}))
+        this.<%= _.lowerFirst(pk.entityName) %>Service.query(lazyLoadEventToQueryParams(event || {}, '<%= pk.otherEntityField %>.contains'))
             .subscribe(res => this.<%= pk.formName %>Options = res.body, (res: HttpErrorResponse) => this.onError(res.message));
     }
             <%_ } _%>

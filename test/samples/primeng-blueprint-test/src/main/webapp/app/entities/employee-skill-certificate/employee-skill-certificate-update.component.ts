@@ -63,13 +63,13 @@ export class EmployeeSkillCertificateUpdateComponent implements OnInit {
 
   onSkillLazyLoadEvent(event: LazyLoadEvent) {
     this.employeeSkillService
-      .query(lazyLoadEventToQueryParams(event || {}))
+      .query(lazyLoadEventToQueryParams(event || {}, 'name.contains'))
       .subscribe(res => (this.skillOptions = res.body), (res: HttpErrorResponse) => this.onError(res.message));
   }
 
   onSkillEmployeeLazyLoadEvent(event: LazyLoadEvent) {
     this.employeeService
-      .query(lazyLoadEventToQueryParams(event || {}))
+      .query(lazyLoadEventToQueryParams(event || {}, 'fullname.contains'))
       .subscribe(res => (this.skillEmployeeOptions = res.body), (res: HttpErrorResponse) => this.onError(res.message));
   }
 

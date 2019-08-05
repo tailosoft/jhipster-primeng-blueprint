@@ -54,7 +54,7 @@ export class EmployeeSkillUpdateComponent implements OnInit {
 
   onEmployeeLazyLoadEvent(event: LazyLoadEvent) {
     this.employeeService
-      .query(lazyLoadEventToQueryParams(event || {}))
+      .query(lazyLoadEventToQueryParams(event || {}, 'fullname.contains'))
       .subscribe(res => (this.employeeOptions = res.body), (res: HttpErrorResponse) => this.onError(res.message));
   }
 

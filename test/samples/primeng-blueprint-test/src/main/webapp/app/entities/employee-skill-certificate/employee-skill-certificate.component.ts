@@ -149,11 +149,15 @@ export class EmployeeSkillCertificateComponent implements OnInit, OnDestroy, Aft
   }
 
   onSkillLazyLoadEvent(event: LazyLoadEvent) {
-    this.employeeSkillService.query(lazyLoadEventToQueryParams(event || {})).subscribe(res => (this.skillOptions = res.body));
+    this.employeeSkillService
+      .query(lazyLoadEventToQueryParams(event || {}, 'name.contains'))
+      .subscribe(res => (this.skillOptions = res.body));
   }
 
   onSkillEmployeeLazyLoadEvent(event: LazyLoadEvent) {
-    this.employeeService.query(lazyLoadEventToQueryParams(event || {})).subscribe(res => (this.skillEmployeeOptions = res.body));
+    this.employeeService
+      .query(lazyLoadEventToQueryParams(event || {}, 'fullname.contains'))
+      .subscribe(res => (this.skillEmployeeOptions = res.body));
   }
 
   trackId(index: number, item: IEmployeeSkillCertificate) {
