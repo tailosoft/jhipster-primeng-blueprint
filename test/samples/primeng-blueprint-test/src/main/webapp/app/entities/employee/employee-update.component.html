@@ -3,14 +3,8 @@
         <form name="editForm" role="form" novalidate (ngSubmit)="save()" [formGroup]="editForm">
             <h2 id="jhi-employee-heading" jhiTranslate="primengtestApp.employee.home.createOrEditLabel">Create or edit a Employee</h2>
             <div class="form-grid">
-                <ng-container *ngIf="editForm.get('id').value">
-                    <label for="id" jhiTranslate="global.field.id">ID</label>
-                    <input pInputText type="text" id="id" name="id" formControlName="id"
-                           readonly />
-                    <div class="validation-messages"></div>
-                </ng-container>
                 <label jhiTranslate="primengtestApp.employee.username" for="field_username">Username</label>
-                <input pInputText type="text" name="username" id="field_username" formControlName="username"/>
+                <input pInputText type="text" name="username" id="field_username" formControlName="username" [disabled]="edit" [readonly]="edit"/>
                 <div class="validation-messages">
                     <ng-container *ngIf="editForm.get('username').invalid && (editForm.get('username').dirty || editForm.get('username').touched)">
                         <p-message severity="error"

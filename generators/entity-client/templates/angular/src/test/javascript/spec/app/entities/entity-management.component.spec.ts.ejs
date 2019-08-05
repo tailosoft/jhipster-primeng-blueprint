@@ -17,7 +17,7 @@
  limitations under the License.
 -%>
 <%_
-const tsKeyId = generateTestEntityId(pkType, prodDatabaseType);
+const tsKeyId = pkData.map(pk => pk.field.tsTestValue).join(', ');
 _%>
 /* tslint:disable max-line-length */
 import { ComponentFixture, TestBed, fakeAsync<%_ if (pagination !== 'no') { _%>, tick<%_ } _%> } from '@angular/core/testing';
@@ -81,7 +81,7 @@ describe('Component Tests', () => {
 
             // THEN
             expect(service.query).toHaveBeenCalled();
-            expect(comp.<%= entityInstancePlural %>[0]).toEqual(jasmine.objectContaining({id: <%- tsKeyId %>}));
+            expect(comp.<%= entityInstancePlural %>[0]).toEqual(jasmine.objectContaining({<%- pkData.map(pk => `${pk.name}: ${pk.field.tsTestValue}`).join(', ') %>}));
         }));
 <%_ if (pagination !== 'no') { _%>
 
@@ -105,7 +105,7 @@ describe('Component Tests', () => {
 
             // THEN
             expect(service.query).toHaveBeenCalled();
-            expect(comp.<%= entityInstancePlural %>[0]).toEqual(jasmine.objectContaining({id: <%- tsKeyId %>}));
+            expect(comp.<%= entityInstancePlural %>[0]).toEqual(jasmine.objectContaining({<%- pkData.map(pk => `${pk.name}: ${pk.field.tsTestValue}`).join(', ') %>}));
         }));
 <%_ } _%>
 

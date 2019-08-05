@@ -16,9 +16,9 @@ export class EmployeeResolve implements Resolve<IEmployee> {
   constructor(private service: EmployeeService) {}
 
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<IEmployee> {
-    const id = route.params['id'] ? route.params['id'] : null;
-    if (id) {
-      return this.service.find(id).pipe(
+    const username = route.params['username'] ? route.params['username'] : null;
+    if (username) {
+      return this.service.find(username).pipe(
         filter((response: HttpResponse<Employee>) => response.ok),
         map((employee: HttpResponse<Employee>) => employee.body)
       );
@@ -38,7 +38,7 @@ export const employeeRoute: Routes = [
     canActivate: [UserRouteAccessService]
   },
   {
-    path: ':id/view',
+    path: ':username/view',
     component: EmployeeDetailComponent,
     resolve: {
       employee: EmployeeResolve
@@ -62,7 +62,7 @@ export const employeeRoute: Routes = [
     canActivate: [UserRouteAccessService]
   },
   {
-    path: ':id/edit',
+    path: ':username/edit',
     component: EmployeeUpdateComponent,
     resolve: {
       employee: EmployeeResolve

@@ -12,8 +12,8 @@ import { lazyLoadEventToQueryParams } from 'app/shared/util/request-util';
 import { TaskCommentService } from './task-comment.service';
 import { ConfirmationService, LazyLoadEvent } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
-import { TaskService } from 'app/entities/task/task.service';
 import { ITask } from 'app/shared/model/task.model';
+import { TaskService } from 'app/entities/task';
 
 import { Table } from 'primeng/table';
 import { flatten, unflatten } from 'flat';
@@ -70,6 +70,9 @@ export class TaskCommentComponent implements OnInit, OnDestroy, AfterViewInit {
       )
       .subscribe(event => {
         Object.assign(this.taskCommentTable, event);
+        if (event.filters && event.filters.id) {
+          this.taskCommentTable.filters.id.value = +event.filters.id.value;
+        }
         if (event.filters && event.filters.taskId && event.filters.taskId.value) {
           this.taskCommentTable.filters.taskId.value = event.filters.taskId.value.map(x => +x);
         }

@@ -15,13 +15,17 @@
                 <dt><span jhiTranslate="primengtestApp.employeeSkillCertificate.type">Type</span></dt>
                 <dd>
                     <div *ngIf="employeeSkillCertificate.typeId">
-                        <a [routerLink]="['/certificate-type', employeeSkillCertificate.typeId, 'view']">{{employeeSkillCertificate.typeName}}</a>
+                        <a [routerLink]="['/certificate-type', employeeSkillCertificate.typeId, 'view']">
+                            {{employeeSkillCertificate.typeName}}
+                        </a>
                     </div>
                 </dd>
                 <dt><span jhiTranslate="primengtestApp.employeeSkillCertificate.skill">Skill</span></dt>
                 <dd>
-                    <div *ngIf="employeeSkillCertificate.skillId">
-                        <a [routerLink]="['/employee-skill', employeeSkillCertificate.skillId, 'view']">{{employeeSkillCertificate.skillId}}</a>
+                    <div *ngIf="employeeSkillCertificate.skillName && employeeSkillCertificate.skillEmployeeUsername">
+                        <a [routerLink]="['/employee-skill', { name: employeeSkillCertificate.skillName, employeeUsername: employeeSkillCertificate.skillEmployeeUsername }, 'view']">
+                            {{'primengtestApp.employeeSkillCertificate.skill' | translate}}
+                        </a>
                     </div>
                 </dd>
             </dl>
@@ -33,7 +37,7 @@
             </button>
 
             <button type="button"
-                    [routerLink]="['/employee-skill-certificate', employeeSkillCertificate.id, 'edit']"
+                    [routerLink]="['/employee-skill-certificate', { typeId: employeeSkillCertificate.typeId, skillName: employeeSkillCertificate.skillName, skillEmployeeUsername: employeeSkillCertificate.skillEmployeeUsername }, 'edit']"
                     class="btn btn-primary">
                 <fa-icon [icon]="'pencil-alt'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit"> Edit</span>
             </button>

@@ -10,7 +10,7 @@
         <ng-template pTemplate="header">
         <tr>
             <th>
-                <span jhiTranslate="global.field.id">ID</span>
+                <span jhiTranslate="primengtestApp.certificateType.id">ID</span>
             </th>
             <th>
                 <span jhiTranslate="primengtestApp.certificateType.name">Name</span>
@@ -19,7 +19,7 @@
         </tr>
         <tr>
             <th>
-                <input pInputText type="text" [value]="certificateTypeTable.filters.id?.value"
+                <input pInputText type="number" [value]="certificateTypeTable.filters.id?.value"
                        (input)="certificateTypeTable.filter($event.target.value, 'id', 'equals')">
             </th>
             <th>
@@ -31,7 +31,7 @@
         </ng-template>
         <ng-template pTemplate="body" let-certificateType>
             <tr>
-                <td><a [routerLink]="['/certificate-type', certificateType.id, 'view' ]">{{certificateType.id}}</a></td>
+                <td>{{certificateType.id}}</td>
                 <td>{{certificateType.name}}</td>
                 <td>
                     <div class="btn-group flex-btn-group-container">

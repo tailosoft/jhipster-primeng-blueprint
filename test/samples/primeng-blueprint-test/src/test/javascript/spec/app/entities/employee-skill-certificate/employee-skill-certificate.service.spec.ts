@@ -30,7 +30,7 @@ describe('Service Tests', () => {
       currentDate = new Date();
       datePipe = injector.get(DatePipe);
 
-      elemDefault = new EmployeeSkillCertificate(0, 0, currentDate);
+      elemDefault = new EmployeeSkillCertificate(123, 'AAAAAAA', 'AAAAAAA', 123, currentDate, 'AAAAAAA', 'AAAAAAA');
     });
 
     describe('Service methods', () => {
@@ -42,7 +42,7 @@ describe('Service Tests', () => {
           elemDefault
         );
         service
-          .find(123)
+          .find(123, 'AAAAAAA', 'AAAAAAA')
           .pipe(take(1))
           .subscribe(resp => (expectedResult = resp));
 
@@ -126,7 +126,7 @@ describe('Service Tests', () => {
       });
 
       it('should delete a EmployeeSkillCertificate', async () => {
-        const rxPromise = service.delete(123).subscribe(resp => (expectedResult = resp.ok));
+        const rxPromise = service.delete(123, 'AAAAAAA', 'AAAAAAA').subscribe(resp => (expectedResult = resp.ok));
 
         const req = httpMock.expectOne({ method: 'DELETE' });
         req.flush({ status: 200 });

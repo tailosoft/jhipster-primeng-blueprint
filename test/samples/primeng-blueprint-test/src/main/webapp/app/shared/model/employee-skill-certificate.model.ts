@@ -1,19 +1,21 @@
 export interface IEmployeeSkillCertificate {
-  id?: number;
+  typeId?: number;
+  skillName?: string;
+  skillEmployeeUsername?: string;
   grade?: number;
   date?: Date;
   typeName?: string;
-  typeId?: number;
-  skillId?: number;
+  skillEmployeeFullname?: string;
 }
 
 export class EmployeeSkillCertificate implements IEmployeeSkillCertificate {
   constructor(
-    public id?: number,
+    public typeId?: number,
+    public skillName?: string,
+    public skillEmployeeUsername?: string,
     public grade?: number,
     public date?: Date,
     public typeName?: string,
-    public typeId?: number,
-    public skillId?: number
+    public skillEmployeeFullname?: string
   ) {}
 }

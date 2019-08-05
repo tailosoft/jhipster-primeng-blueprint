@@ -23,14 +23,14 @@ describe('Service Tests', () => {
       service = injector.get(EmployeeService);
       httpMock = injector.get(HttpTestingController);
 
-      elemDefault = new Employee(0, 'AAAAAAA', 'AAAAAAA');
+      elemDefault = new Employee('AAAAAAA', 'AAAAAAA', undefined);
     });
 
     describe('Service methods', () => {
       it('should find an element', async () => {
         const returnedFromService = Object.assign({}, elemDefault);
         service
-          .find(123)
+          .find('AAAAAAA')
           .pipe(take(1))
           .subscribe(resp => (expectedResult = resp));
 
@@ -42,7 +42,7 @@ describe('Service Tests', () => {
       it('should create a Employee', async () => {
         const returnedFromService = Object.assign(
           {
-            id: 0
+            id: 'ID'
           },
           elemDefault
         );
@@ -98,7 +98,7 @@ describe('Service Tests', () => {
       });
 
       it('should delete a Employee', async () => {
-        const rxPromise = service.delete(123).subscribe(resp => (expectedResult = resp.ok));
+        const rxPromise = service.delete('AAAAAAA').subscribe(resp => (expectedResult = resp.ok));
 
         const req = httpMock.expectOne({ method: 'DELETE' });
         req.flush({ status: 200 });

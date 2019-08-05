@@ -3,7 +3,6 @@ import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
-import {} from 'ng-jhipster';
 import { MessageService } from 'primeng/api';
 import { ITaskComment, TaskComment } from 'app/shared/model/task-comment.model';
 import { TaskCommentService } from './task-comment.service';

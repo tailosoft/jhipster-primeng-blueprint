@@ -9,10 +9,6 @@
     <p-table #employeeSkillCertificateTable [value]="employeeSkillCertificates" [rowTrackBy]="trackId" [responsive]="true"[lazy]="true" [rows]="itemsPerPage" [totalRecords]="totalItems" [loading]="loading" sortMode="multiple" [lazyLoadOnInit]="false"[paginator]="true" (onLazyLoad)="onLazyLoadEvent($event)" >
         <ng-template pTemplate="header">
         <tr>
-            <th pSortableColumn="id">
-                <span jhiTranslate="global.field.id">ID</span>
-                <p-sortIcon field="id"></p-sortIcon>
-            </th>
             <th pSortableColumn="grade">
                 <span jhiTranslate="primengtestApp.employeeSkillCertificate.grade">Grade</span>
                 <p-sortIcon field="grade"></p-sortIcon>
@@ -23,19 +19,19 @@
             </th>
             <th pSortableColumn="type">
                 <span jhiTranslate="primengtestApp.employeeSkillCertificate.type">Type</span>
-                 <p-sortIcon field="type"></p-sortIcon>
+                <p-sortIcon field="type"></p-sortIcon>
             </th>
             <th pSortableColumn="skill">
                 <span jhiTranslate="primengtestApp.employeeSkillCertificate.skill">Skill</span>
-                 <p-sortIcon field="skill"></p-sortIcon>
+                <p-sortIcon field="skill"></p-sortIcon>
+            </th>
+            <th pSortableColumn="skillEmployee">
+                <span jhiTranslate="primengtestApp.employeeSkillCertificate.skillEmployee">Skill Employee</span>
+                <p-sortIcon field="skillEmployee"></p-sortIcon>
             </th>
             <th style="width: 124px"></th>
         </tr>
         <tr>
-            <th>
-                <input pInputText type="text" [value]="employeeSkillCertificateTable.filters.id?.value"
-                       (input)="employeeSkillCertificateTable.filter($event.target.value, 'id', 'equals')">
-            </th>
             <th>
                 <input pInputText type="number" [value]="employeeSkillCertificateTable.filters.grade?.value"
                        (input)="employeeSkillCertificateTable.filter($event.target.value, 'grade', 'equals')">
@@ -46,20 +42,24 @@
                             (onSelect)="onDateSelect(dateRange, 'date')" (onClearClick)="onDateSelect(dateRange, 'date')"></p-calendar>
             </th>
             <th>
-                <p-multiSelect [options]="typeOptions" [ngModel]="employeeSkillCertificateTable.filters.typeId?.value" optionLabel="name" optionValue="id" 
+                <p-multiSelect [options]="typeOptions" [ngModel]="employeeSkillCertificateTable.filters.typeId?.value" optionLabel="name" optionValue="id"
                                (ngModelChange)="employeeSkillCertificateTable.filter($event, 'typeId', 'in')"></p-multiSelect>
             </th>
             <th>
-                <p-multiSelect [options]="skillOptions" [ngModel]="employeeSkillCertificateTable.filters.skillId?.value" optionLabel="id" optionValue="id" 
+                <p-multiSelect [options]="skillOptions" [ngModel]="employeeSkillCertificateTable.filters.skillName?.value" optionLabel="name" optionValue="name"
                                [lazy]="true" [rows]="10" (onLazyLoad)="onSkillLazyLoadEvent($event)"
-                               (ngModelChange)="employeeSkillCertificateTable.filter($event, 'skillId', 'in')"></p-multiSelect>
+                               (ngModelChange)="employeeSkillCertificateTable.filter($event, 'skillName', 'in')"></p-multiSelect>
+            </th>
+            <th>
+                <p-multiSelect [options]="skillEmployeeOptions" [ngModel]="employeeSkillCertificateTable.filters.skillEmployeeUsername?.value" optionLabel="fullname" optionValue="username"
+                               [lazy]="true" [rows]="10" (onLazyLoad)="onSkillEmployeeLazyLoadEvent($event)"
+                               (ngModelChange)="employeeSkillCertificateTable.filter($event, 'skillEmployeeUsername', 'in')"></p-multiSelect>
             </th>
             <th></th>
         </tr>
         </ng-template>
         <ng-template pTemplate="body" let-employeeSkillCertificate>
             <tr>
-                <td><a [routerLink]="['/employee-skill-certificate', employeeSkillCertificate.id, 'view' ]">{{employeeSkillCertificate.id}}</a></td>
                 <td>{{employeeSkillCertificate.grade}}</td>
                 <td>{{employeeSkillCertificate.date | date:'mediumDate'}}</td>
                 <td>
@@ -68,19 +68,24 @@
                     </div>
                 </td>
                 <td>
-                    <div *ngIf="employeeSkillCertificate.skillId">
-                        <a [routerLink]="['../employee-skill', employeeSkillCertificate.skillId , 'view' ]" >{{employeeSkillCertificate.skillId}}</a>
+                    <div *ngIf="employeeSkillCertificate.skillName">
+                        <a [routerLink]="['../employee-skill', employeeSkillCertificate.skillName , 'view' ]" >{{employeeSkillCertificate.skillName}}</a>
+                    </div>
+                </td>
+                <td>
+                    <div *ngIf="employeeSkillCertificate.skillEmployeeUsername">
+                        <a [routerLink]="['../employee-skill', employeeSkillCertificate.skillEmployeeUsername , 'view' ]" >{{employeeSkillCertificate.skillEmployeeFullname}}</a>
                     </div>
                 </td>
                 <td>
                     <div class="btn-group flex-btn-group-container">
-                        <p-button type="submit" [routerLink]="['/employee-skill-certificate', employeeSkillCertificate.id, 'view' ]"
+                        <p-button type="submit" [routerLink]="['/employee-skill-certificate', { typeId: employeeSkillCertificate.typeId, skillName: employeeSkillCertificate.skillName, skillEmployeeUsername: employeeSkillCertificate.skillEmployeeUsername }, 'view' ]"
                                   icon="pi pi-eye" styleClass="ui-button-info">
                         </p-button>
-                        <p-button type="submit" [routerLink]="['/employee-skill-certificate', employeeSkillCertificate.id, 'edit' ]"
+                        <p-button type="submit" [routerLink]="['/employee-skill-certificate', { typeId: employeeSkillCertificate.typeId, skillName: employeeSkillCertificate.skillName, skillEmployeeUsername: employeeSkillCertificate.skillEmployeeUsername }, 'edit' ]"
                                   icon="pi pi-pencil" styleClass="ui-button-warning">
                         </p-button>
-                        <p-button type="submit" (click)="delete(employeeSkillCertificate.id)"
+                        <p-button type="submit" (click)="delete(employeeSkillCertificate.typeId, employeeSkillCertificate.skillName, employeeSkillCertificate.skillEmployeeUsername)"
                                   icon="pi pi-times" styleClass="ui-button-danger">
                         </p-button>
                     </div>

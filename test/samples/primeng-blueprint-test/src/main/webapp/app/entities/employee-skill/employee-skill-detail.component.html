@@ -20,8 +20,10 @@
                 </dd>
                 <dt><span jhiTranslate="primengtestApp.employeeSkill.employee">Employee</span></dt>
                 <dd>
-                    <div *ngIf="employeeSkill.employeeId">
-                        <a [routerLink]="['/employee', employeeSkill.employeeId, 'view']">{{employeeSkill.employeeFullname}}</a>
+                    <div *ngIf="employeeSkill.employeeUsername">
+                        <a [routerLink]="['/employee', employeeSkill.employeeUsername, 'view']">
+                            {{employeeSkill.employeeFullname}}
+                        </a>
                     </div>
                 </dd>
             </dl>
@@ -33,7 +35,7 @@
             </button>
 
             <button type="button"
-                    [routerLink]="['/employee-skill', employeeSkill.id, 'edit']"
+                    [routerLink]="['/employee-skill', { name: employeeSkill.name, employeeUsername: employeeSkill.employeeUsername }, 'edit']"
                     class="btn btn-primary">
                 <fa-icon [icon]="'pencil-alt'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit"> Edit</span>
             </button>

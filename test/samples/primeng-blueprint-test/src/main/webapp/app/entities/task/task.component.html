@@ -10,7 +10,7 @@
         <ng-template pTemplate="header">
         <tr>
             <th>
-                <span jhiTranslate="global.field.id">ID</span>
+                <span jhiTranslate="primengtestApp.task.id">ID</span>
             </th>
             <th>
                 <span jhiTranslate="primengtestApp.task.name">Name</span>
@@ -19,7 +19,7 @@
         </tr>
         <tr>
             <th>
-                <input pInputText type="text" [value]="taskTable.filters.id?.value"
+                <input pInputText type="number" [value]="taskTable.filters.id?.value"
                        (input)="taskTable.filter($event.target.value, 'id', 'equals')">
             </th>
             <th>
@@ -31,7 +31,7 @@
         </ng-template>
         <ng-template pTemplate="body" let-task>
             <tr>
-                <td><a [routerLink]="['/task', task.id, 'view' ]">{{task.id}}</a></td>
+                <td>{{task.id}}</td>
                 <td>{{task.name}}</td>
                 <td>
                     <div class="btn-group flex-btn-group-container">

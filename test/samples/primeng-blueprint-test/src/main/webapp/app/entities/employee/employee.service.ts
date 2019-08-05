@@ -22,8 +22,8 @@ export class EmployeeService {
     return this.http.put<IEmployee>(this.resourceUrl, employee, { observe: 'response' });
   }
 
-  find(id: number): Observable<EntityResponseType> {
-    return this.http.get<IEmployee>(`${this.resourceUrl}/${id}`, { observe: 'response' });
+  find(username: string): Observable<EntityResponseType> {
+    return this.http.get<IEmployee>(`${this.resourceUrl}/${username}`, { observe: 'response' });
   }
 
   query(req?: any): Observable<EntityArrayResponseType> {
@@ -31,7 +31,7 @@ export class EmployeeService {
     return this.http.get<IEmployee[]>(this.resourceUrl, { params: options, observe: 'response' });
   }
 
-  delete(id: number): Observable<HttpResponse<any>> {
-    return this.http.delete<any>(`${this.resourceUrl}/${id}`, { observe: 'response' });
+  delete(username: string): Observable<HttpResponse<any>> {
+    return this.http.delete<any>(`${this.resourceUrl}/${username}`, { observe: 'response' });
   }
 }

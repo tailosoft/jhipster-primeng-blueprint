@@ -10,7 +10,7 @@
         <ng-template pTemplate="header">
         <tr>
             <th pSortableColumn="id">
-                <span jhiTranslate="global.field.id">ID</span>
+                <span jhiTranslate="primengtestApp.taskComment.id">ID</span>
                 <p-sortIcon field="id"></p-sortIcon>
             </th>
             <th pSortableColumn="value">
@@ -19,13 +19,13 @@
             </th>
             <th pSortableColumn="task">
                 <span jhiTranslate="primengtestApp.taskComment.task">Task</span>
-                 <p-sortIcon field="task"></p-sortIcon>
+                <p-sortIcon field="task"></p-sortIcon>
             </th>
             <th style="width: 124px"></th>
         </tr>
         <tr>
             <th>
-                <input pInputText type="text" [value]="taskCommentTable.filters.id?.value"
+                <input pInputText type="number" [value]="taskCommentTable.filters.id?.value"
                        (input)="taskCommentTable.filter($event.target.value, 'id', 'equals')">
             </th>
             <th>
@@ -33,7 +33,7 @@
                        (input)="taskCommentTable.filter($event.target.value, 'value', 'contains')">
             </th>
             <th>
-                <p-multiSelect [options]="taskOptions" [ngModel]="taskCommentTable.filters.taskId?.value" optionLabel="name" optionValue="id" 
+                <p-multiSelect [options]="taskOptions" [ngModel]="taskCommentTable.filters.taskId?.value" optionLabel="name" optionValue="id"
                                (ngModelChange)="taskCommentTable.filter($event, 'taskId', 'in')"></p-multiSelect>
             </th>
             <th></th>
@@ -41,7 +41,7 @@
         </ng-template>
         <ng-template pTemplate="body" let-taskComment>
             <tr>
-                <td><a [routerLink]="['/task-comment', taskComment.id, 'view' ]">{{taskComment.id}}</a></td>
+                <td>{{taskComment.id}}</td>
                 <td>{{taskComment.value}}</td>
                 <td>
                     <div *ngIf="taskComment.taskId">

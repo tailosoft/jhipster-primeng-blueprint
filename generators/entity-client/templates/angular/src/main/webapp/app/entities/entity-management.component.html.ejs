@@ -61,12 +61,6 @@
         <%_ } _%>
         <ng-template pTemplate="header">
         <tr>
-            <th<% if (pagination !== 'no') { %> pSortableColumn="id"<% } %>>
-                <span jhiTranslate="global.field.id">ID</span>
-                <%_ if (pagination !== 'no') { _%>
-                <p-sortIcon field="id"></p-sortIcon>
-                <%_ } _%>
-            </th>
             <%_ for (idx in fields) { _%>
             <th<% if (pagination !== 'no') { %> pSortableColumn="<%= fields[idx].fieldName %>"<% } %>>
                 <span jhiTranslate="<%=`${i18nKeyPrefix}.${fields[idx].fieldName}` %>"><%= fields[idx].fieldNameHumanized %></span>
@@ -76,22 +70,19 @@
             </th>
             <%_ } _%>
             <%_ for (idx in relationships) { _%>
-            <%_ if (relationships[idx].inList) {
-            const fieldName = dto === 'no' ? "." + relationships[idx].otherEntityField : relationships[idx].otherEntityFieldCapitalized;_%>
-            <th<% if (pagination !== 'no') { %> pSortableColumn="<%=relationships[idx].relationshipName%>"<% } %>>
-                <span jhiTranslate="<%= `${i18nKeyPrefix}.${relationships[idx].relationshipName}` %>"><%= relationships[idx].relationshipNameHumanized %></span>
-                <% if (pagination !== 'no') { %> <p-sortIcon field="<%= relationships[idx].relationshipName %>"></p-sortIcon><% } %>
+                <%_ if (relationships[idx].inList) { _%>
+                    <%_ relationships[idx].pkData.forEach(pk => { _%>
+            <th<% if (pagination !== 'no') { %> pSortableColumn="<%= pk.formName %>"<% } %>>
+                <span jhiTranslate="<%= `${i18nKeyPrefix}.${pk.formName}` %>"><%= _.startCase(pk.formName) %></span>
+                <% if (pagination !== 'no') { %><p-sortIcon field="<%= pk.formName %>"></p-sortIcon><% } %>
             </th>
-            <%_ } _%>
+                    <%_ }) _%>
+                <%_ } _%>
             <%_ } _%>
             <th style="width: 124px"></th>
         </tr>
         <%_ if (jpaMetamodelFiltering) { _%>
         <tr>
-            <th>
-                <input pInputText type="text" [value]="<%= entityInstance %>Table.filters.id?.value"
-                       (input)="<%= entityInstance %>Table.filter($event.target.value, 'id', 'equals')">
-            </th>
             <%_ for (idx in fields) {
                 const fieldType = fields[idx].fieldType;_%>
             <th>
@@ -125,11 +116,13 @@
             <%_ } _%>
             <%_ for (idx in relationships) { _%>
                 <%_ if (relationships[idx].inList) { _%>
+                    <%_ relationships[idx].pkData.forEach(pk => { _%>
             <th>
-                <p-multiSelect [options]="<%= relationships[idx].relationshipName %>Options" [ngModel]="<%= entityInstance %>Table.filters.<%= relationships[idx].relationshipName %>Id?.value" optionLabel="<%= relationships[idx].otherEntityField %>" optionValue="id" <% if(relationships[idx].pagination !== 'no') { %>
-                               [lazy]="true" [rows]="10" (onLazyLoad)="on<%= relationships[idx].relationshipNameCapitalized %>LazyLoadEvent($event)"<% } %>
-                               (ngModelChange)="<%= entityInstance %>Table.filter($event, '<%= relationships[idx].relationshipFieldName %>Id', 'in')"></p-multiSelect>
+                <p-multiSelect [options]="<%= pk.formName %>Options" [ngModel]="<%= entityInstance %>Table.filters.<%= relationships[idx].relationshipName + pk.nameCapitalized %>?.value" optionLabel="<%= pk.otherEntityField %>" optionValue="<%= pk.field.fieldName %>"<% if(relationships[idx].pagination !== 'no') { %>
+                               [lazy]="true" [rows]="10" (onLazyLoad)="on<%= _.upperFirst(pk.formName) %>LazyLoadEvent($event)"<% } %>
+                               (ngModelChange)="<%= entityInstance %>Table.filter($event, '<%= relationships[idx].relationshipName + pk.nameCapitalized %>', 'in')"></p-multiSelect>
             </th>
+                    <%_ }) _%>
                 <%_ } _%>
             <%_ } _%>
             <th></th>
@@ -138,7 +131,6 @@
         </ng-template>
         <ng-template pTemplate="body" let-<%=entityInstance %>>
             <tr>
-                <td><a [routerLink]="['/<%= entityUrl %>', <%= entityInstance %>.id, 'view' ]">{{<%=entityInstance %>.id}}</a></td>
                 <%_ for (idx in fields) {
                 const fieldName = fields[idx].fieldName;
                 const fieldType = fields[idx].fieldType;
@@ -175,12 +167,13 @@
                 const otherEntityField = relationships[idx].otherEntityField;
                 const otherEntityFieldCapitalized = relationships[idx].otherEntityFieldCapitalized; _%>
                 <%_ if (relationships[idx].inList) { _%>
-                <td>
                     <%_ if (otherEntityName === 'user') { _%>
                         <%_ if (relationshipType === 'many-to-many') { _%>
+                <td>
                     <span *ngFor="let <%= relationshipFieldName %> of <%= entityInstance %>.<%= relationshipFieldNamePlural %>; let last = last">
-                            {{<%= relationshipFieldName %>.<%= otherEntityField %>}}{{last ? '' : ', '}}
-                        </span>
+                        {{<%= relationshipFieldName %>.<%= otherEntityField %>}}{{last ? '' : ', '}}
+                    </span>
+                </td>
                         <%_ } else { _%>
                             <%_ if (dto === 'no') { _%>
                     {{<%= entityInstance + "." + relationshipFieldName + "?." + otherEntityField %>}}
@@ -190,33 +183,41 @@
                         <%_ } _%>
                     <%_ } else { _%>
                         <%_ if (relationshipType === 'many-to-many') { _%>
+                <td>
                     <span *ngFor="let <%= relationshipFieldName %> of <%= entityInstance %>.<%= relationshipFieldNamePlural %>; let last = last">
-                            <a class="form-control-static" [routerLink]="['../<%= otherEntityStateName %>', <%= relationshipFieldName %>?.id, 'view' ]">{{<%= relationshipFieldName %>.<%= otherEntityField %>}}</a>{{last ? '' : ', '}}
-                        </span>
+                        <a class="form-control-static" [routerLink]="['../<%= otherEntityStateName %>', <%= relationshipFieldName %>?.id, 'view' ]">{{<%= relationshipFieldName %>.<%= otherEntityField %>}}</a>{{last ? '' : ', '}}
+                    </span>
+                </td>
                         <%_ } else { _%>
                             <%_ if (dto === 'no') { _%>
+                <td>
                     <div *ngIf="<%= entityInstance + "." + relationshipFieldName %>">
                         <a [routerLink]="['../<%= otherEntityStateName %>', <%= entityInstance + "." + relationshipFieldName + "?.id" %>, 'view' ]" >{{<%= entityInstance + "." + relationshipFieldName + "?." + otherEntityField %>}}</a>
                     </div>
-                        <%_ } else { _%>
-                    <div *ngIf="<%= entityInstance + "." + relationshipFieldName + "Id" %>">
-                        <a [routerLink]="['../<%= otherEntityStateName %>', <%= entityInstance + "." + relationshipFieldName + "Id" %> %>, 'view' ]" >{{<%= entityInstance + "." + relationshipFieldName + otherEntityFieldCapitalized %>}}</a>
+                </td>
+                            <%_ } else { _%>
+                                <%_ relationships[idx].pkData.forEach(pk => { _%>
+                <td>
+                    <div *ngIf="<%= entityInstance + "." + relationshipFieldName + pk.nameCapitalized %>">
+                        <a [routerLink]="['../<%= otherEntityStateName %>', <%= entityInstance + "." + relationshipFieldName + pk.nameCapitalized %> %>, 'view' ]" >{{<%= entityInstance + "." + pk.formName + _.upperFirst(pk.otherEntityField) %>}}</a>
                     </div>
+                </td>
+                                <%_ }) _%>
                             <%_ } _%>
                         <%_ } _%>
                     <%_ } _%>
-                </td>
                 <%_ } _%>
                 <%_ } _%>
                 <td>
                     <div class="btn-group flex-btn-group-container">
-                        <p-button type="submit" [routerLink]="['/<%= entityUrl %>', <%= entityInstance %>.id, 'view' ]"
+<%_ const idParam = pkData.length === 1 ? `${entityInstance}.${pkName}` : '{ '+ pkData.map(pk => `${pk.name}: ${entityInstance}.${pk.name}`).join(', ') + ' }' _%>
+                        <p-button type="submit" [routerLink]="['/<%= entityUrl %>', <%- idParam %>, 'view' ]"
                                   icon="pi pi-eye" styleClass="ui-button-info">
                         </p-button>
-                        <p-button type="submit" [routerLink]="['/<%= entityUrl %>', <%= entityInstance %>.id, 'edit' ]"
+                        <p-button type="submit" [routerLink]="['/<%= entityUrl %>', <%- idParam %>, 'edit' ]"
                                   icon="pi pi-pencil" styleClass="ui-button-warning">
                         </p-button>
-                        <p-button type="submit" (click)="delete(<%= entityInstance %>.id)"
+                        <p-button type="submit" (click)="delete(<%- pkData.map(pk => `${entityInstance}.${pk.name}`).join(', ') %>)"
                                   icon="pi pi-times" styleClass="ui-button-danger">
                         </p-button>
                     </div>

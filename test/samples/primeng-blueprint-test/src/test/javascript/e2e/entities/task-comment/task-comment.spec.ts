@@ -39,9 +39,11 @@ describe('TaskComment e2e test', () => {
 
         await taskCommentComponentsPage.clickOnCreateButton();
         await promise.all([
+            taskCommentUpdatePage.setInput('5'),
             taskCommentUpdatePage.setValueInput('value'),
             taskCommentUpdatePage.taskSelectLastOption(),
         ]);
+        expect(await taskCommentUpdatePage.getInput()).to.eq('5', 'Expected id value to be equals to 5');
         expect(await taskCommentUpdatePage.getValueInput()).to.eq('value', 'Expected Value value to be equals to value');
         await taskCommentUpdatePage.save();
         expect(await taskCommentUpdatePage.getSaveButton().isPresent(), 'Expected save button disappear').to.be.false;

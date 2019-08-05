@@ -9,10 +9,6 @@
     <p-table #employeeTable [value]="employees" [rowTrackBy]="trackId" [responsive]="true"[lazy]="true" [rows]="itemsPerPage" [totalRecords]="totalItems" [loading]="loading" sortMode="multiple" [lazyLoadOnInit]="false"[paginator]="true" (onLazyLoad)="onLazyLoadEvent($event)" >
         <ng-template pTemplate="header">
         <tr>
-            <th pSortableColumn="id">
-                <span jhiTranslate="global.field.id">ID</span>
-                <p-sortIcon field="id"></p-sortIcon>
-            </th>
             <th pSortableColumn="username">
                 <span jhiTranslate="primengtestApp.employee.username">Username</span>
                 <p-sortIcon field="username"></p-sortIcon>
@@ -24,10 +20,6 @@
             <th style="width: 124px"></th>
         </tr>
         <tr>
-            <th>
-                <input pInputText type="text" [value]="employeeTable.filters.id?.value"
-                       (input)="employeeTable.filter($event.target.value, 'id', 'equals')">
-            </th>
             <th>
                 <input pInputText type="text" [value]="employeeTable.filters.username?.value"
                        (input)="employeeTable.filter($event.target.value, 'username', 'contains')">
@@ -41,18 +33,17 @@
         </ng-template>
         <ng-template pTemplate="body" let-employee>
             <tr>
-                <td><a [routerLink]="['/employee', employee.id, 'view' ]">{{employee.id}}</a></td>
                 <td>{{employee.username}}</td>
                 <td>{{employee.fullname}}</td>
                 <td>
                     <div class="btn-group flex-btn-group-container">
-                        <p-button type="submit" [routerLink]="['/employee', employee.id, 'view' ]"
+                        <p-button type="submit" [routerLink]="['/employee', employee.username, 'view' ]"
                                   icon="pi pi-eye" styleClass="ui-button-info">
                         </p-button>
-                        <p-button type="submit" [routerLink]="['/employee', employee.id, 'edit' ]"
+                        <p-button type="submit" [routerLink]="['/employee', employee.username, 'edit' ]"
                                   icon="pi pi-pencil" styleClass="ui-button-warning">
                         </p-button>
-                        <p-button type="submit" (click)="delete(employee.id)"
+                        <p-button type="submit" (click)="delete(employee.username)"
                                   icon="pi pi-times" styleClass="ui-button-danger">
                         </p-button>
                     </div>

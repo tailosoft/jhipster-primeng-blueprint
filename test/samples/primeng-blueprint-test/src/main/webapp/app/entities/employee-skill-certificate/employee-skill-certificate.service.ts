@@ -31,9 +31,12 @@ export class EmployeeSkillCertificateService {
       .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
   }
 
-  find(id: number): Observable<EntityResponseType> {
+  find(typeId: number, skillName: string, skillEmployeeUsername: string): Observable<EntityResponseType> {
     return this.http
-      .get<IEmployeeSkillCertificate>(`${this.resourceUrl}/${id}`, { observe: 'response' })
+      .get<IEmployeeSkillCertificate>(
+        `${this.resourceUrl}/typeId=${typeId};skillName=${skillName};skillEmployeeUsername=${skillEmployeeUsername}`,
+        { observe: 'response' }
+      )
       .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
   }
 
@@ -44,8 +47,11 @@ export class EmployeeSkillCertificateService {
       .pipe(map((res: EntityArrayResponseType) => this.convertDateArrayFromServer(res)));
   }
 
-  delete(id: number): Observable<HttpResponse<any>> {
-    return this.http.delete<any>(`${this.resourceUrl}/${id}`, { observe: 'response' });
+  delete(typeId: number, skillName: string, skillEmployeeUsername: string): Observable<HttpResponse<any>> {
+    return this.http.delete<any>(
+      `${this.resourceUrl}/typeId=${typeId};skillName=${skillName};skillEmployeeUsername=${skillEmployeeUsername}`,
+      { observe: 'response' }
+    );
   }
 
   protected convertDateFromClient(employeeSkillCertificate: IEmployeeSkillCertificate): IEmployeeSkillCertificate {

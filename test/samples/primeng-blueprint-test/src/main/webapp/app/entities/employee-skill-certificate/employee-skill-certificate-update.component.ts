@@ -5,7 +5,6 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { lazyLoadEventToQueryParams } from 'app/shared/util/request-util';
 import { LazyLoadEvent } from 'primeng/api';
-import {} from 'ng-jhipster';
 import { MessageService } from 'primeng/api';
 import { IEmployeeSkillCertificate, EmployeeSkillCertificate } from 'app/shared/model/employee-skill-certificate.model';
 import { EmployeeSkillCertificateService } from './employee-skill-certificate.service';
@@ -13,24 +12,29 @@ import { ICertificateType } from 'app/shared/model/certificate-type.model';
 import { CertificateTypeService } from 'app/entities/certificate-type';
 import { IEmployeeSkill } from 'app/shared/model/employee-skill.model';
 import { EmployeeSkillService } from 'app/entities/employee-skill';
+import { IEmployee } from 'app/shared/model/employee.model';
+import { EmployeeService } from 'app/entities/employee';
 
 @Component({
   selector: 'jhi-employee-skill-certificate-update',
   templateUrl: './employee-skill-certificate-update.component.html'
 })
 export class EmployeeSkillCertificateUpdateComponent implements OnInit {
+  edit: boolean;
   isSaving: boolean;
   typeOptions: ICertificateType[];
   typeFilterValue: any;
   skillOptions: IEmployeeSkill[];
   skillFilterValue: any;
+  skillEmployeeOptions: IEmployee[];
+  skillEmployeeFilterValue: any;
 
   editForm = this.fb.group({
-    id: [],
     grade: [null, [Validators.required]],
     date: [null, [Validators.required]],
     typeId: [null, Validators.required],
-    skillId: [null, Validators.required]
+    skillName: [null, Validators.required],
+    skillEmployeeUsername: [null, Validators.required]
   });
 
   constructor(
@@ -38,6 +42,7 @@ export class EmployeeSkillCertificateUpdateComponent implements OnInit {
     protected employeeSkillCertificateService: EmployeeSkillCertificateService,
     protected certificateTypeService: CertificateTypeService,
     protected employeeSkillService: EmployeeSkillService,
+    protected employeeService: EmployeeService,
     protected activatedRoute: ActivatedRoute,
     private fb: FormBuilder
   ) {}
@@ -62,16 +67,26 @@ export class EmployeeSkillCertificateUpdateComponent implements OnInit {
       .subscribe(res => (this.skillOptions = res.body), (res: HttpErrorResponse) => this.onError(res.message));
   }
 
+  onSkillEmployeeLazyLoadEvent(event: LazyLoadEvent) {
+    this.employeeService
+      .query(lazyLoadEventToQueryParams(event || {}))
+      .subscribe(res => (this.skillEmployeeOptions = res.body), (res: HttpErrorResponse) => this.onError(res.message));
+  }
+
   updateForm(employeeSkillCertificate: IEmployeeSkillCertificate) {
+    if (employeeSkillCertificate.typeId && employeeSkillCertificate.skillName && employeeSkillCertificate.skillEmployeeUsername) {
+      this.edit = true;
+    }
     this.editForm.patchValue({
-      id: employeeSkillCertificate.id,
       grade: employeeSkillCertificate.grade,
       date: employeeSkillCertificate.date,
       typeId: employeeSkillCertificate.typeId,
-      skillId: employeeSkillCertificate.skillId
+      skillName: employeeSkillCertificate.skillName,
+      skillEmployeeUsername: employeeSkillCertificate.skillEmployeeUsername
     });
     this.typeFilterValue = employeeSkillCertificate.typeId;
-    this.skillFilterValue = employeeSkillCertificate.skillId;
+    this.skillFilterValue = employeeSkillCertificate.skillName;
+    this.skillEmployeeFilterValue = employeeSkillCertificate.skillEmployeeUsername;
   }
 
   previousState() {
@@ -81,7 +96,7 @@ export class EmployeeSkillCertificateUpdateComponent implements OnInit {
   save() {
     this.isSaving = true;
     const employeeSkillCertificate = this.createFromForm();
-    if (employeeSkillCertificate.id !== undefined) {
+    if (this.edit) {
       this.subscribeToSaveResponse(this.employeeSkillCertificateService.update(employeeSkillCertificate));
     } else {
       this.subscribeToSaveResponse(this.employeeSkillCertificateService.create(employeeSkillCertificate));
@@ -91,11 +106,11 @@ export class EmployeeSkillCertificateUpdateComponent implements OnInit {
   private createFromForm(): IEmployeeSkillCertificate {
     return {
       ...new EmployeeSkillCertificate(),
-      id: this.editForm.get(['id']).value,
       grade: this.editForm.get(['grade']).value,
       date: this.editForm.get(['date']).value,
       typeId: this.editForm.get(['typeId']).value,
-      skillId: this.editForm.get(['skillId']).value
+      skillName: this.editForm.get(['skillName']).value,
+      skillEmployeeUsername: this.editForm.get(['skillEmployeeUsername']).value
     };
   }
 

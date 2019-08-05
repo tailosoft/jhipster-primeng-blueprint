@@ -8,7 +8,6 @@ const walker = require('./path-walker');
 
 const importJdl = require('generator-jhipster/cli/import-jdl');
 
-
 const noopFork = () => ({
     on(code, cb) {
         cb(0);

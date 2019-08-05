@@ -17,8 +17,16 @@
  limitations under the License.
 -%>
 <%_
-const hasRelationshipQuery = relationships && relationships.some(r => (r.relationshipType === 'many-to-one' || ((r.relationshipType === 'one-to-one' || r.relationshipType === 'many-to-many') && r.ownerSide === true)));
-const hasPaginationRelationship = relationships && relationships.some(r => (r.relationshipType === 'many-to-one' || ((r.relationshipType === 'one-to-one' || r.relationshipType === 'many-to-many') && r.ownerSide === true)) && r.pagination != 'no');
+const hasRelationshipQuery = relationships && relationships.some(r => r.inForm);
+const hasPaginationRelationship = relationships && relationships.some(r => r.inForm && r.pagination != 'no');
+const relationshipsEntities = {};
+relationships.filter(r => r.inForm).forEach(r => {
+    r.pkData.forEach(pk => {
+        if (!(pk.entityName in relationshipsEntities)) {
+            relationshipsEntities[pk.entityName];
+        }
+    });
+})
 _%>
 import { Component, OnInit<% if (fieldsContainImageBlob) { %>, ElementRef<% } %> } from '@angular/core';
 import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
@@ -29,8 +37,10 @@ import { Observable } from 'rxjs';
 import { lazyLoadEventToQueryParams } from 'app/shared/util/request-util';
 import { LazyLoadEvent } from 'primeng/api';
 <%_ } _%>
+<%_ if (fieldsContainBlob) { _%>
+import { JhiDataUtils } from 'ng-jhipster';
+<%_ } _%>
 <%_ if (hasRelationshipQuery || fieldsContainBlob) { _%>
-import { <% if (fieldsContainBlob) { %>JhiDataUtils<% } %> } from 'ng-jhipster';
 import { MessageService } from 'primeng/api';
 <%_ } _%>
 <%_
@@ -47,20 +57,21 @@ _%>
 import { I<%= entityAngularName %>, <%= entityAngularName %><%= enumOptions ? ', ' + enumOptions : '' %> } from 'app/shared/model/<%= entityModelFileName %>.model';
 import { <%= entityAngularName %>Service } from './<%= entityFileName %>.service';
 <%_
-Object.keys(differentRelationships).forEach(key => {
-    if (differentRelationships[key].some(rel => rel.inForm)) {
-        const uniqueRel = differentRelationships[key][0];
-        if (uniqueRel.otherEntityAngularName !== entityAngularName) {
-            if (uniqueRel.otherEntityAngularName === 'User') {
-_%>
-import { I<%= uniqueRel.otherEntityAngularName %>, <%= uniqueRel.otherEntityAngularName%>Service } from 'app/core';
-<%_         } else { _%>
-import { I<%= uniqueRel.otherEntityAngularName %> } from 'app/shared/model/<%= uniqueRel.otherEntityModelName %>.model';
-import { <%= uniqueRel.otherEntityAngularName%>Service } from 'app/entities/<%= uniqueRel.otherEntityPath %>';
-<%_         }
+const importedEntities = [];
+relationships.filter(r => r.inForm).forEach(r => {
+    r.pkData.filter(pk => pk.entity.angularName !== entityAngularName).forEach(pk => {
+        if(!importedEntities.includes(pk.entity.angularName)) {
+            importedEntities.push(pk.entity.angularName);
+            if(pk.entity.angularName === 'User') { _%>
+import { IUser, UserService } from 'app/core';
+            <%_ } else { _%>
+import { I<%= pk.entity.angularName %> } from 'app/shared/model/<%= pk.entity.modelName %>.model';
+import { <%= pk.entity.angularName%>Service } from 'app/entities/<%= pk.entity.path %>';
+<%_
+            }
         }
-    }
-}); _%>
+    })
+}) _%>
 
 @Component({
     selector: '<%= jhiPrefixDashed %>-<%= entityFileName %>-update',
@@ -68,13 +79,18 @@ import { <%= uniqueRel.otherEntityAngularName%>Service } from 'app/entities/<%= 
 })
 export class <%= entityAngularName %>UpdateComponent implements OnInit {
 
+<%_ if(!isAutoIncrement){ _%>
+    edit: boolean;
+<%_} _%>
     isSaving: boolean;
 <%_ for (idx in relationships) { _%>
     <%_ if (relationships[idx].inForm) { _%>
-    <%= relationships[idx].relationshipName %>Options: I<%= relationships[idx].otherEntityAngularName %>[];
-        <%_ if (relationships[idx].relationshipType === 'many-to-one' || (relationships[idx].relationshipType === 'one-to-one' && relationships[idx].ownerSide === true)) { _%>
-    <%= relationships[idx].relationshipName %>FilterValue: any;
-        <%_ } _%>
+        <%_ relationships[idx].pkData.forEach(pk => { _%>
+    <%= pk.formName %>Options: I<%= _.upperFirst(pk.entityName) %>[];
+            <%_ if (relationships[idx].relationshipType === 'many-to-one' || (relationships[idx].relationshipType === 'one-to-one' && relationships[idx].ownerSide === true)) { _%>
+    <%= pk.formName %>FilterValue: any;
+            <%_ } _%>
+        <%_ }) _%>
     <%_ } _%>
 <%_ } _%>
 <%_ for ( idx in fields ) { _%>
@@ -86,7 +102,6 @@ export class <%= entityAngularName %>UpdateComponent implements OnInit {
 <%_ } _%>
 
     editForm = this.fb.group({
-        id: [],
 <%_ for (idx in fields) {
     const fieldName = fields[idx].fieldName;
     const fieldType = fields[idx].fieldType;
@@ -114,7 +129,9 @@ export class <%= entityAngularName %>UpdateComponent implements OnInit {
         <%_ if (dto === 'no') { _%>
         <%=relationshipName %>: [<% if (relationshipRequired) { %>null,Validators.required<% } %>],
         <%_ } else { _%>
-        <%=relationshipName %>Id: [<% if (relationshipRequired) { %>null,Validators.required<% } %>],
+            <%_ relationships[idx].pkData.forEach(pk => { _%>
+        <%=relationshipName %><%= pk.nameCapitalized %>: [<% if (relationshipRequired) { %>null,Validators.required<% } %>],
+            <%_ }); _%>
         <%_ } _%>
     <%_ } else if (relationshipType === 'many-to-many' && relationships[idx].ownerSide === true) { _%>
         <%=relationshipFieldNamePlural %>: [<% if (relationshipRequired) { %>null,Validators.required<% } %>],
@@ -131,15 +148,17 @@ export class <%= entityAngularName %>UpdateComponent implements OnInit {
         protected messageService: MessageService,
 <%_ } _%>
         protected <%= entityInstance %>Service: <%= entityAngularName %>Service,
-<%_ Object.keys(differentRelationships).forEach(key => {
-    if (differentRelationships[key].some(rel => rel.inForm)) {
-        const uniqueRel = differentRelationships[key][0];
-        if (uniqueRel.otherEntityAngularName !== entityAngularName) { _%>
-        protected <%= uniqueRel.otherEntityName %>Service: <%= uniqueRel.otherEntityAngularName %>Service,
+<%_
+const constructorEntities = [];
+relationships.filter(r => r.inForm).forEach(r => {
+    r.pkData.filter(pk => pk.entity.angularName !== entityAngularName).forEach(pk => {
+        if(!constructorEntities.includes(pk.entity.angularName)) {
+            constructorEntities.push(pk.entity.angularName); _%>
+        protected <%= _.lowerFirst(pk.entity.name) %>Service: <%= pk.entity.angularName%>Service,
 <%_
         }
-    }
-}); _%>
+    })
+}) _%>
         protected activatedRoute: ActivatedRoute,
         private fb: FormBuilder
     ) {
@@ -161,28 +180,34 @@ export class <%= entityAngularName %>UpdateComponent implements OnInit {
 
 <%_ for (idx in relationships) { _%>
     <%_ if (relationships[idx].inForm) { _%>
-        <%_ if (relationships[idx].pagination == 'no') { _%>
+        <%_ relationships[idx].pkData.forEach(pk => { _%>
+            <%_ if (relationships[idx].pagination == 'no') { _%>
 
-    loadAll<%= relationships[idx].relationshipNameCapitalizedPlural %>() {
-            <%_ if (relationships[idx].relationshipType === 'one-to-one' && relationships[idx].ownerSide === true && relationships[idx].jpaMetamodelFiltering) { _%>
+    loadAll<%= _.upperFirst(pluralize(pk.formName)) %>() {
+                <%_ if (relationships[idx].relationshipType === 'one-to-one' && relationships[idx].ownerSide === true && relationships[idx].jpaMetamodelFiltering) { _%>
         //TODO change this to load only unspecified + add selectedTo options if any
-            <%_ } _%>
-        this.<%= relationships[idx].otherEntityName %>Service.query()
-            .subscribe(res => this.<%= relationships[idx].relationshipName %>Options = res.body, (res: HttpErrorResponse) => this.onError(res.message));
+                <%_ } _%>
+        this.<%= _.lowerFirst(pk.entityName) %>Service.query()
+            .subscribe(res => this.<%= pk.formName %>Options = res.body, (res: HttpErrorResponse) => this.onError(res.message));
     }
-        <%_ } else { _%>
+            <%_ } else { _%>
 
-    on<%= relationships[idx].relationshipNameCapitalized %>LazyLoadEvent(event: LazyLoadEvent) {
-        this.<%= relationships[idx].otherEntityName %>Service.query(lazyLoadEventToQueryParams(event || {}))
-            .subscribe(res => this.<%= relationships[idx].relationshipName %>Options = res.body, (res: HttpErrorResponse) => this.onError(res.message));
+    on<%= _.upperFirst(pk.formName) %>LazyLoadEvent(event: LazyLoadEvent) {
+        this.<%= _.lowerFirst(pk.entityName) %>Service.query(lazyLoadEventToQueryParams(event || {}))
+            .subscribe(res => this.<%= pk.formName %>Options = res.body, (res: HttpErrorResponse) => this.onError(res.message));
     }
-        <%_ } _%>
+            <%_ } _%>
+        <%_ }) _%>
     <%_ } _%>
 <%_ } _%>
 
     updateForm(<%= entityInstance %>: I<%= entityAngularName %>) {
+<%_ if(!isAutoIncrement) {_%>
+        if (<%- pkData.map(pk => `${entityInstance}.${pk.name}`).join(' && ') %>) {
+            this.edit = true;
+        }
+<%_ } _%>
         this.editForm.patchValue({
-            id: <%= entityInstance %>.id,
 <%_ for (idx in fields) {
     const fieldName = fields[idx].fieldName;
     const fieldType = fields[idx].fieldType;
@@ -213,7 +238,9 @@ _%>
         <%_ if (dto === 'no') { _%>
             <%=relationshipName %>: <%= entityInstance %>.<%=relationshipFieldName %>,
         <%_ } else { _%>
-            <%=relationshipName %>Id: <%= entityInstance %>.<%=relationshipFieldName %>Id,
+            <%_ relationships[idx].pkData.forEach(pk => { _%>
+            <%=relationshipName %><%= pk.nameCapitalized %>: <%= entityInstance %>.<%=relationshipFieldName %><%= pk.nameCapitalized %>,
+            <%_ }); _%>
         <%_ } _%>
     <%_ } else if (relationshipType === 'many-to-many' && relationships[idx].ownerSide === true) { _%>
             <%=relationshipFieldNamePlural %>: <%=entityInstance %>.<%=relationshipFieldNamePlural %>,
@@ -237,7 +264,9 @@ _%>
 <%_ } _%>
 <%_ for (idx in relationships) { _%>
     <%_ if (relationships[idx].relationshipType === 'many-to-one' || (relationships[idx].relationshipType === 'one-to-one' && relationships[idx].ownerSide === true)) { _%>
-        this.<%= relationships[idx].relationshipName %>FilterValue = <%= entityInstance %>.<%= relationships[idx].relationshipName %>Id;
+        <%_ relationships[idx].pkData.forEach(pk => { _%>
+        this.<%= pk.formName %>FilterValue = <%= entityInstance %>.<%= relationships[idx].relationshipName %><%= pk.nameCapitalized %>;
+        <%_ }); _%>
     <%_ } _%>
 <%_ } _%>
     }
@@ -268,7 +297,11 @@ _%>
     save() {
         this.isSaving = true;
         const <%= entityInstance %> = this.createFromForm();
+<%_ if(isAutoIncrement){ _%>
         if (<%= entityInstance %>.id !== undefined) {
+<%_ } else { _%>
+        if (this.edit) {
+<%_ } _%>
             this.subscribeToSaveResponse(
                 this.<%= entityInstance %>Service.update(<%= entityInstance %>));
         } else {
@@ -280,7 +313,6 @@ _%>
     private createFromForm(): I<%= entityAngularName %> {
         return {
                        ...new <%= entityAngularName %>(),
-            id: this.editForm.get(['id']).value,
     <%_ for (idx in fields) {
         const fieldName = fields[idx].fieldName;
         const fieldType = fields[idx].fieldType;
@@ -311,7 +343,9 @@ _%>
             <%_ if (dto === 'no') { _%>
             <%= relationshipName %>: this.editForm.get(['<%= relationshipName %>']).value,
             <%_ } else { _%>
-            <%= relationshipName %>Id: this.editForm.get(['<%= relationshipName %>Id']).value,
+                <%_ relationships[idx].pkData.forEach(pk => { _%>
+            <%= relationshipName %><%= pk.nameCapitalized %>: this.editForm.get(['<%= relationshipName %><%= pk.nameCapitalized %>']).value,
+                <%_ }); _%>
             <%_ } _%>
         <%_ } else if (relationshipType === 'many-to-many' && relationships[idx].ownerSide === true) { _%>
             <%= relationshipFieldNamePlural %>: this.editForm.get(['<%= relationshipFieldNamePlural %>']).value,

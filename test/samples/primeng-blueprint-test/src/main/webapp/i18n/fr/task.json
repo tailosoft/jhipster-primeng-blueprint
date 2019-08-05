@@ -16,6 +16,7 @@
       "detail": {
         "title": "Task"
       },
+      "id": "ID",
       "name": "Name",
       "comment": "Comment",
       "employeeSkill": "Employee Skill"

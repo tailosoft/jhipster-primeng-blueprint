@@ -16,9 +16,10 @@ export class EmployeeSkillResolve implements Resolve<IEmployeeSkill> {
   constructor(private service: EmployeeSkillService) {}
 
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<IEmployeeSkill> {
-    const id = route.params['id'] ? route.params['id'] : null;
-    if (id) {
-      return this.service.find(id).pipe(
+    const name = route.params['name'] ? route.params['name'] : null;
+    const employeeUsername = route.params['employeeUsername'] ? route.params['employeeUsername'] : null;
+    if (name && employeeUsername) {
+      return this.service.find(name, employeeUsername).pipe(
         filter((response: HttpResponse<EmployeeSkill>) => response.ok),
         map((employeeSkill: HttpResponse<EmployeeSkill>) => employeeSkill.body)
       );
@@ -38,7 +39,7 @@ export const employeeSkillRoute: Routes = [
     canActivate: [UserRouteAccessService]
   },
   {
-    path: ':id/view',
+    path: 'view',
     component: EmployeeSkillDetailComponent,
     resolve: {
       employeeSkill: EmployeeSkillResolve
@@ -62,7 +63,7 @@ export const employeeSkillRoute: Routes = [
     canActivate: [UserRouteAccessService]
   },
   {
-    path: ':id/edit',
+    path: 'edit',
     component: EmployeeSkillUpdateComponent,
     resolve: {
       employeeSkill: EmployeeSkillResolve

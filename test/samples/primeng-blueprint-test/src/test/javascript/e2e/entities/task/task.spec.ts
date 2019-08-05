@@ -38,7 +38,8 @@ describe('Task e2e test', () => {
     const nbButtonsBeforeCreate = await taskComponentsPage.countDeleteButtons();
 
     await taskComponentsPage.clickOnCreateButton();
-    await promise.all([taskUpdatePage.setNameInput('name')]);
+    await promise.all([taskUpdatePage.setInput('5'), taskUpdatePage.setNameInput('name')]);
+    expect(await taskUpdatePage.getInput()).to.eq('5', 'Expected id value to be equals to 5');
     expect(await taskUpdatePage.getNameInput()).to.eq('name', 'Expected Name value to be equals to name');
     await taskUpdatePage.save();
     expect(await taskUpdatePage.getSaveButton().isPresent(), 'Expected save button disappear').to.be.false;

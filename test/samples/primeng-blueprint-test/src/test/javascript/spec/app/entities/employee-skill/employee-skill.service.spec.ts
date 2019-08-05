@@ -23,14 +23,14 @@ describe('Service Tests', () => {
       service = injector.get(EmployeeSkillService);
       httpMock = injector.get(HttpTestingController);
 
-      elemDefault = new EmployeeSkill(0, 'AAAAAAA', 0);
+      elemDefault = new EmployeeSkill('AAAAAAA', 'AAAAAAA', 123, undefined, undefined, 'AAAAAAA');
     });
 
     describe('Service methods', () => {
       it('should find an element', async () => {
         const returnedFromService = Object.assign({}, elemDefault);
         service
-          .find(123)
+          .find('AAAAAAA', 'AAAAAAA')
           .pipe(take(1))
           .subscribe(resp => (expectedResult = resp));
 
@@ -98,7 +98,7 @@ describe('Service Tests', () => {
       });
 
       it('should delete a EmployeeSkill', async () => {
-        const rxPromise = service.delete(123).subscribe(resp => (expectedResult = resp.ok));
+        const rxPromise = service.delete('AAAAAAA', 'AAAAAAA').subscribe(resp => (expectedResult = resp.ok));
 
         const req = httpMock.expectOne({ method: 'DELETE' });
         req.flush({ status: 200 });

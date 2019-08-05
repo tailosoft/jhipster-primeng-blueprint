@@ -26,10 +26,19 @@ export class CertificateTypeUpdatePage {
   pageTitle = element(by.id('jhi-certificate-type-heading'));
   saveButton = element(by.id('save-entity'));
   cancelButton = element(by.id('cancel-save'));
+  idInput = element(by.id('field_id'));
   nameInput = element(by.id('field_name'));
 
   async getPageTitle() {
     return this.pageTitle.getAttribute('jhiTranslate');
+  }
+
+  async setInput(id) {
+    await this.idInput.sendKeys(id);
+  }
+
+  async getInput() {
+    return await this.idInput.getAttribute('value');
   }
 
   async setNameInput(name) {

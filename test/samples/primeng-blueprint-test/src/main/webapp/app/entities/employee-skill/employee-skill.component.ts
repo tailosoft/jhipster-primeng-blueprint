@@ -12,10 +12,10 @@ import { lazyLoadEventToQueryParams } from 'app/shared/util/request-util';
 import { EmployeeSkillService } from './employee-skill.service';
 import { ConfirmationService, LazyLoadEvent } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
-import { TaskService } from 'app/entities/task/task.service';
 import { ITask } from 'app/shared/model/task.model';
-import { EmployeeService } from 'app/entities/employee/employee.service';
+import { TaskService } from 'app/entities/task';
 import { IEmployee } from 'app/shared/model/employee.model';
+import { EmployeeService } from 'app/entities/employee';
 
 import { Table } from 'primeng/table';
 import { flatten, unflatten } from 'flat';
@@ -80,8 +80,8 @@ export class EmployeeSkillComponent implements OnInit, OnDestroy, AfterViewInit 
         if (event.filters && event.filters.taskId && event.filters.taskId.value) {
           this.employeeSkillTable.filters.taskId.value = event.filters.taskId.value.map(x => +x);
         }
-        if (event.filters && event.filters.employeeId && event.filters.employeeId.value) {
-          this.employeeSkillTable.filters.employeeId.value = event.filters.employeeId.value.map(x => +x);
+        if (event.filters && event.filters.employeeUsername && event.filters.employeeUsername.value) {
+          this.employeeSkillTable.filters.employeeUsername.value = event.filters.employeeUsername.value.map(x => +x);
         }
       });
 
@@ -116,12 +116,12 @@ export class EmployeeSkillComponent implements OnInit, OnDestroy, AfterViewInit 
     });
   }
 
-  delete(id: number) {
+  delete(name: string, employeeUsername: string) {
     this.confirmationService.confirm({
       header: this.translateService.instant('entity.delete.title'),
-      message: this.translateService.instant('primengtestApp.employeeSkill.delete.question', { id }),
+      message: this.translateService.instant('primengtestApp.employeeSkill.delete.question', { id: name + ',' + employeeUsername }),
       accept: () => {
-        this.employeeSkillService.delete(id).subscribe(() => {
+        this.employeeSkillService.delete(name, employeeUsername).subscribe(() => {
           this.eventManager.broadcast({
             name: 'employeeSkillListModification',
             content: 'Deleted an employeeSkill'
@@ -140,7 +140,7 @@ export class EmployeeSkillComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   trackId(index: number, item: IEmployeeSkill) {
-    return item.id;
+    return item.name + ',' + item.employeeUsername;
   }
 
   registerChangeInEmployeeSkills() {

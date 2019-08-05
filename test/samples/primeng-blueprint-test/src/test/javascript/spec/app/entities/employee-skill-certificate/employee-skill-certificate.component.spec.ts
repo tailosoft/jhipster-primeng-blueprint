@@ -43,7 +43,7 @@ describe('Component Tests', () => {
       spyOn(service, 'query').and.returnValue(
         of(
           new HttpResponse({
-            body: [new EmployeeSkillCertificate(123)]
+            body: [new EmployeeSkillCertificate(123, 'AAAAAAA', 'AAAAAAA')]
           })
         )
       );
@@ -56,7 +56,9 @@ describe('Component Tests', () => {
 
       // THEN
       expect(service.query).toHaveBeenCalled();
-      expect(comp.employeeSkillCertificates[0]).toEqual(jasmine.objectContaining({ id: 123 }));
+      expect(comp.employeeSkillCertificates[0]).toEqual(
+        jasmine.objectContaining({ typeId: 123, skillName: 'AAAAAAA', skillEmployeeUsername: 'AAAAAAA' })
+      );
     }));
 
     it('should load a page', fakeAsync(() => {
@@ -64,7 +66,7 @@ describe('Component Tests', () => {
       spyOn(service, 'query').and.returnValue(
         of(
           new HttpResponse({
-            body: [new EmployeeSkillCertificate(123)]
+            body: [new EmployeeSkillCertificate(123, 'AAAAAAA', 'AAAAAAA')]
           })
         )
       );
@@ -79,7 +81,9 @@ describe('Component Tests', () => {
 
       // THEN
       expect(service.query).toHaveBeenCalled();
-      expect(comp.employeeSkillCertificates[0]).toEqual(jasmine.objectContaining({ id: 123 }));
+      expect(comp.employeeSkillCertificates[0]).toEqual(
+        jasmine.objectContaining({ typeId: 123, skillName: 'AAAAAAA', skillEmployeeUsername: 'AAAAAAA' })
+      );
     }));
 
     it('should call delete service using confirmDialog', fakeAsync(() => {
@@ -87,11 +91,11 @@ describe('Component Tests', () => {
       spyOn(service, 'delete').and.returnValue(of({}));
 
       // WHEN
-      comp.delete(123);
+      comp.delete(123, 'AAAAAAA', 'AAAAAAA');
 
       // THEN
       expect(mockConfirmationService.confirmSpy).toHaveBeenCalled();
-      expect(service.delete).toHaveBeenCalledWith(123);
+      expect(service.delete).toHaveBeenCalledWith(123, 'AAAAAAA', 'AAAAAAA');
       expect(mockEventManager.broadcastSpy).toHaveBeenCalled();
     }));
   });

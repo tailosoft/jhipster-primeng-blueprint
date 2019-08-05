@@ -26,11 +26,20 @@ export class TaskCommentUpdatePage {
   pageTitle = element(by.id('jhi-task-comment-heading'));
   saveButton = element(by.id('save-entity'));
   cancelButton = element(by.id('cancel-save'));
+  idInput = element(by.id('field_id'));
   valueInput = element(by.id('field_value'));
   taskSelect = element(by.id('field_task'));
 
   async getPageTitle() {
     return this.pageTitle.getAttribute('jhiTranslate');
+  }
+
+  async setInput(id) {
+    await this.idInput.sendKeys(id);
+  }
+
+  async getInput() {
+    return await this.idInput.getAttribute('value');
   }
 
   async setValueInput(value) {

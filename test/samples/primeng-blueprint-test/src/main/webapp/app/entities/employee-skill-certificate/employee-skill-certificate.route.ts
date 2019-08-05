@@ -16,9 +16,11 @@ export class EmployeeSkillCertificateResolve implements Resolve<IEmployeeSkillCe
   constructor(private service: EmployeeSkillCertificateService) {}
 
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<IEmployeeSkillCertificate> {
-    const id = route.params['id'] ? route.params['id'] : null;
-    if (id) {
-      return this.service.find(id).pipe(
+    const typeId = route.params['typeId'] ? route.params['typeId'] : null;
+    const skillName = route.params['skillName'] ? route.params['skillName'] : null;
+    const skillEmployeeUsername = route.params['skillEmployeeUsername'] ? route.params['skillEmployeeUsername'] : null;
+    if (typeId && skillName && skillEmployeeUsername) {
+      return this.service.find(typeId, skillName, skillEmployeeUsername).pipe(
         filter((response: HttpResponse<EmployeeSkillCertificate>) => response.ok),
         map((employeeSkillCertificate: HttpResponse<EmployeeSkillCertificate>) => employeeSkillCertificate.body)
       );
@@ -38,7 +40,7 @@ export const employeeSkillCertificateRoute: Routes = [
     canActivate: [UserRouteAccessService]
   },
   {
-    path: ':id/view',
+    path: 'view',
     component: EmployeeSkillCertificateDetailComponent,
     resolve: {
       employeeSkillCertificate: EmployeeSkillCertificateResolve
@@ -62,7 +64,7 @@ export const employeeSkillCertificateRoute: Routes = [
     canActivate: [UserRouteAccessService]
   },
   {
-    path: ':id/edit',
+    path: 'edit',
     component: EmployeeSkillCertificateUpdateComponent,
     resolve: {
       employeeSkillCertificate: EmployeeSkillCertificateResolve

@@ -16,6 +16,7 @@
       "detail": {
         "title": "Certificate Type"
       },
+      "id": "ID",
       "name": "Name",
       "employeeSkillCertificate": "Employee Skill Certificate"
     }

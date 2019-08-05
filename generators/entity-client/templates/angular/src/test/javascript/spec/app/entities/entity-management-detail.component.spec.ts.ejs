@@ -17,7 +17,7 @@
  limitations under the License.
 -%>
 <%_
-const tsKeyId = generateTestEntityId(pkType, prodDatabaseType);
+const tsKeyId = pkData.map(pk => pk.field.tsTestValue).join(', ');
 _%>
 /* tslint:disable max-line-length */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -57,7 +57,7 @@ describe('Component Tests', () => {
                 comp.ngOnInit();
 
                 // THEN
-                expect(comp.<%= entityInstance %>).toEqual(jasmine.objectContaining({id: <%- tsKeyId %>}));
+                expect(comp.<%= entityInstance %>).toEqual(jasmine.objectContaining({<%- pkData.map(pk => `${pk.name}: ${pk.field.tsTestValue}`).join(', ') %>}));
             });
         });
     });

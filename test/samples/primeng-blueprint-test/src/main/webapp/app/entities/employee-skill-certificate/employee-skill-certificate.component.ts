@@ -12,10 +12,12 @@ import { lazyLoadEventToQueryParams } from 'app/shared/util/request-util';
 import { EmployeeSkillCertificateService } from './employee-skill-certificate.service';
 import { ConfirmationService, LazyLoadEvent } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
-import { CertificateTypeService } from 'app/entities/certificate-type/certificate-type.service';
 import { ICertificateType } from 'app/shared/model/certificate-type.model';
-import { EmployeeSkillService } from 'app/entities/employee-skill/employee-skill.service';
+import { CertificateTypeService } from 'app/entities/certificate-type';
 import { IEmployeeSkill } from 'app/shared/model/employee-skill.model';
+import { EmployeeSkillService } from 'app/entities/employee-skill';
+import { IEmployee } from 'app/shared/model/employee.model';
+import { EmployeeService } from 'app/entities/employee';
 
 import { Table } from 'primeng/table';
 import { flatten, unflatten } from 'flat';
@@ -31,6 +33,7 @@ export class EmployeeSkillCertificateComponent implements OnInit, OnDestroy, Aft
   dateRange: Date[];
   typeOptions: ICertificateType[];
   skillOptions: IEmployeeSkill[];
+  skillEmployeeOptions: IEmployee[];
 
   totalItems: number;
   itemsPerPage: number;
@@ -43,6 +46,7 @@ export class EmployeeSkillCertificateComponent implements OnInit, OnDestroy, Aft
     protected employeeSkillCertificateService: EmployeeSkillCertificateService,
     protected certificateTypeService: CertificateTypeService,
     protected employeeSkillService: EmployeeSkillService,
+    protected employeeService: EmployeeService,
     protected messageService: MessageService,
     protected activatedRoute: ActivatedRoute,
     protected router: Router,
@@ -84,8 +88,11 @@ export class EmployeeSkillCertificateComponent implements OnInit, OnDestroy, Aft
         if (event.filters && event.filters.typeId && event.filters.typeId.value) {
           this.employeeSkillCertificateTable.filters.typeId.value = event.filters.typeId.value.map(x => +x);
         }
-        if (event.filters && event.filters.skillId && event.filters.skillId.value) {
-          this.employeeSkillCertificateTable.filters.skillId.value = event.filters.skillId.value.map(x => +x);
+        if (event.filters && event.filters.skillName && event.filters.skillName.value) {
+          this.employeeSkillCertificateTable.filters.skillName.value = event.filters.skillName.value.map(x => +x);
+        }
+        if (event.filters && event.filters.skillEmployeeUsername && event.filters.skillEmployeeUsername.value) {
+          this.employeeSkillCertificateTable.filters.skillEmployeeUsername.value = event.filters.skillEmployeeUsername.value.map(x => +x);
         }
       });
 
@@ -120,12 +127,14 @@ export class EmployeeSkillCertificateComponent implements OnInit, OnDestroy, Aft
     });
   }
 
-  delete(id: number) {
+  delete(typeId: number, skillName: string, skillEmployeeUsername: string) {
     this.confirmationService.confirm({
       header: this.translateService.instant('entity.delete.title'),
-      message: this.translateService.instant('primengtestApp.employeeSkillCertificate.delete.question', { id }),
+      message: this.translateService.instant('primengtestApp.employeeSkillCertificate.delete.question', {
+        id: typeId + ',' + skillName + ',' + skillEmployeeUsername
+      }),
       accept: () => {
-        this.employeeSkillCertificateService.delete(id).subscribe(() => {
+        this.employeeSkillCertificateService.delete(typeId, skillName, skillEmployeeUsername).subscribe(() => {
           this.eventManager.broadcast({
             name: 'employeeSkillCertificateListModification',
             content: 'Deleted an employeeSkillCertificate'
@@ -143,8 +152,12 @@ export class EmployeeSkillCertificateComponent implements OnInit, OnDestroy, Aft
     this.employeeSkillService.query(lazyLoadEventToQueryParams(event || {})).subscribe(res => (this.skillOptions = res.body));
   }
 
+  onSkillEmployeeLazyLoadEvent(event: LazyLoadEvent) {
+    this.employeeService.query(lazyLoadEventToQueryParams(event || {})).subscribe(res => (this.skillEmployeeOptions = res.body));
+  }
+
   trackId(index: number, item: IEmployeeSkillCertificate) {
-    return item.id;
+    return item.typeId + ',' + item.skillName + ',' + item.skillEmployeeUsername;
   }
 
   registerChangeInEmployeeSkillCertificates() {

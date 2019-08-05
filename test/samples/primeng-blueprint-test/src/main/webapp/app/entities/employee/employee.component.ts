@@ -98,12 +98,12 @@ export class EmployeeComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  delete(id: number) {
+  delete(username: string) {
     this.confirmationService.confirm({
       header: this.translateService.instant('entity.delete.title'),
-      message: this.translateService.instant('primengtestApp.employee.delete.question', { id }),
+      message: this.translateService.instant('primengtestApp.employee.delete.question', { id: username }),
       accept: () => {
-        this.employeeService.delete(id).subscribe(() => {
+        this.employeeService.delete(username).subscribe(() => {
           this.eventManager.broadcast({
             name: 'employeeListModification',
             content: 'Deleted an employee'
@@ -114,7 +114,7 @@ export class EmployeeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   trackId(index: number, item: IEmployee) {
-    return item.id;
+    return item.username;
   }
 
   registerChangeInEmployees() {

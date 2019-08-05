@@ -11,10 +11,10 @@ import { EmployeeService } from './employee.service';
   templateUrl: './employee-update.component.html'
 })
 export class EmployeeUpdateComponent implements OnInit {
+  edit: boolean;
   isSaving: boolean;
 
   editForm = this.fb.group({
-    id: [],
     username: [null, [Validators.required]],
     fullname: [null, [Validators.required]]
   });
@@ -29,8 +29,10 @@ export class EmployeeUpdateComponent implements OnInit {
   }
 
   updateForm(employee: IEmployee) {
+    if (employee.username) {
+      this.edit = true;
+    }
     this.editForm.patchValue({
-      id: employee.id,
       username: employee.username,
       fullname: employee.fullname
     });
@@ -43,7 +45,7 @@ export class EmployeeUpdateComponent implements OnInit {
   save() {
     this.isSaving = true;
     const employee = this.createFromForm();
-    if (employee.id !== undefined) {
+    if (this.edit) {
       this.subscribeToSaveResponse(this.employeeService.update(employee));
     } else {
       this.subscribeToSaveResponse(this.employeeService.create(employee));
@@ -53,7 +55,6 @@ export class EmployeeUpdateComponent implements OnInit {
   private createFromForm(): IEmployee {
     return {
       ...new Employee(),
-      id: this.editForm.get(['id']).value,
       username: this.editForm.get(['username']).value,
       fullname: this.editForm.get(['fullname']).value
     };

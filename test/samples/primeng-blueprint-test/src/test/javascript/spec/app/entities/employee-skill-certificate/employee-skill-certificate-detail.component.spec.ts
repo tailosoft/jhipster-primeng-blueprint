@@ -11,7 +11,9 @@ describe('Component Tests', () => {
   describe('EmployeeSkillCertificate Management Detail Component', () => {
     let comp: EmployeeSkillCertificateDetailComponent;
     let fixture: ComponentFixture<EmployeeSkillCertificateDetailComponent>;
-    const route = ({ data: of({ employeeSkillCertificate: new EmployeeSkillCertificate(123) }) } as any) as ActivatedRoute;
+    const route = ({
+      data: of({ employeeSkillCertificate: new EmployeeSkillCertificate(123, 'AAAAAAA', 'AAAAAAA') })
+    } as any) as ActivatedRoute;
 
     beforeEach(() => {
       TestBed.configureTestingModule({
@@ -33,7 +35,9 @@ describe('Component Tests', () => {
         comp.ngOnInit();
 
         // THEN
-        expect(comp.employeeSkillCertificate).toEqual(jasmine.objectContaining({ id: 123 }));
+        expect(comp.employeeSkillCertificate).toEqual(
+          jasmine.objectContaining({ typeId: 123, skillName: 'AAAAAAA', skillEmployeeUsername: 'AAAAAAA' })
+        );
       });
     });
   });

@@ -5,7 +5,6 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { lazyLoadEventToQueryParams } from 'app/shared/util/request-util';
 import { LazyLoadEvent } from 'primeng/api';
-import {} from 'ng-jhipster';
 import { MessageService } from 'primeng/api';
 import { IEmployeeSkill, EmployeeSkill } from 'app/shared/model/employee-skill.model';
 import { EmployeeSkillService } from './employee-skill.service';
@@ -19,17 +18,17 @@ import { EmployeeService } from 'app/entities/employee';
   templateUrl: './employee-skill-update.component.html'
 })
 export class EmployeeSkillUpdateComponent implements OnInit {
+  edit: boolean;
   isSaving: boolean;
   taskOptions: ITask[];
   employeeOptions: IEmployee[];
   employeeFilterValue: any;
 
   editForm = this.fb.group({
-    id: [],
     name: [null, [Validators.required]],
     level: [null, [Validators.required]],
     tasks: [],
-    employeeId: [null, Validators.required]
+    employeeUsername: [null, Validators.required]
   });
 
   constructor(
@@ -60,14 +59,16 @@ export class EmployeeSkillUpdateComponent implements OnInit {
   }
 
   updateForm(employeeSkill: IEmployeeSkill) {
+    if (employeeSkill.name && employeeSkill.employeeUsername) {
+      this.edit = true;
+    }
     this.editForm.patchValue({
-      id: employeeSkill.id,
       name: employeeSkill.name,
       level: employeeSkill.level,
       tasks: employeeSkill.tasks,
-      employeeId: employeeSkill.employeeId
+      employeeUsername: employeeSkill.employeeUsername
     });
-    this.employeeFilterValue = employeeSkill.employeeId;
+    this.employeeFilterValue = employeeSkill.employeeUsername;
   }
 
   previousState() {
@@ -77,7 +78,7 @@ export class EmployeeSkillUpdateComponent implements OnInit {
   save() {
     this.isSaving = true;
     const employeeSkill = this.createFromForm();
-    if (employeeSkill.id !== undefined) {
+    if (this.edit) {
       this.subscribeToSaveResponse(this.employeeSkillService.update(employeeSkill));
     } else {
       this.subscribeToSaveResponse(this.employeeSkillService.create(employeeSkill));
@@ -87,11 +88,10 @@ export class EmployeeSkillUpdateComponent implements OnInit {
   private createFromForm(): IEmployeeSkill {
     return {
       ...new EmployeeSkill(),
-      id: this.editForm.get(['id']).value,
       name: this.editForm.get(['name']).value,
       level: this.editForm.get(['level']).value,
       tasks: this.editForm.get(['tasks']).value,
-      employeeId: this.editForm.get(['employeeId']).value
+      employeeUsername: this.editForm.get(['employeeUsername']).value
     };
   }
 

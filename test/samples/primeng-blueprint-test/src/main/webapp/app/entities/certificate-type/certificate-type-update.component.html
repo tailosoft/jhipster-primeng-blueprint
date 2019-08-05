@@ -4,10 +4,10 @@
             <h2 id="jhi-certificate-type-heading" jhiTranslate="primengtestApp.certificateType.home.createOrEditLabel">Create or edit a Certificate Type</h2>
             <div class="form-grid">
                 <ng-container *ngIf="editForm.get('id').value">
-                    <label for="id" jhiTranslate="global.field.id">ID</label>
-                    <input pInputText type="text" id="id" name="id" formControlName="id"
-                           readonly />
-                    <div class="validation-messages"></div>
+                    <label jhiTranslate="global.field.id" for="field_id">ID</label>
+                    <input pInputText type="number" name="id" id="field_id" formControlName="id" readonly [disabled]="true"/>
+                    <div class="validation-messages">
+                    </div>
                 </ng-container>
                 <label jhiTranslate="primengtestApp.certificateType.name" for="field_name">Name</label>
                 <input pInputText type="text" name="name" id="field_name" formControlName="name"/>

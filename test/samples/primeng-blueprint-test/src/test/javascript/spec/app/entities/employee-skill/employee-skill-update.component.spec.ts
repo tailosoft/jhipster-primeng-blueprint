@@ -32,7 +32,7 @@ describe('Component Tests', () => {
     describe('save', () => {
       it('Should call update service on save for existing entity', fakeAsync(() => {
         // GIVEN
-        const entity = new EmployeeSkill(123);
+        const entity = new EmployeeSkill('AAAAAAA', 'AAAAAAA');
         spyOn(service, 'update').and.returnValue(of(new HttpResponse({ body: entity })));
         comp.updateForm(entity);
         // WHEN

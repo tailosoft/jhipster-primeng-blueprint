@@ -43,7 +43,7 @@ describe('Component Tests', () => {
       spyOn(service, 'query').and.returnValue(
         of(
           new HttpResponse({
-            body: [new EmployeeSkill(123)]
+            body: [new EmployeeSkill('AAAAAAA', 'AAAAAAA')]
           })
         )
       );
@@ -56,7 +56,7 @@ describe('Component Tests', () => {
 
       // THEN
       expect(service.query).toHaveBeenCalled();
-      expect(comp.employeeSkills[0]).toEqual(jasmine.objectContaining({ id: 123 }));
+      expect(comp.employeeSkills[0]).toEqual(jasmine.objectContaining({ name: 'AAAAAAA', employeeUsername: 'AAAAAAA' }));
     }));
 
     it('should load a page', fakeAsync(() => {
@@ -64,7 +64,7 @@ describe('Component Tests', () => {
       spyOn(service, 'query').and.returnValue(
         of(
           new HttpResponse({
-            body: [new EmployeeSkill(123)]
+            body: [new EmployeeSkill('AAAAAAA', 'AAAAAAA')]
           })
         )
       );
@@ -79,7 +79,7 @@ describe('Component Tests', () => {
 
       // THEN
       expect(service.query).toHaveBeenCalled();
-      expect(comp.employeeSkills[0]).toEqual(jasmine.objectContaining({ id: 123 }));
+      expect(comp.employeeSkills[0]).toEqual(jasmine.objectContaining({ name: 'AAAAAAA', employeeUsername: 'AAAAAAA' }));
     }));
 
     it('should call delete service using confirmDialog', fakeAsync(() => {
@@ -87,11 +87,11 @@ describe('Component Tests', () => {
       spyOn(service, 'delete').and.returnValue(of({}));
 
       // WHEN
-      comp.delete(123);
+      comp.delete('AAAAAAA', 'AAAAAAA');
 
       // THEN
       expect(mockConfirmationService.confirmSpy).toHaveBeenCalled();
-      expect(service.delete).toHaveBeenCalledWith(123);
+      expect(service.delete).toHaveBeenCalledWith('AAAAAAA', 'AAAAAAA');
       expect(mockEventManager.broadcastSpy).toHaveBeenCalled();
     }));
   });

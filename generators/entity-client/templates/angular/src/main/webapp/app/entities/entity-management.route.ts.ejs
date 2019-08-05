@@ -36,9 +36,11 @@ export class <%= entityAngularName %>Resolve implements Resolve<I<%= entityAngul
     }
 
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<I<%= entityAngularName %>> {
-        const id = route.params['id'] ? route.params['id'] : null;
-        if (id) {
-            return this.service.find(id).pipe(
+<%_ pkData.forEach(pk => { _%>
+        const <%= pk.name %> = route.params['<%= pk.name %>'] ? route.params['<%= pk.name %>'] : null;
+<%_ }) _%>
+        if (<%- pkData.map(pk => pk.name).join(' && ') %>) {
+            return this.service.find(<%- pkData.map(pk => pk.name).join(', ') %>).pipe(
                 filter((response: HttpResponse<<%= entityAngularName %>>) => response.ok),
                 map((<%= entityInstance %>: HttpResponse<<%= entityAngularName %>>) => <%= entityInstance %>.body)
             );
@@ -58,7 +60,7 @@ export const <%= entityInstance %>Route: Routes = [
         },
         canActivate: [UserRouteAccessService]
     }, {
-        path: ':id/view',
+        path: '<% if (pkData.length === 1) { %>:<%= pkName %>/<% } %>view',
         component: <%= entityAngularName %>DetailComponent,
         resolve: {
             <%= entityInstance %>: <%= entityAngularName %>Resolve
@@ -82,7 +84,7 @@ export const <%= entityInstance %>Route: Routes = [
         canActivate: [UserRouteAccessService]
     },
     {
-        path: ':id/edit',
+        path: '<% if (pkData.length === 1) { %>:<%= pkName %>/<% } %>edit',
         component: <%= entityAngularName %>UpdateComponent,
         resolve: {
             <%= entityInstance %>: <%= entityAngularName %>Resolve

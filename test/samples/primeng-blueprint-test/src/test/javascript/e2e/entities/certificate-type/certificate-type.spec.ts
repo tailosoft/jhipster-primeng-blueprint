@@ -38,7 +38,8 @@ describe('CertificateType e2e test', () => {
     const nbButtonsBeforeCreate = await certificateTypeComponentsPage.countDeleteButtons();
 
     await certificateTypeComponentsPage.clickOnCreateButton();
-    await promise.all([certificateTypeUpdatePage.setNameInput('name')]);
+    await promise.all([certificateTypeUpdatePage.setInput('5'), certificateTypeUpdatePage.setNameInput('name')]);
+    expect(await certificateTypeUpdatePage.getInput()).to.eq('5', 'Expected id value to be equals to 5');
     expect(await certificateTypeUpdatePage.getNameInput()).to.eq('name', 'Expected Name value to be equals to name');
     await certificateTypeUpdatePage.save();
     expect(await certificateTypeUpdatePage.getSaveButton().isPresent(), 'Expected save button disappear').to.be.false;

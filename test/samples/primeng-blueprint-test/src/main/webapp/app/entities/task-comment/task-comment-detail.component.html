@@ -11,7 +11,9 @@
                 <dt><span jhiTranslate="primengtestApp.taskComment.task">Task</span></dt>
                 <dd>
                     <div *ngIf="taskComment.taskId">
-                        <a [routerLink]="['/task', taskComment.taskId, 'view']">{{taskComment.taskName}}</a>
+                        <a [routerLink]="['/task', taskComment.taskId, 'view']">
+                            {{taskComment.taskName}}
+                        </a>
                     </div>
                 </dd>
             </dl>
