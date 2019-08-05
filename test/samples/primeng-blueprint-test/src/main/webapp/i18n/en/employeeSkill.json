@@ -18,7 +18,6 @@
       },
       "name": "Name",
       "level": "Level",
-      "employeeSkillCertificate": "Employee Skill Certificate",
       "task": "Task",
       "employee": "Employee"
     }

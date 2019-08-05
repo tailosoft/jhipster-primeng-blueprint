@@ -17,8 +17,7 @@
         "title": "Employee"
       },
       "username": "Username",
-      "fullname": "Fullname",
-      "skill": "Skill"
+      "fullname": "Fullname"
     }
   }
 }

@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const utils = require('../utils');
+const utils = require('generator-jhipster/generators/utils');
 
 /**
  * The default is to use a file path string. It implies use of the template method.
@@ -38,7 +38,7 @@ function writeFiles() {
                     if (!this.skipClient && this.enableTranslation) {
                         const languages = this.languages || this.getAllInstalledLanguages();
                         languages.forEach(language => {
-                            this.copyEnumI18n(language, enumInfo, this.fetchFromInstalledJHipster('entity-i18n/templates'));
+                            this.copyEnumI18n(language, enumInfo, './');
                         });
                     }
                 }
@@ -52,7 +52,7 @@ function writeFiles() {
             if (this.enableTranslation) {
                 const languages = this.languages || this.getAllInstalledLanguages();
                 languages.forEach(language => {
-                    this.copyI18n(language, this.fetchFromInstalledJHipster('entity-i18n/templates'));
+                    this.copyI18n(language, './');
                 });
             }
         }

@@ -19,7 +19,8 @@
       "grade": "Grade",
       "date": "Date",
       "type": "Type",
-      "skill": "Skill"
+      "skill": "Skill",
+      "skillEmployee": "Skill Employee"
     }
   }
 }
