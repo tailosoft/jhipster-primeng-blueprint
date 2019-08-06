@@ -206,7 +206,6 @@ module.exports = class extends EntityClientGenerator {
         } else {
             context.isAutoIncrement = false;
         }
-        console.log('context.isAutoIncrement: '+context.isAutoIncrement);
         context.pkData = [];
         for (let i = 0; i < context.fields.length; i++) {
             const field = context.fields[i];
