@@ -46,11 +46,6 @@ describe('Subgenerator client of primeng-blueprint JHipster blueprint', () => {
                         path.join(__dirname, '../generators/client/index.js')
                     ],
                     [
-                        require('../generators/entity/index.js'), // eslint-disable-line global-require
-                        'jhipster-primeng-blueprint:entity',
-                        path.join(__dirname, '../generators/entity/index.js')
-                    ],
-                    [
                         require('../generators/entity-client/index.js'), // eslint-disable-line global-require
                         'jhipster-primeng-blueprint:entity-client',
                         path.join(__dirname, '../generators/entity-client/index.js')
