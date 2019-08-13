@@ -85,6 +85,9 @@ module.exports = class extends EntityClientGenerator {
         const prePhaseSteps = {
             // making sure name is unique to not override any step
             primengBlueprintPopulatingRelationshipPagination() {
+                if (!this.allContexts) {
+                    this.allContexts = {};
+                }
                 this.relationships.forEach(relationship => {
                     const otherEntityData = this._getEntityJson(relationship.otherEntityName);
                     relationship.pagination = otherEntityData.pagination;
@@ -102,6 +105,10 @@ module.exports = class extends EntityClientGenerator {
                 const context = this;
                 context.pluralize = pluralize;
                 this._computePkData(context);
+                // compute relationships pkData
+                this.relationships.forEach(r => {
+                    this._populateRelationshipPkData(r, context);
+                });
                 this._populateTsVaribales(context);
                 if (context.pkData.length === 1) {
                     context.pkType = context.pkData[0].type;
@@ -195,11 +202,14 @@ module.exports = class extends EntityClientGenerator {
             context.modulePath = 'app/core';
         }
 
-        this._computePkData(context, currentContext);
+        this._computePkData(context);
         return context.pkData;
     }
 
-    _computePkData(context, previousContext) {
+    _computePkData(context) {
+        if (context.pkData) {
+            return context.pkData;
+        }
         if (!context.fields.some(x => x.options && x.options.id) && !context.relationships.some(r => this._checkRelationshipPartOfId(r))) {
             context.fields.unshift(defaultIdField);
             context.isAutoIncrement = true;
@@ -225,30 +235,13 @@ module.exports = class extends EntityClientGenerator {
                 });
             }
         }
-        // TODO handle cyclic references specially in criteria
+
         for (let i = 0; i < context.relationships.length; i++) {
             const relationship = context.relationships[i];
-            if (previousContext && previousContext.name === _.upperFirst(relationship.otherEntityName)) {
-                relationship.pkData = previousContext.pkData;
-            } else {
-                relationship.pkData = this._loadRelationshipPkData(relationship.otherEntityName, context);
-                if(!relationship.otherEntityField || relationship.otherEntityField === 'id') {
-                    relationship.otherEntityField = relationship.pkData[0].name;
-                }
-                relationship.pkData.forEach(pk => {
-                    pk.nameCapitalized = _.upperFirst(pk.name);
-                    pk.fieldValidate = relationship.relationshipValidateRules === 'required';
-                    pk.fieldValidateRules = pk.fieldValidate ? ['required'] : [];
-                    pk.otherEntityNameCapitalized = relationship.otherEntityNameCapitalized;
-                    pk.nameHumanized = _.startCase(context.relationshipNameHumanized);
-                    pk.formName = relationship.relationshipName + (pk.formName ? _.upperFirst(pk.formName) : '');
-                    // if two ids are created using fields we might need to check here if so this is done only once, I personally don't see any real use case for this
-                    if (!pk.otherEntityField) {
-                        pk.otherEntityField = relationship.otherEntityField;
-                    }
-                });
-            }
-            if (relationship.options && relationship.options.id && relationship.relationshipType === 'many-to-one') {
+            // if relationship partOfId we initialize it's pkData first since it's need to fill own pkData
+            // else we fill pkData before loading, this avoids recursion problems
+            if (this._checkRelationshipPartOfId(relationship)) {
+                this._populateRelationshipPkData(relationship, context);
                 relationship.partOfId = true;
                 context.pkData.push(
                     ...relationship.pkData.map(pk => {
@@ -365,8 +358,10 @@ module.exports = class extends EntityClientGenerator {
     }
 
     _getEntityJson(file) {
-        let entityJson = null;
-
+        let entityJson = this.allContexts[file];
+        if (entityJson) {
+            return entityJson;
+        }
         try {
             if (this.microservicePath) {
                 entityJson = this.fs.readJSON(path.join(this.microservicePath, JHIPSTER_CONFIG_DIR, `${_.upperFirst(file)}.json`));
@@ -377,7 +372,29 @@ module.exports = class extends EntityClientGenerator {
             this.log(chalk.red(`The JHipster entity configuration file could not be read for file ${file}!`) + err);
             this.debug('Error:', err);
         }
-
+        this.allContexts[file] = entityJson;
         return entityJson;
+    }
+
+    _populateRelationshipPkData(relationship, context) {
+        if (!relationship.pkData) {
+            // cloning each pk in pkData to be able to modify it (add relationshipName prefix...)
+            relationship.pkData = this._loadRelationshipPkData(relationship.otherEntityName, context).map(pk => ({ ...pk }));
+            if(!relationship.otherEntityField || relationship.otherEntityField === 'id') {
+                relationship.otherEntityField = relationship.pkData[0].name;
+            }
+            relationship.pkData.forEach(pk => {
+                pk.nameCapitalized = _.upperFirst(pk.name);
+                pk.fieldValidate = relationship.relationshipValidateRules === 'required';
+                pk.fieldValidateRules = pk.fieldValidate ? ['required'] : [];
+                pk.otherEntityNameCapitalized = relationship.otherEntityNameCapitalized;
+                pk.nameHumanized = _.startCase(context.relationshipNameHumanized);
+                pk.formName = relationship.relationshipName + (pk.formName ? _.upperFirst(pk.formName) : '');
+                // if two ids are created using fields we might need to check here if so this is done only once, I personally don't see any real use case for this
+                if (!pk.otherEntityField) {
+                    pk.otherEntityField = relationship.otherEntityField;
+                }
+            });
+        }
     }
 };

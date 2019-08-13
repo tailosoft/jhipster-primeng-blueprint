@@ -106,20 +106,20 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
         protected <%= _.lowerFirst(pk.entity.name) %>Service: <%= pk.entity.angularName%>Service,
             <%_ }) _%>
         <%_ } _%>
-    <%_ } %>
-<%_ } %>
+    <%_ } _%>
+<%_ } _%>
         protected messageService: MessageService,
         <%_ if (fieldsContainBlob) { _%>
         protected dataUtils: JhiDataUtils,
         <%_ } _%>
-        <%_ if (pagination !== 'no') { %>
+        <%_ if (pagination !== 'no') { _%>
         protected activatedRoute: ActivatedRoute,
         protected router: Router,
         <%_ } _%>
         protected eventManager: JhiEventManager,
         protected confirmationService: ConfirmationService,
         protected translateService: TranslateService,
-        <%_ if(fields.some(f => f.fieldType === 'LocalDate' )){ _%>
+        <%_ if(jpaMetamodelFiltering && fields.some(f => f.fieldType === 'LocalDate' )){ _%>
         protected datePipe: DatePipe,
         <%_ } _%>
     ) {
