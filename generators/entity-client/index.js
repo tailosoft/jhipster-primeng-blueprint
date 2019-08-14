@@ -105,8 +105,8 @@ module.exports = class extends EntityClientGenerator {
                 const context = this;
                 context.pluralize = pluralize;
                 this._computePkData(context);
-                // compute relationships pkData
-                this.relationships.forEach(r => {
+                // compute relationships pkData for does not already calculated in this.pkData
+                this.relationships.filter(r => !this._checkRelationshipPartOfId(r)).forEach(r => {
                     this._populateRelationshipPkData(r, context);
                 });
                 this._populateTsVaribales(context);
@@ -153,55 +153,6 @@ module.exports = class extends EntityClientGenerator {
 
     _loadRelationshipPkData(entityName, currentContext) {
         const context = this._getEntityJson(entityName);
-        context.angularName = _.upperFirst(entityName) + _.upperFirst(context.angularJSSuffix || '');
-        context.angularXAppName = this.getAngularXAppName(currentContext.baseName);
-        context.fileName = _.kebabCase(context.angularName);
-        context.folderName = this.getEntityFolderName(context.clientRootFolder, context.fileName);
-        context.modelFileName = context.folderName;
-        context.parentPathAddition = this.getEntityParentPathAddition(context.clientRootFolder);
-        if (context.applicationType === 'microservice') {
-            context.microserviceName = currentContext.baseName;
-            if (!context.clientRootFolder) {
-                context.clientRootFolder = context.microserviceName;
-            }
-        }
-        if(context.microserviceName && !context.clientRootFolder) {
-            context.clientRootFolder = context.microserviceName;
-        }
-        if (_.upperFirst(context.name) !== 'User') {
-            context.moduleName = `${context.angularXAppName + _.upperFirst(context.name)}Module`;
-            context.fileName = _.kebabCase(context.angularName);
-            if (
-                context.skipUiGrouping ||
-                context.clientRootFolder === '' ||
-                context.clientRootFolder === undefined
-            ) {
-                context.clientRootFolder = '';
-            } else {
-                context.clientRootFolder = `${context.clientRootFolder}/`;
-            }
-            if (context !== undefined && context.clientRootFolder) {
-                if (context.clientRootFolder === currentContext.clientRootFolder) {
-                    context.modulePath = context.fileName;
-                } else {
-                    context.modulePath = `${
-                        context.parentPathAddition ? `${context.parentPathAddition}/` : ''
-                        }${context.clientRootFolder}/${context.fileName}`;
-                }
-                context.modelName = `${context.clientRootFolder}/${context.filename}`;
-                context.path = `${context.clientRootFolder}/${context.filename}`;
-            } else {
-                context.modulePath = `${
-                    context.parentPathAddition ? `${context.parentPathAddition}/` : ''
-                    }${context.filename}`;
-                context.modelName = context.fileName;
-                context.path = context.fileName;
-            }
-        } else {
-            context.moduleName = `${context.angularXAppName}SharedModule`;
-            context.modulePath = 'app/core';
-        }
-
         this._computePkData(context);
         return context.pkData;
     }
@@ -372,29 +323,69 @@ module.exports = class extends EntityClientGenerator {
             this.log(chalk.red(`The JHipster entity configuration file could not be read for file ${file}!`) + err);
             this.debug('Error:', err);
         }
+        entityJson.angularName = _.upperFirst(entityJson.name) + _.upperFirst(entityJson.angularJSSuffix || '');
+        entityJson.angularXAppName = this.getAngularXAppName(this.baseName);
+        entityJson.fileName = _.kebabCase(entityJson.angularName);
+        entityJson.folderName = this.getEntityFolderName(entityJson.clientRootFolder, entityJson.fileName);
+        entityJson.modelFileName = entityJson.folderName;
+        entityJson.parentPathAddition = this.getEntityParentPathAddition(entityJson.clientRootFolder);
+        if (entityJson.applicationType === 'microservice') {
+            entityJson.microserviceName = this.baseName;
+            if (!entityJson.clientRootFolder) {
+                entityJson.clientRootFolder = entityJson.microserviceName;
+            }
+        }
+        if(entityJson.microserviceName && !entityJson.clientRootFolder) {
+            entityJson.clientRootFolder = entityJson.microserviceName;
+        }
+        if (_.upperFirst(entityJson.name) !== 'User') {
+            entityJson.moduleName = `${entityJson.angularXAppName + _.upperFirst(entityJson.name)}Module`;
+            entityJson.fileName = _.kebabCase(entityJson.angularName);
+            if (
+                entityJson.skipUiGrouping ||
+                entityJson.clientRootFolder === '' ||
+                entityJson.clientRootFolder === undefined
+            ) {
+                entityJson.clientRootFolder = '';
+            }
+            if (entityJson.clientRootFolder) {
+                entityJson.modulePath = `${
+                    entityJson.parentPathAddition ? `${entityJson.parentPathAddition}/` : ''
+                    }${entityJson.clientRootFolder}/${entityJson.fileName}`;
+                entityJson.modelName = `${entityJson.clientRootFolder}/${entityJson.filename}`;
+                entityJson.path = `${entityJson.clientRootFolder}/${entityJson.filename}`;
+            } else {
+                entityJson.modulePath = `${
+                    entityJson.parentPathAddition ? `${entityJson.parentPathAddition}/` : ''
+                    }${entityJson.filename}`;
+                entityJson.modelName = entityJson.fileName;
+                entityJson.path = entityJson.fileName;
+            }
+        } else {
+            entityJson.moduleName = `${entityJson.angularXAppName}SharedModule`;
+            entityJson.modulePath = 'app/core';
+        }
         this.allContexts[file] = entityJson;
         return entityJson;
     }
 
     _populateRelationshipPkData(relationship, context) {
-        if (!relationship.pkData) {
-            // cloning each pk in pkData to be able to modify it (add relationshipName prefix...)
-            relationship.pkData = this._loadRelationshipPkData(relationship.otherEntityName, context).map(pk => ({ ...pk }));
-            if(!relationship.otherEntityField || relationship.otherEntityField === 'id') {
-                relationship.otherEntityField = relationship.pkData[0].name;
-            }
-            relationship.pkData.forEach(pk => {
-                pk.nameCapitalized = _.upperFirst(pk.name);
-                pk.fieldValidate = relationship.relationshipValidateRules === 'required';
-                pk.fieldValidateRules = pk.fieldValidate ? ['required'] : [];
-                pk.otherEntityNameCapitalized = relationship.otherEntityNameCapitalized;
-                pk.nameHumanized = _.startCase(context.relationshipNameHumanized);
-                pk.formName = relationship.relationshipName + (pk.formName ? _.upperFirst(pk.formName) : '');
-                // if two ids are created using fields we might need to check here if so this is done only once, I personally don't see any real use case for this
-                if (!pk.otherEntityField) {
-                    pk.otherEntityField = relationship.otherEntityField;
-                }
-            });
+        // cloning each pk in pkData to be able to modify it (add relationshipName prefix...)
+        relationship.pkData = this._loadRelationshipPkData(relationship.otherEntityName, context).map(pk => ({ ...pk }));
+        if(!relationship.otherEntityField || relationship.otherEntityField === 'id') {
+            relationship.otherEntityField = relationship.pkData[0].name;
         }
+        relationship.pkData.forEach(pk => {
+            pk.nameCapitalized = _.upperFirst(pk.name);
+            pk.fieldValidate = relationship.relationshipValidateRules === 'required';
+            pk.fieldValidateRules = pk.fieldValidate ? ['required'] : [];
+            pk.otherEntityNameCapitalized = relationship.otherEntityNameCapitalized;
+            pk.nameHumanized = _.startCase(context.relationshipNameHumanized);
+            pk.formName = relationship.relationshipName + (pk.formName ? _.upperFirst(pk.formName) : '');
+            // if two ids are created using fields we might need to check here if so this is done only once, I personally don't see any real use case for this
+            if (!pk.otherEntityField) {
+                pk.otherEntityField = relationship.otherEntityField;
+            }
+        });
     }
 };
