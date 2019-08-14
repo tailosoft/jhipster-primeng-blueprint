@@ -25,6 +25,10 @@
                 <span jhiTranslate="primengtestApp.employeeSkill.employee">Employee</span>
                 <p-sortIcon field="employee"></p-sortIcon>
             </th>
+            <th pSortableColumn="teacher">
+                <span jhiTranslate="primengtestApp.employeeSkill.teacher">Teacher</span>
+                <p-sortIcon field="teacher"></p-sortIcon>
+            </th>
             <th style="width: 124px"></th>
         </tr>
         <tr>
@@ -45,6 +49,11 @@
                                [lazy]="true" [rows]="10" (onLazyLoad)="onEmployeeLazyLoadEvent($event)"
                                (ngModelChange)="employeeSkillTable.filter($event, 'employeeUsername', 'in')"></p-multiSelect>
             </th>
+            <th>
+                <p-multiSelect [options]="teacherOptions" [ngModel]="employeeSkillTable.filters.teacherUsername?.value" optionLabel="fullname" optionValue="username"
+                               [lazy]="true" [rows]="10" (onLazyLoad)="onTeacherLazyLoadEvent($event)"
+                               (ngModelChange)="employeeSkillTable.filter($event, 'teacherUsername', 'in')"></p-multiSelect>
+            </th>
             <th></th>
         </tr>
         </ng-template>
@@ -60,6 +69,11 @@
                 <td>
                     <div *ngIf="employeeSkill.employeeUsername">
                         <a [routerLink]="['../employee', employeeSkill.employeeUsername , 'view' ]" >{{employeeSkill.employeeFullname}}</a>
+                    </div>
+                </td>
+                <td>
+                    <div *ngIf="employeeSkill.teacherUsername">
+                        <a [routerLink]="['../employee', employeeSkill.teacherUsername , 'view' ]" >{{employeeSkill.teacherFullname}}</a>
                     </div>
                 </td>
                 <td>

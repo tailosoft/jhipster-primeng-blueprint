@@ -8,6 +8,8 @@ export interface IEmployeeSkill {
   employeeSkillCertificates?: IEmployeeSkillCertificate[];
   tasks?: ITask[];
   employeeFullname?: string;
+  teacherFullname?: string;
+  teacherUsername?: string;
 }
 
 export class EmployeeSkill implements IEmployeeSkill {
@@ -17,6 +19,8 @@ export class EmployeeSkill implements IEmployeeSkill {
     public level?: number,
     public employeeSkillCertificates?: IEmployeeSkillCertificate[],
     public tasks?: ITask[],
-    public employeeFullname?: string
+    public employeeFullname?: string,
+    public teacherFullname?: string,
+    public teacherUsername?: string
   ) {}
 }

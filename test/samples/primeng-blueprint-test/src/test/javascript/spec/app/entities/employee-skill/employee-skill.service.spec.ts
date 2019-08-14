@@ -23,7 +23,7 @@ describe('Service Tests', () => {
       service = injector.get(EmployeeSkillService);
       httpMock = injector.get(HttpTestingController);
 
-      elemDefault = new EmployeeSkill('AAAAAAA', 'AAAAAAA', 123, undefined, undefined, 'AAAAAAA');
+      elemDefault = new EmployeeSkill('AAAAAAA', 'AAAAAAA', 123, undefined, undefined, 'AAAAAAA', 'AAAAAAA', 'AAAAAAA');
     });
 
     describe('Service methods', () => {

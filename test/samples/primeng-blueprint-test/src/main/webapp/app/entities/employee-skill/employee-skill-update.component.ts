@@ -23,12 +23,15 @@ export class EmployeeSkillUpdateComponent implements OnInit {
   taskOptions: ITask[];
   employeeOptions: IEmployee[];
   employeeFilterValue: any;
+  teacherOptions: IEmployee[];
+  teacherFilterValue: any;
 
   editForm = this.fb.group({
     name: [null, [Validators.required]],
     level: [null, [Validators.required]],
     tasks: [],
-    employeeUsername: [null, Validators.required]
+    employeeUsername: [null, Validators.required],
+    teacherUsername: [null, Validators.required]
   });
 
   constructor(
@@ -58,6 +61,12 @@ export class EmployeeSkillUpdateComponent implements OnInit {
       .subscribe(res => (this.employeeOptions = res.body), (res: HttpErrorResponse) => this.onError(res.message));
   }
 
+  onTeacherLazyLoadEvent(event: LazyLoadEvent) {
+    this.employeeService
+      .query(lazyLoadEventToQueryParams(event || {}, 'fullname.contains'))
+      .subscribe(res => (this.teacherOptions = res.body), (res: HttpErrorResponse) => this.onError(res.message));
+  }
+
   updateForm(employeeSkill: IEmployeeSkill) {
     if (employeeSkill.name && employeeSkill.employeeUsername) {
       this.edit = true;
@@ -66,9 +75,11 @@ export class EmployeeSkillUpdateComponent implements OnInit {
       name: employeeSkill.name,
       level: employeeSkill.level,
       tasks: employeeSkill.tasks,
-      employeeUsername: employeeSkill.employeeUsername
+      employeeUsername: employeeSkill.employeeUsername,
+      teacherUsername: employeeSkill.teacherUsername
     });
     this.employeeFilterValue = employeeSkill.employeeUsername;
+    this.teacherFilterValue = employeeSkill.teacherUsername;
   }
 
   previousState() {
@@ -91,7 +102,8 @@ export class EmployeeSkillUpdateComponent implements OnInit {
       name: this.editForm.get(['name']).value,
       level: this.editForm.get(['level']).value,
       tasks: this.editForm.get(['tasks']).value,
-      employeeUsername: this.editForm.get(['employeeUsername']).value
+      employeeUsername: this.editForm.get(['employeeUsername']).value,
+      teacherUsername: this.editForm.get(['teacherUsername']).value
     };
   }
 

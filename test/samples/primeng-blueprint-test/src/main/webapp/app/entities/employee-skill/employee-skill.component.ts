@@ -29,6 +29,7 @@ export class EmployeeSkillComponent implements OnInit, OnDestroy, AfterViewInit 
   eventSubscriber: Subscription;
   taskOptions: ITask[];
   employeeOptions: IEmployee[];
+  teacherOptions: IEmployee[];
 
   totalItems: number;
   itemsPerPage: number;
@@ -82,6 +83,9 @@ export class EmployeeSkillComponent implements OnInit, OnDestroy, AfterViewInit 
         }
         if (event.filters && event.filters.employeeUsername && event.filters.employeeUsername.value) {
           this.employeeSkillTable.filters.employeeUsername.value = event.filters.employeeUsername.value.map(x => +x);
+        }
+        if (event.filters && event.filters.teacherUsername && event.filters.teacherUsername.value) {
+          this.employeeSkillTable.filters.teacherUsername.value = event.filters.teacherUsername.value.map(x => +x);
         }
       });
 
@@ -139,6 +143,12 @@ export class EmployeeSkillComponent implements OnInit, OnDestroy, AfterViewInit 
     this.employeeService
       .query(lazyLoadEventToQueryParams(event || {}, 'fullname.contains'))
       .subscribe(res => (this.employeeOptions = res.body));
+  }
+
+  onTeacherLazyLoadEvent(event: LazyLoadEvent) {
+    this.employeeService
+      .query(lazyLoadEventToQueryParams(event || {}, 'fullname.contains'))
+      .subscribe(res => (this.teacherOptions = res.body));
   }
 
   trackId(index: number, item: IEmployeeSkill) {

@@ -20,7 +20,8 @@
       "level": "Level",
       "employeeSkillCertificate": "Employee Skill Certificate",
       "task": "Task",
-      "employee": "Employee"
+      "employee": "Employee",
+      "teacher": "Teacher"
     }
   }
 }

@@ -26,6 +26,14 @@
                         </a>
                     </div>
                 </dd>
+                <dt><span jhiTranslate="primengtestApp.employeeSkill.teacher">Teacher</span></dt>
+                <dd>
+                    <div *ngIf="employeeSkill.teacherUsername">
+                        <a [routerLink]="['/employee', employeeSkill.teacherUsername, 'view']">
+                            {{employeeSkill.teacherFullname}}
+                        </a>
+                    </div>
+                </dd>
             </dl>
 
             <button type="submit"

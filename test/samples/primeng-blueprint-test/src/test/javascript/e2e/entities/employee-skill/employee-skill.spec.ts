@@ -43,6 +43,7 @@ describe('EmployeeSkill e2e test', () => {
             employeeSkillUpdatePage.setLevelInput('5'),
             // employeeSkillUpdatePage.taskSelectLastOption(),
             employeeSkillUpdatePage.employeeSelectLastOption(),
+            employeeSkillUpdatePage.teacherSelectLastOption(),
         ]);
         expect(await employeeSkillUpdatePage.getNameInput()).to.eq('name', 'Expected Name value to be equals to name');
         expect(await employeeSkillUpdatePage.getLevelInput()).to.eq('5', 'Expected level value to be equals to 5');

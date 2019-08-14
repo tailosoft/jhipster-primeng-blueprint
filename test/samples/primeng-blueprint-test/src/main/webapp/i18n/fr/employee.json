@@ -18,7 +18,8 @@
       },
       "username": "Username",
       "fullname": "Fullname",
-      "skill": "Skill"
+      "skill": "Skill",
+      "taughtSkill": "Taught Skill"
     }
   }
 }

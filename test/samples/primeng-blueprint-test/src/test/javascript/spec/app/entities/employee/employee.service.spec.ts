@@ -23,7 +23,7 @@ describe('Service Tests', () => {
       service = injector.get(EmployeeService);
       httpMock = injector.get(HttpTestingController);
 
-      elemDefault = new Employee('AAAAAAA', 'AAAAAAA', undefined);
+      elemDefault = new Employee('AAAAAAA', 'AAAAAAA', undefined, undefined);
     });
 
     describe('Service methods', () => {

@@ -42,6 +42,17 @@
                         </p-message>
                     </ng-container>
                 </div>
+                <label jhiTranslate="primengtestApp.employeeSkill.teacher" for="field_teacher">Teacher</label>
+                <p-dropdown id="field_teacher" name="teacher" [options]="teacherOptions" formControlName="teacherUsername"
+                            [virtualScroll]="true" [lazy]="true" [rows]="10" (onLazyLoad)="onTeacherLazyLoadEvent($event)" [lazyLoadOnInit]="true" [filter]="true" [filterValue]="teacherFilterValue"
+                            placeholder="Choose" optionLabel="fullname" optionValue="username"></p-dropdown>
+                <div class="validation-messages">
+                    <ng-container *ngIf="editForm.get('teacherUsername').invalid && (editForm.get('teacherUsername').dirty || editForm.get('teacherUsername').touched)">
+                        <p-message severity="error"
+                                   *ngIf="editForm.get('teacherUsername').errors.required" [text]="'entity.validation.required' | translate">
+                        </p-message>
+                    </ng-container>
+                </div>
             </div>
             <div>
                 <button pButton type="button" id="cancel-save" icon="pi pi-ban" class="ui-button-secondary" (click)="previousState()" [label]="'entity.action.cancel' | translate"></button>

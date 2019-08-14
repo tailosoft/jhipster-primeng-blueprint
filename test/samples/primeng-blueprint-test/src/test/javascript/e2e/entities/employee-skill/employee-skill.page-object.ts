@@ -30,6 +30,7 @@ export class EmployeeSkillUpdatePage {
   levelInput = element(by.id('field_level'));
   taskSelect = element(by.id('field_task'));
   employeeSelect = element(by.id('field_employee'));
+  teacherSelect = element(by.id('field_teacher'));
 
   async getPageTitle() {
     return this.pageTitle.getAttribute('jhiTranslate');
@@ -87,6 +88,25 @@ export class EmployeeSkillUpdatePage {
 
   async getEmployeeSelectedOption() {
     return await this.employeeSelect.element(by.css('option:checked')).getText();
+  }
+
+  async teacherSelectLastOption(timeout?: number) {
+    await this.teacherSelect
+      .all(by.tagName('option'))
+      .last()
+      .click();
+  }
+
+  async teacherSelectOption(option) {
+    await this.teacherSelect.sendKeys(option);
+  }
+
+  getTeacherSelect(): ElementFinder {
+    return this.teacherSelect;
+  }
+
+  async getTeacherSelectedOption() {
+    return await this.teacherSelect.element(by.css('option:checked')).getText();
   }
 
   async save(timeout?: number) {

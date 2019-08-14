@@ -60,6 +60,11 @@ relationship ManyToMany {
     EmployeeSkill{task(name)} to Task{employeeSkill}
 }
 
+//double OneToMany to check double imports, variables names...
+relationship OneToMany {
+    Employee{taughtSkill(name)} to EmployeeSkill{teacher(fullname) required}
+}
+
 dto * with mapstruct
 service * with serviceImpl
 filter *
