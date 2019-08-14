@@ -47,6 +47,8 @@ entity Task {
 }
 
 entity TaskComment {
+    // detect autoIncrement
+    @id id Long
     value String required
 }
 

@@ -165,7 +165,7 @@ module.exports = class extends EntityClientGenerator {
             context.fields.unshift(defaultIdField);
             context.isAutoIncrement = true;
         } else {
-            context.isAutoIncrement = false;
+            context.isAutoIncrement = context.fields[0] && context.fields[0].name === 'id' && context.fields[0].fieldType === 'Long';
         }
         context.pkData = [];
         for (let i = 0; i < context.fields.length; i++) {
