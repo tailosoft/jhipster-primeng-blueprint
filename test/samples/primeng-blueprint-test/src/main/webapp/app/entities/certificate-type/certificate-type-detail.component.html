@@ -10,17 +10,8 @@
                 </dd>
             </dl>
 
-            <button type="submit"
-                    (click)="previousState()"
-                    class="btn btn-info">
-                <fa-icon [icon]="'arrow-left'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back"> Back</span>
-            </button>
-
-            <button type="button"
-                    [routerLink]="['/certificate-type', certificateType.id, 'edit']"
-                    class="btn btn-primary">
-                <fa-icon [icon]="'pencil-alt'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit"> Edit</span>
-            </button>
+            <button pButton type="submit" (click)="previousState()" class="ui-button-info" icon="pi pi-arrow-left" [label]="'entity.action.back' | translate"></button>
+            <button pButton type="button" icon="pi pi-pencil" [label]="'entity.action.edit' | translate" [routerLink]="['/certificate-type', certificateType.id, 'edit']"></button>
         </div>
     </div>
 </div>
