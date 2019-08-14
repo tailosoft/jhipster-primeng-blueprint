@@ -15,6 +15,7 @@ import { PrimengtestSharedModule, PrimeNGCommonModule } from 'app/shared';
 import { PrimengtestCoreModule } from 'app/core';
 import { PrimengtestAppRoutingModule } from './app-routing.module';
 import { PrimengtestHomeModule } from './home/home.module';
+import { PrimengtestAccountModule } from './account/account.module';
 import { PrimengtestEntityModule } from './entities/entity.module';
 import { ConfirmationService, MessageService } from 'primeng/api';
 // jhipster-needle-angular-add-module-import JHipster will add new module here
@@ -36,6 +37,7 @@ import { JhiMainComponent, NavbarComponent, FooterComponent, PageRibbonComponent
     PrimeNGCommonModule,
     PrimengtestCoreModule,
     PrimengtestHomeModule,
+    PrimengtestAccountModule,
     // jhipster-needle-angular-add-module JHipster will add new module here
     PrimengtestEntityModule,
     PrimengtestAppRoutingModule

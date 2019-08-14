@@ -8,6 +8,9 @@ import { PrimengtestSharedModule } from 'app/shared';
 import {
   adminState,
   AuditsComponent,
+  UserMgmtComponent,
+  UserMgmtDetailComponent,
+  UserMgmtUpdateComponent,
   LogsComponent,
   JhiMetricsMonitoringComponent,
   JhiHealthModalComponent,
@@ -15,15 +18,20 @@ import {
   JhiConfigurationComponent,
   JhiDocsComponent
 } from './';
+import { ButtonModule } from 'primeng/button';
 
 @NgModule({
   imports: [
     PrimengtestSharedModule,
     /* jhipster-needle-add-admin-module - JHipster will add admin modules here */
-    RouterModule.forChild(adminState)
+    RouterModule.forChild(adminState),
+    ButtonModule
   ],
   declarations: [
     AuditsComponent,
+    UserMgmtComponent,
+    UserMgmtDetailComponent,
+    UserMgmtUpdateComponent,
     LogsComponent,
     JhiConfigurationComponent,
     JhiHealthCheckComponent,

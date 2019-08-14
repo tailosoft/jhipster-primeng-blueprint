@@ -61,6 +61,17 @@ export class NavBarPage {
     await this.clickOnSignIn();
     return new SignInPage();
   }
+  async getPasswordPage() {
+    await this.clickOnAccountMenu();
+    await this.clickOnPasswordMenu();
+    return new PasswordPage();
+  }
+
+  async getSettingsPage() {
+    await this.clickOnAccountMenu();
+    await this.clickOnSettingsMenu();
+    return new SettingsPage();
+  }
 
   async goToEntity(entityName: string) {
     await this.clickOnEntityMenu();
@@ -120,5 +131,100 @@ export class SignInPage {
 
   async login() {
     await this.loginButton.click();
+  }
+}
+export class PasswordPage {
+  currentPassword = element(by.id('currentPassword'));
+  password = element(by.id('newPassword'));
+  confirmPassword = element(by.id('confirmPassword'));
+  saveButton = element(by.css('button[type=submit]'));
+  title = element.all(by.css('h2')).first();
+
+  async setCurrentPassword(password) {
+    await this.currentPassword.sendKeys(password);
+  }
+
+  async setPassword(password) {
+    await this.password.sendKeys(password);
+  }
+
+  async getPassword() {
+    return this.password.getAttribute('value');
+  }
+
+  async clearPassword() {
+    await this.password.clear();
+  }
+
+  async setConfirmPassword(confirmPassword) {
+    await this.confirmPassword.sendKeys(confirmPassword);
+  }
+
+  async getConfirmPassword() {
+    return this.confirmPassword.getAttribute('value');
+  }
+
+  async clearConfirmPassword() {
+    await this.confirmPassword.clear();
+  }
+
+  async getTitle() {
+    return this.title.getAttribute('jhiTranslate');
+  }
+
+  async save() {
+    await this.saveButton.click();
+  }
+}
+
+export class SettingsPage {
+  firstName = element(by.id('firstName'));
+  lastName = element(by.id('lastName'));
+  email = element(by.id('email'));
+  saveButton = element(by.css('button[type=submit]'));
+  title = element.all(by.css('h2')).first();
+
+  async setFirstName(firstName) {
+    await this.firstName.sendKeys(firstName);
+  }
+
+  async getFirstName() {
+    return this.firstName.getAttribute('value');
+  }
+
+  async clearFirstName() {
+    await this.firstName.clear();
+  }
+
+  async setLastName(lastName) {
+    await this.lastName.sendKeys(lastName);
+  }
+
+  async getLastName() {
+    return this.lastName.getAttribute('value');
+  }
+
+  async clearLastName() {
+    await this.lastName.clear();
+  }
+
+  async setEmail(email) {
+    await this.email.sendKeys(email);
+  }
+
+  async getEmail() {
+    return this.email.getAttribute('value');
+  }
+
+  async clearEmail() {
+    await this.email.clear();
+  }
+
+  async getTitle() {
+    return this.title.getAttribute('jhiTranslate');
+  }
+
+  async save() {
+    await this.saveButton.click();
   }
 }

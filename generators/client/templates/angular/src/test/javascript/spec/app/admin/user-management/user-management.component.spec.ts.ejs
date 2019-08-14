@@ -26,6 +26,7 @@ import { HttpHeaders, HttpResponse } from '@angular/common/http';
 import { <%=angularXAppName%>TestModule } from '../../../test.module';
 import { UserMgmtComponent } from 'app/admin/user-management/user-management.component';
 import { UserService, User } from 'app/core';
+import { JhiEventManager } from 'ng-jhipster';
 
 describe('Component Tests', () => {
 
@@ -33,6 +34,7 @@ describe('Component Tests', () => {
         let comp: UserMgmtComponent;
         let fixture: ComponentFixture<UserMgmtComponent>;
         let service: UserService;
+        let mockEventManager: any;
 
         beforeEach(async(() => {
             TestBed.configureTestingModule({
@@ -41,13 +43,12 @@ describe('Component Tests', () => {
             })
             .overrideTemplate(UserMgmtComponent, '')
             .compileComponents();
-        }));
 
-        beforeEach(() => {
             fixture = TestBed.createComponent(UserMgmtComponent);
             comp = fixture.componentInstance;
             service = fixture.debugElement.injector.get(UserService);
-        });
+            mockEventManager = fixture.debugElement.injector.get(JhiEventManager);
+        }));
 
         describe('OnInit', () => {
             it('Should call load all on init',
@@ -61,8 +62,10 @@ describe('Component Tests', () => {
                         })));
 
                         // WHEN
-                        comp.ngOnInit();
-                        tick(); // simulate async
+                        fixture.detectChanges();
+                        comp.userTable = <any>{};
+                        // wait for debounce
+                        tick(300);
 
                         // THEN
                         expect(service.query).toHaveBeenCalled();
@@ -77,12 +80,7 @@ describe('Component Tests', () => {
                 inject([],
                     fakeAsync(() => {
                         // GIVEN
-                        const headers = new HttpHeaders().append('link', 'link;link');
                         const user = new User(<%- tsKeyId %>);
-                        spyOn(service, 'query').and.returnValue(of(new HttpResponse({
-                            body: [user],
-                            headers
-                        })));
                         spyOn(service, 'update').and.returnValue(of(new HttpResponse({ status: 200 })));
 
                         // WHEN
@@ -91,8 +89,6 @@ describe('Component Tests', () => {
 
                         // THEN
                         expect(service.update).toHaveBeenCalledWith(user);
-                        expect(service.query).toHaveBeenCalled();
-                        expect(comp.users[0]).toEqual(jasmine.objectContaining({id: <%- tsKeyId %>}));
                     })
                 )
             );

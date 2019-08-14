@@ -287,9 +287,9 @@ const files = {
                 { file: 'admin/user-management/user-management-detail.component.ts', method: 'processJs' },
                 { file: 'admin/user-management/user-management-detail.component.html', method: 'processHtml' },
                 { file: 'admin/user-management/user-management-update.component.ts', method: 'processJs' },
-                { file: 'admin/user-management/user-management-update.component.html', method: 'processHtml' },
-                { file: 'admin/user-management/user-management-delete-dialog.component.ts', method: 'processJs' },
-                { file: 'admin/user-management/user-management-delete-dialog.component.html', method: 'processHtml' }
+                { file: 'admin/user-management/user-management-update.component.html', method: 'processHtml' }
+                // { file: 'admin/user-management/user-management-delete-dialog.component.ts', method: 'processJs' },
+                // { file: 'admin/user-management/user-management-delete-dialog.component.html', method: 'processHtml' }
             ]
         },
         {
@@ -444,7 +444,7 @@ const files = {
                 'spec/app/admin/user-management/user-management.component.spec.ts',
                 'spec/app/admin/user-management/user-management-detail.component.spec.ts',
                 'spec/app/admin/user-management/user-management-update.component.spec.ts',
-                'spec/app/admin/user-management/user-management-delete-dialog.component.spec.ts',
+                // 'spec/app/admin/user-management/user-management-delete-dialog.component.spec.ts',
                 // user service tests
                 'spec/app/core/user/user.service.spec.ts'
             ]

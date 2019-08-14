@@ -36,8 +36,7 @@ describe('Subgenerator client of primeng-blueprint JHipster blueprint', () => {
                     skipInstall: true,
                     blueprint: 'primeng-blueprint',
                     skipChecks: true,
-                    withEntities: true,
-                    skipUserManagement: true
+                    withEntities: true
                 })
                 .withGenerators([
                     [

@@ -34,7 +34,6 @@ import {
     UserMgmtComponent,
     UserMgmtDetailComponent,
     UserMgmtUpdateComponent,
-    UserMgmtDeleteDialogComponent,
     <%_ } _%>
     LogsComponent,
     <%=jhiPrefixCapitalized%>MetricsMonitoringComponent,
@@ -49,12 +48,14 @@ import {
     <%=jhiPrefixCapitalized%>TrackerComponent,
     <%_ } _%>
 } from './';
+import { ButtonModule } from 'primeng/button';
 
 @NgModule({
     imports: [
         <%=angularXAppName%>SharedModule,
         /* jhipster-needle-add-admin-module - JHipster will add admin modules here */
-        RouterModule.forChild(adminState)
+        RouterModule.forChild(adminState),
+        ButtonModule
     ],
     declarations: [
         <%_ if (databaseType !== 'no' && databaseType !== 'cassandra') { _%>
@@ -64,7 +65,6 @@ import {
         UserMgmtComponent,
         UserMgmtDetailComponent,
         UserMgmtUpdateComponent,
-        UserMgmtDeleteDialogComponent,
         <%_ } _%>
         LogsComponent,
         <%=jhiPrefixCapitalized%>ConfigurationComponent,
@@ -84,7 +84,6 @@ import {
     <%_ } _%>
     entryComponents: [
         <%_ if (!skipUserManagement) { _%>
-        UserMgmtDeleteDialogComponent,
         <%_ } _%>
         <%=jhiPrefixCapitalized%>HealthModalComponent
     ],

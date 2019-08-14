@@ -20,6 +20,13 @@ describe('administration', () => {
     await navBarPage.clickOnAdminMenu();
   });
 
+  it('should load user management', async () => {
+    await navBarPage.clickOnAdmin('user-management');
+    const expect1 = 'userManagement.home.title';
+    const value1 = await element(by.id('user-management-page-heading')).getAttribute('jhiTranslate');
+    expect(value1).to.eq(expect1);
+  });
+
   it('should load metrics', async () => {
     await navBarPage.clickOnAdmin('jhi-metrics');
     const expect1 = 'metrics.title';

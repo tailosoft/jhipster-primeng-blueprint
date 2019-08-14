@@ -18,7 +18,6 @@
 -%>
 import { Injectable } from '@angular/core';
 import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot, Routes, CanActivate } from '@angular/router';
-import { JhiPaginationUtil, JhiResolvePagingParams } from 'ng-jhipster';
 
 import { AccountService, User, UserService } from 'app/core';
 import { UserMgmtComponent } from './user-management.component';
@@ -54,12 +53,8 @@ export const userMgmtRoute: Routes = [
     {
         path: 'user-management',
         component: UserMgmtComponent,
-        resolve: {
-            'pagingParams': JhiResolvePagingParams
-        },
         data: {
-            pageTitle: 'userManagement.home.title',
-            defaultSort: 'id,asc'
+            pageTitle: 'userManagement.home.title'
         }
     },
     {
