@@ -6,7 +6,6 @@ import { filter, map, tap, take, debounceTime, switchMap } from 'rxjs/operators'
 import { JhiEventManager } from 'ng-jhipster';
 import { MessageService } from 'primeng/api';
 import { ITaskComment } from 'app/shared/model/task-comment.model';
-
 import { ITEMS_PER_PAGE } from 'app/shared';
 import { lazyLoadEventToQueryParams } from 'app/shared/util/request-util';
 import { TaskCommentService } from './task-comment.service';

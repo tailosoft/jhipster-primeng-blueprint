@@ -40,12 +40,14 @@ if ( jpaMetamodelFiltering) {
     });
 } _%>
 import { I<%= entityAngularName %><%= enumOptions ? ', ' + enumOptions : '' %> } from 'app/shared/model/<%= entityModelFileName %>.model';
-<%_ if (pagination !== 'no') { %>
+<%_ if (pagination !== 'no') { _%>
 import { ITEMS_PER_PAGE } from 'app/shared';
+<%_ } _%>
+<%_ if (pagination !== 'no' || relationships.some(r => r.inList && r.pagination !== null)) { _%>
 import { lazyLoadEventToQueryParams } from 'app/shared/util/request-util';
 <%_ } _%>
 import { <%= entityAngularName %>Service } from './<%= entityFileName %>.service';
-import { ConfirmationService<%_ if (pagination !== 'no') { _%>, LazyLoadEvent<% } %> } from 'primeng/api';
+import { ConfirmationService<%_ if (pagination !== 'no' || relationships.some(r => r.inList && r.pagination !== null)) { _%>, LazyLoadEvent<% } %> } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
 <%_ if(jpaMetamodelFiltering){ _%>
     <%_ const alreadyImported = new Set() _%>

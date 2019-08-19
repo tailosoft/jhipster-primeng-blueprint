@@ -6,7 +6,6 @@ import { filter, map, tap, take, debounceTime, switchMap } from 'rxjs/operators'
 import { JhiEventManager } from 'ng-jhipster';
 import { MessageService } from 'primeng/api';
 import { IEmployeeSkill } from 'app/shared/model/employee-skill.model';
-
 import { ITEMS_PER_PAGE } from 'app/shared';
 import { lazyLoadEventToQueryParams } from 'app/shared/util/request-util';
 import { EmployeeSkillService } from './employee-skill.service';
