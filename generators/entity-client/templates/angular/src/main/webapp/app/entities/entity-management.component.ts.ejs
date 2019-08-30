@@ -325,11 +325,13 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
     <%_
     let eventCallBack = 'this.loadAll()';
     if (pagination !== 'no') {
-        eventCallBack = 'this.'+entityInstance+'Table.ngOnInit()';
+        eventCallBack = "this.router.navigate(['/" + entityUrl + "'], {queryParams: {r: Date.now()}})";
     } _%>
 
     registerChangeIn<%= entityClassPlural %>() {
-        this.eventSubscriber = this.eventManager.subscribe('<%= entityInstance %>ListModification', (response) => <%= eventCallBack %>);
+        this.eventSubscriber = this.eventManager.subscribe('<%= entityInstance %>ListModification', (response) =>
+            <%- eventCallBack %>
+        );
     }
     <%_ if (pagination !== 'no') { _%>
         <%_ if (pagination === 'pagination' || pagination === 'pager') { _%>

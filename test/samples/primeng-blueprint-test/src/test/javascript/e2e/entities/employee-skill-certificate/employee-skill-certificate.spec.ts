@@ -2,7 +2,11 @@
 import { browser, ExpectedConditions as ec, promise } from 'protractor';
 import { NavBarPage, SignInPage } from '../../page-objects/jhi-page-objects';
 
-import { EmployeeSkillCertificateComponentsPage, EmployeeSkillCertificateUpdatePage } from './employee-skill-certificate.page-object';
+import {
+  EmployeeSkillCertificateComponentsPage,
+  EmployeeSkillCertificateDeleteDialog,
+  EmployeeSkillCertificateUpdatePage
+} from './employee-skill-certificate.page-object';
 
 const expect = chai.expect;
 
@@ -11,6 +15,7 @@ describe('EmployeeSkillCertificate e2e test', () => {
   let signInPage: SignInPage;
   let employeeSkillCertificateUpdatePage: EmployeeSkillCertificateUpdatePage;
   let employeeSkillCertificateComponentsPage: EmployeeSkillCertificateComponentsPage;
+  /*let employeeSkillCertificateDeleteDialog: EmployeeSkillCertificateDeleteDialog;*/
 
   before(async () => {
     await browser.get('/');
@@ -53,8 +58,14 @@ describe('EmployeeSkillCertificate e2e test', () => {
     });*/
 
   /* it('should delete last EmployeeSkillCertificate', async () => {
-        // TODO test delete dialog e2e
-});*/
+        const nbButtonsBeforeDelete = await employeeSkillCertificateComponentsPage.countDeleteButtons();
+        await employeeSkillCertificateComponentsPage.clickOnLastDeleteButton();
+
+        employeeSkillCertificateDeleteDialog = new EmployeeSkillCertificateDeleteDialog();
+        await employeeSkillCertificateDeleteDialog.clickOnConfirmButton();
+
+        expect(await employeeSkillCertificateComponentsPage.countDeleteButtons()).to.eq(nbButtonsBeforeDelete - 1);
+    });*/
 
   after(async () => {
     await navBarPage.autoSignOut();

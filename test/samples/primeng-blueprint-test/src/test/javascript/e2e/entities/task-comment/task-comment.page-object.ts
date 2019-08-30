@@ -2,7 +2,7 @@ import { browser, ExpectedConditions, element, by, ElementFinder } from 'protrac
 
 export class TaskCommentComponentsPage {
   createButton = element(by.id('jh-create-entity'));
-  deleteButtons = element.all(by.css('jhi-task-comment div table .btn-danger'));
+  deleteButtons = element.all(by.css('jhi-task-comment div table .ui-button-danger'));
   title = element.all(by.css('jhi-task-comment div h2#page-heading span')).first();
 
   async clickOnCreateButton(timeout?: number) {
@@ -79,5 +79,13 @@ export class TaskCommentUpdatePage {
 
   getSaveButton(): ElementFinder {
     return this.saveButton;
+  }
+}
+
+export class TaskCommentDeleteDialog {
+  private confirmButton = element(by.css('p-confirmdialog .ui-dialog-footer button:first-of-type'));
+
+  async clickOnConfirmButton(timeout?: number) {
+    await this.confirmButton.click();
   }
 }

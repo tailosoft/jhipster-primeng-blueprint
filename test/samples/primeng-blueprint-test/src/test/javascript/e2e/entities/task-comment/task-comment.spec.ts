@@ -2,7 +2,7 @@
 import { browser, ExpectedConditions as ec, promise } from 'protractor';
 import { NavBarPage, SignInPage } from '../../page-objects/jhi-page-objects';
 
-import { TaskCommentComponentsPage, TaskCommentUpdatePage } from './task-comment.page-object';
+import { TaskCommentComponentsPage, TaskCommentDeleteDialog, TaskCommentUpdatePage } from './task-comment.page-object';
 
 const expect = chai.expect;
 
@@ -11,6 +11,7 @@ describe('TaskComment e2e test', () => {
   let signInPage: SignInPage;
   let taskCommentUpdatePage: TaskCommentUpdatePage;
   let taskCommentComponentsPage: TaskCommentComponentsPage;
+  /*let taskCommentDeleteDialog: TaskCommentDeleteDialog;*/
 
   before(async () => {
     await browser.get('/');
@@ -39,11 +40,9 @@ describe('TaskComment e2e test', () => {
 
         await taskCommentComponentsPage.clickOnCreateButton();
         await promise.all([
-            taskCommentUpdatePage.setInput('5'),
             taskCommentUpdatePage.setValueInput('value'),
             taskCommentUpdatePage.taskSelectLastOption(),
         ]);
-        expect(await taskCommentUpdatePage.getInput()).to.eq('5', 'Expected id value to be equals to 5');
         expect(await taskCommentUpdatePage.getValueInput()).to.eq('value', 'Expected Value value to be equals to value');
         await taskCommentUpdatePage.save();
         expect(await taskCommentUpdatePage.getSaveButton().isPresent(), 'Expected save button disappear').to.be.false;
@@ -52,8 +51,14 @@ describe('TaskComment e2e test', () => {
     });*/
 
   /* it('should delete last TaskComment', async () => {
-        // TODO test delete dialog e2e
-});*/
+        const nbButtonsBeforeDelete = await taskCommentComponentsPage.countDeleteButtons();
+        await taskCommentComponentsPage.clickOnLastDeleteButton();
+
+        taskCommentDeleteDialog = new TaskCommentDeleteDialog();
+        await taskCommentDeleteDialog.clickOnConfirmButton();
+
+        expect(await taskCommentComponentsPage.countDeleteButtons()).to.eq(nbButtonsBeforeDelete - 1);
+    });*/
 
   after(async () => {
     await navBarPage.autoSignOut();

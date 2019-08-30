@@ -132,7 +132,9 @@ export class TaskCommentComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   registerChangeInTaskComments() {
-    this.eventSubscriber = this.eventManager.subscribe('taskCommentListModification', response => this.taskCommentTable.ngOnInit());
+    this.eventSubscriber = this.eventManager.subscribe('taskCommentListModification', response =>
+      this.router.navigate(['/task-comment'], { queryParams: { r: Date.now() } })
+    );
   }
 
   protected paginateTaskComments(data: ITaskComment[], headers: HttpHeaders) {

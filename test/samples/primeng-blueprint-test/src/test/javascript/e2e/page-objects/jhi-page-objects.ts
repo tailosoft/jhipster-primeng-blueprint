@@ -1,4 +1,4 @@
-import { element, by, ElementFinder } from 'protractor';
+import { element, by, ElementFinder, browser, ExpectedConditions as ec } from 'protractor';
 
 export class NavBarPage {
   entityMenu = element(by.id('entity-menu'));
@@ -9,6 +9,7 @@ export class NavBarPage {
   signOut = element(by.id('logout'));
   passwordMenu = element(by.css('[routerLink="password"]'));
   settingsMenu = element(by.css('[routerLink="settings"]'));
+  allToasts = element.all(by.css('p-toastitem'));
 
   constructor(asAdmin?: Boolean) {
     if (asAdmin) {
@@ -16,11 +17,17 @@ export class NavBarPage {
     }
   }
 
+  async closeAllToasts() {
+    await this.allToasts.each(e => e.element(by.css('.ui-toast-close-icon')).click());
+    await browser.wait(ec.invisibilityOf(this.allToasts.first()), 5000);
+  }
+
   async clickOnEntityMenu() {
     await this.entityMenu.click();
   }
 
   async clickOnAccountMenu() {
+    await this.closeAllToasts();
     await this.accountMenu.click();
   }
 

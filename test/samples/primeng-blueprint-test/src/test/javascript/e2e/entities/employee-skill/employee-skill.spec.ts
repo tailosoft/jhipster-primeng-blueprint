@@ -2,7 +2,7 @@
 import { browser, ExpectedConditions as ec, promise } from 'protractor';
 import { NavBarPage, SignInPage } from '../../page-objects/jhi-page-objects';
 
-import { EmployeeSkillComponentsPage, EmployeeSkillUpdatePage } from './employee-skill.page-object';
+import { EmployeeSkillComponentsPage, EmployeeSkillDeleteDialog, EmployeeSkillUpdatePage } from './employee-skill.page-object';
 
 const expect = chai.expect;
 
@@ -11,6 +11,7 @@ describe('EmployeeSkill e2e test', () => {
   let signInPage: SignInPage;
   let employeeSkillUpdatePage: EmployeeSkillUpdatePage;
   let employeeSkillComponentsPage: EmployeeSkillComponentsPage;
+  /*let employeeSkillDeleteDialog: EmployeeSkillDeleteDialog;*/
 
   before(async () => {
     await browser.get('/');
@@ -54,8 +55,14 @@ describe('EmployeeSkill e2e test', () => {
     });*/
 
   /* it('should delete last EmployeeSkill', async () => {
-        // TODO test delete dialog e2e
-});*/
+        const nbButtonsBeforeDelete = await employeeSkillComponentsPage.countDeleteButtons();
+        await employeeSkillComponentsPage.clickOnLastDeleteButton();
+
+        employeeSkillDeleteDialog = new EmployeeSkillDeleteDialog();
+        await employeeSkillDeleteDialog.clickOnConfirmButton();
+
+        expect(await employeeSkillComponentsPage.countDeleteButtons()).to.eq(nbButtonsBeforeDelete - 1);
+    });*/
 
   after(async () => {
     await navBarPage.autoSignOut();

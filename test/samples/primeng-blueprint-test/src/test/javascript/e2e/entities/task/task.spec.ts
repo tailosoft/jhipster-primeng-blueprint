@@ -2,7 +2,7 @@
 import { browser, ExpectedConditions as ec, promise } from 'protractor';
 import { NavBarPage, SignInPage } from '../../page-objects/jhi-page-objects';
 
-import { TaskComponentsPage, TaskUpdatePage } from './task.page-object';
+import { TaskComponentsPage, TaskDeleteDialog, TaskUpdatePage } from './task.page-object';
 
 const expect = chai.expect;
 
@@ -11,6 +11,7 @@ describe('Task e2e test', () => {
   let signInPage: SignInPage;
   let taskUpdatePage: TaskUpdatePage;
   let taskComponentsPage: TaskComponentsPage;
+  let taskDeleteDialog: TaskDeleteDialog;
 
   before(async () => {
     await browser.get('/');
@@ -38,8 +39,7 @@ describe('Task e2e test', () => {
     const nbButtonsBeforeCreate = await taskComponentsPage.countDeleteButtons();
 
     await taskComponentsPage.clickOnCreateButton();
-    await promise.all([taskUpdatePage.setInput('5'), taskUpdatePage.setNameInput('name')]);
-    expect(await taskUpdatePage.getInput()).to.eq('5', 'Expected id value to be equals to 5');
+    await promise.all([taskUpdatePage.setNameInput('name')]);
     expect(await taskUpdatePage.getNameInput()).to.eq('name', 'Expected Name value to be equals to name');
     await taskUpdatePage.save();
     expect(await taskUpdatePage.getSaveButton().isPresent(), 'Expected save button disappear').to.be.false;
@@ -48,7 +48,13 @@ describe('Task e2e test', () => {
   });
 
   it('should delete last Task', async () => {
-    // TODO test delete dialog e2e
+    const nbButtonsBeforeDelete = await taskComponentsPage.countDeleteButtons();
+    await taskComponentsPage.clickOnLastDeleteButton();
+
+    taskDeleteDialog = new TaskDeleteDialog();
+    await taskDeleteDialog.clickOnConfirmButton();
+
+    expect(await taskComponentsPage.countDeleteButtons()).to.eq(nbButtonsBeforeDelete - 1);
   });
 
   after(async () => {

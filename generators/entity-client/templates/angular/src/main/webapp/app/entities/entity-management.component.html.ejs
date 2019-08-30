@@ -47,7 +47,7 @@
         if (pagination === 'infinite-scroll') {
             %> [scrollable]="true" [virtualScroll]="true" (onLazyLoad)="onLazyLoadEvent($event)" scrollHeight="200px" [virtualRowHeight]="34" <%
         } else if (pagination === 'pagination') {
-            %>[paginator]="true" (onLazyLoad)="onLazyLoadEvent($event)" <%
+            %> [paginator]="true" (onLazyLoad)="onLazyLoadEvent($event)" <%
         }
     }
     %>>

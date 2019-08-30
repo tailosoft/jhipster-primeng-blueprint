@@ -2,7 +2,7 @@
 import { browser, ExpectedConditions as ec, promise } from 'protractor';
 import { NavBarPage, SignInPage } from '../../page-objects/jhi-page-objects';
 
-import { CertificateTypeComponentsPage, CertificateTypeUpdatePage } from './certificate-type.page-object';
+import { CertificateTypeComponentsPage, CertificateTypeDeleteDialog, CertificateTypeUpdatePage } from './certificate-type.page-object';
 
 const expect = chai.expect;
 
@@ -11,6 +11,7 @@ describe('CertificateType e2e test', () => {
   let signInPage: SignInPage;
   let certificateTypeUpdatePage: CertificateTypeUpdatePage;
   let certificateTypeComponentsPage: CertificateTypeComponentsPage;
+  let certificateTypeDeleteDialog: CertificateTypeDeleteDialog;
 
   before(async () => {
     await browser.get('/');
@@ -38,8 +39,7 @@ describe('CertificateType e2e test', () => {
     const nbButtonsBeforeCreate = await certificateTypeComponentsPage.countDeleteButtons();
 
     await certificateTypeComponentsPage.clickOnCreateButton();
-    await promise.all([certificateTypeUpdatePage.setInput('5'), certificateTypeUpdatePage.setNameInput('name')]);
-    expect(await certificateTypeUpdatePage.getInput()).to.eq('5', 'Expected id value to be equals to 5');
+    await promise.all([certificateTypeUpdatePage.setNameInput('name')]);
     expect(await certificateTypeUpdatePage.getNameInput()).to.eq('name', 'Expected Name value to be equals to name');
     await certificateTypeUpdatePage.save();
     expect(await certificateTypeUpdatePage.getSaveButton().isPresent(), 'Expected save button disappear').to.be.false;
@@ -51,7 +51,13 @@ describe('CertificateType e2e test', () => {
   });
 
   it('should delete last CertificateType', async () => {
-    // TODO test delete dialog e2e
+    const nbButtonsBeforeDelete = await certificateTypeComponentsPage.countDeleteButtons();
+    await certificateTypeComponentsPage.clickOnLastDeleteButton();
+
+    certificateTypeDeleteDialog = new CertificateTypeDeleteDialog();
+    await certificateTypeDeleteDialog.clickOnConfirmButton();
+
+    expect(await certificateTypeComponentsPage.countDeleteButtons()).to.eq(nbButtonsBeforeDelete - 1);
   });
 
   after(async () => {

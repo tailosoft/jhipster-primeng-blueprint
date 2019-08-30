@@ -6,7 +6,7 @@
         </p-button>
     </h2>
     <br/>
-    <p-table #employeeTable [value]="employees" [rowTrackBy]="trackId" [responsive]="true"[lazy]="true" [rows]="itemsPerPage" [totalRecords]="totalItems" [loading]="loading" sortMode="multiple" [lazyLoadOnInit]="false"[paginator]="true" (onLazyLoad)="onLazyLoadEvent($event)" >
+    <p-table #employeeTable [value]="employees" [rowTrackBy]="trackId" [responsive]="true"[lazy]="true" [rows]="itemsPerPage" [totalRecords]="totalItems" [loading]="loading" sortMode="multiple" [lazyLoadOnInit]="false" [paginator]="true" (onLazyLoad)="onLazyLoadEvent($event)" >
         <ng-template pTemplate="header">
         <tr>
             <th pSortableColumn="username">

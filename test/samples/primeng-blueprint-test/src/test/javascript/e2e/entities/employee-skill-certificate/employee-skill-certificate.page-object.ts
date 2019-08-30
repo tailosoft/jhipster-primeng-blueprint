@@ -2,7 +2,7 @@ import { browser, ExpectedConditions, element, by, ElementFinder } from 'protrac
 
 export class EmployeeSkillCertificateComponentsPage {
   createButton = element(by.id('jh-create-entity'));
-  deleteButtons = element.all(by.css('jhi-employee-skill-certificate div table .btn-danger'));
+  deleteButtons = element.all(by.css('jhi-employee-skill-certificate div table .ui-button-danger'));
   title = element.all(by.css('jhi-employee-skill-certificate div h2#page-heading span')).first();
 
   async clickOnCreateButton(timeout?: number) {
@@ -99,5 +99,13 @@ export class EmployeeSkillCertificateUpdatePage {
 
   getSaveButton(): ElementFinder {
     return this.saveButton;
+  }
+}
+
+export class EmployeeSkillCertificateDeleteDialog {
+  private confirmButton = element(by.css('p-confirmdialog .ui-dialog-footer button:first-of-type'));
+
+  async clickOnConfirmButton(timeout?: number) {
+    await this.confirmButton.click();
   }
 }

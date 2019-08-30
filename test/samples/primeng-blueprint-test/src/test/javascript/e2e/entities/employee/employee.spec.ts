@@ -2,7 +2,7 @@
 import { browser, ExpectedConditions as ec, promise } from 'protractor';
 import { NavBarPage, SignInPage } from '../../page-objects/jhi-page-objects';
 
-import { EmployeeComponentsPage, EmployeeUpdatePage } from './employee.page-object';
+import { EmployeeComponentsPage, EmployeeDeleteDialog, EmployeeUpdatePage } from './employee.page-object';
 
 const expect = chai.expect;
 
@@ -11,6 +11,7 @@ describe('Employee e2e test', () => {
   let signInPage: SignInPage;
   let employeeUpdatePage: EmployeeUpdatePage;
   let employeeComponentsPage: EmployeeComponentsPage;
+  let employeeDeleteDialog: EmployeeDeleteDialog;
 
   before(async () => {
     await browser.get('/');
@@ -48,7 +49,13 @@ describe('Employee e2e test', () => {
   });
 
   it('should delete last Employee', async () => {
-    // TODO test delete dialog e2e
+    const nbButtonsBeforeDelete = await employeeComponentsPage.countDeleteButtons();
+    await employeeComponentsPage.clickOnLastDeleteButton();
+
+    employeeDeleteDialog = new EmployeeDeleteDialog();
+    await employeeDeleteDialog.clickOnConfirmButton();
+
+    expect(await employeeComponentsPage.countDeleteButtons()).to.eq(nbButtonsBeforeDelete - 1);
   });
 
   after(async () => {

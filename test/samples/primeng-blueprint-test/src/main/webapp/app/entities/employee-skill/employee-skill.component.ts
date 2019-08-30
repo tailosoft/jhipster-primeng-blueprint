@@ -155,7 +155,9 @@ export class EmployeeSkillComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   registerChangeInEmployeeSkills() {
-    this.eventSubscriber = this.eventManager.subscribe('employeeSkillListModification', response => this.employeeSkillTable.ngOnInit());
+    this.eventSubscriber = this.eventManager.subscribe('employeeSkillListModification', response =>
+      this.router.navigate(['/employee-skill'], { queryParams: { r: Date.now() } })
+    );
   }
 
   protected paginateEmployeeSkills(data: IEmployeeSkill[], headers: HttpHeaders) {

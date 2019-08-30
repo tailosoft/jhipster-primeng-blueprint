@@ -117,7 +117,9 @@ export class EmployeeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   registerChangeInEmployees() {
-    this.eventSubscriber = this.eventManager.subscribe('employeeListModification', response => this.employeeTable.ngOnInit());
+    this.eventSubscriber = this.eventManager.subscribe('employeeListModification', response =>
+      this.router.navigate(['/employee'], { queryParams: { r: Date.now() } })
+    );
   }
 
   protected paginateEmployees(data: IEmployee[], headers: HttpHeaders) {

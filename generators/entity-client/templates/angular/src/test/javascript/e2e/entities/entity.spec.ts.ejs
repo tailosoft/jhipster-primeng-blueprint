@@ -20,7 +20,7 @@
 import { browser, ExpectedConditions as ec, <% if ( fieldsContainInstant || fieldsContainZonedDateTime ) { %>protractor, <% } %>promise } from 'protractor';
 import { NavBarPage, SignInPage } from '../../<%= entityParentPathAddition %>page-objects/jhi-page-objects';
 
-import { <%= entityClass %>ComponentsPage, <%= entityClass %>UpdatePage } from './<%= entityFileName %>.page-object';
+import { <%= entityClass %>ComponentsPage, <%= entityClass %>DeleteDialog, <%= entityClass %>UpdatePage } from './<%= entityFileName %>.page-object';
 <%_ if (fieldsContainBlobOrImage) { _%>
 import * as path from 'path';
 <%_ } _%>
@@ -47,6 +47,7 @@ describe('<%= entityClass %> e2e test', () => {
     let signInPage: SignInPage;
     let <%= entityInstance %>UpdatePage: <%= entityClass %>UpdatePage;
     let <%= entityInstance %>ComponentsPage: <%= entityClass %>ComponentsPage;
+    <%= openBlockComment %>let <%= entityInstance %>DeleteDialog: <%= entityClass %>DeleteDialog;<%= closeBlockComment %>
     <%_ if (fieldsContainBlobOrImage) { _%>
     const fileNameToUpload = 'logo-jhipster.png';
     const fileToUpload = '../../../../../../<%= entityParentPathAddition %><%= CLIENT_MAIN_SRC_DIR %>content/images/' + fileNameToUpload;
@@ -96,7 +97,7 @@ describe('<%= entityClass %> e2e test', () => {
 
         await <%= entityInstance %>ComponentsPage.clickOnCreateButton();
         await promise.all([
-        <%_ fields.forEach((field) => {
+        <%_ fields.filter(f => !(f.fieldName === 'id' && f.fieldType === 'Long')).forEach((field) => {
             const fieldName = field.fieldName;
             const fieldNameCapitalized = field.fieldNameCapitalized;
             const fieldType = field.fieldType;
@@ -134,7 +135,7 @@ describe('<%= entityClass %> e2e test', () => {
             <%_ } _%>
         <%_ }); _%>
         ]);
-        <%_ fields.forEach((field) => {
+        <%_ fields.filter(f => !(f.fieldName === 'id' && f.fieldType === 'Long')).forEach((field) => {
             const fieldName = field.fieldName;
             const fieldNameCapitalized = field.fieldNameCapitalized;
             const fieldType = field.fieldType;
@@ -174,8 +175,14 @@ describe('<%= entityClass %> e2e test', () => {
     });<%= closeBlockComment %>
 
     <%= openBlockComment %> it('should delete last <%= entityClass %>', async () => {
-        // TODO test delete dialog e2e
-});<%= closeBlockComment %>
+        const nbButtonsBeforeDelete = await <%= entityInstance %>ComponentsPage.countDeleteButtons();
+        await <%= entityInstance %>ComponentsPage.clickOnLastDeleteButton();
+
+        <%= entityInstance %>DeleteDialog = new <%= entityClass %>DeleteDialog();
+        await <%= entityInstance %>DeleteDialog.clickOnConfirmButton();
+
+        expect(await <%= entityInstance %>ComponentsPage.countDeleteButtons()).to.eq(nbButtonsBeforeDelete - 1);
+    });<%= closeBlockComment %>
 
     after(async () => {
         await navBarPage.autoSignOut();

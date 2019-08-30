@@ -165,7 +165,7 @@ export class EmployeeSkillCertificateComponent implements OnInit, OnDestroy, Aft
 
   registerChangeInEmployeeSkillCertificates() {
     this.eventSubscriber = this.eventManager.subscribe('employeeSkillCertificateListModification', response =>
-      this.employeeSkillCertificateTable.ngOnInit()
+      this.router.navigate(['/employee-skill-certificate'], { queryParams: { r: Date.now() } })
     );
   }
 

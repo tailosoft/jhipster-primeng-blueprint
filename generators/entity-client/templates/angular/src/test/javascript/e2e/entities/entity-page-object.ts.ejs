@@ -34,7 +34,7 @@ for (let relationship of relationships) {
 } _%>
 export class <%= entityClass %>ComponentsPage {
     createButton = element(by.id('jh-create-entity'));
-    deleteButtons = element.all(by.css('<%= jhiPrefixDashed %>-<%= entityFileName %> div table .btn-danger'));
+    deleteButtons = element.all(by.css('<%= jhiPrefixDashed %>-<%= entityFileName %> div table .ui-button-danger'));
     title = element.all(by.css('<%= jhiPrefixDashed %>-<%= entityFileName %> div h2#page-heading span')).first();
 
     async clickOnCreateButton(timeout?: number) {
@@ -171,5 +171,13 @@ export class <%= entityClass %>UpdatePage {
 
     getSaveButton(): ElementFinder {
         return this.saveButton;
+    }
+}
+
+export class <%= entityClass %>DeleteDialog {
+    private confirmButton = element(by.css('p-confirmdialog .ui-dialog-footer button:first-of-type'));
+
+    async clickOnConfirmButton(timeout?: number) {
+        await this.confirmButton.click();
     }
 }
