@@ -16,7 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { browser, ExpectedConditions, element, by, ElementFinder } from 'protractor';
+import { browser, ExpectedConditions as ec, element, by, ElementFinder } from 'protractor';
 
 <%_
 let elementGetter = `getText()`;
@@ -68,8 +68,6 @@ export class <%= entityClass %>UpdatePage {
     <%= fieldName %>Select = element(by.id('field_<%= fieldName %>'));
     <%_ } else if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent === 'text') { _%>
     <%= fieldName %>Input = element(by.id('field_<%= fieldName %>'));
-    <%_ } else if (['byte[]', 'ByteBuffer'].includes(fieldType)) { _%>
-    <%= fieldName %>Input = element(by.id('file_<%= fieldName %>'));
     <%_ } else { _%>
     <%= fieldName %>Input = element(by.id('field_<%= fieldName %>'));
     <%_ } _%>
@@ -79,8 +77,14 @@ export class <%= entityClass %>UpdatePage {
         const ownerSide = relationship.ownerSide;
         const relationshipName = relationship.relationshipName;
         const relationshipFieldName = relationship.relationshipFieldName; _%>
-    <%_ if (relationshipType === 'many-to-one' || (relationshipType === 'many-to-many' && ownerSide === true) || (relationshipType === 'one-to-one' && ownerSide === true)) { _%>
+    <%_ if (((relationshipType === 'many-to-one') || (relationshipType === 'one-to-one' && ownerSide === true)) && dto === 'no') { _%>
     <%=relationshipName %>Select = element(by.id('field_<%= relationshipName %>'));
+    <%_ } else if (((relationshipType === 'many-to-one') || (relationshipType === 'one-to-one' && ownerSide === true)) && dto !== 'no') { _%>
+        <%_ relationship.pkData.forEach(pk => { _%>
+    <%= pk.formName %>Select = element(by.id('field_<%= pk.formName %>'));
+        <%_ }) _%>
+    <%_ } else if(relationshipType === 'many-to-many' && ownerSide === true) { _%>
+    <%=relationshipName %>Select = element(by.id('field_<%= relationship.relationshipFieldNamePlural %>'));
     <%_ } _%>
     <%_ }); _%>
 
@@ -102,17 +106,30 @@ export class <%= entityClass %>UpdatePage {
     get<%= fieldNameCapitalized %>Input(timeout?: number) {
         return this.<%= fieldName %>Input;
     }
+
             <%_ } else if (fieldIsEnum) { _%>
-    async set<%= fieldNameCapitalized %>Select(<%= fieldName %>) {
-        await this.<%= fieldName %>Select.sendKeys(<%= fieldName %>);
-    }
-
-    async get<%= fieldNameCapitalized %>Select() {
-        return await this.<%= fieldName %>Select.element(by.css('option:checked')).getText();
-    }
-
     async <%=fieldName %>SelectLastOption(timeout?: number) {
-        await this.<%=fieldName %>Select.all(by.tagName('option')).last().click();
+        await this.<%= fieldName %>Select.click();
+        await this.<%= fieldName %>Select
+          .all(by.tagName('.ui-dropdown-item'))
+          .last()
+          .click();
+        await browser.wait(ec.invisibilityOf(this.<%= fieldName %>Select.element(by.css('.ui-dropdown-panel'))), 5000);
+    }
+
+    async get<%=fieldNameCapitalized %>Select() {
+        return await this.<%= fieldName %>Select.element(by.css('.ui-dropdown-label')).getText();
+    }
+
+    <%_ } else if (['LocalDate', 'Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
+    async set<%= fieldNameCapitalized %>Input(<%= fieldName %>) {
+        await this.<%= fieldName %>Input.element(by.css('.ui-inputtext')).sendKeys(<%= fieldName %>);
+        await this.<%= fieldName %>Input.element(by.tagName('.ui-calendar-button')).click();
+        await browser.wait(ec.invisibilityOf(this.<%= fieldName %>Input.element(by.css('.ui-datepicker'))), 5000);
+    }
+
+    async get<%= fieldNameCapitalized %>Input() {
+        return await this.<%= fieldName %>Input.element(by.css('.ui-inputtext')).getAttribute('value');
     }
 
     <%_ } else if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent === 'text') { _%>
@@ -122,6 +139,15 @@ export class <%= entityClass %>UpdatePage {
 
     async get<%= fieldNameCapitalized %>Input() {
         return await this.<%= fieldName %>Input.getAttribute('value');
+    }
+
+    <%_ } else if (['byte[]', 'ByteBuffer'].includes(fieldType)) { _%>
+    async set<%= fieldNameCapitalized %>Input(<%= fieldName %>) {
+        await this.<%= fieldName %>Input.element(by.css('input[type="file"]')).sendKeys(<%= fieldName %>);
+    }
+
+    async get<%= fieldNameCapitalized %>Input() {
+        return await this.<%= fieldName %>Input.all(by.css('.ui-fileupload-row > div')).get(1).getText();
     }
 
     <%_ } else { _%>
@@ -142,13 +168,14 @@ export class <%= entityClass %>UpdatePage {
         const relationshipFieldName = relationship.relationshipFieldName;
         const relationshipNameCapitalized = relationship.relationshipNameCapitalized; _%>
 
-    <%_ if (relationshipType === 'many-to-one' || (relationshipType === 'many-to-many' && ownerSide === true) || (relationshipType === 'one-to-one' && ownerSide === true)) { _%>
+    <%_ if (((relationshipType === 'many-to-one') || (relationshipType === 'one-to-one' && ownerSide === true)) && dto === 'no') { _%>
     async <%=relationshipName %>SelectLastOption(timeout?: number) {
-        await this.<%=relationshipName %>Select.all(by.tagName('option')).last().click();
-    }
-
-    async <%=relationshipName %>SelectOption(option) {
-        await this.<%=relationshipName %>Select.sendKeys(option);
+        await this.<%= relationshipName %>Select.click();
+        await this.<%= relationshipName %>Select
+          .all(by.tagName('.ui-dropdown-item'))
+          .last()
+          .click();
+        await browser.wait(ec.invisibilityOf(this.<%= relationshipName %>Select.element(by.css('.ui-dropdown-panel'))), 5000);
     }
 
     get<%=relationshipNameCapitalized %>Select(): ElementFinder {
@@ -156,9 +183,47 @@ export class <%= entityClass %>UpdatePage {
     }
 
     async get<%=relationshipNameCapitalized %>SelectedOption() {
-        return await this.<%=relationshipName %>Select.element(by.css('option:checked')).getText();
+        return await this.<%= relationshipName %>Select.element(by.css('.ui-dropdown-label')).getText();
     }
 
+    <%_ } else if(((relationshipType === 'many-to-one') || (relationshipType === 'one-to-one' && ownerSide === true)) && dto !== 'no') { _%>
+        <%_ relationship.pkData.forEach(pk => { _%>
+    async <%= pk.formName %>SelectLastOption(timeout?: number) {
+        await this.<%= pk.formName %>Select.click();
+        await this.<%= pk.formName %>Select
+          .all(by.tagName('.ui-dropdown-item'))
+          .last()
+          .click();
+        await browser.wait(ec.invisibilityOf(this.<%= pk.formName %>Select.element(by.css('.ui-dropdown-panel'))), 5000);
+    }
+
+    get<%= _.upperFirst(pk.formName) %>Select(): ElementFinder {
+        return this.<%= pk.formName %>Select;
+    }
+
+    async get<%= _.upperFirst(pk.formName) %>SelectedOption() {
+        return await this.<%= pk.formName %>Select.element(by.css('.ui-dropdown-label')).getText();
+    }
+
+        <%_ }) _%>
+    <%_ } else if (relationshipType === 'many-to-many' && ownerSide === true) {_%>
+    async <%=relationshipName %>SelectLastOption(timeout?: number) {
+        await this.<%= relationshipName %>Select.click();
+        await this.<%= relationshipName %>Select
+          .all(by.tagName('.ui-multiselect-item'))
+          .last()
+          .click();
+        await this.<%= relationshipName %>Select.element(by.css('.ui-multiselect-close')).click();
+        await browser.wait(ec.invisibilityOf(this.<%= relationshipName %>Select.element(by.css('.ui-multiselect-panel'))), 5000);
+    }
+
+    get<%=relationshipNameCapitalized %>Select(): ElementFinder {
+        return this.<%=relationshipName %>Select;
+    }
+
+    async get<%=relationshipNameCapitalized %>SelectedOption() {
+        return await this.<%= relationshipName %>Select.element(by.css('.ui-multiselect-label')).getText();
+    }
     <%_ } _%>
     <%_ }); _%>
     async save(timeout?: number) {

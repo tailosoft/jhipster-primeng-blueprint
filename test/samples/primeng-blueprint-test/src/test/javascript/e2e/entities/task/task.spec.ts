@@ -1,8 +1,9 @@
 /* tslint:disable no-unused-expression */
-import { browser, ExpectedConditions as ec, promise } from 'protractor';
+import { browser, by, ExpectedConditions as ec, protractor } from 'protractor';
 import { NavBarPage, SignInPage } from '../../page-objects/jhi-page-objects';
 
 import { TaskComponentsPage, TaskDeleteDialog, TaskUpdatePage } from './task.page-object';
+import * as path from 'path';
 
 const expect = chai.expect;
 
@@ -12,6 +13,9 @@ describe('Task e2e test', () => {
   let taskUpdatePage: TaskUpdatePage;
   let taskComponentsPage: TaskComponentsPage;
   let taskDeleteDialog: TaskDeleteDialog;
+  const fileNameToUpload = 'logo-jhipster.png';
+  const fileToUpload = '../../../../../../src/main/webapp/content/images/' + fileNameToUpload;
+  const absolutePath = path.resolve(__dirname, fileToUpload);
 
   before(async () => {
     await browser.get('/');
@@ -39,8 +43,41 @@ describe('Task e2e test', () => {
     const nbButtonsBeforeCreate = await taskComponentsPage.countDeleteButtons();
 
     await taskComponentsPage.clickOnCreateButton();
-    await promise.all([taskUpdatePage.setNameInput('name')]);
+    await taskUpdatePage.setNameInput('name');
+    await taskUpdatePage.typeSelectLastOption();
+    await taskUpdatePage.setEndDateInput('12/31/2000');
+    await taskUpdatePage.setCreatedAtInput('01/01/2001 02:30');
+    await taskUpdatePage.setModifiedAtInput('01/01/2001 02:30');
+    await taskUpdatePage.setDescriptionInput('description');
+    await taskUpdatePage.setAttachmentInput(absolutePath);
+    await taskUpdatePage.setPictureInput(absolutePath);
     expect(await taskUpdatePage.getNameInput()).to.eq('name', 'Expected Name value to be equals to name');
+    expect(await taskUpdatePage.getEndDateInput()).to.eq('12/31/2000', 'Expected endDate value to be equals to 12/31/2000');
+    expect(await taskUpdatePage.getCreatedAtInput()).to.contain(
+      '01/01/2001 02:30',
+      'Expected createdAt value to be equals to 01/01/2001 02:30'
+    );
+    expect(await taskUpdatePage.getModifiedAtInput()).to.contain(
+      '01/01/2001 02:30',
+      'Expected modifiedAt value to be equals to 01/01/2001 02:30'
+    );
+    const selectedDone = taskUpdatePage.getDoneInput();
+    if (await selectedDone.element(by.css('input[type="checkbox"]')).isSelected()) {
+      await selectedDone.click();
+      expect(await selectedDone.element(by.css('input[type="checkbox"]')).isSelected(), 'Expected done not to be selected').to.be.false;
+    } else {
+      await selectedDone.click();
+      expect(await selectedDone.element(by.css('input[type="checkbox"]')).isSelected(), 'Expected done to be selected').to.be.true;
+    }
+    expect(await taskUpdatePage.getDescriptionInput()).to.eq('description', 'Expected Description value to be equals to description');
+    expect(await taskUpdatePage.getAttachmentInput()).to.endsWith(
+      fileNameToUpload,
+      'Expected Attachment value to be end with ' + fileNameToUpload
+    );
+    expect(await taskUpdatePage.getPictureInput()).to.endsWith(
+      fileNameToUpload,
+      'Expected Picture value to be end with ' + fileNameToUpload
+    );
     await taskUpdatePage.save();
     expect(await taskUpdatePage.getSaveButton().isPresent(), 'Expected save button disappear').to.be.false;
 

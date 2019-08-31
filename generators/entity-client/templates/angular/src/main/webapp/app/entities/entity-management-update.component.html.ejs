@@ -60,8 +60,8 @@ _%>
                 <textarea pInputTextarea name="<%= fieldName %>" id="field_<%= fieldName %>"
                           formControlName="<%= fieldName %>"<% if (fields[idx].partOfId) { %> [disabled]="edit"<% } %>></textarea>
         <%_ } else if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent !== 'text') { _%>
-                <p-fileUpload name="<%= fieldName %>" id="field_<%= fieldName %>" [showUploadButton]="false" (onSelect)="onFileSelect($event, 'picture')"<% if (fieldTypeBlobContent === 'image') { %> accept="image/*"<% } %>
-                              (onClear)="onFileRemove($event, 'picture')" (onRemove)="onFileRemove($event, 'picture')" [files]="<%= fieldName %>File?[<%= fieldName %>File]:null"></p-fileUpload>
+                <p-fileUpload name="<%= fieldName %>" id="field_<%= fieldName %>" [showUploadButton]="false" (onSelect)="onFileSelect($event, '<%= fieldName %>')"<% if (fieldTypeBlobContent === 'image') { %> accept="image/*"<% } %>
+                              (onClear)="onFileRemove($event, '<%= fieldName %>')" (onRemove)="onFileRemove($event, '<%= fieldName %>')" [files]="<%= fieldName %>File?[<%= fieldName %>File]:null"></p-fileUpload>
         <%_ } else if (fieldType === 'Boolean') { _%>
                 <p-inputSwitch name="<%= fieldName %>" id="field_<%= fieldName %>" formControlName="<%= fieldName %>"<% if (fields[idx].partOfId) { %> [disabled]="edit"<% } %>></p-inputSwitch>
         <%_ } else if (isAutoIncrement && fields[idx].partOfId) { _%>
@@ -164,8 +164,8 @@ _%>
                 </div>
         <%_ } else { _%>
             <%_ relationships[idx].pkData.forEach(pk => { _%>
-                <label jhiTranslate="<%= `${i18nKeyPrefix}.${pk.formName}` %>" for="field_<%= _.snakeCase(pk.formName) %>"><%= _.startCase(pk.formName) %></label>
-                <p-dropdown id="field_<%= _.snakeCase(`${pk.formName}`) %>" name="<%= `${pk.formName}` %>" [options]="<%= `${pk.formName}Options` %>" formControlName="<%= relationshipName %><%= pk.nameCapitalized %>"<% if (relationships[idx].partOfId) { %> [disabled]="edit"<% } %><% if(relationships[idx].pagination !== 'no') { %>
+                <label jhiTranslate="<%= `${i18nKeyPrefix}.${pk.formName}` %>" for="field_<%= pk.formName %>"><%= _.startCase(pk.formName) %></label>
+                <p-dropdown id="field_<%= pk.formName %>" name="<%= pk.formName %>" [options]="<%= `${pk.formName}Options` %>" formControlName="<%= relationshipName %><%= pk.nameCapitalized %>"<% if (relationships[idx].partOfId) { %> [disabled]="edit"<% } %><% if(relationships[idx].pagination !== 'no') { %>
                             [virtualScroll]="true" [lazy]="true" [rows]="10" (onLazyLoad)="on<%= _.upperFirst(pk.formName) %>LazyLoadEvent($event)"<% } %> [lazyLoadOnInit]="true" [filter]="true" [filterValue]="<%= pk.formName %>FilterValue"
                             placeholder="Choose" optionLabel="<%= pk.otherEntityField %>" optionValue="<%= pk.field.fieldName %>"<%- relationshipRequired?'':' [showClear]="true"' %>></p-dropdown>
                 <div class="validation-messages">

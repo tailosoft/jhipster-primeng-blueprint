@@ -1,5 +1,5 @@
 /* tslint:disable no-unused-expression */
-import { browser, ExpectedConditions as ec, promise } from 'protractor';
+import { browser, by, ExpectedConditions as ec } from 'protractor';
 import { NavBarPage, SignInPage } from '../../page-objects/jhi-page-objects';
 
 import { CertificateTypeComponentsPage, CertificateTypeDeleteDialog, CertificateTypeUpdatePage } from './certificate-type.page-object';
@@ -39,7 +39,7 @@ describe('CertificateType e2e test', () => {
     const nbButtonsBeforeCreate = await certificateTypeComponentsPage.countDeleteButtons();
 
     await certificateTypeComponentsPage.clickOnCreateButton();
-    await promise.all([certificateTypeUpdatePage.setNameInput('name')]);
+    await certificateTypeUpdatePage.setNameInput('name');
     expect(await certificateTypeUpdatePage.getNameInput()).to.eq('name', 'Expected Name value to be equals to name');
     await certificateTypeUpdatePage.save();
     expect(await certificateTypeUpdatePage.getSaveButton().isPresent(), 'Expected save button disappear').to.be.false;

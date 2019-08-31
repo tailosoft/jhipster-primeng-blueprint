@@ -1,4 +1,4 @@
-import { browser, ExpectedConditions, element, by, ElementFinder } from 'protractor';
+import { browser, ExpectedConditions as ec, element, by, ElementFinder } from 'protractor';
 
 export class EmployeeSkillComponentsPage {
   createButton = element(by.id('jh-create-entity'));
@@ -28,7 +28,7 @@ export class EmployeeSkillUpdatePage {
   cancelButton = element(by.id('cancel-save'));
   nameInput = element(by.id('field_name'));
   levelInput = element(by.id('field_level'));
-  taskSelect = element(by.id('field_task'));
+  taskSelect = element(by.id('field_tasks'));
   employeeSelect = element(by.id('field_employee'));
   teacherSelect = element(by.id('field_teacher'));
 
@@ -53,14 +53,13 @@ export class EmployeeSkillUpdatePage {
   }
 
   async taskSelectLastOption(timeout?: number) {
+    await this.taskSelect.click();
     await this.taskSelect
-      .all(by.tagName('option'))
+      .all(by.tagName('.ui-multiselect-item'))
       .last()
       .click();
-  }
-
-  async taskSelectOption(option) {
-    await this.taskSelect.sendKeys(option);
+    await this.taskSelect.element(by.css('.ui-multiselect-close')).click();
+    await browser.wait(ec.invisibilityOf(this.taskSelect.element(by.css('.ui-multiselect-panel'))), 5000);
   }
 
   getTaskSelect(): ElementFinder {
@@ -68,18 +67,16 @@ export class EmployeeSkillUpdatePage {
   }
 
   async getTaskSelectedOption() {
-    return await this.taskSelect.element(by.css('option:checked')).getText();
+    return await this.taskSelect.element(by.css('.ui-multiselect-label')).getText();
   }
 
   async employeeSelectLastOption(timeout?: number) {
+    await this.employeeSelect.click();
     await this.employeeSelect
-      .all(by.tagName('option'))
+      .all(by.tagName('.ui-dropdown-item'))
       .last()
       .click();
-  }
-
-  async employeeSelectOption(option) {
-    await this.employeeSelect.sendKeys(option);
+    await browser.wait(ec.invisibilityOf(this.employeeSelect.element(by.css('.ui-dropdown-panel'))), 5000);
   }
 
   getEmployeeSelect(): ElementFinder {
@@ -87,18 +84,16 @@ export class EmployeeSkillUpdatePage {
   }
 
   async getEmployeeSelectedOption() {
-    return await this.employeeSelect.element(by.css('option:checked')).getText();
+    return await this.employeeSelect.element(by.css('.ui-dropdown-label')).getText();
   }
 
   async teacherSelectLastOption(timeout?: number) {
+    await this.teacherSelect.click();
     await this.teacherSelect
-      .all(by.tagName('option'))
+      .all(by.tagName('.ui-dropdown-item'))
       .last()
       .click();
-  }
-
-  async teacherSelectOption(option) {
-    await this.teacherSelect.sendKeys(option);
+    await browser.wait(ec.invisibilityOf(this.teacherSelect.element(by.css('.ui-dropdown-panel'))), 5000);
   }
 
   getTeacherSelect(): ElementFinder {
@@ -106,7 +101,7 @@ export class EmployeeSkillUpdatePage {
   }
 
   async getTeacherSelectedOption() {
-    return await this.teacherSelect.element(by.css('option:checked')).getText();
+    return await this.teacherSelect.element(by.css('.ui-dropdown-label')).getText();
   }
 
   async save(timeout?: number) {

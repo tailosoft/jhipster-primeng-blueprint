@@ -18,6 +18,84 @@
                         </p-message>
                     </ng-container>
                 </div>
+                <label jhiTranslate="primengtestApp.task.type" for="field_type">Type</label>
+                <p-dropdown [options]="typeOptions" name="type" formControlName="type" id="field_type" placeholder="Choose">
+                    <ng-template let-type pTemplate="item">{{'primengtestApp.TaskType.' + type.label | translate}}</ng-template>
+                </p-dropdown>
+                <div class="validation-messages">
+                    <ng-container *ngIf="editForm.get('type').invalid && (editForm.get('type').dirty || editForm.get('type').touched)">
+                        <p-message severity="error"
+                                   *ngIf="editForm.get('type').errors.required" [text]="'entity.validation.required' | translate">
+                        </p-message>
+                    </ng-container>
+                </div>
+                <label jhiTranslate="primengtestApp.task.endDate" for="field_endDate">End Date</label>
+                <p-calendar id="field_endDate" formControlName="endDate" [showIcon]="true"></p-calendar>
+                <div class="validation-messages">
+                </div>
+                <label jhiTranslate="primengtestApp.task.createdAt" for="field_createdAt">Created At</label>
+                <p-calendar id="field_createdAt" formControlName="createdAt" [showIcon]="true" [showTime]="true"></p-calendar>
+                <div class="validation-messages">
+                    <ng-container *ngIf="editForm.get('createdAt').invalid && (editForm.get('createdAt').dirty || editForm.get('createdAt').touched)">
+                        <p-message severity="error"
+                                   *ngIf="editForm.get('createdAt').errors.required" [text]="'entity.validation.required' | translate">
+                        </p-message>
+                        <p-message severity="error"
+                            [hidden]="!editForm.get('createdAt').errors?.ZonedDateTimelocal" [text]="'entity.validation.ZonedDateTimelocal' | translate">
+                        </p-message>
+                    </ng-container>
+                </div>
+                <label jhiTranslate="primengtestApp.task.modifiedAt" for="field_modifiedAt">Modified At</label>
+                <p-calendar id="field_modifiedAt" formControlName="modifiedAt" [showIcon]="true" [showTime]="true"></p-calendar>
+                <div class="validation-messages">
+                    <ng-container *ngIf="editForm.get('modifiedAt').invalid && (editForm.get('modifiedAt').dirty || editForm.get('modifiedAt').touched)">
+                        <p-message severity="error"
+                                   *ngIf="editForm.get('modifiedAt').errors.required" [text]="'entity.validation.required' | translate">
+                        </p-message>
+                        <p-message severity="error"
+                            [hidden]="!editForm.get('modifiedAt').errors?.ZonedDateTimelocal" [text]="'entity.validation.ZonedDateTimelocal' | translate">
+                        </p-message>
+                    </ng-container>
+                </div>
+                <label jhiTranslate="primengtestApp.task.done" for="field_done">Done</label>
+                <p-inputSwitch name="done" id="field_done" formControlName="done"></p-inputSwitch>
+                <div class="validation-messages">
+                    <ng-container *ngIf="editForm.get('done').invalid && (editForm.get('done').dirty || editForm.get('done').touched)">
+                        <p-message severity="error"
+                                   *ngIf="editForm.get('done').errors.required" [text]="'entity.validation.required' | translate">
+                        </p-message>
+                    </ng-container>
+                </div>
+                <label jhiTranslate="primengtestApp.task.description" for="field_description">Description</label>
+                <textarea pInputTextarea name="description" id="field_description"
+                          formControlName="description"></textarea>
+                <div class="validation-messages">
+                    <ng-container *ngIf="editForm.get('description').invalid && (editForm.get('description').dirty || editForm.get('description').touched)">
+                        <p-message severity="error"
+                                   *ngIf="editForm.get('description').errors.required" [text]="'entity.validation.required' | translate">
+                        </p-message>
+                    </ng-container>
+                </div>
+                <label jhiTranslate="primengtestApp.task.attachment" for="field_attachment">Attachment</label>
+                <p-fileUpload name="attachment" id="field_attachment" [showUploadButton]="false" (onSelect)="onFileSelect($event, 'attachment')"
+                              (onClear)="onFileRemove($event, 'attachment')" (onRemove)="onFileRemove($event, 'attachment')" [files]="attachmentFile?[attachmentFile]:null"></p-fileUpload>
+                <div class="validation-messages">
+                    <ng-container *ngIf="editForm.get('attachment').invalid && (editForm.get('attachment').dirty || editForm.get('attachment').touched)">
+                        <p-message severity="error"
+                                   *ngIf="editForm.get('attachment').errors.required" [text]="'entity.validation.required' | translate">
+                        </p-message>
+                    </ng-container>
+                </div>
+                <label jhiTranslate="primengtestApp.task.picture" for="field_picture">Picture</label>
+                <p-fileUpload name="picture" id="field_picture" [showUploadButton]="false" (onSelect)="onFileSelect($event, 'picture')" accept="image/*"
+                              (onClear)="onFileRemove($event, 'picture')" (onRemove)="onFileRemove($event, 'picture')" [files]="pictureFile?[pictureFile]:null"></p-fileUpload>
+                <div class="validation-messages">
+                    <ng-container *ngIf="editForm.get('picture').invalid && (editForm.get('picture').dirty || editForm.get('picture').touched)">
+                        <p-message severity="error"
+                                   *ngIf="editForm.get('picture').errors.required" [text]="'entity.validation.required' | translate">
+                        </p-message>
+                    </ng-container>
+                </div>
 
             </div>
             <div>

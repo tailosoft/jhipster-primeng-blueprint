@@ -1,4 +1,4 @@
-import { browser, ExpectedConditions, element, by, ElementFinder } from 'protractor';
+import { browser, ExpectedConditions as ec, element, by, ElementFinder } from 'protractor';
 
 export class TaskCommentComponentsPage {
   createButton = element(by.id('jh-create-entity'));
@@ -51,14 +51,12 @@ export class TaskCommentUpdatePage {
   }
 
   async taskSelectLastOption(timeout?: number) {
+    await this.taskSelect.click();
     await this.taskSelect
-      .all(by.tagName('option'))
+      .all(by.tagName('.ui-dropdown-item'))
       .last()
       .click();
-  }
-
-  async taskSelectOption(option) {
-    await this.taskSelect.sendKeys(option);
+    await browser.wait(ec.invisibilityOf(this.taskSelect.element(by.css('.ui-dropdown-panel'))), 5000);
   }
 
   getTaskSelect(): ElementFinder {
@@ -66,7 +64,7 @@ export class TaskCommentUpdatePage {
   }
 
   async getTaskSelectedOption() {
-    return await this.taskSelect.element(by.css('option:checked')).getText();
+    return await this.taskSelect.element(by.css('.ui-dropdown-label')).getText();
   }
 
   async save(timeout?: number) {

@@ -1,5 +1,5 @@
 /* tslint:disable no-unused-expression */
-import { browser, ExpectedConditions as ec, promise } from 'protractor';
+import { browser, by, ExpectedConditions as ec } from 'protractor';
 import { NavBarPage, SignInPage } from '../../page-objects/jhi-page-objects';
 
 import { TaskCommentComponentsPage, TaskCommentDeleteDialog, TaskCommentUpdatePage } from './task-comment.page-object';
@@ -39,10 +39,8 @@ describe('TaskComment e2e test', () => {
         const nbButtonsBeforeCreate = await taskCommentComponentsPage.countDeleteButtons();
 
         await taskCommentComponentsPage.clickOnCreateButton();
-        await promise.all([
-            taskCommentUpdatePage.setValueInput('value'),
-            taskCommentUpdatePage.taskSelectLastOption(),
-        ]);
+        await taskCommentUpdatePage.setValueInput('value');
+        await taskCommentUpdatePage.taskSelectLastOption();
         expect(await taskCommentUpdatePage.getValueInput()).to.eq('value', 'Expected Value value to be equals to value');
         await taskCommentUpdatePage.save();
         expect(await taskCommentUpdatePage.getSaveButton().isPresent(), 'Expected save button disappear').to.be.false;

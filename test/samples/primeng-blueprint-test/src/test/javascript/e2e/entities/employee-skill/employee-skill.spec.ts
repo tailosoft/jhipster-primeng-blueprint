@@ -1,5 +1,5 @@
 /* tslint:disable no-unused-expression */
-import { browser, ExpectedConditions as ec, promise } from 'protractor';
+import { browser, by, ExpectedConditions as ec } from 'protractor';
 import { NavBarPage, SignInPage } from '../../page-objects/jhi-page-objects';
 
 import { EmployeeSkillComponentsPage, EmployeeSkillDeleteDialog, EmployeeSkillUpdatePage } from './employee-skill.page-object';
@@ -39,13 +39,11 @@ describe('EmployeeSkill e2e test', () => {
         const nbButtonsBeforeCreate = await employeeSkillComponentsPage.countDeleteButtons();
 
         await employeeSkillComponentsPage.clickOnCreateButton();
-        await promise.all([
-            employeeSkillUpdatePage.setNameInput('name'),
-            employeeSkillUpdatePage.setLevelInput('5'),
-            // employeeSkillUpdatePage.taskSelectLastOption(),
-            employeeSkillUpdatePage.employeeSelectLastOption(),
-            employeeSkillUpdatePage.teacherSelectLastOption(),
-        ]);
+        await employeeSkillUpdatePage.setNameInput('name');
+        await employeeSkillUpdatePage.setLevelInput('5');
+        // await employeeSkillUpdatePage.taskSelectLastOption();
+        await employeeSkillUpdatePage.employeeSelectLastOption();
+        await employeeSkillUpdatePage.teacherSelectLastOption();
         expect(await employeeSkillUpdatePage.getNameInput()).to.eq('name', 'Expected Name value to be equals to name');
         expect(await employeeSkillUpdatePage.getLevelInput()).to.eq('5', 'Expected level value to be equals to 5');
         await employeeSkillUpdatePage.save();

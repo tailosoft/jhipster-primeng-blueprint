@@ -2,12 +2,14 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { JhiEventManager } from 'ng-jhipster';
+import { JhiEventManager, JhiDataUtils } from 'ng-jhipster';
 import { MessageService } from 'primeng/api';
-import { ITask } from 'app/shared/model/task.model';
+import { ITask, TASK_TYPE_ARRAY } from 'app/shared/model/task.model';
 import { TaskService } from './task.service';
 import { ConfirmationService } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
+
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'jhi-task',
@@ -16,13 +18,19 @@ import { TranslateService } from '@ngx-translate/core';
 export class TaskComponent implements OnInit, OnDestroy {
   tasks: ITask[];
   eventSubscriber: Subscription;
+  typeOptions = TASK_TYPE_ARRAY.map(s => ({ label: s.toString(), value: s }));
+  endDateRange: Date[];
+  createdAtRange: Date[];
+  modifiedAtRange: Date[];
 
   constructor(
     protected taskService: TaskService,
     protected messageService: MessageService,
+    protected dataUtils: JhiDataUtils,
     protected eventManager: JhiEventManager,
     protected confirmationService: ConfirmationService,
-    protected translateService: TranslateService
+    protected translateService: TranslateService,
+    protected datePipe: DatePipe
   ) {}
 
   ngOnInit() {
@@ -66,6 +74,14 @@ export class TaskComponent implements OnInit, OnDestroy {
 
   trackId(index: number, item: ITask) {
     return item.id;
+  }
+
+  byteSize(field) {
+    return this.dataUtils.byteSize(field);
+  }
+
+  openFile(contentType, field) {
+    return this.dataUtils.openFile(contentType, field);
   }
 
   registerChangeInTasks() {

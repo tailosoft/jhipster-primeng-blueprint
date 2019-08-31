@@ -46,8 +46,8 @@
                         </p-message>
                     </ng-container>
                 </div>
-                <label jhiTranslate="primengtestApp.employeeSkillCertificate.skillEmployee" for="field_skill_employee">Skill Employee</label>
-                <p-dropdown id="field_skill_employee" name="skillEmployee" [options]="skillEmployeeOptions" formControlName="skillEmployeeUsername" [disabled]="edit"
+                <label jhiTranslate="primengtestApp.employeeSkillCertificate.skillEmployee" for="field_skillEmployee">Skill Employee</label>
+                <p-dropdown id="field_skillEmployee" name="skillEmployee" [options]="skillEmployeeOptions" formControlName="skillEmployeeUsername" [disabled]="edit"
                             [virtualScroll]="true" [lazy]="true" [rows]="10" (onLazyLoad)="onSkillEmployeeLazyLoadEvent($event)" [lazyLoadOnInit]="true" [filter]="true" [filterValue]="skillEmployeeFilterValue"
                             placeholder="Choose" optionLabel="fullname" optionValue="username"></p-dropdown>
                 <div class="validation-messages">

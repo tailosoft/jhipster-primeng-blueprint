@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { JhiDataUtils } from 'ng-jhipster';
 
 import { ITask } from 'app/shared/model/task.model';
 
@@ -10,7 +11,7 @@ import { ITask } from 'app/shared/model/task.model';
 export class TaskDetailComponent implements OnInit {
   task: ITask;
 
-  constructor(protected activatedRoute: ActivatedRoute) {}
+  constructor(protected dataUtils: JhiDataUtils, protected activatedRoute: ActivatedRoute) {}
 
   ngOnInit() {
     this.activatedRoute.data.subscribe(({ task }) => {
@@ -18,6 +19,13 @@ export class TaskDetailComponent implements OnInit {
     });
   }
 
+  byteSize(field) {
+    return this.dataUtils.byteSize(field);
+  }
+
+  openFile(contentType, field) {
+    return this.dataUtils.openFile(contentType, field);
+  }
   previousState() {
     window.history.back();
   }

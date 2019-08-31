@@ -44,6 +44,18 @@ relationship OneToMany{
 
 entity Task {
     name String required
+    type TaskType required
+    endDate LocalDate
+    createdAt ZonedDateTime required
+    modifiedAt Instant required
+    done Boolean required
+    description TextBlob required
+    attachment Blob required
+    picture ImageBlob required
+}
+
+enum TaskType {
+    TYPE1, TYPE2, TYPE3
 }
 
 entity TaskComment {

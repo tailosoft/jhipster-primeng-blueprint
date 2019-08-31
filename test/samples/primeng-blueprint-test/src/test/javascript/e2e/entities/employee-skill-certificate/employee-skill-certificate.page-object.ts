@@ -1,4 +1,4 @@
-import { browser, ExpectedConditions, element, by, ElementFinder } from 'protractor';
+import { browser, ExpectedConditions as ec, element, by, ElementFinder } from 'protractor';
 
 export class EmployeeSkillCertificateComponentsPage {
   createButton = element(by.id('jh-create-entity'));
@@ -30,6 +30,7 @@ export class EmployeeSkillCertificateUpdatePage {
   dateInput = element(by.id('field_date'));
   typeSelect = element(by.id('field_type'));
   skillSelect = element(by.id('field_skill'));
+  skillEmployeeSelect = element(by.id('field_skillEmployee'));
 
   async getPageTitle() {
     return this.pageTitle.getAttribute('jhiTranslate');
@@ -44,22 +45,22 @@ export class EmployeeSkillCertificateUpdatePage {
   }
 
   async setDateInput(date) {
-    await this.dateInput.sendKeys(date);
+    await this.dateInput.element(by.css('.ui-inputtext')).sendKeys(date);
+    await this.dateInput.element(by.tagName('.ui-calendar-button')).click();
+    await browser.wait(ec.invisibilityOf(this.dateInput.element(by.css('.ui-datepicker'))), 5000);
   }
 
   async getDateInput() {
-    return await this.dateInput.getAttribute('value');
+    return await this.dateInput.element(by.css('.ui-inputtext')).getAttribute('value');
   }
 
   async typeSelectLastOption(timeout?: number) {
+    await this.typeSelect.click();
     await this.typeSelect
-      .all(by.tagName('option'))
+      .all(by.tagName('.ui-dropdown-item'))
       .last()
       .click();
-  }
-
-  async typeSelectOption(option) {
-    await this.typeSelect.sendKeys(option);
+    await browser.wait(ec.invisibilityOf(this.typeSelect.element(by.css('.ui-dropdown-panel'))), 5000);
   }
 
   getTypeSelect(): ElementFinder {
@@ -67,18 +68,16 @@ export class EmployeeSkillCertificateUpdatePage {
   }
 
   async getTypeSelectedOption() {
-    return await this.typeSelect.element(by.css('option:checked')).getText();
+    return await this.typeSelect.element(by.css('.ui-dropdown-label')).getText();
   }
 
   async skillSelectLastOption(timeout?: number) {
+    await this.skillSelect.click();
     await this.skillSelect
-      .all(by.tagName('option'))
+      .all(by.tagName('.ui-dropdown-item'))
       .last()
       .click();
-  }
-
-  async skillSelectOption(option) {
-    await this.skillSelect.sendKeys(option);
+    await browser.wait(ec.invisibilityOf(this.skillSelect.element(by.css('.ui-dropdown-panel'))), 5000);
   }
 
   getSkillSelect(): ElementFinder {
@@ -86,7 +85,24 @@ export class EmployeeSkillCertificateUpdatePage {
   }
 
   async getSkillSelectedOption() {
-    return await this.skillSelect.element(by.css('option:checked')).getText();
+    return await this.skillSelect.element(by.css('.ui-dropdown-label')).getText();
+  }
+
+  async skillEmployeeSelectLastOption(timeout?: number) {
+    await this.skillEmployeeSelect.click();
+    await this.skillEmployeeSelect
+      .all(by.tagName('.ui-dropdown-item'))
+      .last()
+      .click();
+    await browser.wait(ec.invisibilityOf(this.skillEmployeeSelect.element(by.css('.ui-dropdown-panel'))), 5000);
+  }
+
+  getSkillEmployeeSelect(): ElementFinder {
+    return this.skillEmployeeSelect;
+  }
+
+  async getSkillEmployeeSelectedOption() {
+    return await this.skillEmployeeSelect.element(by.css('.ui-dropdown-label')).getText();
   }
 
   async save(timeout?: number) {

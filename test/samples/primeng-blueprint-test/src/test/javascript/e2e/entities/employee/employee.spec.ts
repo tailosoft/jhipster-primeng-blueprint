@@ -1,5 +1,5 @@
 /* tslint:disable no-unused-expression */
-import { browser, ExpectedConditions as ec, promise } from 'protractor';
+import { browser, by, ExpectedConditions as ec } from 'protractor';
 import { NavBarPage, SignInPage } from '../../page-objects/jhi-page-objects';
 
 import { EmployeeComponentsPage, EmployeeDeleteDialog, EmployeeUpdatePage } from './employee.page-object';
@@ -39,7 +39,8 @@ describe('Employee e2e test', () => {
     const nbButtonsBeforeCreate = await employeeComponentsPage.countDeleteButtons();
 
     await employeeComponentsPage.clickOnCreateButton();
-    await promise.all([employeeUpdatePage.setUsernameInput('username'), employeeUpdatePage.setFullnameInput('fullname')]);
+    await employeeUpdatePage.setUsernameInput('username');
+    await employeeUpdatePage.setFullnameInput('fullname');
     expect(await employeeUpdatePage.getUsernameInput()).to.eq('username', 'Expected Username value to be equals to username');
     expect(await employeeUpdatePage.getFullnameInput()).to.eq('fullname', 'Expected Fullname value to be equals to fullname');
     await employeeUpdatePage.save();

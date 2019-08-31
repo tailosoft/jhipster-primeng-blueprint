@@ -17,7 +17,15 @@
         "title": "Task"
       },
       "id": "ID",
-      "name": "Name"
+      "name": "Name",
+      "type": "Type",
+      "endDate": "End Date",
+      "createdAt": "Created At",
+      "modifiedAt": "Modified At",
+      "done": "Done",
+      "description": "Description",
+      "attachment": "Attachment",
+      "picture": "Picture"
     }
   }
 }

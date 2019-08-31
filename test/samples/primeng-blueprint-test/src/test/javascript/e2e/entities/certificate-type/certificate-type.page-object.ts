@@ -1,4 +1,4 @@
-import { browser, ExpectedConditions, element, by, ElementFinder } from 'protractor';
+import { browser, ExpectedConditions as ec, element, by, ElementFinder } from 'protractor';
 
 export class CertificateTypeComponentsPage {
   createButton = element(by.id('jh-create-entity'));

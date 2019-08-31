@@ -1,5 +1,5 @@
 /* tslint:disable no-unused-expression */
-import { browser, ExpectedConditions as ec, promise } from 'protractor';
+import { browser, by, ExpectedConditions as ec } from 'protractor';
 import { NavBarPage, SignInPage } from '../../page-objects/jhi-page-objects';
 
 import {
@@ -43,14 +43,13 @@ describe('EmployeeSkillCertificate e2e test', () => {
         const nbButtonsBeforeCreate = await employeeSkillCertificateComponentsPage.countDeleteButtons();
 
         await employeeSkillCertificateComponentsPage.clickOnCreateButton();
-        await promise.all([
-            employeeSkillCertificateUpdatePage.setGradeInput('5'),
-            employeeSkillCertificateUpdatePage.setDateInput('2000-12-31'),
-            employeeSkillCertificateUpdatePage.typeSelectLastOption(),
-            employeeSkillCertificateUpdatePage.skillSelectLastOption(),
-        ]);
+        await employeeSkillCertificateUpdatePage.setGradeInput('5');
+        await employeeSkillCertificateUpdatePage.setDateInput('12/31/2000');
+        await employeeSkillCertificateUpdatePage.typeSelectLastOption();
+        await employeeSkillCertificateUpdatePage.skillSelectLastOption();
+        await employeeSkillCertificateUpdatePage.skillEmployeeSelectLastOption();
         expect(await employeeSkillCertificateUpdatePage.getGradeInput()).to.eq('5', 'Expected grade value to be equals to 5');
-        expect(await employeeSkillCertificateUpdatePage.getDateInput()).to.eq('2000-12-31', 'Expected date value to be equals to 2000-12-31');
+        expect(await employeeSkillCertificateUpdatePage.getDateInput()).to.eq('12/31/2000', 'Expected date value to be equals to 12/31/2000');
         await employeeSkillCertificateUpdatePage.save();
         expect(await employeeSkillCertificateUpdatePage.getSaveButton().isPresent(), 'Expected save button disappear').to.be.false;
 

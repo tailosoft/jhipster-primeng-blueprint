@@ -4,8 +4,10 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { of } from 'rxjs';
 import { take, map } from 'rxjs/operators';
+import { DATE_FORMAT } from 'app/shared/constants/input.constants';
+import { DatePipe } from '@angular/common';
 import { TaskService } from 'app/entities/task/task.service';
-import { ITask, Task } from 'app/shared/model/task.model';
+import { ITask, Task, TaskType } from 'app/shared/model/task.model';
 
 describe('Service Tests', () => {
   describe('Task Service', () => {
@@ -14,21 +16,48 @@ describe('Service Tests', () => {
     let httpMock: HttpTestingController;
     let elemDefault: ITask;
     let expectedResult;
+    let currentDate: Date;
+    let datePipe: DatePipe;
     beforeEach(() => {
       TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule]
+        imports: [HttpClientTestingModule],
+        providers: [DatePipe]
       });
       expectedResult = {};
       injector = getTestBed();
       service = injector.get(TaskService);
       httpMock = injector.get(HttpTestingController);
+      currentDate = new Date();
+      datePipe = injector.get(DatePipe);
 
-      elemDefault = new Task(123, 'AAAAAAA', undefined, undefined);
+      elemDefault = new Task(
+        123,
+        'AAAAAAA',
+        TaskType.TYPE1,
+        currentDate,
+        currentDate,
+        currentDate,
+        false,
+        undefined,
+        'image/png',
+        undefined,
+        'image/png',
+        undefined,
+        undefined,
+        undefined
+      );
     });
 
     describe('Service methods', () => {
       it('should find an element', async () => {
-        const returnedFromService = Object.assign({}, elemDefault);
+        const returnedFromService = Object.assign(
+          {
+            endDate: datePipe.transform(currentDate, DATE_FORMAT),
+            createdAt: currentDate.toISOString(),
+            modifiedAt: currentDate.toISOString()
+          },
+          elemDefault
+        );
         service
           .find(123)
           .pipe(take(1))
@@ -42,11 +71,21 @@ describe('Service Tests', () => {
       it('should create a Task', async () => {
         const returnedFromService = Object.assign(
           {
-            id: 0
+            id: 0,
+            endDate: datePipe.transform(currentDate, DATE_FORMAT),
+            createdAt: currentDate.toISOString(),
+            modifiedAt: currentDate.toISOString()
           },
           elemDefault
         );
-        const expected = Object.assign({}, returnedFromService);
+        const expected = Object.assign(
+          {
+            endDate: currentDate,
+            createdAt: currentDate,
+            modifiedAt: currentDate
+          },
+          returnedFromService
+        );
         service
           .create(new Task(null))
           .pipe(take(1))
@@ -60,12 +99,27 @@ describe('Service Tests', () => {
         const returnedFromService = Object.assign(
           {
             id: 1,
-            name: 'BBBBBB'
+            name: 'BBBBBB',
+            type: 'BBBBBB',
+            endDate: datePipe.transform(currentDate, DATE_FORMAT),
+            createdAt: currentDate.toISOString(),
+            modifiedAt: currentDate.toISOString(),
+            done: true,
+            description: 'BBBBBB',
+            attachment: 'BBBBBB',
+            picture: 'BBBBBB'
           },
           elemDefault
         );
 
-        const expected = Object.assign({}, returnedFromService);
+        const expected = Object.assign(
+          {
+            endDate: currentDate,
+            createdAt: currentDate,
+            modifiedAt: currentDate
+          },
+          returnedFromService
+        );
         service
           .update(expected)
           .pipe(take(1))
@@ -79,11 +133,26 @@ describe('Service Tests', () => {
         const returnedFromService = Object.assign(
           {
             id: 1,
-            name: 'BBBBBB'
+            name: 'BBBBBB',
+            type: 'BBBBBB',
+            endDate: datePipe.transform(currentDate, DATE_FORMAT),
+            createdAt: currentDate.toISOString(),
+            modifiedAt: currentDate.toISOString(),
+            done: true,
+            description: 'BBBBBB',
+            attachment: 'BBBBBB',
+            picture: 'BBBBBB'
           },
           elemDefault
         );
-        const expected = Object.assign({}, returnedFromService);
+        const expected = Object.assign(
+          {
+            endDate: currentDate,
+            createdAt: currentDate,
+            modifiedAt: currentDate
+          },
+          returnedFromService
+        );
         service
           .query(expected)
           .pipe(

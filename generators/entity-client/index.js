@@ -223,7 +223,7 @@ module.exports = class extends EntityClientGenerator {
         context.fields.forEach(field => {
             const fieldName = field.fieldName;
             if (['byte[]', 'ByteBuffer'].includes(field.fieldType) && field.fieldTypeBlobContent !== 'text') {
-                context.tsVariables.push({name: `${fieldName}ContentType`, type: string, tsTestValue: 'image/png'});
+                context.tsVariables.push({name: `${fieldName}ContentType`, type: 'string', tsTestValue: "'image/png'"});
             }
             const res = {name: fieldName, type: field.tsType, tsTestValue: field.tsTestValue};
             if(field.partOfId) {

@@ -15,6 +15,30 @@
             <th>
                 <span jhiTranslate="primengtestApp.task.name">Name</span>
             </th>
+            <th>
+                <span jhiTranslate="primengtestApp.task.type">Type</span>
+            </th>
+            <th>
+                <span jhiTranslate="primengtestApp.task.endDate">End Date</span>
+            </th>
+            <th>
+                <span jhiTranslate="primengtestApp.task.createdAt">Created At</span>
+            </th>
+            <th>
+                <span jhiTranslate="primengtestApp.task.modifiedAt">Modified At</span>
+            </th>
+            <th>
+                <span jhiTranslate="primengtestApp.task.done">Done</span>
+            </th>
+            <th>
+                <span jhiTranslate="primengtestApp.task.description">Description</span>
+            </th>
+            <th>
+                <span jhiTranslate="primengtestApp.task.attachment">Attachment</span>
+            </th>
+            <th>
+                <span jhiTranslate="primengtestApp.task.picture">Picture</span>
+            </th>
             <th style="width: 124px"></th>
         </tr>
         <tr>
@@ -26,6 +50,28 @@
                 <input pInputText type="text" [value]="taskTable.filters.name?.value"
                        (input)="taskTable.filter($event.target.value, 'name', 'contains')">
             </th>
+            <th>
+                <p-multiSelect [options]="typeOptions" [ngModel]="taskTable.filters.type?.value"
+                               (ngModelChange)="taskTable.filter($event, 'type', 'in')">
+                    <ng-template let-type pTemplate="item">{{'primengtestApp.TaskType.' + type.label | translate}}</ng-template>
+                </p-multiSelect>
+            </th>
+            <th>
+            </th>
+            <th>
+            </th>
+            <th>
+            </th>
+            <th>
+                <p-triStateCheckbox [ngModel]="taskTable.filters.billable?.value"
+                                    (ngModelChange)="taskTable.filter($event, 'done', 'equals')"></p-triStateCheckbox>
+            </th>
+            <th>
+            </th>
+            <th>
+            </th>
+            <th>
+            </th>
             <th></th>
         </tr>
         </ng-template>
@@ -33,6 +79,22 @@
             <tr>
                 <td>{{task.id}}</td>
                 <td>{{task.name}}</td>
+                <td jhiTranslate="{{'primengtestApp.TaskType.' + task.type}}">{{task.type}}</td>
+                <td>{{task.endDate | date:'mediumDate'}}</td>
+                <td>{{task.createdAt | date:'medium'}}</td>
+                <td>{{task.modifiedAt | date:'medium'}}</td>
+                <td>{{task.done}}</td>
+                <td>{{task.description}}</td>
+                <td>
+                    <a *ngIf="task.attachment" (click)="openFile(task.attachmentContentType, task.attachment)" jhiTranslate="entity.action.open">open</a>
+                    <span *ngIf="task.attachment">{{task.attachmentContentType}}, {{byteSize(task.attachment)}}</span>
+                </td>
+                <td>
+                    <a *ngIf="task.picture" (click)="openFile(task.pictureContentType, task.picture)">
+                        <img [src]="'data:' + task.pictureContentType + ';base64,' + task.picture" style="max-height: 30px;" alt="task image"/>
+                    </a>
+                    <span *ngIf="task.picture">{{task.pictureContentType}}, {{byteSize(task.picture)}}</span>
+                </td>
                 <td>
                     <div class="btn-group flex-btn-group-container">
                         <p-button type="submit" [routerLink]="['/task', task.id, 'view' ]"
