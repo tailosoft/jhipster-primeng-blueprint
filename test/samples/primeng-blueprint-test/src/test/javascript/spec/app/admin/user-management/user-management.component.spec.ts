@@ -1,10 +1,14 @@
-import { ComponentFixture, TestBed, async, inject, fakeAsync, tick } from '@angular/core/testing';
-import { Observable, of } from 'rxjs';
-import { HttpHeaders, HttpResponse } from '@angular/common/http';
-
+/* tslint:disable max-line-length */
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { of, BehaviorSubject } from 'rxjs';
+import { HttpResponse } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
 import { PrimengtestTestModule } from '../../../test.module';
 import { UserMgmtComponent } from 'app/admin/user-management/user-management.component';
 import { UserService, User } from 'app/core';
+import { ConfirmationService } from 'primeng/api';
+import { MockActivatedRoute } from '../../../helpers/mock-route.service';
+import { MockTable } from '../../../helpers/mock-table';
 import { JhiEventManager } from 'ng-jhipster';
 
 describe('Component Tests', () => {
@@ -12,9 +16,12 @@ describe('Component Tests', () => {
     let comp: UserMgmtComponent;
     let fixture: ComponentFixture<UserMgmtComponent>;
     let service: UserService;
+    let mockConfirmationService: any;
+
+    let activatedRoute: MockActivatedRoute;
     let mockEventManager: any;
 
-    beforeEach(async(() => {
+    beforeEach(() => {
       TestBed.configureTestingModule({
         imports: [PrimengtestTestModule],
         declarations: [UserMgmtComponent]
@@ -24,54 +31,62 @@ describe('Component Tests', () => {
 
       fixture = TestBed.createComponent(UserMgmtComponent);
       comp = fixture.componentInstance;
+      comp.userTable = <any>new MockTable();
       service = fixture.debugElement.injector.get(UserService);
+      mockConfirmationService = fixture.debugElement.injector.get(ConfirmationService);
+      activatedRoute = fixture.debugElement.injector.get(ActivatedRoute);
       mockEventManager = fixture.debugElement.injector.get(JhiEventManager);
+    });
+
+    it('Should call load all on init', fakeAsync(() => {
+      // GIVEN
+      spyOn(service, 'query').and.returnValue(
+        of(
+          new HttpResponse({
+            body: [new User(123)]
+          })
+        )
+      );
+
+      // WHEN
+      fixture.detectChanges();
+
+      // THEN
+      expect(service.query).toHaveBeenCalled();
+      expect(comp.users[0]).toEqual(jasmine.objectContaining({ id: 123 }));
     }));
 
-    describe('OnInit', () => {
-      it('Should call load all on init', inject(
-        [],
-        fakeAsync(() => {
-          // GIVEN
-          const headers = new HttpHeaders().append('link', 'link;link');
-          spyOn(service, 'query').and.returnValue(
-            of(
-              new HttpResponse({
-                body: [new User(123)],
-                headers
-              })
-            )
-          );
+    it('should load a page', fakeAsync(() => {
+      // GIVEN
+      spyOn(service, 'query').and.returnValue(
+        of(
+          new HttpResponse({
+            body: [new User(123)]
+          })
+        )
+      );
 
-          // WHEN
-          fixture.detectChanges();
-          comp.userTable = <any>{};
-          // wait for debounce
-          tick(300);
+      // WHEN
+      fixture.detectChanges();
+      tick(100);
+      (<BehaviorSubject<any>>activatedRoute.queryParams).next({ first: 3 });
 
-          // THEN
-          expect(service.query).toHaveBeenCalled();
-          expect(comp.users[0]).toEqual(jasmine.objectContaining({ id: 123 }));
-        })
-      ));
-    });
+      // THEN
+      expect(service.query).toHaveBeenCalled();
+      expect(comp.users[0]).toEqual(jasmine.objectContaining({ id: 123 }));
+    }));
 
-    describe('setActive', () => {
-      it('Should update user and call load all', inject(
-        [],
-        fakeAsync(() => {
-          // GIVEN
-          const user = new User(123);
-          spyOn(service, 'update').and.returnValue(of(new HttpResponse({ status: 200 })));
+    it('should call delete service using confirmDialog', fakeAsync(() => {
+      // GIVEN
+      spyOn(service, 'delete').and.returnValue(of({}));
 
-          // WHEN
-          comp.setActive(user, true);
-          tick(); // simulate async
+      // WHEN
+      comp.delete('AAAAAAA');
 
-          // THEN
-          expect(service.update).toHaveBeenCalledWith(user);
-        })
-      ));
-    });
+      // THEN
+      expect(mockConfirmationService.confirmSpy).toHaveBeenCalled();
+      expect(service.delete).toHaveBeenCalledWith('AAAAAAA');
+      expect(mockEventManager.broadcastSpy).toHaveBeenCalled();
+    }));
   });
 });

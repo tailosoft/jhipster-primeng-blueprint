@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -6,9 +6,10 @@ import { JhiEventManager, JhiDataUtils } from 'ng-jhipster';
 import { MessageService } from 'primeng/api';
 import { ITask, TASK_TYPE_ARRAY } from 'app/shared/model/task.model';
 import { TaskService } from './task.service';
+import { computeFilterMatchMode } from 'app/shared/util/request-util';
 import { ConfirmationService } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
-
+import { Table } from 'primeng/table';
 import { DatePipe } from '@angular/common';
 
 @Component({
@@ -19,9 +20,18 @@ export class TaskComponent implements OnInit, OnDestroy {
   tasks: ITask[];
   eventSubscriber: Subscription;
   typeOptions = TASK_TYPE_ARRAY.map(s => ({ label: s.toString(), value: s }));
-  endDateRange: Date[];
-  createdAtRange: Date[];
-  modifiedAtRange: Date[];
+
+  private filtersDetails: { [_: string]: { matchMode?: string; flatten?: (_: any) => string; unflatten?: (_: string) => any } } = {
+    id: { matchMode: 'equals', unflatten: x => +x },
+    type: { matchMode: 'in' },
+    endDate: { matchMode: 'between', flatten: a => a.filter(x => x).join(','), unflatten: a => a.split(',') },
+    createdAt: { matchMode: 'between', flatten: a => a.filter(x => x).join(','), unflatten: a => a.split(',') },
+    modifiedAt: { matchMode: 'between', flatten: a => a.filter(x => x).join(','), unflatten: a => a.split(',') },
+    done: { matchMode: 'equals', unflatten: x => x === 'true' }
+  };
+
+  @ViewChild('taskTable', { static: true })
+  taskTable: Table;
 
   constructor(
     protected taskService: TaskService,
@@ -55,6 +65,10 @@ export class TaskComponent implements OnInit, OnDestroy {
         },
         (res: HttpErrorResponse) => this.onError(res.message)
       );
+  }
+
+  filter(value, field) {
+    this.taskTable.filter(value, field, computeFilterMatchMode(this.filtersDetails[field]));
   }
 
   delete(id: number) {

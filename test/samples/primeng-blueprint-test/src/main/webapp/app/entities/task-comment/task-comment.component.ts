@@ -1,27 +1,30 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { HttpErrorResponse, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { filter, map, tap, take, debounceTime, switchMap } from 'rxjs/operators';
+import { filter, tap, switchMap } from 'rxjs/operators';
 import { JhiEventManager } from 'ng-jhipster';
 import { MessageService } from 'primeng/api';
 import { ITaskComment } from 'app/shared/model/task-comment.model';
-import { ITEMS_PER_PAGE } from 'app/shared';
-import { lazyLoadEventToQueryParams } from 'app/shared/util/request-util';
 import { TaskCommentService } from './task-comment.service';
+import { ITEMS_PER_PAGE } from 'app/shared';
+import {
+  computeFilterMatchMode,
+  lazyLoadEventToServerQueryParams,
+  lazyLoadEventToRouterQueryParams,
+  fillTableFromQueryParams
+} from 'app/shared/util/request-util';
 import { ConfirmationService, LazyLoadEvent } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
 import { ITask } from 'app/shared/model/task.model';
 import { TaskService } from 'app/entities/task';
-
 import { Table } from 'primeng/table';
-import { flatten, unflatten } from 'flat';
 
 @Component({
   selector: 'jhi-task-comment',
   templateUrl: './task-comment.component.html'
 })
-export class TaskCommentComponent implements OnInit, OnDestroy, AfterViewInit {
+export class TaskCommentComponent implements OnInit, OnDestroy {
   taskComments: ITaskComment[];
   eventSubscriber: Subscription;
   taskOptions: ITask[];
@@ -30,7 +33,12 @@ export class TaskCommentComponent implements OnInit, OnDestroy, AfterViewInit {
   itemsPerPage: number;
   loading: boolean;
 
-  @ViewChild('taskCommentTable', { static: false })
+  private filtersDetails: { [_: string]: { matchMode?: string; flatten?: (_: any) => string; unflatten?: (_: string) => any } } = {
+    id: { matchMode: 'equals', unflatten: x => +x },
+    taskId: { matchMode: 'in', flatten: a => a.join(','), unflatten: a => a.split(',').map(x => +x) }
+  };
+
+  @ViewChild('taskCommentTable', { static: true })
   taskCommentTable: Table;
 
   constructor(
@@ -50,38 +58,11 @@ export class TaskCommentComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit() {
     this.loadAllTasks();
     this.registerChangeInTaskComments();
-  }
-
-  ngOnDestroy() {
-    this.eventManager.destroy(this.eventSubscriber);
-  }
-
-  ngAfterViewInit() {
-    const lazyLoadEvent$ = this.activatedRoute.queryParams.pipe(
-      debounceTime(300),
-      map(data => <LazyLoadEvent>(<any>unflatten(data)).lle)
-    );
-
-    lazyLoadEvent$
+    this.activatedRoute.queryParams
       .pipe(
-        take(1),
-        filter(event => event !== undefined)
-      )
-      .subscribe(event => {
-        Object.assign(this.taskCommentTable, event);
-        if (event.filters && event.filters.id) {
-          this.taskCommentTable.filters.id.value = +event.filters.id.value;
-        }
-        if (event.filters && event.filters.taskId && event.filters.taskId.value) {
-          this.taskCommentTable.filters.taskId.value = event.filters.taskId.value.map(x => +x);
-        }
-      });
-
-    lazyLoadEvent$
-      .pipe(
-        map(event => lazyLoadEventToQueryParams(event || {})),
+        tap(queryParams => fillTableFromQueryParams(this.taskCommentTable, queryParams, this.filtersDetails)),
         tap(() => (this.loading = true)),
-        switchMap(params => this.taskCommentService.query(params)),
+        switchMap(() => this.taskCommentService.query(lazyLoadEventToServerQueryParams(this.taskCommentTable.createLazyLoadMetadata()))),
         filter((res: HttpResponse<ITaskComment[]>) => res.ok)
       )
       .subscribe(
@@ -96,16 +77,17 @@ export class TaskCommentComponent implements OnInit, OnDestroy, AfterViewInit {
       );
   }
 
+  ngOnDestroy() {
+    this.eventManager.destroy(this.eventSubscriber);
+  }
+
   onLazyLoadEvent(event: LazyLoadEvent) {
-    const queryParams = flatten({ lle: event });
-    Object.entries(queryParams).forEach(([key, value]) => {
-      if (value && typeof value === 'object' && Object.entries(value).length === 0) {
-        delete queryParams[key];
-      }
-    });
-    this.router.navigate(['/task-comment'], {
-      queryParams
-    });
+    const queryParams = lazyLoadEventToRouterQueryParams(event, this.filtersDetails);
+    this.router.navigate(['/task-comment'], { queryParams });
+  }
+
+  filter(value, field) {
+    this.taskCommentTable.filter(value, field, computeFilterMatchMode(this.filtersDetails[field]));
   }
 
   delete(id: number) {

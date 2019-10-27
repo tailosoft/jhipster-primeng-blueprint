@@ -16,7 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Component, OnInit, OnDestroy<%_ if (pagination !== 'no') { _%>, AfterViewInit, ViewChild<% } %> } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { HttpErrorResponse, <%_ if (pagination !== 'no') { _%>HttpHeaders, <% } %>HttpResponse } from '@angular/common/http';
 <%_ if (pagination === 'pagination' || pagination === 'pager') { _%>
 import { ActivatedRoute, Router } from '@angular/router';
@@ -24,7 +24,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 <%_ } _%>
 import { Subscription } from 'rxjs';
-import { filter, map<%_ if (pagination !== 'no') { _%>, tap, take, debounceTime, switchMap<%_ } _%> } from 'rxjs/operators';
+import { filter<% if (pagination !== 'no') { %>, tap, switchMap<% } else { %>, map<% } %> } from 'rxjs/operators';
 import { JhiEventManager<% if (fieldsContainBlob) { %>, JhiDataUtils<% } %> } from 'ng-jhipster';
 import { MessageService } from 'primeng/api';
 <%_
@@ -40,13 +40,11 @@ if ( jpaMetamodelFiltering) {
     });
 } _%>
 import { I<%= entityAngularName %><%= enumOptions ? ', ' + enumOptions : '' %> } from 'app/shared/model/<%= entityModelFileName %>.model';
+import { <%= entityAngularName %>Service } from './<%= entityFileName %>.service';
 <%_ if (pagination !== 'no') { _%>
 import { ITEMS_PER_PAGE } from 'app/shared';
 <%_ } _%>
-<%_ if (pagination !== 'no' || relationships.some(r => r.inList && r.pagination !== null)) { _%>
-import { lazyLoadEventToQueryParams } from 'app/shared/util/request-util';
-<%_ } _%>
-import { <%= entityAngularName %>Service } from './<%= entityFileName %>.service';
+import { computeFilterMatchMode<% if (pagination !== 'no' || relationships.some(r => r.inList && r.pagination !== null)) { %>, lazyLoadEventToServerQueryParams<% } %><% if (pagination !== 'no') {%>, lazyLoadEventToRouterQueryParams, fillTableFromQueryParams<% } %> } from 'app/shared/util/request-util';
 import { ConfirmationService<%_ if (pagination !== 'no' || relationships.some(r => r.inList && r.pagination !== null)) { _%>, LazyLoadEvent<% } %> } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
 <%_ if(jpaMetamodelFiltering){ _%>
@@ -61,12 +59,9 @@ import { <%= pk.entity.angularName%>Service } from 'app/entities/<%= pk.entity.p
                 <%_ } _%>
             <%_ }) _%>
         <%_ } _%>
-    <%_ } %>
-<%_ } %>
-<%_ if (pagination !== 'no') { %>
-import { Table } from 'primeng/table';
-import { flatten, unflatten } from 'flat';
+    <%_ } _%>
 <%_ } _%>
+import { Table } from 'primeng/table';
 <%_ if(jpaMetamodelFiltering && fields.some(f => f.fieldType === 'LocalDate' )){ _%>
 import { DatePipe } from '@angular/common';
 <%_ } _%>
@@ -75,13 +70,15 @@ import { DatePipe } from '@angular/common';
     selector: '<%= jhiPrefixDashed %>-<%= entityFileName %>',
     templateUrl: './<%= entityFileName %>.component.html'
 })
-export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if (pagination !== 'no') { %>, AfterViewInit<% } %> {
+export class <%= entityAngularName %>Component implements OnInit, OnDestroy {
     <%= entityInstancePlural %>: I<%= entityAngularName %>[];
     eventSubscriber: Subscription;
 <%_ if (jpaMetamodelFiltering) {
     for (idx in fields) {
         if(['LocalDate', 'Instant', 'ZonedDateTime'].includes(fields[idx].fieldType)){ _%>
+            <%_ if (pagination !== 'no') { _%>
     <%= fields[idx].fieldName %>Range: Date[];
+            <%_ } _%>
         <%_ } else if(fields[idx].fieldIsEnum) {_%>
     <%= fields[idx].fieldName %>Options = <%= fields[idx].fieldTypeUnderscoreCapitalized %>_ARRAY.map(s => ({ label: s.toString(), value: s }));
         <%_ } _%>
@@ -99,9 +96,30 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
     itemsPerPage: number;
     loading: boolean;
 
-    @ViewChild('<%= entityInstance %>Table', { static: false })
-    <%= entityInstance %>Table: Table;
 <%_ } _%>
+    private filtersDetails: { [_: string]: { matchMode?: string; flatten?: (_: any) => string; unflatten?: (_: string) => any } } = {
+<%_ for ( idx in fields ) {
+    if (fields[idx].fieldIsEnum) { _%>
+        <%= fields[idx].fieldName %>: {matchMode: 'in'},
+    <%_ } else if (['LocalDate', 'Instant', 'ZonedDateTime'].includes(fields[idx].fieldType)) { _%>
+        <%= fields[idx].fieldName %>: {matchMode: 'between', flatten: a => a.filter(x => x).join(','), unflatten: a => a.split(',') },
+    <%_ } else if (fields[idx].fieldType === 'Boolean') { _%>
+        <%= fields[idx].fieldName %>: {matchMode: 'equals', unflatten: x => x === 'true'},
+    <%_ } else if (['Integer', 'Long', 'Float', 'Double', 'BigDecimal', 'Duration'].includes(fields[idx].fieldType)) {  _%>
+        <%= fields[idx].fieldName %>: {matchMode: 'equals', unflatten: x => +x},
+    <%_ } _%>
+<%_ } _%>
+<%_ for ( idx in relationships ) { _%>
+    <%_ if (relationships[idx].inList) { _%>
+        <%_ relationships[idx].pkData.forEach(pk => { _%>
+        <%= relationships[idx].relationshipFieldName %><%= pk.nameCapitalized %>: {matchMode: 'in'<% if(['Integer', 'Long', 'Float', 'Double', 'BigDecimal', 'Duration'].includes(pk.fieldType)) { %>, flatten: a => a.join(','), unflatten: a => a.split(',').map(x => +x) <% } %>},
+        <%_ }) _%>
+    <%_ } _%>
+<%_ } _%>
+    };
+
+    @ViewChild('<%= entityInstance %>Table', { static: true })
+    <%= entityInstance %>Table: Table;
 
     constructor(
         protected <%= entityInstance %>Service: <%= entityAngularName %>Service,
@@ -122,10 +140,10 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
         <%_ if (fieldsContainBlob) { _%>
         protected dataUtils: JhiDataUtils,
         <%_ } _%>
-        <%_ if (pagination !== 'no') { _%>
+<%_ if (pagination !== 'no') { _%>
         protected activatedRoute: ActivatedRoute,
         protected router: Router,
-        <%_ } _%>
+<%_ } _%>
         protected eventManager: JhiEventManager,
         protected confirmationService: ConfirmationService,
         protected translateService: TranslateService,
@@ -133,7 +151,7 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
         protected datePipe: DatePipe,
         <%_ } _%>
     ) {
-        <%_ if (pagination !== 'no') { %>
+        <%_ if (pagination !== 'no') { _%>
         this.itemsPerPage = ITEMS_PER_PAGE;
         this.loading = true;
         <%_ } _%>
@@ -144,19 +162,52 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
     }
 
     ngOnInit() {
-        <%_ if (pagination === 'no') { %>
+<%_ if (pagination === 'no') { %>
         this.loadAll();
-        <%_ } _%>
-    <%_ if(jpaMetamodelFiltering){ _%>
-        <%_ for (idx in relationships) { _%>
-            <%_ if (relationships[idx].inList && relationships[idx].pagination == 'no') { _%>
-                <%_ relationships[idx].pkData.forEach(pk => { _%>
+<%_ } _%>
+<%_ if(jpaMetamodelFiltering){ _%>
+    <%_ for (idx in relationships) { _%>
+        <%_ if (relationships[idx].inList && relationships[idx].pagination == 'no') { _%>
+            <%_ relationships[idx].pkData.forEach(pk => { _%>
         this.loadAll<%= _.upperFirst(pluralize(pk.formName)) %>();
-                <%_ }) _%>
-            <%_ } _%>
+            <%_ }) _%>
         <%_ } _%>
     <%_ } _%>
+<%_ } _%>
         this.registerChangeIn<%= entityClassPlural %>();
+<%_ if (pagination !== 'no') { _%>
+        this.activatedRoute.queryParams.pipe(
+            tap(queryParams => fillTableFromQueryParams(this.<%= entityInstance %>Table, queryParams, this.filtersDetails)),
+    <%_ for ( idx in fields ) {
+        if (['LocalDate', 'Instant', 'ZonedDateTime'].includes(fields[idx].fieldType)) { _%>
+            tap(() => this.<%= fields[idx].fieldName %>Range = this.<%= entityInstance %>Table.filters.<%= fields[idx].fieldName %> && this.<%= entityInstance %>Table.filters.<%= fields[idx].fieldName %>.value &&
+                    this.<%= entityInstance %>Table.filters.<%= fields[idx].fieldName %>.value.map(x => new Date(x))),
+        <%_ } _%>
+    <%_ } _%>
+            tap(() => this.loading = true),
+        <%_ if (searchEngine === 'elasticsearch') { _%>
+            switchMap(() => {
+                if (this.currentSearch) {
+                    this.<%= entityInstance %>Service.search(this.<%= entityInstance %>Table.filters.global.value)),
+                } else {
+                    return this.<%= entityInstance %>Service.query(lazyLoadEventToServerQueryParams(this.<%= entityInstance %>Table.createLazyLoadMetadata())));
+                }
+            }),
+        <%_ } else { _%>
+            switchMap(() => this.<%= entityInstance %>Service.query(lazyLoadEventToServerQueryParams(this.<%= entityInstance %>Table.createLazyLoadMetadata()))),
+        <%_ } _%>
+            filter((res: HttpResponse<I<%= entityAngularName %>[]>) => res.ok)
+        ).subscribe(
+            (res: HttpResponse<I<%= entityAngularName %>[]>) => {
+                this.paginate<%= entityClassPlural %>(res.body, res.headers);
+                this.loading = false;
+            },
+            (res: HttpErrorResponse) => {
+                this.onError(res.message);
+                this.loading = false;
+            }
+        );
+<%_ } _%>
     }
 
     ngOnDestroy() {
@@ -193,85 +244,15 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
         );
     }
     <%_ } else { _%>
-    ngAfterViewInit() {
-        const lazyLoadEvent$ = this.activatedRoute.queryParams.pipe(
-            debounceTime(300),
-            map(data => <LazyLoadEvent>((<any>unflatten(data)).lle))
-        );
-
-        lazyLoadEvent$.pipe(
-            take(1),
-            filter(event => event !== undefined)
-        ).subscribe(event => {
-                Object.assign(this.<%= entityInstance %>Table, event);
-            <%_ if(jpaMetamodelFiltering) { _%>
-                <%_ for ( idx in fields ) {
-                    if (['LocalDate', 'Instant', 'ZonedDateTime'].includes(fields[idx].fieldType)) { _%>
-                this.<%= fields[idx].fieldName %>Range = event.filters && event.filters.<%= fields[idx].fieldName %> && event.filters.<%= fields[idx].fieldName %>.value &&
-                    event.filters.<%= fields[idx].fieldName %>.value.map(x => new Date(x));
-                    <%_ } else if (fields[idx].fieldType === 'Boolean') { _%>
-                if (event.filters && event.filters.<%= fields[idx].fieldName %>) {
-                    this.<%= entityInstance %>Table.filters.<%= fields[idx].fieldName %>.value = event.filters.<%= fields[idx].fieldName %>.value === 'true';
-                }
-                    <%_ } else if (['Integer', 'Long', 'Float', 'Double', 'BigDecimal', 'Duration'].includes(fields[idx].fieldType)) {  _%>
-                if (event.filters && event.filters.<%= fields[idx].fieldName %>) {
-                    this.<%= entityInstance %>Table.filters.<%= fields[idx].fieldName %>.value = +event.filters.<%= fields[idx].fieldName %>.value;
-                }
-                    <%_ } _%>
-                <%_ } _%>
-                <%_ for ( idx in relationships ) { _%>
-                    <%_ if (relationships[idx].inList) { _%>
-                        <%_ relationships[idx].pkData.forEach(pk => { _%>
-                if (event.filters && event.filters.<%= relationships[idx].relationshipFieldName %><%= pk.nameCapitalized %> && event.filters.<%= relationships[idx].relationshipFieldName %><%= pk.nameCapitalized %>.value) {
-                    this.<%= entityInstance %>Table.filters.<%= relationships[idx].relationshipFieldName %><%= pk.nameCapitalized %>.value = event.filters.<%= relationships[idx].relationshipFieldName %><%= pk.nameCapitalized %>.value.map(x => +x);
-                }
-                        <%_ }) _%>
-                    <%_ } _%>
-                <%_ } _%>
-            <%_ } _%>
-        });
-
-        lazyLoadEvent$.pipe(
-            map(event => lazyLoadEventToQueryParams(event || {})),
-            tap(() => this.loading = true),
-        <%_ if (searchEngine === 'elasticsearch') { _%>
-            switchMap(params => {
-                if (this.currentSearch) {
-                    return this.<%= entityInstance %>Service.search(params)
-                } else {
-                    return this.<%= entityInstance %>Service.query(params)
-                }
-            }),
-        <%_ } else { _%>
-            switchMap(params => this.<%= entityInstance %>Service.query(params)),
-        <%_ } _%>
-            filter((res: HttpResponse<I<%= entityAngularName %>[]>) => res.ok)
-        ).subscribe(
-            (res: HttpResponse<I<%= entityAngularName %>[]>) => {
-                this.paginate<%= entityClassPlural %>(res.body, res.headers);
-                this.loading = false;
-            },
-            (res: HttpErrorResponse) => {
-                this.onError(res.message);
-                this.loading = false;
-            }
-        );
-    }
-
     onLazyLoadEvent(event: LazyLoadEvent) {
-        const queryParams = flatten({lle: event});
-        Object.entries(queryParams).forEach(
-            ([key, value]) => {
-                if (value && typeof (value) === 'object' && Object.entries(value).length === 0) {
-                    delete queryParams[key];
-                }
-            }
-        );
-        this.router.navigate(['/<%= entityUrl %>'], {
-            queryParams
-        });
+        const queryParams = lazyLoadEventToRouterQueryParams(event, this.filtersDetails);
+        this.router.navigate(['/<%= entityUrl %>'], { queryParams });
     }
     <%_ } _%>
+
+    filter(value, field) {
+        this.<%= entityInstance %>Table.filter(value, field, computeFilterMatchMode(this.filtersDetails[field]));
+    }
 
     delete(<%= pkData.map(pk => `${pk.name}: ${pk.tsType}`).join(', ') %>) {
         this.confirmationService.confirm({
@@ -300,7 +281,7 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
                     <%_ } else {_%>
 
     on<%= _.upperFirst(pk.formName) %>LazyLoadEvent(event: LazyLoadEvent) {
-        this.<%= _.lowerFirst(pk.entity.name) %>Service.query(lazyLoadEventToQueryParams(event || {}, '<%= pk.otherEntityField %>.contains'))
+        this.<%= _.lowerFirst(pk.entity.name) %>Service.query(lazyLoadEventToServerQueryParams(event || {}, '<%= pk.otherEntityField %>.contains'))
             .subscribe(res => this.<%= pk.formName %>Options = res.body);
     }
                     <%_ } _%>
@@ -360,9 +341,9 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy<% if
     onDateSelect(dateRange: Date[], column: string, time = false) {
         const dateToString =  time ? (x => x && x.toISOString()) : (x => x && this.datePipe.transform(x, 'yyyy-MM-dd'));
         if (dateRange) {
-            this.<%= entityInstance %>Table.filter(dateRange.map(dateToString), column, 'between');
+            this.filter(dateRange.map(dateToString), column);
         } else {
-            this.<%= entityInstance %>Table.filter(undefined, column, undefined);
+            this.filter(undefined, column);
         }
     }
     <%_ } _%>

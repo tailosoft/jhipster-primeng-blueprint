@@ -3,7 +3,7 @@
         <span id="user-management-page-heading" jhiTranslate="userManagement.home.title">Users</span>
         <button pButton class="float-right jh-create-entity" [routerLink]="['./new']" icon="pi pi-plus" [label]="'userManagement.home.createLabel' | translate"></button>
     </h2>
-    <div class="table-responsive" *ngIf="users">
+    <div class="table-responsive">
         <p-table #userTable [value]="users" [rowTrackBy]="trackId" [responsive]="true" [lazy]="true" [rows]="itemsPerPage" [totalRecords]="totalItems" [loading]="loading" sortMode="multiple" [lazyLoadOnInit]="false" [paginator]="true" (onLazyLoad)="onLazyLoadEvent($event)">
             <ng-template pTemplate="header">
             <tr>

@@ -28,6 +28,10 @@ import { RouterModule } from '@angular/router';
       {
         path: 'task-comment',
         loadChildren: () => import('./task-comment/task-comment.module').then(m => m.PrimengtestTaskCommentModule)
+      },
+      {
+        path: 'price-formula',
+        loadChildren: () => import('./price-formula/price-formula.module').then(m => m.PrimengtestPriceFormulaModule)
       }
       /* jhipster-needle-add-entity-route - JHipster will add entity modules routes here */
     ])

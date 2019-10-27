@@ -79,8 +79,13 @@ relationship OneToMany {
     Employee{taughtSkill(name)} to EmployeeSkill{teacher(fullname) required}
 }
 
+//Entity With integer id not called Id (not autoIncrement)
+entity PriceFormula {
+    @id max Integer required
+    formula String required
+}
+
 dto * with mapstruct
 service * with serviceImpl
 filter *
 paginate TaskComment, Employee, EmployeeSkill, EmployeeSkillCertificate with pagination
-

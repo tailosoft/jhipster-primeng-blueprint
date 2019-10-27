@@ -1,14 +1,19 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { HttpErrorResponse, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { filter, map, tap, take, debounceTime, switchMap } from 'rxjs/operators';
+import { filter, tap, switchMap } from 'rxjs/operators';
 import { JhiEventManager } from 'ng-jhipster';
 import { MessageService } from 'primeng/api';
 import { IEmployeeSkillCertificate } from 'app/shared/model/employee-skill-certificate.model';
-import { ITEMS_PER_PAGE } from 'app/shared';
-import { lazyLoadEventToQueryParams } from 'app/shared/util/request-util';
 import { EmployeeSkillCertificateService } from './employee-skill-certificate.service';
+import { ITEMS_PER_PAGE } from 'app/shared';
+import {
+  computeFilterMatchMode,
+  lazyLoadEventToServerQueryParams,
+  lazyLoadEventToRouterQueryParams,
+  fillTableFromQueryParams
+} from 'app/shared/util/request-util';
 import { ConfirmationService, LazyLoadEvent } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
 import { ICertificateType } from 'app/shared/model/certificate-type.model';
@@ -17,16 +22,14 @@ import { IEmployeeSkill } from 'app/shared/model/employee-skill.model';
 import { EmployeeSkillService } from 'app/entities/employee-skill';
 import { IEmployee } from 'app/shared/model/employee.model';
 import { EmployeeService } from 'app/entities/employee';
-
 import { Table } from 'primeng/table';
-import { flatten, unflatten } from 'flat';
 import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'jhi-employee-skill-certificate',
   templateUrl: './employee-skill-certificate.component.html'
 })
-export class EmployeeSkillCertificateComponent implements OnInit, OnDestroy, AfterViewInit {
+export class EmployeeSkillCertificateComponent implements OnInit, OnDestroy {
   employeeSkillCertificates: IEmployeeSkillCertificate[];
   eventSubscriber: Subscription;
   dateRange: Date[];
@@ -38,7 +41,15 @@ export class EmployeeSkillCertificateComponent implements OnInit, OnDestroy, Aft
   itemsPerPage: number;
   loading: boolean;
 
-  @ViewChild('employeeSkillCertificateTable', { static: false })
+  private filtersDetails: { [_: string]: { matchMode?: string; flatten?: (_: any) => string; unflatten?: (_: string) => any } } = {
+    grade: { matchMode: 'equals', unflatten: x => +x },
+    date: { matchMode: 'between', flatten: a => a.filter(x => x).join(','), unflatten: a => a.split(',') },
+    typeId: { matchMode: 'in', flatten: a => a.join(','), unflatten: a => a.split(',').map(x => +x) },
+    skillName: { matchMode: 'in' },
+    skillEmployeeUsername: { matchMode: 'in' }
+  };
+
+  @ViewChild('employeeSkillCertificateTable', { static: true })
   employeeSkillCertificateTable: Table;
 
   constructor(
@@ -61,45 +72,22 @@ export class EmployeeSkillCertificateComponent implements OnInit, OnDestroy, Aft
   ngOnInit() {
     this.loadAllTypes();
     this.registerChangeInEmployeeSkillCertificates();
-  }
-
-  ngOnDestroy() {
-    this.eventManager.destroy(this.eventSubscriber);
-  }
-
-  ngAfterViewInit() {
-    const lazyLoadEvent$ = this.activatedRoute.queryParams.pipe(
-      debounceTime(300),
-      map(data => <LazyLoadEvent>(<any>unflatten(data)).lle)
-    );
-
-    lazyLoadEvent$
+    this.activatedRoute.queryParams
       .pipe(
-        take(1),
-        filter(event => event !== undefined)
-      )
-      .subscribe(event => {
-        Object.assign(this.employeeSkillCertificateTable, event);
-        if (event.filters && event.filters.grade) {
-          this.employeeSkillCertificateTable.filters.grade.value = +event.filters.grade.value;
-        }
-        this.dateRange = event.filters && event.filters.date && event.filters.date.value && event.filters.date.value.map(x => new Date(x));
-        if (event.filters && event.filters.typeId && event.filters.typeId.value) {
-          this.employeeSkillCertificateTable.filters.typeId.value = event.filters.typeId.value.map(x => +x);
-        }
-        if (event.filters && event.filters.skillName && event.filters.skillName.value) {
-          this.employeeSkillCertificateTable.filters.skillName.value = event.filters.skillName.value.map(x => +x);
-        }
-        if (event.filters && event.filters.skillEmployeeUsername && event.filters.skillEmployeeUsername.value) {
-          this.employeeSkillCertificateTable.filters.skillEmployeeUsername.value = event.filters.skillEmployeeUsername.value.map(x => +x);
-        }
-      });
-
-    lazyLoadEvent$
-      .pipe(
-        map(event => lazyLoadEventToQueryParams(event || {})),
+        tap(queryParams => fillTableFromQueryParams(this.employeeSkillCertificateTable, queryParams, this.filtersDetails)),
+        tap(
+          () =>
+            (this.dateRange =
+              this.employeeSkillCertificateTable.filters.date &&
+              this.employeeSkillCertificateTable.filters.date.value &&
+              this.employeeSkillCertificateTable.filters.date.value.map(x => new Date(x)))
+        ),
         tap(() => (this.loading = true)),
-        switchMap(params => this.employeeSkillCertificateService.query(params)),
+        switchMap(() =>
+          this.employeeSkillCertificateService.query(
+            lazyLoadEventToServerQueryParams(this.employeeSkillCertificateTable.createLazyLoadMetadata())
+          )
+        ),
         filter((res: HttpResponse<IEmployeeSkillCertificate[]>) => res.ok)
       )
       .subscribe(
@@ -114,16 +102,17 @@ export class EmployeeSkillCertificateComponent implements OnInit, OnDestroy, Aft
       );
   }
 
+  ngOnDestroy() {
+    this.eventManager.destroy(this.eventSubscriber);
+  }
+
   onLazyLoadEvent(event: LazyLoadEvent) {
-    const queryParams = flatten({ lle: event });
-    Object.entries(queryParams).forEach(([key, value]) => {
-      if (value && typeof value === 'object' && Object.entries(value).length === 0) {
-        delete queryParams[key];
-      }
-    });
-    this.router.navigate(['/employee-skill-certificate'], {
-      queryParams
-    });
+    const queryParams = lazyLoadEventToRouterQueryParams(event, this.filtersDetails);
+    this.router.navigate(['/employee-skill-certificate'], { queryParams });
+  }
+
+  filter(value, field) {
+    this.employeeSkillCertificateTable.filter(value, field, computeFilterMatchMode(this.filtersDetails[field]));
   }
 
   delete(typeId: number, skillName: string, skillEmployeeUsername: string) {
@@ -149,13 +138,13 @@ export class EmployeeSkillCertificateComponent implements OnInit, OnDestroy, Aft
 
   onSkillLazyLoadEvent(event: LazyLoadEvent) {
     this.employeeSkillService
-      .query(lazyLoadEventToQueryParams(event || {}, 'name.contains'))
+      .query(lazyLoadEventToServerQueryParams(event || {}, 'name.contains'))
       .subscribe(res => (this.skillOptions = res.body));
   }
 
   onSkillEmployeeLazyLoadEvent(event: LazyLoadEvent) {
     this.employeeService
-      .query(lazyLoadEventToQueryParams(event || {}, 'fullname.contains'))
+      .query(lazyLoadEventToServerQueryParams(event || {}, 'fullname.contains'))
       .subscribe(res => (this.skillEmployeeOptions = res.body));
   }
 
@@ -181,9 +170,9 @@ export class EmployeeSkillCertificateComponent implements OnInit, OnDestroy, Aft
   onDateSelect(dateRange: Date[], column: string, time = false) {
     const dateToString = time ? x => x && x.toISOString() : x => x && this.datePipe.transform(x, 'yyyy-MM-dd');
     if (dateRange) {
-      this.employeeSkillCertificateTable.filter(dateRange.map(dateToString), column, 'between');
+      this.filter(dateRange.map(dateToString), column);
     } else {
-      this.employeeSkillCertificateTable.filter(undefined, column, undefined);
+      this.filter(undefined, column);
     }
   }
 }

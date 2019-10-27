@@ -2,78 +2,78 @@
     <h2 id="page-heading">
         <span jhiTranslate="primengtestApp.task.home.title">Tasks</span>
         <p-button id="jh-create-entity" class="float-right jh-create-entity create-task" [routerLink]="['/task/new']"
-            [label]="'primengtestApp.task.home.createLabel' | translate" icon="pi pi-plus" iconPos="left">
+                  [label]="'primengtestApp.task.home.createLabel' | translate" icon="pi pi-plus" iconPos="left">
         </p-button>
     </h2>
     <br/>
     <p-table #taskTable [value]="tasks" [rowTrackBy]="trackId" [responsive]="true">
         <ng-template pTemplate="header">
-        <tr>
-            <th>
-                <span jhiTranslate="primengtestApp.task.id">ID</span>
-            </th>
-            <th>
-                <span jhiTranslate="primengtestApp.task.name">Name</span>
-            </th>
-            <th>
-                <span jhiTranslate="primengtestApp.task.type">Type</span>
-            </th>
-            <th>
-                <span jhiTranslate="primengtestApp.task.endDate">End Date</span>
-            </th>
-            <th>
-                <span jhiTranslate="primengtestApp.task.createdAt">Created At</span>
-            </th>
-            <th>
-                <span jhiTranslate="primengtestApp.task.modifiedAt">Modified At</span>
-            </th>
-            <th>
-                <span jhiTranslate="primengtestApp.task.done">Done</span>
-            </th>
-            <th>
-                <span jhiTranslate="primengtestApp.task.description">Description</span>
-            </th>
-            <th>
-                <span jhiTranslate="primengtestApp.task.attachment">Attachment</span>
-            </th>
-            <th>
-                <span jhiTranslate="primengtestApp.task.picture">Picture</span>
-            </th>
-            <th style="width: 124px"></th>
-        </tr>
-        <tr>
-            <th>
-                <input pInputText type="number" [value]="taskTable.filters.id?.value"
-                       (input)="taskTable.filter($event.target.value, 'id', 'equals')">
-            </th>
-            <th>
-                <input pInputText type="text" [value]="taskTable.filters.name?.value"
-                       (input)="taskTable.filter($event.target.value, 'name', 'contains')">
-            </th>
-            <th>
-                <p-multiSelect [options]="typeOptions" [ngModel]="taskTable.filters.type?.value"
-                               (ngModelChange)="taskTable.filter($event, 'type', 'in')">
-                    <ng-template let-type pTemplate="item">{{'primengtestApp.TaskType.' + type.label | translate}}</ng-template>
-                </p-multiSelect>
-            </th>
-            <th>
-            </th>
-            <th>
-            </th>
-            <th>
-            </th>
-            <th>
-                <p-triStateCheckbox [ngModel]="taskTable.filters.billable?.value"
-                                    (ngModelChange)="taskTable.filter($event, 'done', 'equals')"></p-triStateCheckbox>
-            </th>
-            <th>
-            </th>
-            <th>
-            </th>
-            <th>
-            </th>
-            <th></th>
-        </tr>
+            <tr>
+                <th>
+                    <span jhiTranslate="primengtestApp.task.id">ID</span>
+                </th>
+                <th>
+                    <span jhiTranslate="primengtestApp.task.name">Name</span>
+                </th>
+                <th>
+                    <span jhiTranslate="primengtestApp.task.type">Type</span>
+                </th>
+                <th>
+                    <span jhiTranslate="primengtestApp.task.endDate">End Date</span>
+                </th>
+                <th>
+                    <span jhiTranslate="primengtestApp.task.createdAt">Created At</span>
+                </th>
+                <th>
+                    <span jhiTranslate="primengtestApp.task.modifiedAt">Modified At</span>
+                </th>
+                <th>
+                    <span jhiTranslate="primengtestApp.task.done">Done</span>
+                </th>
+                <th>
+                    <span jhiTranslate="primengtestApp.task.description">Description</span>
+                </th>
+                <th>
+                    <span jhiTranslate="primengtestApp.task.attachment">Attachment</span>
+                </th>
+                <th>
+                    <span jhiTranslate="primengtestApp.task.picture">Picture</span>
+                </th>
+                <th style="width: 124px"></th>
+            </tr>
+            <tr>
+                <th>
+                    <input pInputText type="number" [ngModel]="taskTable.filters.id?.value"
+                           (ngModelChange)="filter($event, 'id')">
+                </th>
+                <th>
+                    <input pInputText type="text" [ngModel]="taskTable.filters.name?.value"
+                           (ngModelChange)="filter($event, 'name')">
+                </th>
+                <th>
+                    <p-multiSelect [options]="typeOptions" [ngModel]="taskTable.filters.type?.value"
+                                   (ngModelChange)="taskTable.filter($event, 'type', 'in')">
+                        <ng-template let-type pTemplate="item">{{'primengtestApp.TaskType.' + type.label | translate}}</ng-template>
+                    </p-multiSelect>
+                </th>
+                <th>
+                </th>
+                <th>
+                </th>
+                <th>
+                </th>
+                <th>
+                    <p-triStateCheckbox [ngModel]="taskTable.filters.billable?.value"
+                                        (ngModelChange)="taskTable.filter($event, 'done')"></p-triStateCheckbox>
+                </th>
+                <th>
+                </th>
+                <th>
+                </th>
+                <th>
+                </th>
+                <th></th>
+            </tr>
         </ng-template>
         <ng-template pTemplate="body" let-task>
             <tr>

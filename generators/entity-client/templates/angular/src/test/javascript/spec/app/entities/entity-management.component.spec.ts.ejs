@@ -33,6 +33,7 @@ import { <%= entityAngularName %> } from 'app/shared/model/<%= entityModelFileNa
 import { ConfirmationService } from 'primeng/api';
 <%_ if (pagination !== 'no') { %>
 import { MockActivatedRoute } from '../../../helpers/mock-route.service';
+import { MockTable } from '../../../helpers/mock-table';
 <%_ } _%>
 import { JhiEventManager } from 'ng-jhipster';
 
@@ -57,6 +58,9 @@ describe('Component Tests', () => {
 
             fixture = TestBed.createComponent(<%= entityAngularName %>Component);
             comp = fixture.componentInstance;
+<%_ if (pagination !== 'no') { _%>
+            comp.<%= entityInstance %>Table = <any>new MockTable();
+<%_ } _%>
             service = fixture.debugElement.injector.get(<%= entityAngularName %>Service);
             mockConfirmationService = fixture.debugElement.injector.get(ConfirmationService);
 <%_ if (pagination !== 'no') { _%>
@@ -73,11 +77,6 @@ describe('Component Tests', () => {
 
             // WHEN
             fixture.detectChanges();
-<%_ if (pagination !== 'no') { _%>
-            comp.<%= entityInstance %>Table = <any>{};
-            // wait for debounce
-            tick(300);
-<%_ } _%>
 
             // THEN
             expect(service.query).toHaveBeenCalled();
@@ -97,11 +96,8 @@ describe('Component Tests', () => {
 
             // WHEN
             fixture.detectChanges();
-            comp.<%= entityInstance %>Table = <any>{};
             tick(100);
-            (<BehaviorSubject<any>>activatedRoute.queryParams).next({lle: {page: 3}});
-            // wait for debounce
-            tick(300);
+            (<BehaviorSubject<any>>activatedRoute.queryParams).next({ first: 3});
 
             // THEN
             expect(service.query).toHaveBeenCalled();

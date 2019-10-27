@@ -407,6 +407,7 @@ const files = {
                 'spec/app/core/user/account.service.spec.ts',
                 'spec/helpers/spyobject.ts',
                 'spec/helpers/mock-account.service.ts',
+                'spec/helpers/mock-table.ts',
                 'spec/helpers/mock-route.service.ts',
                 'spec/helpers/mock-login.service.ts',
                 'spec/helpers/mock-event-manager.service.ts',

@@ -10,11 +10,8 @@ We would like to have:
 2. urls as short as possible (easy to understand, share, and modify manually) without constant values (# of rows, match mode...)
 3. Easy to understand by new developers
 
-## Nice to have
-The code should work for lazy and non lazy tables
-
 ## Implementation details
-There many approaches all involving the same events:
+There are many approaches all involving the same events:
     URL Change         Input filter Change          Order/Page Change           Lazy Load event
     
 by default for lazy tables Order/Page change also triggers lazy load event.
@@ -43,36 +40,11 @@ So changes are mandatory to respect the requirement (or are automatically done b
         - **Update the filters** (without triggering lazy load event)
         - Send request to the server using filter values
         
-This approach is implemented but it's not very easy to understand for new devs, we will try to send request on lazy load event without loosing the SSOT
-2. 
-    - on Input Filter change:
-        - Change URL
-    - on Order/Page change:
-        - **trigger Lazy Load event** (skipped due to debounce time)
-        - Change URL (we should subscribe to first change instead of pageChange)
-    - on Lazy event:
-        - Send request to the server using filter values
-        - ~~Change URL~~ (lazy Load event only triggered by filter/page/order change and we already change URL in those)
-    - on URL change:
-        - **Update the filters** (without triggering on Input Filter change)
-        - Update page (first/rows) (without triggering on Order/Page change event)
-        - trigger lazy load event (by reading filter from table)
-
-3. 
-    - on Input Filter change:
-        - trigger Lazy Load event (calls table.filter)
-        - Change URL (without navigation and on URL change)
-    - on Order/Page change:
-        - **trigger Lazy Load event**
-        - Change URL (without navigation and on URL change)
-    - on Lazy event:
-        - Send request to the server using filter values
-    - on URL change:
-        - **Update the filters** (without triggering on Input Filter change)
-        - Update page (first/rows) (without triggering on Order/Page change event)
-        - trigger lazy load event (by reading filter from table) (only called with outside link/filter)
-
-We prefer this approach as the SSOT is the table and we only keep on the URL what we need there (smaller URL).
-Also it is much easier to understand for new developers as lazyLoadEvent in almost all cases is triggered directly by table filter and navigation
-(without the logic of going through the URL serialize and deserialize).
-Also, the same code works for lazy and non lazy tables.
+This can be summarized as follows:
+    When the URL changes the table state (filters/order/page) must change
+    When the table state (filters/order/page) changes the URL must change
+    And in both cases we should send a request
+    
+The easiest way to understand for a new developer would have been to make the URL trigger the table change, and the table change send the request,
+but this is not feasible as this will trigger URL change back... (since we can't change the router's state without triggering routerChange which will trigger change again).
+On the other hand we can update the the table's state without triggering the onLazyLoadEvent.

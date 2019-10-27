@@ -20,7 +20,7 @@
     <h2 id="page-heading">
         <span jhiTranslate="<%= i18nKeyPrefix %>.home.title"><%= entityClassPluralHumanized %></span>
         <p-button id="jh-create-entity" class="float-right jh-create-entity create-<%= entityUrl %>" [routerLink]="['/<%= entityUrl %>/new']"
-            [label]="'<%= i18nKeyPrefix %>.home.createLabel' | translate" icon="pi pi-plus" iconPos="left">
+                  [label]="'<%= i18nKeyPrefix %>.home.createLabel' | translate" icon="pi pi-plus" iconPos="left">
         </p-button>
     </h2>
     <%_ if (searchEngine === 'elasticsearch') { _%>
@@ -43,7 +43,7 @@
     <br/>
     <p-table #<%= entityInstance %>Table [value]="<%= entityInstancePlural %>" [rowTrackBy]="trackId" [responsive]="true"<%
     if (pagination !== 'no') {
-        %>[lazy]="true" [rows]="itemsPerPage" [totalRecords]="totalItems" [loading]="loading" sortMode="multiple" [lazyLoadOnInit]="false"<%
+        %> [lazy]="true" [rows]="itemsPerPage" [totalRecords]="totalItems" [loading]="loading" sortMode="multiple" [lazyLoadOnInit]="false"<%
         if (pagination === 'infinite-scroll') {
             %> [scrollable]="true" [virtualScroll]="true" (onLazyLoad)="onLazyLoadEvent($event)" scrollHeight="200px" [virtualRowHeight]="34" <%
         } else if (pagination === 'pagination') {
@@ -55,78 +55,79 @@
         <ng-template pTemplate="caption">
             <div style="text-align: right">
                 <i class="fa fa-search" style="margin:4px 4px 0 0"></i>
-                <input type="text" pInputText size="50" placeholder="Global Filter" (input)="dt.filterGlobal($event.target.value, 'contains')" style="width:auto">
+                <input pInputText type="text" placeholder="Global Filter" [ngModel]="<%= entityInstance %>Table.filters.global?.value"
+                       (ngModelChange)="filter($event, 'global')" style="width:auto">
             </div>
         </ng-template>
         <%_ } _%>
         <ng-template pTemplate="header">
-        <tr>
-            <%_ for (idx in fields) { _%>
-            <th<% if (pagination !== 'no') { %> pSortableColumn="<%= fields[idx].fieldName %>"<% } %>>
-                <span jhiTranslate="<%=`${i18nKeyPrefix}.${fields[idx].fieldName}` %>"><%= fields[idx].fieldNameHumanized %></span>
-                <%_ if (pagination !== 'no') { _%>
-                <p-sortIcon field="<%= fields[idx].fieldName %>"></p-sortIcon>
-                <%_ } _%>
-            </th>
-            <%_ } _%>
-            <%_ for (idx in relationships) { _%>
-                <%_ if (relationships[idx].inList) { _%>
-                    <%_ relationships[idx].pkData.forEach(pk => { _%>
-            <th<% if (pagination !== 'no') { %> pSortableColumn="<%= pk.formName %>"<% } %>>
-                <span jhiTranslate="<%= `${i18nKeyPrefix}.${pk.formName}` %>"><%= _.startCase(pk.formName) %></span>
-                <% if (pagination !== 'no') { %><p-sortIcon field="<%= pk.formName %>"></p-sortIcon><% } %>
-            </th>
-                    <%_ }) _%>
-                <%_ } _%>
-            <%_ } _%>
-            <th style="width: 124px"></th>
-        </tr>
-        <%_ if (jpaMetamodelFiltering) { _%>
-        <tr>
-            <%_ for (idx in fields) {
-                const fieldType = fields[idx].fieldType;_%>
-            <th>
-                <%_ if (['byte[]', 'ByteBuffer'].includes(fieldType)) { _%>
-                <%_ } else if (fieldType === 'Boolean') { _%>
-                <p-triStateCheckbox [ngModel]="<%= entityInstance %>Table.filters.billable?.value"
-                                    (ngModelChange)="<%= entityInstance %>Table.filter($event, '<%= fields[idx].fieldName %>', 'equals')"></p-triStateCheckbox>
-                <%_ } else if (fields[idx].fieldIsEnum) { _%>
-                <p-multiSelect [options]="<%= fields[idx].fieldName %>Options" [ngModel]="<%= entityInstance %>Table.filters.<%= fields[idx].fieldName %>?.value"
-                               (ngModelChange)="<%= entityInstance %>Table.filter($event, '<%= fields[idx].fieldName %>', 'in')">
-                    <ng-template let-<%= fields[idx].fieldName %> pTemplate="item">{{'<%= `${angularAppName}.${fields[idx].fieldType}` %>.' + <%= fields[idx].fieldName %>.label | translate}}</ng-template>
-                </p-multiSelect>
-                <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
-                    <%_ if (pagination !== 'no') { %>
-                <p-calendar [(ngModel)]="<%= fields[idx].fieldName %>Range" selectionMode="range" [readonlyInput]="true" [showButtonBar]="true" showTime="true" hourFormat="24"
-                            (onSelect)="onDateSelect(<%= fields[idx].fieldName %>Range, '<%= fields[idx].fieldName %>', true)" (onClearClick)="onDateSelect(<%= fields[idx].fieldName %>Range, '<%= fields[idx].fieldName %>', true)"></p-calendar>
+            <tr>
+                <%_ for (idx in fields) { _%>
+                <th<% if (pagination !== 'no') { %> pSortableColumn="<%= fields[idx].fieldName %>"<% } %>>
+                    <span jhiTranslate="<%=`${i18nKeyPrefix}.${fields[idx].fieldName}` %>"><%= fields[idx].fieldNameHumanized %></span>
+                    <%_ if (pagination !== 'no') { _%>
+                    <p-sortIcon field="<%= fields[idx].fieldName %>"></p-sortIcon>
                     <%_ } _%>
-                <%_ } else if (fieldType === 'LocalDate') { _%>
-                    <%_ if (pagination !== 'no') { %>
-                <p-calendar [(ngModel)]="<%= fields[idx].fieldName %>Range" selectionMode="range" [readonlyInput]="true" [showButtonBar]="true"
-                            (onSelect)="onDateSelect(<%= fields[idx].fieldName %>Range, '<%= fields[idx].fieldName %>')" (onClearClick)="onDateSelect(<%= fields[idx].fieldName %>Range, '<%= fields[idx].fieldName %>')"></p-calendar>
+                </th>
+                <%_ } _%>
+                <%_ for (idx in relationships) { _%>
+                    <%_ if (relationships[idx].inList) { _%>
+                        <%_ relationships[idx].pkData.forEach(pk => { _%>
+                <th<% if (pagination !== 'no') { %> pSortableColumn="<%= pk.formName %>"<% } %>>
+                    <span jhiTranslate="<%= `${i18nKeyPrefix}.${pk.formName}` %>"><%= _.startCase(pk.formName) %></span>
+                    <% if (pagination !== 'no') { %><p-sortIcon field="<%= pk.formName %>"></p-sortIcon><% } %>
+                </th>
+                        <%_ }) _%>
                     <%_ } _%>
-                <%_ } else if (['Integer', 'Long', 'Float', 'Double', 'BigDecimal', 'Duration'].includes(fieldType)) { _%>
-                <input pInputText type="number" [value]="<%= entityInstance %>Table.filters.<%= fields[idx].fieldName %>?.value"
-                       (input)="<%= entityInstance %>Table.filter($event.target.value, '<%= fields[idx].fieldName %>', 'equals')">
-                <%_ } else { _%>
-                <input pInputText type="text" [value]="<%= entityInstance %>Table.filters.<%= fields[idx].fieldName %>?.value"
-                       (input)="<%= entityInstance %>Table.filter($event.target.value, '<%= fields[idx].fieldName %>', 'contains')">
                 <%_ } _%>
-            </th>
-            <%_ } _%>
-            <%_ for (idx in relationships) { _%>
-                <%_ if (relationships[idx].inList) { _%>
-                    <%_ relationships[idx].pkData.forEach(pk => { _%>
-            <th>
-                <p-multiSelect [options]="<%= pk.formName %>Options" [ngModel]="<%= entityInstance %>Table.filters.<%= relationships[idx].relationshipName + pk.nameCapitalized %>?.value" optionLabel="<%= pk.otherEntityField %>" optionValue="<%= pk.field.fieldName %>"<% if(relationships[idx].pagination !== 'no') { %>
-                               [lazy]="true" [rows]="10" (onLazyLoad)="on<%= _.upperFirst(pk.formName) %>LazyLoadEvent($event)"<% } %>
-                               (ngModelChange)="<%= entityInstance %>Table.filter($event, '<%= relationships[idx].relationshipName + pk.nameCapitalized %>', 'in')"></p-multiSelect>
-            </th>
-                    <%_ }) _%>
+                <th style="width: 124px"></th>
+            </tr>
+            <%_ if (jpaMetamodelFiltering) { _%>
+            <tr>
+                <%_ for (idx in fields) {
+                    const fieldType = fields[idx].fieldType;_%>
+                <th>
+                    <%_ if (['byte[]', 'ByteBuffer'].includes(fieldType)) { _%>
+                    <%_ } else if (fieldType === 'Boolean') { _%>
+                    <p-triStateCheckbox [ngModel]="<%= entityInstance %>Table.filters.billable?.value"
+                                        (ngModelChange)="<%= entityInstance %>Table.filter($event, '<%= fields[idx].fieldName %>')"></p-triStateCheckbox>
+                    <%_ } else if (fields[idx].fieldIsEnum) { _%>
+                    <p-multiSelect [options]="<%= fields[idx].fieldName %>Options" [ngModel]="<%= entityInstance %>Table.filters.<%= fields[idx].fieldName %>?.value"
+                                   (ngModelChange)="<%= entityInstance %>Table.filter($event, '<%= fields[idx].fieldName %>', 'in')">
+                        <ng-template let-<%= fields[idx].fieldName %> pTemplate="item">{{'<%= `${angularAppName}.${fields[idx].fieldType}` %>.' + <%= fields[idx].fieldName %>.label | translate}}</ng-template>
+                    </p-multiSelect>
+                    <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
+                        <%_ if (pagination !== 'no') { _%>
+                    <p-calendar [(ngModel)]="<%= fields[idx].fieldName %>Range" selectionMode="range" [readonlyInput]="true" [showButtonBar]="true" showTime="true" hourFormat="24"
+                                (onSelect)="onDateSelect(<%= fields[idx].fieldName %>Range, '<%= fields[idx].fieldName %>', true)" (onClearClick)="onDateSelect(<%= fields[idx].fieldName %>Range, '<%= fields[idx].fieldName %>', true)"></p-calendar>
+                        <%_ } _%>
+                    <%_ } else if (fieldType === 'LocalDate') { _%>
+                        <%_ if (pagination !== 'no') { _%>
+                    <p-calendar [(ngModel)]="<%= fields[idx].fieldName %>Range" selectionMode="range" [readonlyInput]="true" [showButtonBar]="true"
+                                (onSelect)="onDateSelect(<%= fields[idx].fieldName %>Range, '<%= fields[idx].fieldName %>')" (onClearClick)="onDateSelect(<%= fields[idx].fieldName %>Range, '<%= fields[idx].fieldName %>')"></p-calendar>
+                        <%_ } _%>
+                    <%_ } else if (['Integer', 'Long', 'Float', 'Double', 'BigDecimal', 'Duration'].includes(fieldType)) { _%>
+                    <input pInputText type="number" [ngModel]="<%= entityInstance %>Table.filters.<%= fields[idx].fieldName %>?.value"
+                           (ngModelChange)="filter($event, '<%= fields[idx].fieldName %>')">
+                    <%_ } else { _%>
+                    <input pInputText type="text" [ngModel]="<%= entityInstance %>Table.filters.<%= fields[idx].fieldName %>?.value"
+                           (ngModelChange)="filter($event, '<%= fields[idx].fieldName %>')">
+                    <%_ } _%>
+                </th>
                 <%_ } _%>
-            <%_ } _%>
-            <th></th>
-        </tr>
+                <%_ for (idx in relationships) { _%>
+                    <%_ if (relationships[idx].inList) { _%>
+                        <%_ relationships[idx].pkData.forEach(pk => { _%>
+                <th>
+                    <p-multiSelect [options]="<%= pk.formName %>Options" [ngModel]="<%= entityInstance %>Table.filters.<%= relationships[idx].relationshipName + pk.nameCapitalized %>?.value" optionLabel="<%= pk.otherEntityField %>" optionValue="<%= pk.field.fieldName %>"<% if(relationships[idx].pagination !== 'no') { %>
+                                   [lazy]="true" [rows]="10" (onLazyLoad)="on<%= _.upperFirst(pk.formName) %>LazyLoadEvent($event)"<% } %>
+                                   (ngModelChange)="filter($event, '<%= relationships[idx].relationshipName + pk.nameCapitalized %>')"></p-multiSelect>
+                </th>
+                        <%_ }) _%>
+                    <%_ } _%>
+                <%_ } _%>
+                <th></th>
+            </tr>
         <%_ } _%>
         </ng-template>
         <ng-template pTemplate="body" let-<%=entityInstance %>>

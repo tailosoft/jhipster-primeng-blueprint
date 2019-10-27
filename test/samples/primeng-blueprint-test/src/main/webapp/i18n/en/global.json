@@ -13,6 +13,7 @@
         "employeeSkillCertificate": "Employee Skill Certificate",
         "task": "Task",
         "taskComment": "Task Comment",
+        "priceFormula": "Price Formula",
         "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)"
       },
       "account": {

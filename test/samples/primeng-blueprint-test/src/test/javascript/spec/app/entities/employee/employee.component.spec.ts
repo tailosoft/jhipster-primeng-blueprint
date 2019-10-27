@@ -10,6 +10,7 @@ import { Employee } from 'app/shared/model/employee.model';
 import { ConfirmationService } from 'primeng/api';
 
 import { MockActivatedRoute } from '../../../helpers/mock-route.service';
+import { MockTable } from '../../../helpers/mock-table';
 import { JhiEventManager } from 'ng-jhipster';
 
 describe('Component Tests', () => {
@@ -32,6 +33,7 @@ describe('Component Tests', () => {
 
       fixture = TestBed.createComponent(EmployeeComponent);
       comp = fixture.componentInstance;
+      comp.employeeTable = <any>new MockTable();
       service = fixture.debugElement.injector.get(EmployeeService);
       mockConfirmationService = fixture.debugElement.injector.get(ConfirmationService);
       activatedRoute = fixture.debugElement.injector.get(ActivatedRoute);
@@ -50,9 +52,6 @@ describe('Component Tests', () => {
 
       // WHEN
       fixture.detectChanges();
-      comp.employeeTable = <any>{};
-      // wait for debounce
-      tick(300);
 
       // THEN
       expect(service.query).toHaveBeenCalled();
@@ -71,11 +70,8 @@ describe('Component Tests', () => {
 
       // WHEN
       fixture.detectChanges();
-      comp.employeeTable = <any>{};
       tick(100);
-      (<BehaviorSubject<any>>activatedRoute.queryParams).next({ lle: { page: 3 } });
-      // wait for debounce
-      tick(300);
+      (<BehaviorSubject<any>>activatedRoute.queryParams).next({ first: 3 });
 
       // THEN
       expect(service.query).toHaveBeenCalled();

@@ -1,0 +1,21 @@
+<div class="row justify-content-center">
+    <div class="col-8">
+        <div *ngIf="priceFormula">
+            <h2><span jhiTranslate="primengtestApp.priceFormula.detail.title">Price Formula</span> {{priceFormula.id}}</h2>
+            <hr>
+            <dl class="row-md jh-entity-details">
+                <dt><span jhiTranslate="primengtestApp.priceFormula.max">Max</span></dt>
+                <dd>
+                    <span>{{priceFormula.max}}</span>
+                </dd>
+                <dt><span jhiTranslate="primengtestApp.priceFormula.formula">Formula</span></dt>
+                <dd>
+                    <span>{{priceFormula.formula}}</span>
+                </dd>
+            </dl>
+
+            <button pButton type="submit" (click)="previousState()" class="ui-button-info" icon="pi pi-arrow-left" [label]="'entity.action.back' | translate"></button>
+            <button pButton type="button" icon="pi pi-pencil" [label]="'entity.action.edit' | translate" [routerLink]="['/price-formula', priceFormula.max, 'edit']"></button>
+        </div>
+    </div>
+</div>

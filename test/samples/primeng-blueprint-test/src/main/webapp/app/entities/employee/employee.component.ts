@@ -1,25 +1,28 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { HttpErrorResponse, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { filter, map, tap, take, debounceTime, switchMap } from 'rxjs/operators';
+import { filter, tap, switchMap } from 'rxjs/operators';
 import { JhiEventManager } from 'ng-jhipster';
 import { MessageService } from 'primeng/api';
 import { IEmployee } from 'app/shared/model/employee.model';
-import { ITEMS_PER_PAGE } from 'app/shared';
-import { lazyLoadEventToQueryParams } from 'app/shared/util/request-util';
 import { EmployeeService } from './employee.service';
+import { ITEMS_PER_PAGE } from 'app/shared';
+import {
+  computeFilterMatchMode,
+  lazyLoadEventToServerQueryParams,
+  lazyLoadEventToRouterQueryParams,
+  fillTableFromQueryParams
+} from 'app/shared/util/request-util';
 import { ConfirmationService, LazyLoadEvent } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
-
 import { Table } from 'primeng/table';
-import { flatten, unflatten } from 'flat';
 
 @Component({
   selector: 'jhi-employee',
   templateUrl: './employee.component.html'
 })
-export class EmployeeComponent implements OnInit, OnDestroy, AfterViewInit {
+export class EmployeeComponent implements OnInit, OnDestroy {
   employees: IEmployee[];
   eventSubscriber: Subscription;
 
@@ -27,7 +30,9 @@ export class EmployeeComponent implements OnInit, OnDestroy, AfterViewInit {
   itemsPerPage: number;
   loading: boolean;
 
-  @ViewChild('employeeTable', { static: false })
+  private filtersDetails: { [_: string]: { matchMode?: string; flatten?: (_: any) => string; unflatten?: (_: string) => any } } = {};
+
+  @ViewChild('employeeTable', { static: true })
   employeeTable: Table;
 
   constructor(
@@ -45,32 +50,11 @@ export class EmployeeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit() {
     this.registerChangeInEmployees();
-  }
-
-  ngOnDestroy() {
-    this.eventManager.destroy(this.eventSubscriber);
-  }
-
-  ngAfterViewInit() {
-    const lazyLoadEvent$ = this.activatedRoute.queryParams.pipe(
-      debounceTime(300),
-      map(data => <LazyLoadEvent>(<any>unflatten(data)).lle)
-    );
-
-    lazyLoadEvent$
+    this.activatedRoute.queryParams
       .pipe(
-        take(1),
-        filter(event => event !== undefined)
-      )
-      .subscribe(event => {
-        Object.assign(this.employeeTable, event);
-      });
-
-    lazyLoadEvent$
-      .pipe(
-        map(event => lazyLoadEventToQueryParams(event || {})),
+        tap(queryParams => fillTableFromQueryParams(this.employeeTable, queryParams, this.filtersDetails)),
         tap(() => (this.loading = true)),
-        switchMap(params => this.employeeService.query(params)),
+        switchMap(() => this.employeeService.query(lazyLoadEventToServerQueryParams(this.employeeTable.createLazyLoadMetadata()))),
         filter((res: HttpResponse<IEmployee[]>) => res.ok)
       )
       .subscribe(
@@ -85,16 +69,17 @@ export class EmployeeComponent implements OnInit, OnDestroy, AfterViewInit {
       );
   }
 
+  ngOnDestroy() {
+    this.eventManager.destroy(this.eventSubscriber);
+  }
+
   onLazyLoadEvent(event: LazyLoadEvent) {
-    const queryParams = flatten({ lle: event });
-    Object.entries(queryParams).forEach(([key, value]) => {
-      if (value && typeof value === 'object' && Object.entries(value).length === 0) {
-        delete queryParams[key];
-      }
-    });
-    this.router.navigate(['/employee'], {
-      queryParams
-    });
+    const queryParams = lazyLoadEventToRouterQueryParams(event, this.filtersDetails);
+    this.router.navigate(['/employee'], { queryParams });
+  }
+
+  filter(value, field) {
+    this.employeeTable.filter(value, field, computeFilterMatchMode(this.filtersDetails[field]));
   }
 
   delete(username: string) {

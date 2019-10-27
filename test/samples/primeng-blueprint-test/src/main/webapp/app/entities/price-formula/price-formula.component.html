@@ -1,0 +1,52 @@
+<div>
+    <h2 id="page-heading">
+        <span jhiTranslate="primengtestApp.priceFormula.home.title">Price Formulas</span>
+        <p-button id="jh-create-entity" class="float-right jh-create-entity create-price-formula" [routerLink]="['/price-formula/new']"
+                  [label]="'primengtestApp.priceFormula.home.createLabel' | translate" icon="pi pi-plus" iconPos="left">
+        </p-button>
+    </h2>
+    <br/>
+    <p-table #priceFormulaTable [value]="priceFormulas" [rowTrackBy]="trackId" [responsive]="true">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>
+                    <span jhiTranslate="primengtestApp.priceFormula.max">Max</span>
+                </th>
+                <th>
+                    <span jhiTranslate="primengtestApp.priceFormula.formula">Formula</span>
+                </th>
+                <th style="width: 124px"></th>
+            </tr>
+            <tr>
+                <th>
+                    <input pInputText type="number" [ngModel]="priceFormulaTable.filters.max?.value"
+                           (ngModelChange)="filter($event, 'max')">
+                </th>
+                <th>
+                    <input pInputText type="text" [ngModel]="priceFormulaTable.filters.formula?.value"
+                           (ngModelChange)="filter($event, 'formula')">
+                </th>
+                <th></th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-priceFormula>
+            <tr>
+                <td>{{priceFormula.max}}</td>
+                <td>{{priceFormula.formula}}</td>
+                <td>
+                    <div class="btn-group flex-btn-group-container">
+                        <p-button type="submit" [routerLink]="['/price-formula', priceFormula.max, 'view' ]"
+                                  icon="pi pi-eye" styleClass="ui-button-info">
+                        </p-button>
+                        <p-button type="submit" [routerLink]="['/price-formula', priceFormula.max, 'edit' ]"
+                                  icon="pi pi-pencil" styleClass="ui-button-warning">
+                        </p-button>
+                        <p-button type="submit" (click)="delete(priceFormula.max)"
+                                  icon="pi pi-times" styleClass="ui-button-danger">
+                        </p-button>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>

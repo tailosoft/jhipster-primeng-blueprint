@@ -2,32 +2,32 @@
     <h2 id="page-heading">
         <span jhiTranslate="primengtestApp.certificateType.home.title">Certificate Types</span>
         <p-button id="jh-create-entity" class="float-right jh-create-entity create-certificate-type" [routerLink]="['/certificate-type/new']"
-            [label]="'primengtestApp.certificateType.home.createLabel' | translate" icon="pi pi-plus" iconPos="left">
+                  [label]="'primengtestApp.certificateType.home.createLabel' | translate" icon="pi pi-plus" iconPos="left">
         </p-button>
     </h2>
     <br/>
     <p-table #certificateTypeTable [value]="certificateTypes" [rowTrackBy]="trackId" [responsive]="true">
         <ng-template pTemplate="header">
-        <tr>
-            <th>
-                <span jhiTranslate="primengtestApp.certificateType.id">ID</span>
-            </th>
-            <th>
-                <span jhiTranslate="primengtestApp.certificateType.name">Name</span>
-            </th>
-            <th style="width: 124px"></th>
-        </tr>
-        <tr>
-            <th>
-                <input pInputText type="number" [value]="certificateTypeTable.filters.id?.value"
-                       (input)="certificateTypeTable.filter($event.target.value, 'id', 'equals')">
-            </th>
-            <th>
-                <input pInputText type="text" [value]="certificateTypeTable.filters.name?.value"
-                       (input)="certificateTypeTable.filter($event.target.value, 'name', 'contains')">
-            </th>
-            <th></th>
-        </tr>
+            <tr>
+                <th>
+                    <span jhiTranslate="primengtestApp.certificateType.id">ID</span>
+                </th>
+                <th>
+                    <span jhiTranslate="primengtestApp.certificateType.name">Name</span>
+                </th>
+                <th style="width: 124px"></th>
+            </tr>
+            <tr>
+                <th>
+                    <input pInputText type="number" [ngModel]="certificateTypeTable.filters.id?.value"
+                           (ngModelChange)="filter($event, 'id')">
+                </th>
+                <th>
+                    <input pInputText type="text" [ngModel]="certificateTypeTable.filters.name?.value"
+                           (ngModelChange)="filter($event, 'name')">
+                </th>
+                <th></th>
+            </tr>
         </ng-template>
         <ng-template pTemplate="body" let-certificateType>
             <tr>

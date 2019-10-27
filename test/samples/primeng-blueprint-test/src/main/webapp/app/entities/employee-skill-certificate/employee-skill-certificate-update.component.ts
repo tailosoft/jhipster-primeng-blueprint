@@ -3,7 +3,7 @@ import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
-import { lazyLoadEventToQueryParams } from 'app/shared/util/request-util';
+import { lazyLoadEventToServerQueryParams } from 'app/shared/util/request-util';
 import { LazyLoadEvent } from 'primeng/api';
 import { MessageService } from 'primeng/api';
 import { IEmployeeSkillCertificate, EmployeeSkillCertificate } from 'app/shared/model/employee-skill-certificate.model';
@@ -63,13 +63,13 @@ export class EmployeeSkillCertificateUpdateComponent implements OnInit {
 
   onSkillLazyLoadEvent(event: LazyLoadEvent) {
     this.employeeSkillService
-      .query(lazyLoadEventToQueryParams(event || {}, 'name.contains'))
+      .query(lazyLoadEventToServerQueryParams(event || {}, 'name.contains'))
       .subscribe(res => (this.skillOptions = res.body), (res: HttpErrorResponse) => this.onError(res.message));
   }
 
   onSkillEmployeeLazyLoadEvent(event: LazyLoadEvent) {
     this.employeeService
-      .query(lazyLoadEventToQueryParams(event || {}, 'fullname.contains'))
+      .query(lazyLoadEventToServerQueryParams(event || {}, 'fullname.contains'))
       .subscribe(res => (this.skillEmployeeOptions = res.body), (res: HttpErrorResponse) => this.onError(res.message));
   }
 

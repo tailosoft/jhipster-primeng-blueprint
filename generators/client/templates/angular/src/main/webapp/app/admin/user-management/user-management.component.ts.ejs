@@ -16,7 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { HttpErrorResponse, HttpHeaders, HttpResponse } from '@angular/common/http';
 
 <%_ if (prodDatabaseType !== 'cassandra') { _%>
@@ -24,24 +24,27 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { JhiEventManager } from 'ng-jhipster'
 import { ConfirmationService, LazyLoadEvent, MessageService } from 'primeng/api';
 import { ITEMS_PER_PAGE } from 'app/shared';
-import { lazyLoadEventToQueryParams } from 'app/shared/util/request-util';
+import {
+    computeFilterMatchMode,
+    lazyLoadEventToServerQueryParams,
+    lazyLoadEventToRouterQueryParams,
+    fillTableFromQueryParams
+} from 'app/shared/util/request-util';
 <%_ } else { _%>
 import { JhiEventManager } from 'ng-jhipster';
 import { MessageService } from 'primeng/api';
 <%_ } _%>
 import { UserService, AccountService, IUser } from 'app/core';
-import { Subscription, merge } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { Table } from 'primeng/table';
 import { TranslateService } from '@ngx-translate/core';
-import { debounceTime, filter, map, switchMap, take, tap } from 'rxjs/operators';
-import { unflatten } from 'flat';
-import flatten = require('flat');
+import { switchMap, tap, filter } from 'rxjs/operators';
 
 @Component({
     selector: '<%= jhiPrefixDashed %>-user-mgmt',
     templateUrl: './user-management.component.html'
 })
-export class UserMgmtComponent implements OnInit, OnDestroy, AfterViewInit {
+export class UserMgmtComponent implements OnInit, OnDestroy {
 
     currentAccount: any;
     users: IUser[];
@@ -51,7 +54,9 @@ export class UserMgmtComponent implements OnInit, OnDestroy, AfterViewInit {
     itemsPerPage: number;
     loading: boolean;
 
-    @ViewChild('userTable', { static: false })
+    private filtersDetails: { [_: string]: { matchMode?: string; flatten?: (_: any) => string; unflatten?: (_: string) => any } } = {};
+
+    @ViewChild('userTable', { static: true })
     userTable: Table;
 
     constructor(
@@ -69,48 +74,22 @@ export class UserMgmtComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     ngOnInit() {
-        this.accountService.identity().then((account) => {
+        this.accountService.identity().then(account => {
             this.currentAccount = account;
         });
         this.registerChangeInUsers();
-    }
-
-    ngOnDestroy() {
-        this.eventManager.destroy(this.eventSubscriber);
-    }
-
-    ngAfterViewInit() {
-        const lazyLoadEvent$ = this.activatedRoute.queryParams.pipe(
-            debounceTime(300),
-            map(data => <LazyLoadEvent>(<any>unflatten(data)).lle)
-        );
-
-        lazyLoadEvent$
+        this.activatedRoute.queryParams
             .pipe(
-                take(1),
-                filter(event => event !== undefined)
-            )
-            .subscribe(event => {
-                Object.assign(this.userTable, event);
-                if (event.filters && event.filters.activated) {
-                    this.userTable.filters.activated.value = event.filters.activated.value === 'true';
-                }
-            });
-
-        merge(
-            lazyLoadEvent$,
-            this.eventManager.observable.pipe(
-                filter(event => event.name === 'userListModification'),
-                map(_ => {})
-            )
-        )
-            .pipe(
-                map(event => lazyLoadEventToQueryParams(event || {})),
+                tap(queryParams => fillTableFromQueryParams(this.userTable, queryParams, this.filtersDetails)),
                 tap(() => (this.loading = true)),
-                switchMap(params => this.userService.query(params)),
-                filter((res: HttpResponse<IUser[]>) => res.ok)
+                switchMap(() =>
+                    this.userService.query(
+                        lazyLoadEventToServerQueryParams(this.userTable.createLazyLoadMetadata())
+                    )
+                ),
+            filter((res: HttpResponse<IUser[]>) => res.ok)
             )
-            .subscribe(
+                .subscribe(
                 (res: HttpResponse<IUser[]>) => {
                     this.paginateUsers(res.body, res.headers);
                     this.loading = false;
@@ -122,16 +101,18 @@ export class UserMgmtComponent implements OnInit, OnDestroy, AfterViewInit {
             );
     }
 
+    ngOnDestroy() {
+        this.eventManager.destroy(this.eventSubscriber);
+    }
+
+
     onLazyLoadEvent(event: LazyLoadEvent) {
-        const queryParams = flatten({ lle: event });
-        Object.entries(queryParams).forEach(([key, value]) => {
-            if (value && typeof value === 'object' && Object.entries(value).length === 0) {
-                delete queryParams[key];
-            }
-        });
-        this.router.navigate(['/admin/user-management'], {
-            queryParams
-        });
+        const queryParams = lazyLoadEventToRouterQueryParams(event, this.filtersDetails);
+        this.router.navigate(['/admin/user-management'], { queryParams });
+    }
+
+    filter(value, field) {
+        this.userTable.filter(value, field, computeFilterMatchMode(this.filtersDetails[field]));
     }
 
     delete(login: string) {

@@ -1,6 +1,9 @@
 import { HttpParams } from '@angular/common/http';
-import { LazyLoadEvent } from 'primeng/api';
+import { FilterMetadata, LazyLoadEvent } from 'primeng/api';
 import { ITEMS_PER_PAGE } from 'app/shared';
+import { flatten, unflatten } from 'flat';
+import { Params } from '@angular/router';
+import { Table } from 'primeng/table';
 
 export const createRequestOption = (req?: any): HttpParams => {
   let options: HttpParams = new HttpParams();
@@ -19,7 +22,7 @@ export const createRequestOption = (req?: any): HttpParams => {
   return options;
 };
 
-export const lazyLoadEventToQueryParams = (event: LazyLoadEvent, globalFilter?: string) => {
+export const lazyLoadEventToServerQueryParams = (event: LazyLoadEvent, globalFilter?: string) => {
   const params = {};
   if (event.filters) {
     for (const filterField of Object.keys(event.filters)) {
@@ -44,4 +47,50 @@ export const lazyLoadEventToQueryParams = (event: LazyLoadEvent, globalFilter?: 
   params['page'] = event.first / event.rows || 0;
   params['size'] = event.rows || ITEMS_PER_PAGE;
   return params;
+};
+
+export const fillTableFromQueryParams = (
+  table: Table,
+  queryParams: Params,
+  filtersDetails: { [_: string]: { matchMode?: string; unflatten?: Function } }
+) => {
+  const params = unflatten(queryParams);
+  table.first = +queryParams.first || 0;
+  table.multiSortMeta = params['msm'] || [];
+  const filters = {};
+  if (params['f']) {
+    Object.entries(params['f']).forEach(
+      ([field, value]) =>
+        (filters[field] = {
+          value: (filtersDetails[field] && filtersDetails[field].unflatten && filtersDetails[field].unflatten(value)) || value,
+          matchMode: computeFilterMatchMode(filtersDetails[field])
+        })
+    );
+  }
+  table.filters = filters;
+};
+
+export const lazyLoadEventToRouterQueryParams = (
+  event: LazyLoadEvent,
+  filtersDetails: { [_: string]: { matchMode?: string; flatten?: Function } }
+) => {
+  const queryParams = {};
+  if (event.first) {
+    queryParams['first'] = event.first && event.first;
+  }
+  if (event.multiSortMeta && event.multiSortMeta.length) {
+    queryParams['msm'] = event.multiSortMeta;
+  }
+  Object.entries(event.filters).forEach(([field, filter]) => {
+    let filterValue = filter.value;
+    if (filterValue && filtersDetails[field] && filtersDetails[field].flatten) {
+      filterValue = filtersDetails[field].flatten(filterValue);
+    }
+    queryParams[`f.${field}`] = filterValue;
+  });
+  return flatten(queryParams);
+};
+
+export const computeFilterMatchMode = (filterDetails: { matchMode?: string }): string => {
+  return (filterDetails && filterDetails.matchMode) || 'contains';
 };

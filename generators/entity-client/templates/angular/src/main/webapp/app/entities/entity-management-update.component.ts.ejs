@@ -34,7 +34,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 <%_ if (hasPaginationRelationship) { _%>
-import { lazyLoadEventToQueryParams } from 'app/shared/util/request-util';
+import { lazyLoadEventToServerQueryParams } from 'app/shared/util/request-util';
 import { LazyLoadEvent } from 'primeng/api';
 <%_ } _%>
 <%_ if (fieldsContainBlob) { _%>
@@ -193,7 +193,7 @@ relationships.filter(r => r.inForm).forEach(r => {
             <%_ } else { _%>
 
     on<%= _.upperFirst(pk.formName) %>LazyLoadEvent(event: LazyLoadEvent) {
-        this.<%= _.lowerFirst(pk.entityName) %>Service.query(lazyLoadEventToQueryParams(event || {}, '<%= pk.otherEntityField %>.contains'))
+        this.<%= _.lowerFirst(pk.entityName) %>Service.query(lazyLoadEventToServerQueryParams(event || {}, '<%= pk.otherEntityField %>.contains'))
             .subscribe(res => this.<%= pk.formName %>Options = res.body, (res: HttpErrorResponse) => this.onError(res.message));
     }
             <%_ } _%>
