@@ -4,7 +4,6 @@ import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot, Routes } from '@a
 import { UserRouteAccessService } from 'app/core';
 import { Observable, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { CertificateType } from 'app/shared/model/certificate-type.model';
 import { CertificateTypeService } from './certificate-type.service';
 import { CertificateTypeComponent } from './certificate-type.component';
 import { CertificateTypeDetailComponent } from './certificate-type-detail.component';
@@ -19,11 +18,11 @@ export class CertificateTypeResolve implements Resolve<ICertificateType> {
     const id = route.params['id'] ? route.params['id'] : null;
     if (id) {
       return this.service.find(id).pipe(
-        filter((response: HttpResponse<CertificateType>) => response.ok),
-        map((certificateType: HttpResponse<CertificateType>) => certificateType.body)
+        filter((response: HttpResponse<ICertificateType>) => response.ok),
+        map((certificateType: HttpResponse<ICertificateType>) => certificateType.body)
       );
     }
-    return of(new CertificateType());
+    return of(null);
   }
 }
 

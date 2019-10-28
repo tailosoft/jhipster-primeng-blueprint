@@ -4,7 +4,6 @@ import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot, Routes } from '@a
 import { UserRouteAccessService } from 'app/core';
 import { Observable, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { Task } from 'app/shared/model/task.model';
 import { TaskService } from './task.service';
 import { TaskComponent } from './task.component';
 import { TaskDetailComponent } from './task-detail.component';
@@ -19,11 +18,11 @@ export class TaskResolve implements Resolve<ITask> {
     const id = route.params['id'] ? route.params['id'] : null;
     if (id) {
       return this.service.find(id).pipe(
-        filter((response: HttpResponse<Task>) => response.ok),
-        map((task: HttpResponse<Task>) => task.body)
+        filter((response: HttpResponse<ITask>) => response.ok),
+        map((task: HttpResponse<ITask>) => task.body)
       );
     }
-    return of(new Task());
+    return of(null);
   }
 }
 

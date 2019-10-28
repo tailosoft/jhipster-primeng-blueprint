@@ -4,7 +4,6 @@ import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot, Routes } from '@a
 import { UserRouteAccessService } from 'app/core';
 import { Observable, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { EmployeeSkillCertificate } from 'app/shared/model/employee-skill-certificate.model';
 import { EmployeeSkillCertificateService } from './employee-skill-certificate.service';
 import { EmployeeSkillCertificateComponent } from './employee-skill-certificate.component';
 import { EmployeeSkillCertificateDetailComponent } from './employee-skill-certificate-detail.component';
@@ -21,11 +20,11 @@ export class EmployeeSkillCertificateResolve implements Resolve<IEmployeeSkillCe
     const skillEmployeeUsername = route.params['skillEmployeeUsername'] ? route.params['skillEmployeeUsername'] : null;
     if (typeId && skillName && skillEmployeeUsername) {
       return this.service.find(typeId, skillName, skillEmployeeUsername).pipe(
-        filter((response: HttpResponse<EmployeeSkillCertificate>) => response.ok),
-        map((employeeSkillCertificate: HttpResponse<EmployeeSkillCertificate>) => employeeSkillCertificate.body)
+        filter((response: HttpResponse<IEmployeeSkillCertificate>) => response.ok),
+        map((employeeSkillCertificate: HttpResponse<IEmployeeSkillCertificate>) => employeeSkillCertificate.body)
       );
     }
-    return of(new EmployeeSkillCertificate());
+    return of(null);
   }
 }
 

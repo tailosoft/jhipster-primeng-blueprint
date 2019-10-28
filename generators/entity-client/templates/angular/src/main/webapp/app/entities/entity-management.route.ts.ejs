@@ -22,7 +22,6 @@ import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot, Routes } from '@a
 import { UserRouteAccessService } from 'app/core';
 import { Observable, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { <%= entityAngularName %> } from 'app/shared/model/<%= entityModelFileName %>.model';
 import { <%= entityAngularName %>Service } from './<%= entityFileName %>.service';
 import { <%= entityAngularName %>Component } from './<%= entityFileName %>.component';
 import { <%= entityAngularName %>DetailComponent } from './<%= entityFileName %>-detail.component';
@@ -41,11 +40,11 @@ export class <%= entityAngularName %>Resolve implements Resolve<I<%= entityAngul
 <%_ }) _%>
         if (<%- pkData.map(pk => pk.name).join(' && ') %>) {
             return this.service.find(<%- pkData.map(pk => pk.name).join(', ') %>).pipe(
-                filter((response: HttpResponse<<%= entityAngularName %>>) => response.ok),
-                map((<%= entityInstance %>: HttpResponse<<%= entityAngularName %>>) => <%= entityInstance %>.body)
+                filter((response: HttpResponse<I<%= entityAngularName %>>) => response.ok),
+                map((<%= entityInstance %>: HttpResponse<I<%= entityAngularName %>>) => <%= entityInstance %>.body)
             );
         }
-        return of(new <%= entityAngularName %>());
+        return of(null);
     }
 }
 

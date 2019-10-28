@@ -4,7 +4,6 @@ import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot, Routes } from '@a
 import { UserRouteAccessService } from 'app/core';
 import { Observable, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { TaskComment } from 'app/shared/model/task-comment.model';
 import { TaskCommentService } from './task-comment.service';
 import { TaskCommentComponent } from './task-comment.component';
 import { TaskCommentDetailComponent } from './task-comment-detail.component';
@@ -19,11 +18,11 @@ export class TaskCommentResolve implements Resolve<ITaskComment> {
     const id = route.params['id'] ? route.params['id'] : null;
     if (id) {
       return this.service.find(id).pipe(
-        filter((response: HttpResponse<TaskComment>) => response.ok),
-        map((taskComment: HttpResponse<TaskComment>) => taskComment.body)
+        filter((response: HttpResponse<ITaskComment>) => response.ok),
+        map((taskComment: HttpResponse<ITaskComment>) => taskComment.body)
       );
     }
-    return of(new TaskComment());
+    return of(null);
   }
 }
 

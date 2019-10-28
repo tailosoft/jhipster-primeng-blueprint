@@ -4,7 +4,6 @@ import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot, Routes } from '@a
 import { UserRouteAccessService } from 'app/core';
 import { Observable, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { Employee } from 'app/shared/model/employee.model';
 import { EmployeeService } from './employee.service';
 import { EmployeeComponent } from './employee.component';
 import { EmployeeDetailComponent } from './employee-detail.component';
@@ -19,11 +18,11 @@ export class EmployeeResolve implements Resolve<IEmployee> {
     const username = route.params['username'] ? route.params['username'] : null;
     if (username) {
       return this.service.find(username).pipe(
-        filter((response: HttpResponse<Employee>) => response.ok),
-        map((employee: HttpResponse<Employee>) => employee.body)
+        filter((response: HttpResponse<IEmployee>) => response.ok),
+        map((employee: HttpResponse<IEmployee>) => employee.body)
       );
     }
-    return of(new Employee());
+    return of(null);
   }
 }
 

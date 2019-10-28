@@ -4,7 +4,7 @@
             <h2 id="jhi-price-formula-heading" jhiTranslate="primengtestApp.priceFormula.home.createOrEditLabel">Create or edit a Price Formula</h2>
             <div class="form-grid">
                 <label jhiTranslate="primengtestApp.priceFormula.max" for="field_max">Max</label>
-                <input pInputText type="number" name="max" id="field_max" formControlName="max" [disabled]="edit" [readonly]="edit"/>
+                <input pInputText type="number" name="max" id="field_max" formControlName="max" [readonly]="edit"/>
                 <div class="validation-messages">
                     <ng-container *ngIf="editForm.get('max').invalid && (editForm.get('max').dirty || editForm.get('max').touched)">
                         <p-message severity="error"

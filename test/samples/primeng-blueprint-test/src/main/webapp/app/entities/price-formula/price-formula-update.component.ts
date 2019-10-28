@@ -29,13 +29,12 @@ export class PriceFormulaUpdateComponent implements OnInit {
   }
 
   updateForm(priceFormula: IPriceFormula) {
-    if (priceFormula.max) {
+    if (priceFormula) {
       this.edit = true;
+      this.editForm.reset({ ...priceFormula });
+    } else {
+      this.editForm.reset({});
     }
-    this.editForm.patchValue({
-      max: priceFormula.max,
-      formula: priceFormula.formula
-    });
   }
 
   previousState() {
@@ -44,20 +43,12 @@ export class PriceFormulaUpdateComponent implements OnInit {
 
   save() {
     this.isSaving = true;
-    const priceFormula = this.createFromForm();
+    const priceFormula = this.editForm.value;
     if (this.edit) {
       this.subscribeToSaveResponse(this.priceFormulaService.update(priceFormula));
     } else {
       this.subscribeToSaveResponse(this.priceFormulaService.create(priceFormula));
     }
-  }
-
-  private createFromForm(): IPriceFormula {
-    return {
-      ...new PriceFormula(),
-      max: this.editForm.get(['max']).value,
-      formula: this.editForm.get(['formula']).value
-    };
   }
 
   protected subscribeToSaveResponse(result: Observable<HttpResponse<IPriceFormula>>) {

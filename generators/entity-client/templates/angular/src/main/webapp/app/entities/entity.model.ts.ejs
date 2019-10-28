@@ -54,7 +54,5 @@ export interface I<%= entityAngularName %> {
 export class <%= entityAngularName %> implements I<%= entityAngularName %> {
     constructor(<% variablesWithTypes.forEach(variablesWithType => { %>
         public <%- variablesWithType %>,<% }); %>
-    ) {<% for (idx in defaultVariablesValues) { %>
-        <%- defaultVariablesValues[idx] %><% } %>
-    }
+    ) {}
 }

@@ -42,7 +42,5 @@ export class Task implements ITask {
     public picture?: any,
     public comments?: ITaskComment[],
     public employeeSkills?: IEmployeeSkill[]
-  ) {
-    this.done = this.done || false;
-  }
+  ) {}
 }

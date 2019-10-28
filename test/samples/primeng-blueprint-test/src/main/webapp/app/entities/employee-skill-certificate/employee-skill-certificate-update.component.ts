@@ -74,19 +74,15 @@ export class EmployeeSkillCertificateUpdateComponent implements OnInit {
   }
 
   updateForm(employeeSkillCertificate: IEmployeeSkillCertificate) {
-    if (employeeSkillCertificate.typeId && employeeSkillCertificate.skillName && employeeSkillCertificate.skillEmployeeUsername) {
+    if (employeeSkillCertificate) {
       this.edit = true;
+      this.editForm.reset({ ...employeeSkillCertificate });
+      this.typeFilterValue = employeeSkillCertificate.typeId;
+      this.skillFilterValue = employeeSkillCertificate.skillName;
+      this.skillEmployeeFilterValue = employeeSkillCertificate.skillEmployeeUsername;
+    } else {
+      this.editForm.reset({});
     }
-    this.editForm.patchValue({
-      grade: employeeSkillCertificate.grade,
-      date: employeeSkillCertificate.date,
-      typeId: employeeSkillCertificate.typeId,
-      skillName: employeeSkillCertificate.skillName,
-      skillEmployeeUsername: employeeSkillCertificate.skillEmployeeUsername
-    });
-    this.typeFilterValue = employeeSkillCertificate.typeId;
-    this.skillFilterValue = employeeSkillCertificate.skillName;
-    this.skillEmployeeFilterValue = employeeSkillCertificate.skillEmployeeUsername;
   }
 
   previousState() {
@@ -95,23 +91,12 @@ export class EmployeeSkillCertificateUpdateComponent implements OnInit {
 
   save() {
     this.isSaving = true;
-    const employeeSkillCertificate = this.createFromForm();
+    const employeeSkillCertificate = this.editForm.value;
     if (this.edit) {
       this.subscribeToSaveResponse(this.employeeSkillCertificateService.update(employeeSkillCertificate));
     } else {
       this.subscribeToSaveResponse(this.employeeSkillCertificateService.create(employeeSkillCertificate));
     }
-  }
-
-  private createFromForm(): IEmployeeSkillCertificate {
-    return {
-      ...new EmployeeSkillCertificate(),
-      grade: this.editForm.get(['grade']).value,
-      date: this.editForm.get(['date']).value,
-      typeId: this.editForm.get(['typeId']).value,
-      skillName: this.editForm.get(['skillName']).value,
-      skillEmployeeUsername: this.editForm.get(['skillEmployeeUsername']).value
-    };
   }
 
   protected subscribeToSaveResponse(result: Observable<HttpResponse<IEmployeeSkillCertificate>>) {

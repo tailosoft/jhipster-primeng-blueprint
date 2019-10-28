@@ -32,10 +32,11 @@ export class CertificateTypeUpdateComponent implements OnInit {
   }
 
   updateForm(certificateType: ICertificateType) {
-    this.editForm.patchValue({
-      id: certificateType.id,
-      name: certificateType.name
-    });
+    if (certificateType) {
+      this.editForm.reset({ ...certificateType });
+    } else {
+      this.editForm.reset({});
+    }
   }
 
   previousState() {
@@ -44,20 +45,12 @@ export class CertificateTypeUpdateComponent implements OnInit {
 
   save() {
     this.isSaving = true;
-    const certificateType = this.createFromForm();
-    if (certificateType.id !== undefined) {
+    const certificateType = this.editForm.value;
+    if (certificateType.id !== null) {
       this.subscribeToSaveResponse(this.certificateTypeService.update(certificateType));
     } else {
       this.subscribeToSaveResponse(this.certificateTypeService.create(certificateType));
     }
-  }
-
-  private createFromForm(): ICertificateType {
-    return {
-      ...new CertificateType(),
-      id: this.editForm.get(['id']).value,
-      name: this.editForm.get(['name']).value
-    };
   }
 
   protected subscribeToSaveResponse(result: Observable<HttpResponse<ICertificateType>>) {

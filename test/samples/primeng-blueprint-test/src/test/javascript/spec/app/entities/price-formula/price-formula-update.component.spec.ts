@@ -40,13 +40,13 @@ describe('Component Tests', () => {
         tick(); // simulate async
 
         // THEN
-        expect(service.update).toHaveBeenCalledWith(entity);
+        expect(service.update).toHaveBeenCalledWith(comp.editForm.value);
         expect(comp.isSaving).toEqual(false);
       }));
 
       it('Should call create service on save for new entity', fakeAsync(() => {
         // GIVEN
-        const entity = new PriceFormula();
+        const entity = null;
         spyOn(service, 'create').and.returnValue(of(new HttpResponse({ body: entity })));
         comp.updateForm(entity);
         // WHEN
@@ -54,7 +54,7 @@ describe('Component Tests', () => {
         tick(); // simulate async
 
         // THEN
-        expect(service.create).toHaveBeenCalledWith(entity);
+        expect(service.create).toHaveBeenCalledWith(comp.editForm.value);
         expect(comp.isSaving).toEqual(false);
       }));
     });

@@ -4,7 +4,6 @@ import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot, Routes } from '@a
 import { UserRouteAccessService } from 'app/core';
 import { Observable, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { EmployeeSkill } from 'app/shared/model/employee-skill.model';
 import { EmployeeSkillService } from './employee-skill.service';
 import { EmployeeSkillComponent } from './employee-skill.component';
 import { EmployeeSkillDetailComponent } from './employee-skill-detail.component';
@@ -20,11 +19,11 @@ export class EmployeeSkillResolve implements Resolve<IEmployeeSkill> {
     const employeeUsername = route.params['employeeUsername'] ? route.params['employeeUsername'] : null;
     if (name && employeeUsername) {
       return this.service.find(name, employeeUsername).pipe(
-        filter((response: HttpResponse<EmployeeSkill>) => response.ok),
-        map((employeeSkill: HttpResponse<EmployeeSkill>) => employeeSkill.body)
+        filter((response: HttpResponse<IEmployeeSkill>) => response.ok),
+        map((employeeSkill: HttpResponse<IEmployeeSkill>) => employeeSkill.body)
       );
     }
-    return of(new EmployeeSkill());
+    return of(null);
   }
 }
 

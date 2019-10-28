@@ -26,7 +26,7 @@
                 </div>
 
                 <label jhiTranslate="primengtestApp.employeeSkillCertificate.type" for="field_type">Type</label>
-                <p-dropdown id="field_type" name="type" [options]="typeOptions" formControlName="typeId" [disabled]="edit" [lazyLoadOnInit]="true" [filter]="true" [filterValue]="typeFilterValue"
+                <p-dropdown id="field_type" name="type" [options]="typeOptions" formControlName="typeId" [readonly]="edit" [lazyLoadOnInit]="true" [filter]="true" [filterValue]="typeFilterValue"
                             placeholder="Choose" optionLabel="name" optionValue="id"></p-dropdown>
                 <div class="validation-messages">
                     <ng-container *ngIf="editForm.get('typeId').invalid && (editForm.get('typeId').dirty || editForm.get('typeId').touched)">
@@ -36,7 +36,7 @@
                     </ng-container>
                 </div>
                 <label jhiTranslate="primengtestApp.employeeSkillCertificate.skill" for="field_skill">Skill</label>
-                <p-dropdown id="field_skill" name="skill" [options]="skillOptions" formControlName="skillName" [disabled]="edit"
+                <p-dropdown id="field_skill" name="skill" [options]="skillOptions" formControlName="skillName" [readonly]="edit"
                             [virtualScroll]="true" [lazy]="true" [rows]="10" (onLazyLoad)="onSkillLazyLoadEvent($event)" [lazyLoadOnInit]="true" [filter]="true" [filterValue]="skillFilterValue"
                             placeholder="Choose" optionLabel="name" optionValue="name"></p-dropdown>
                 <div class="validation-messages">
@@ -47,7 +47,7 @@
                     </ng-container>
                 </div>
                 <label jhiTranslate="primengtestApp.employeeSkillCertificate.skillEmployee" for="field_skillEmployee">Skill Employee</label>
-                <p-dropdown id="field_skillEmployee" name="skillEmployee" [options]="skillEmployeeOptions" formControlName="skillEmployeeUsername" [disabled]="edit"
+                <p-dropdown id="field_skillEmployee" name="skillEmployee" [options]="skillEmployeeOptions" formControlName="skillEmployeeUsername" [readonly]="edit"
                             [virtualScroll]="true" [lazy]="true" [rows]="10" (onLazyLoad)="onSkillEmployeeLazyLoadEvent($event)" [lazyLoadOnInit]="true" [filter]="true" [filterValue]="skillEmployeeFilterValue"
                             placeholder="Choose" optionLabel="fullname" optionValue="username"></p-dropdown>
                 <div class="validation-messages">

@@ -5,7 +5,7 @@
             <div class="form-grid">
                 <ng-container *ngIf="editForm.get('id').value">
                     <label jhiTranslate="global.field.id" for="field_id">ID</label>
-                    <input pInputText type="number" name="id" id="field_id" formControlName="id" readonly [disabled]="true"/>
+                    <input pInputText type="number" name="id" id="field_id" formControlName="id" readonly/>
                     <div class="validation-messages">
                     </div>
                 </ng-container>

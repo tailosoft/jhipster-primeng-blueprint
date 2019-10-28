@@ -49,33 +49,26 @@ export class TaskUpdateComponent implements OnInit {
   }
 
   updateForm(task: ITask) {
-    this.editForm.patchValue({
-      id: task.id,
-      name: task.name,
-      type: task.type,
-      endDate: task.endDate,
-      createdAt: task.createdAt,
-      modifiedAt: task.modifiedAt,
-      done: task.done,
-      description: task.description,
-      attachment: task.attachment,
-      attachmentContentType: task.attachmentContentType,
-      picture: task.picture,
-      pictureContentType: task.pictureContentType
-    });
-    if (task.attachment) {
-      fetch(`data:${task.attachmentContentType};base64,${task.attachment}`)
-        .then(res => res.blob())
-        .then(blob => {
-          this.attachmentFile = new File([blob], '', { type: task.attachmentContentType });
-        });
-    }
-    if (task.picture) {
-      fetch(`data:${task.pictureContentType};base64,${task.picture}`)
-        .then(res => res.blob())
-        .then(blob => {
-          this.pictureFile = new File([blob], '', { type: task.pictureContentType });
-        });
+    if (task) {
+      this.editForm.reset({ ...task });
+      if (task.attachment) {
+        fetch(`data:${task.attachmentContentType};base64,${task.attachment}`)
+          .then(res => res.blob())
+          .then(blob => {
+            this.attachmentFile = new File([blob], '', { type: task.attachmentContentType });
+          });
+      }
+      if (task.picture) {
+        fetch(`data:${task.pictureContentType};base64,${task.picture}`)
+          .then(res => res.blob())
+          .then(blob => {
+            this.pictureFile = new File([blob], '', { type: task.pictureContentType });
+          });
+      }
+    } else {
+      this.editForm.reset({
+        done: false
+      });
     }
   }
 
@@ -102,30 +95,12 @@ export class TaskUpdateComponent implements OnInit {
 
   save() {
     this.isSaving = true;
-    const task = this.createFromForm();
-    if (task.id !== undefined) {
+    const task = this.editForm.value;
+    if (task.id !== null) {
       this.subscribeToSaveResponse(this.taskService.update(task));
     } else {
       this.subscribeToSaveResponse(this.taskService.create(task));
     }
-  }
-
-  private createFromForm(): ITask {
-    return {
-      ...new Task(),
-      id: this.editForm.get(['id']).value,
-      name: this.editForm.get(['name']).value,
-      type: this.editForm.get(['type']).value,
-      endDate: this.editForm.get(['endDate']).value,
-      createdAt: this.editForm.get(['createdAt']).value,
-      modifiedAt: this.editForm.get(['modifiedAt']).value,
-      done: this.editForm.get(['done']).value,
-      description: this.editForm.get(['description']).value,
-      attachmentContentType: this.editForm.get(['attachmentContentType']).value,
-      attachment: this.editForm.get(['attachment']).value,
-      pictureContentType: this.editForm.get(['pictureContentType']).value,
-      picture: this.editForm.get(['picture']).value
-    };
   }
 
   protected subscribeToSaveResponse(result: Observable<HttpResponse<ITask>>) {

@@ -68,18 +68,14 @@ export class EmployeeSkillUpdateComponent implements OnInit {
   }
 
   updateForm(employeeSkill: IEmployeeSkill) {
-    if (employeeSkill.name && employeeSkill.employeeUsername) {
+    if (employeeSkill) {
       this.edit = true;
+      this.editForm.reset({ ...employeeSkill });
+      this.employeeFilterValue = employeeSkill.employeeUsername;
+      this.teacherFilterValue = employeeSkill.teacherUsername;
+    } else {
+      this.editForm.reset({});
     }
-    this.editForm.patchValue({
-      name: employeeSkill.name,
-      level: employeeSkill.level,
-      tasks: employeeSkill.tasks,
-      employeeUsername: employeeSkill.employeeUsername,
-      teacherUsername: employeeSkill.teacherUsername
-    });
-    this.employeeFilterValue = employeeSkill.employeeUsername;
-    this.teacherFilterValue = employeeSkill.teacherUsername;
   }
 
   previousState() {
@@ -88,23 +84,12 @@ export class EmployeeSkillUpdateComponent implements OnInit {
 
   save() {
     this.isSaving = true;
-    const employeeSkill = this.createFromForm();
+    const employeeSkill = this.editForm.value;
     if (this.edit) {
       this.subscribeToSaveResponse(this.employeeSkillService.update(employeeSkill));
     } else {
       this.subscribeToSaveResponse(this.employeeSkillService.create(employeeSkill));
     }
-  }
-
-  private createFromForm(): IEmployeeSkill {
-    return {
-      ...new EmployeeSkill(),
-      name: this.editForm.get(['name']).value,
-      level: this.editForm.get(['level']).value,
-      tasks: this.editForm.get(['tasks']).value,
-      employeeUsername: this.editForm.get(['employeeUsername']).value,
-      teacherUsername: this.editForm.get(['teacherUsername']).value
-    };
   }
 
   protected subscribeToSaveResponse(result: Observable<HttpResponse<IEmployeeSkill>>) {

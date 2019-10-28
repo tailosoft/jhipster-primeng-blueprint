@@ -45,12 +45,12 @@ export class TaskCommentUpdateComponent implements OnInit {
   }
 
   updateForm(taskComment: ITaskComment) {
-    this.editForm.patchValue({
-      id: taskComment.id,
-      value: taskComment.value,
-      taskId: taskComment.taskId
-    });
-    this.taskFilterValue = taskComment.taskId;
+    if (taskComment) {
+      this.editForm.reset({ ...taskComment });
+      this.taskFilterValue = taskComment.taskId;
+    } else {
+      this.editForm.reset({});
+    }
   }
 
   previousState() {
@@ -59,21 +59,12 @@ export class TaskCommentUpdateComponent implements OnInit {
 
   save() {
     this.isSaving = true;
-    const taskComment = this.createFromForm();
-    if (taskComment.id !== undefined) {
+    const taskComment = this.editForm.value;
+    if (taskComment.id !== null) {
       this.subscribeToSaveResponse(this.taskCommentService.update(taskComment));
     } else {
       this.subscribeToSaveResponse(this.taskCommentService.create(taskComment));
     }
-  }
-
-  private createFromForm(): ITaskComment {
-    return {
-      ...new TaskComment(),
-      id: this.editForm.get(['id']).value,
-      value: this.editForm.get(['value']).value,
-      taskId: this.editForm.get(['taskId']).value
-    };
   }
 
   protected subscribeToSaveResponse(result: Observable<HttpResponse<ITaskComment>>) {

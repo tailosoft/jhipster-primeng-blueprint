@@ -29,13 +29,12 @@ export class EmployeeUpdateComponent implements OnInit {
   }
 
   updateForm(employee: IEmployee) {
-    if (employee.username) {
+    if (employee) {
       this.edit = true;
+      this.editForm.reset({ ...employee });
+    } else {
+      this.editForm.reset({});
     }
-    this.editForm.patchValue({
-      username: employee.username,
-      fullname: employee.fullname
-    });
   }
 
   previousState() {
@@ -44,20 +43,12 @@ export class EmployeeUpdateComponent implements OnInit {
 
   save() {
     this.isSaving = true;
-    const employee = this.createFromForm();
+    const employee = this.editForm.value;
     if (this.edit) {
       this.subscribeToSaveResponse(this.employeeService.update(employee));
     } else {
       this.subscribeToSaveResponse(this.employeeService.create(employee));
     }
-  }
-
-  private createFromForm(): IEmployee {
-    return {
-      ...new Employee(),
-      username: this.editForm.get(['username']).value,
-      fullname: this.editForm.get(['fullname']).value
-    };
   }
 
   protected subscribeToSaveResponse(result: Observable<HttpResponse<IEmployee>>) {

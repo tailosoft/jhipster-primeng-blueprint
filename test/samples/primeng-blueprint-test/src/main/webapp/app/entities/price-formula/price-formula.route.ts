@@ -4,7 +4,6 @@ import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot, Routes } from '@a
 import { UserRouteAccessService } from 'app/core';
 import { Observable, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { PriceFormula } from 'app/shared/model/price-formula.model';
 import { PriceFormulaService } from './price-formula.service';
 import { PriceFormulaComponent } from './price-formula.component';
 import { PriceFormulaDetailComponent } from './price-formula-detail.component';
@@ -19,11 +18,11 @@ export class PriceFormulaResolve implements Resolve<IPriceFormula> {
     const max = route.params['max'] ? route.params['max'] : null;
     if (max) {
       return this.service.find(max).pipe(
-        filter((response: HttpResponse<PriceFormula>) => response.ok),
-        map((priceFormula: HttpResponse<PriceFormula>) => priceFormula.body)
+        filter((response: HttpResponse<IPriceFormula>) => response.ok),
+        map((priceFormula: HttpResponse<IPriceFormula>) => priceFormula.body)
       );
     }
-    return of(new PriceFormula());
+    return of(null);
   }
 }
 

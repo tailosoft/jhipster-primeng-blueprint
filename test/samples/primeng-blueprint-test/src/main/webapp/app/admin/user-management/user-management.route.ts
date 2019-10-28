@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot, Routes, CanActivate } from '@angular/router';
-
+import { HttpResponse } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 import { AccountService, User, UserService } from 'app/core';
 import { UserMgmtComponent } from './user-management.component';
 import { UserMgmtDetailComponent } from './user-management-detail.component';
@@ -16,15 +18,18 @@ export class UserResolve implements CanActivate {
 }
 
 @Injectable({ providedIn: 'root' })
-export class UserMgmtResolve implements Resolve<any> {
+export class UserMgmtResolve implements Resolve<User> {
   constructor(private service: UserService) {}
 
-  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
+  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<User> {
     const id = route.params['login'] ? route.params['login'] : null;
     if (id) {
-      return this.service.find(id);
+      return this.service.find(id).pipe(
+        filter((response: HttpResponse<User>) => response.ok),
+        map((response: HttpResponse<User>) => response.body)
+      );
     }
-    return new User();
+    return of(null);
   }
 }
 

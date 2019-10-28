@@ -4,7 +4,7 @@
             <h2 id="jhi-employee-skill-heading" jhiTranslate="primengtestApp.employeeSkill.home.createOrEditLabel">Create or edit a Employee Skill</h2>
             <div class="form-grid">
                 <label jhiTranslate="primengtestApp.employeeSkill.name" for="field_name">Name</label>
-                <input pInputText type="text" name="name" id="field_name" formControlName="name" [disabled]="edit" [readonly]="edit"/>
+                <input pInputText type="text" name="name" id="field_name" formControlName="name" [readonly]="edit"/>
                 <div class="validation-messages">
                     <ng-container *ngIf="editForm.get('name').invalid && (editForm.get('name').dirty || editForm.get('name').touched)">
                         <p-message severity="error"
@@ -32,7 +32,7 @@
                 <div class="validation-messages">
                 </div>
                 <label jhiTranslate="primengtestApp.employeeSkill.employee" for="field_employee">Employee</label>
-                <p-dropdown id="field_employee" name="employee" [options]="employeeOptions" formControlName="employeeUsername" [disabled]="edit"
+                <p-dropdown id="field_employee" name="employee" [options]="employeeOptions" formControlName="employeeUsername" [readonly]="edit"
                             [virtualScroll]="true" [lazy]="true" [rows]="10" (onLazyLoad)="onEmployeeLazyLoadEvent($event)" [lazyLoadOnInit]="true" [filter]="true" [filterValue]="employeeFilterValue"
                             placeholder="Choose" optionLabel="fullname" optionValue="username"></p-dropdown>
                 <div class="validation-messages">
