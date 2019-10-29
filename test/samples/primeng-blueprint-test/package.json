@@ -35,7 +35,7 @@
     "primeicons": "^1.0.0",
     "primeng": "https://github.com/yelhouti/primeng/releases/download/8.0.0-rc2/primeng-8.0.0-rc.2-SNAPSHOT.tgz",
     "rxjs": "6.5.2",
-    "swagger-ui": "2.2.10",
+    "swagger-ui": "3.23.11",
     "tslib": "1.10.0",
     "zone.js": "0.9.1"
   },
