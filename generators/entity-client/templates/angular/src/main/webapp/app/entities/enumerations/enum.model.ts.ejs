@@ -16,9 +16,12 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-export * from './<%= entityFileName %>.service';
-export * from './<%= entityFileName %>-update.component';
-export * from './<%= entityFileName %>-delete-dialog.component';
-export * from './<%= entityFileName %>-detail.component';
-export * from './<%= entityFileName %>.component';
-export * from './<%= entityFileName %>.route';
+export const enum <%= enumName %> {
+<% enumsWithCustomValue.forEach((enumWithCustomValue, index) => { %>
+<% if (!enumWithCustomValue.value) { %>
+  <%= enumWithCustomValue.name %>
+<% } else {%>
+  <%= enumWithCustomValue.name %> = '<%= enumWithCustomValue.value %>'
+<% } %><% if (index < enumsWithCustomValue.length - 1) { %>,<% } %>
+<%}); %>
+}

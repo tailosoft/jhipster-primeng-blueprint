@@ -33,7 +33,7 @@
                 <div class="form-group">
                     <label class="username-label" for="username" jhiTranslate="global.form.username.label">Login</label>
                     <input type="text" class="form-control" name="username" id="username" placeholder="{{'global.form.username.placeholder' | translate}}"
-                           formControlName="username">
+                           formControlName="username" #username>
                 </div>
                 <div class="form-group">
                     <label for="password" jhiTranslate="login.form.password">Password</label>
@@ -42,7 +42,7 @@
                 </div>
                 <div class="form-check"<% if (authenticationType === 'session' && databaseType === 'no') { %> hidden<% } %>>
                     <label class="form-check-label" for="rememberMe">
-                        <input class="form-check-input" type="checkbox" name="rememberMe" id="rememberMe" formControlName="rememberMe" checked>
+                        <input class="form-check-input" type="checkbox" name="rememberMe" id="rememberMe" formControlName="rememberMe">
                         <span jhiTranslate="login.form.rememberme">Remember me</span>
                     </label>
                 </div>
