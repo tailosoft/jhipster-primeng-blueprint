@@ -5,26 +5,26 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { lazyLoadEventToServerQueryParams } from 'app/shared/util/request-util';
 import { LazyLoadEvent } from 'primeng/api';
-import { MessageService } from 'primeng/api';
-import { IEmployeeSkill, EmployeeSkill } from 'app/shared/model/employee-skill.model';
+import { IEmployeeSkill } from 'app/shared/model/employee-skill.model';
 import { EmployeeSkillService } from './employee-skill.service';
+import { MessageService } from 'primeng/api';
 import { ITask } from 'app/shared/model/task.model';
-import { TaskService } from 'app/entities/task';
+import { TaskService } from 'app/entities/task/task.service';
 import { IEmployee } from 'app/shared/model/employee.model';
-import { EmployeeService } from 'app/entities/employee';
+import { EmployeeService } from 'app/entities/employee/employee.service';
 
 @Component({
   selector: 'jhi-employee-skill-update',
   templateUrl: './employee-skill-update.component.html'
 })
 export class EmployeeSkillUpdateComponent implements OnInit {
-  edit: boolean;
-  isSaving: boolean;
-  taskOptions: ITask[];
-  employeeOptions: IEmployee[];
-  employeeFilterValue: any;
-  teacherOptions: IEmployee[];
-  teacherFilterValue: any;
+  edit = false;
+  isSaving = false;
+  taskOptions: ITask[] | null = null;
+  employeeOptions: IEmployee[] | null = null;
+  employeeFilterValue?: any;
+  teacherOptions: IEmployee[] | null = null;
+  teacherFilterValue?: any;
 
   editForm = this.fb.group({
     name: [null, [Validators.required]],
@@ -43,7 +43,7 @@ export class EmployeeSkillUpdateComponent implements OnInit {
     private fb: FormBuilder
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.isSaving = false;
     this.activatedRoute.data.subscribe(({ employeeSkill }) => {
       this.updateForm(employeeSkill);
@@ -51,23 +51,28 @@ export class EmployeeSkillUpdateComponent implements OnInit {
     this.loadAllTasks();
   }
 
-  loadAllTasks() {
-    this.taskService.query().subscribe(res => (this.taskOptions = res.body), (res: HttpErrorResponse) => this.onError(res.message));
+  loadAllTasks(): void {
+    this.taskService.query().subscribe(
+      (res: HttpResponse<ITask[]>) => (this.taskOptions = res.body),
+      (res: HttpErrorResponse) => this.onError(res.message)
+    );
   }
 
-  onEmployeeLazyLoadEvent(event: LazyLoadEvent) {
-    this.employeeService
-      .query(lazyLoadEventToServerQueryParams(event || {}, 'fullname.contains'))
-      .subscribe(res => (this.employeeOptions = res.body), (res: HttpErrorResponse) => this.onError(res.message));
+  onEmployeeLazyLoadEvent(event: LazyLoadEvent): void {
+    this.employeeService.query(lazyLoadEventToServerQueryParams(event, 'fullname.contains')).subscribe(
+      (res: HttpResponse<IEmployee[]>) => (this.employeeOptions = res.body),
+      (res: HttpErrorResponse) => this.onError(res.message)
+    );
   }
 
-  onTeacherLazyLoadEvent(event: LazyLoadEvent) {
-    this.employeeService
-      .query(lazyLoadEventToServerQueryParams(event || {}, 'fullname.contains'))
-      .subscribe(res => (this.teacherOptions = res.body), (res: HttpErrorResponse) => this.onError(res.message));
+  onTeacherLazyLoadEvent(event: LazyLoadEvent): void {
+    this.employeeService.query(lazyLoadEventToServerQueryParams(event, 'fullname.contains')).subscribe(
+      (res: HttpResponse<IEmployee[]>) => (this.teacherOptions = res.body),
+      (res: HttpErrorResponse) => this.onError(res.message)
+    );
   }
 
-  updateForm(employeeSkill: IEmployeeSkill) {
+  updateForm(employeeSkill: IEmployeeSkill | null): void {
     if (employeeSkill) {
       this.edit = true;
       this.editForm.reset({ ...employeeSkill });
@@ -78,11 +83,11 @@ export class EmployeeSkillUpdateComponent implements OnInit {
     }
   }
 
-  previousState() {
+  previousState(): void {
     window.history.back();
   }
 
-  save() {
+  save(): void {
     this.isSaving = true;
     const employeeSkill = this.editForm.value;
     if (this.edit) {
@@ -92,19 +97,22 @@ export class EmployeeSkillUpdateComponent implements OnInit {
     }
   }
 
-  protected subscribeToSaveResponse(result: Observable<HttpResponse<IEmployeeSkill>>) {
-    result.subscribe(() => this.onSaveSuccess(), () => this.onSaveError());
+  protected subscribeToSaveResponse(result: Observable<HttpResponse<IEmployeeSkill>>): void {
+    result.subscribe(
+      () => this.onSaveSuccess(),
+      () => this.onSaveError()
+    );
   }
 
-  protected onSaveSuccess() {
+  protected onSaveSuccess(): void {
     this.isSaving = false;
     this.previousState();
   }
 
-  protected onSaveError() {
+  protected onSaveError(): void {
     this.isSaving = false;
   }
-  protected onError(errorMessage: string) {
+  protected onError(errorMessage: string): void {
     this.messageService.add({ severity: 'error', summary: errorMessage });
   }
 }

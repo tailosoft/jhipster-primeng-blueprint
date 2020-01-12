@@ -1,25 +1,31 @@
 import { Injectable } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
-import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot, Routes } from '@angular/router';
-import { UserRouteAccessService } from 'app/core';
-import { Observable, of } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { Resolve, ActivatedRouteSnapshot, Routes, Router } from '@angular/router';
+import { Observable, of, EMPTY } from 'rxjs';
+import { flatMap } from 'rxjs/operators';
+import { UserRouteAccessService } from 'app/core/auth/user-route-access-service';
+import { IEmployee } from 'app/shared/model/employee.model';
 import { EmployeeService } from './employee.service';
 import { EmployeeComponent } from './employee.component';
 import { EmployeeDetailComponent } from './employee-detail.component';
 import { EmployeeUpdateComponent } from './employee-update.component';
-import { IEmployee } from 'app/shared/model/employee.model';
 
 @Injectable({ providedIn: 'root' })
-export class EmployeeResolve implements Resolve<IEmployee> {
-  constructor(private service: EmployeeService) {}
+export class EmployeeResolve implements Resolve<IEmployee | null> {
+  constructor(private service: EmployeeService, private router: Router) {}
 
-  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<IEmployee> {
+  resolve(route: ActivatedRouteSnapshot): Observable<IEmployee | null> {
     const username = route.params['username'] ? route.params['username'] : null;
     if (username) {
       return this.service.find(username).pipe(
-        filter((response: HttpResponse<IEmployee>) => response.ok),
-        map((employee: HttpResponse<IEmployee>) => employee.body)
+        flatMap((employee: HttpResponse<IEmployee>) => {
+          if (employee.body) {
+            return of(employee.body);
+          } else {
+            this.router.navigate(['404']);
+            return EMPTY;
+          }
+        })
       );
     }
     return of(null);

@@ -1,17 +1,20 @@
-/* tslint:disable no-unused-expression */
-import { browser, by, ExpectedConditions as ec } from 'protractor';
+import { browser, by, ExpectedConditions as ec /* , promise */ } from 'protractor';
 import { NavBarPage, SignInPage } from '../../page-objects/jhi-page-objects';
 
-import { TaskCommentComponentsPage, TaskCommentDeleteDialog, TaskCommentUpdatePage } from './task-comment.page-object';
+import {
+  TaskCommentComponentsPage,
+  /* TaskCommentDeleteDialog,
+   */ TaskCommentUpdatePage
+} from './task-comment.page-object';
 
 const expect = chai.expect;
 
 describe('TaskComment e2e test', () => {
   let navBarPage: NavBarPage;
   let signInPage: SignInPage;
-  let taskCommentUpdatePage: TaskCommentUpdatePage;
   let taskCommentComponentsPage: TaskCommentComponentsPage;
-  /*let taskCommentDeleteDialog: TaskCommentDeleteDialog;*/
+  let taskCommentUpdatePage: TaskCommentUpdatePage;
+  /* let taskCommentDeleteDialog: TaskCommentDeleteDialog; */
 
   before(async () => {
     await browser.get('/');
@@ -35,7 +38,7 @@ describe('TaskComment e2e test', () => {
     await taskCommentUpdatePage.cancel();
   });
 
-  /* it('should create and save TaskComments', async () => {
+  /*  it('should create and save TaskComments', async () => {
         const nbButtonsBeforeCreate = await taskCommentComponentsPage.countDeleteButtons();
 
         await taskCommentComponentsPage.clickOnCreateButton();
@@ -46,9 +49,9 @@ describe('TaskComment e2e test', () => {
         expect(await taskCommentUpdatePage.getSaveButton().isPresent(), 'Expected save button disappear').to.be.false;
 
         expect(await taskCommentComponentsPage.countDeleteButtons()).to.eq(nbButtonsBeforeCreate + 1, 'Expected one more entry in the table');
-    });*/
+    }); */
 
-  /* it('should delete last TaskComment', async () => {
+  /*  it('should delete last TaskComment', async () => {
         const nbButtonsBeforeDelete = await taskCommentComponentsPage.countDeleteButtons();
         await taskCommentComponentsPage.clickOnLastDeleteButton();
 
@@ -56,7 +59,7 @@ describe('TaskComment e2e test', () => {
         await taskCommentDeleteDialog.clickOnConfirmButton();
 
         expect(await taskCommentComponentsPage.countDeleteButtons()).to.eq(nbButtonsBeforeDelete - 1);
-    });*/
+    }); */
 
   after(async () => {
     await navBarPage.autoSignOut();

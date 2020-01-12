@@ -8,17 +8,17 @@ import { IEmployeeSkillCertificate } from 'app/shared/model/employee-skill-certi
   templateUrl: './employee-skill-certificate-detail.component.html'
 })
 export class EmployeeSkillCertificateDetailComponent implements OnInit {
-  employeeSkillCertificate: IEmployeeSkillCertificate;
+  employeeSkillCertificate: IEmployeeSkillCertificate | null = null;
 
   constructor(protected activatedRoute: ActivatedRoute) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.activatedRoute.data.subscribe(({ employeeSkillCertificate }) => {
       this.employeeSkillCertificate = employeeSkillCertificate;
     });
   }
 
-  previousState() {
+  previousState(): void {
     window.history.back();
   }
 }

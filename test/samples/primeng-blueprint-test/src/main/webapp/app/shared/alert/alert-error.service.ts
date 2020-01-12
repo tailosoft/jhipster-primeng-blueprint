@@ -4,18 +4,18 @@ import { MessageService } from 'primeng/api';
 import { HttpErrorResponse } from '@angular/common/http';
 
 @Injectable({ providedIn: 'root' })
-export class JhiAlertErrorService {
+export class AlertErrorService {
   constructor(private messageService: MessageService, private translateService: TranslateService) {}
 
-  displayError(httpErrorResponse: HttpErrorResponse) {
+  displayError(httpErrorResponse: HttpErrorResponse): void {
     let i;
     switch (httpErrorResponse.status) {
       // connection refused, server not reachable
-      case 0:
+      case 0: {
         this.messageService.add({ severity: 'error', summary: this.translateService.instant('error.server.not.reachable') });
         break;
-
-      case 400:
+      }
+      case 400: {
         const arr = httpErrorResponse.headers.keys();
         let errorHeader = null;
         let entityKey = null;
@@ -53,17 +53,18 @@ export class JhiAlertErrorService {
           this.messageService.add({ severity: 'error', summary: this.translateService.instant(httpErrorResponse.error) });
         }
         break;
-
-      case 404:
+      }
+      case 404: {
         this.messageService.add({ severity: 'error', summary: this.translateService.instant('error.url.not.found') });
         break;
-
-      default:
+      }
+      default: {
         if (httpErrorResponse.error !== '' && httpErrorResponse.error.message) {
           this.messageService.add({ severity: 'error', summary: this.translateService.instant(httpErrorResponse.error.message) });
         } else {
           this.messageService.add({ severity: 'error', summary: this.translateService.instant(httpErrorResponse.error) });
         }
+      }
     }
   }
 }

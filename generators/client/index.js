@@ -1,4 +1,5 @@
 /* eslint-disable consistent-return */
+const chalk = require('chalk');
 const ClientGenerator = require('generator-jhipster/generators/client');
 const writeAngularFiles = require('./templates/files-angular').writeFiles;
 

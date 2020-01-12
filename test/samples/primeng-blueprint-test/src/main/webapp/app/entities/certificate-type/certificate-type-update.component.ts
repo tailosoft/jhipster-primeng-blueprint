@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
+import { HttpResponse } from '@angular/common/http';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
-import { ICertificateType, CertificateType } from 'app/shared/model/certificate-type.model';
+import { ICertificateType } from 'app/shared/model/certificate-type.model';
 import { CertificateTypeService } from './certificate-type.service';
 
 @Component({
@@ -11,7 +11,7 @@ import { CertificateTypeService } from './certificate-type.service';
   templateUrl: './certificate-type-update.component.html'
 })
 export class CertificateTypeUpdateComponent implements OnInit {
-  isSaving: boolean;
+  isSaving = false;
 
   editForm = this.fb.group({
     id: [],
@@ -24,14 +24,14 @@ export class CertificateTypeUpdateComponent implements OnInit {
     private fb: FormBuilder
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.isSaving = false;
     this.activatedRoute.data.subscribe(({ certificateType }) => {
       this.updateForm(certificateType);
     });
   }
 
-  updateForm(certificateType: ICertificateType) {
+  updateForm(certificateType: ICertificateType | null): void {
     if (certificateType) {
       this.editForm.reset({ ...certificateType });
     } else {
@@ -39,11 +39,11 @@ export class CertificateTypeUpdateComponent implements OnInit {
     }
   }
 
-  previousState() {
+  previousState(): void {
     window.history.back();
   }
 
-  save() {
+  save(): void {
     this.isSaving = true;
     const certificateType = this.editForm.value;
     if (certificateType.id !== null) {
@@ -53,16 +53,19 @@ export class CertificateTypeUpdateComponent implements OnInit {
     }
   }
 
-  protected subscribeToSaveResponse(result: Observable<HttpResponse<ICertificateType>>) {
-    result.subscribe(() => this.onSaveSuccess(), () => this.onSaveError());
+  protected subscribeToSaveResponse(result: Observable<HttpResponse<ICertificateType>>): void {
+    result.subscribe(
+      () => this.onSaveSuccess(),
+      () => this.onSaveError()
+    );
   }
 
-  protected onSaveSuccess() {
+  protected onSaveSuccess(): void {
     this.isSaving = false;
     this.previousState();
   }
 
-  protected onSaveError() {
+  protected onSaveError(): void {
     this.isSaving = false;
   }
 }

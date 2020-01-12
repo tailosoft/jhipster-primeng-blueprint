@@ -35,14 +35,14 @@
                 <dt><span jhiTranslate="primengtestApp.task.attachment">Attachment</span></dt>
                 <dd>
                     <div *ngIf="task.attachment">
-                        <a (click)="openFile(task.attachmentContentType, task.attachment)" jhiTranslate="entity.action.open">open</a>
+                        <a (click)="openFile(task.attachmentContentType!, task.attachment)" jhiTranslate="entity.action.open">open</a>
                         {{task.attachmentContentType}}, {{byteSize(task.attachment)}}
                     </div>
                 </dd>
                 <dt><span jhiTranslate="primengtestApp.task.picture">Picture</span></dt>
                 <dd>
                     <div *ngIf="task.picture">
-                        <a (click)="openFile(task.pictureContentType, task.picture)">
+                        <a (click)="openFile(task.pictureContentType!, task.picture)">
                             <img [src]="'data:' + task.pictureContentType + ';base64,' + task.picture" style="max-width: 100%;" alt="task image"/>
                         </a>
                         {{task.pictureContentType}}, {{byteSize(task.picture)}}

@@ -5,19 +5,19 @@ export class TaskComponentsPage {
   deleteButtons = element.all(by.css('jhi-task div table .ui-button-danger'));
   title = element.all(by.css('jhi-task div h2#page-heading span')).first();
 
-  async clickOnCreateButton(timeout?: number) {
+  async clickOnCreateButton(): Promise<void> {
     await this.createButton.click();
   }
 
-  async clickOnLastDeleteButton(timeout?: number) {
+  async clickOnLastDeleteButton(): Promise<void> {
     await this.deleteButtons.last().click();
   }
 
-  async countDeleteButtons() {
+  async countDeleteButtons(): Promise<number> {
     return this.deleteButtons.count();
   }
 
-  async getTitle() {
+  async getTitle(): Promise<string> {
     return this.title.getAttribute('jhiTranslate');
   }
 }
@@ -37,27 +37,27 @@ export class TaskUpdatePage {
   attachmentInput = element(by.id('field_attachment'));
   pictureInput = element(by.id('field_picture'));
 
-  async getPageTitle() {
+  async getPageTitle(): Promise<string> {
     return this.pageTitle.getAttribute('jhiTranslate');
   }
 
-  async setInput(id) {
+  async setInput(id: string): Promise<void> {
     await this.idInput.sendKeys(id);
   }
 
-  async getInput() {
+  async getInput(): Promise<string> {
     return await this.idInput.getAttribute('value');
   }
 
-  async setNameInput(name) {
+  async setNameInput(name: string): Promise<void> {
     await this.nameInput.sendKeys(name);
   }
 
-  async getNameInput() {
+  async getNameInput(): Promise<string> {
     return await this.nameInput.getAttribute('value');
   }
 
-  async typeSelectLastOption(timeout?: number) {
+  async typeSelectLastOption(): Promise<void> {
     await this.typeSelect.click();
     await this.typeSelect
       .all(by.tagName('.ui-dropdown-item'))
@@ -66,79 +66,79 @@ export class TaskUpdatePage {
     await browser.wait(ec.invisibilityOf(this.typeSelect.element(by.css('.ui-dropdown-panel'))), 5000);
   }
 
-  async getTypeSelect() {
+  async getTypeSelect(): Promise<string> {
     return await this.typeSelect.element(by.css('.ui-dropdown-label')).getText();
   }
 
-  async setEndDateInput(endDate) {
+  async setEndDateInput(endDate: string): Promise<void> {
     await this.endDateInput.element(by.css('.ui-inputtext')).sendKeys(endDate);
     await this.endDateInput.element(by.tagName('.ui-calendar-button')).click();
     await browser.wait(ec.invisibilityOf(this.endDateInput.element(by.css('.ui-datepicker'))), 5000);
   }
 
-  async getEndDateInput() {
+  async getEndDateInput(): Promise<string> {
     return await this.endDateInput.element(by.css('.ui-inputtext')).getAttribute('value');
   }
 
-  async setCreatedAtInput(createdAt) {
+  async setCreatedAtInput(createdAt: string): Promise<void> {
     await this.createdAtInput.element(by.css('.ui-inputtext')).sendKeys(createdAt);
     await this.createdAtInput.element(by.tagName('.ui-calendar-button')).click();
     await browser.wait(ec.invisibilityOf(this.createdAtInput.element(by.css('.ui-datepicker'))), 5000);
   }
 
-  async getCreatedAtInput() {
+  async getCreatedAtInput(): Promise<string> {
     return await this.createdAtInput.element(by.css('.ui-inputtext')).getAttribute('value');
   }
 
-  async setModifiedAtInput(modifiedAt) {
+  async setModifiedAtInput(modifiedAt: string): Promise<void> {
     await this.modifiedAtInput.element(by.css('.ui-inputtext')).sendKeys(modifiedAt);
     await this.modifiedAtInput.element(by.tagName('.ui-calendar-button')).click();
     await browser.wait(ec.invisibilityOf(this.modifiedAtInput.element(by.css('.ui-datepicker'))), 5000);
   }
 
-  async getModifiedAtInput() {
+  async getModifiedAtInput(): Promise<string> {
     return await this.modifiedAtInput.element(by.css('.ui-inputtext')).getAttribute('value');
   }
 
-  getDoneInput(timeout?: number) {
+  getDoneInput(): ElementFinder {
     return this.doneInput;
   }
 
-  async setDescriptionInput(description) {
+  async setDescriptionInput(description: string): Promise<void> {
     await this.descriptionInput.sendKeys(description);
   }
 
-  async getDescriptionInput() {
+  async getDescriptionInput(): Promise<string> {
     return await this.descriptionInput.getAttribute('value');
   }
 
-  async setAttachmentInput(attachment) {
+  async setAttachmentInput(attachment: string): Promise<void> {
     await this.attachmentInput.element(by.css('input[type="file"]')).sendKeys(attachment);
   }
 
-  async getAttachmentInput() {
+  async getAttachmentInput(): Promise<string> {
     return await this.attachmentInput
       .all(by.css('.ui-fileupload-row > div'))
       .get(1)
       .getText();
   }
 
-  async setPictureInput(picture) {
+  async setPictureInput(picture: string): Promise<void> {
     await this.pictureInput.element(by.css('input[type="file"]')).sendKeys(picture);
   }
 
-  async getPictureInput() {
+  async getPictureInput(): Promise<string> {
     return await this.pictureInput
       .all(by.css('.ui-fileupload-row > div'))
       .get(1)
       .getText();
   }
 
-  async save(timeout?: number) {
+  async save(): Promise<void> {
     await this.saveButton.click();
   }
 
-  async cancel(timeout?: number) {
+  async cancel(): Promise<void> {
     await this.cancelButton.click();
   }
 
@@ -150,7 +150,7 @@ export class TaskUpdatePage {
 export class TaskDeleteDialog {
   private confirmButton = element(by.css('p-confirmdialog .ui-dialog-footer button:first-of-type'));
 
-  async clickOnConfirmButton(timeout?: number) {
+  async clickOnConfirmButton(): Promise<void> {
     await this.confirmButton.click();
   }
 }

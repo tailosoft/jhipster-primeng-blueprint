@@ -5,29 +5,29 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { lazyLoadEventToServerQueryParams } from 'app/shared/util/request-util';
 import { LazyLoadEvent } from 'primeng/api';
-import { MessageService } from 'primeng/api';
-import { IEmployeeSkillCertificate, EmployeeSkillCertificate } from 'app/shared/model/employee-skill-certificate.model';
+import { IEmployeeSkillCertificate } from 'app/shared/model/employee-skill-certificate.model';
 import { EmployeeSkillCertificateService } from './employee-skill-certificate.service';
+import { MessageService } from 'primeng/api';
 import { ICertificateType } from 'app/shared/model/certificate-type.model';
-import { CertificateTypeService } from 'app/entities/certificate-type';
+import { CertificateTypeService } from 'app/entities/certificate-type/certificate-type.service';
 import { IEmployeeSkill } from 'app/shared/model/employee-skill.model';
-import { EmployeeSkillService } from 'app/entities/employee-skill';
+import { EmployeeSkillService } from 'app/entities/employee-skill/employee-skill.service';
 import { IEmployee } from 'app/shared/model/employee.model';
-import { EmployeeService } from 'app/entities/employee';
+import { EmployeeService } from 'app/entities/employee/employee.service';
 
 @Component({
   selector: 'jhi-employee-skill-certificate-update',
   templateUrl: './employee-skill-certificate-update.component.html'
 })
 export class EmployeeSkillCertificateUpdateComponent implements OnInit {
-  edit: boolean;
-  isSaving: boolean;
-  typeOptions: ICertificateType[];
-  typeFilterValue: any;
-  skillOptions: IEmployeeSkill[];
-  skillFilterValue: any;
-  skillEmployeeOptions: IEmployee[];
-  skillEmployeeFilterValue: any;
+  edit = false;
+  isSaving = false;
+  typeOptions: ICertificateType[] | null = null;
+  typeFilterValue?: any;
+  skillOptions: IEmployeeSkill[] | null = null;
+  skillFilterValue?: any;
+  skillEmployeeOptions: IEmployee[] | null = null;
+  skillEmployeeFilterValue?: any;
 
   editForm = this.fb.group({
     grade: [null, [Validators.required]],
@@ -47,7 +47,7 @@ export class EmployeeSkillCertificateUpdateComponent implements OnInit {
     private fb: FormBuilder
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.isSaving = false;
     this.activatedRoute.data.subscribe(({ employeeSkillCertificate }) => {
       this.updateForm(employeeSkillCertificate);
@@ -55,25 +55,28 @@ export class EmployeeSkillCertificateUpdateComponent implements OnInit {
     this.loadAllTypes();
   }
 
-  loadAllTypes() {
-    this.certificateTypeService
-      .query()
-      .subscribe(res => (this.typeOptions = res.body), (res: HttpErrorResponse) => this.onError(res.message));
+  loadAllTypes(): void {
+    this.certificateTypeService.query().subscribe(
+      (res: HttpResponse<ICertificateType[]>) => (this.typeOptions = res.body),
+      (res: HttpErrorResponse) => this.onError(res.message)
+    );
   }
 
-  onSkillLazyLoadEvent(event: LazyLoadEvent) {
-    this.employeeSkillService
-      .query(lazyLoadEventToServerQueryParams(event || {}, 'name.contains'))
-      .subscribe(res => (this.skillOptions = res.body), (res: HttpErrorResponse) => this.onError(res.message));
+  onSkillLazyLoadEvent(event: LazyLoadEvent): void {
+    this.employeeSkillService.query(lazyLoadEventToServerQueryParams(event, 'name.contains')).subscribe(
+      (res: HttpResponse<IEmployeeSkill[]>) => (this.skillOptions = res.body),
+      (res: HttpErrorResponse) => this.onError(res.message)
+    );
   }
 
-  onSkillEmployeeLazyLoadEvent(event: LazyLoadEvent) {
-    this.employeeService
-      .query(lazyLoadEventToServerQueryParams(event || {}, 'fullname.contains'))
-      .subscribe(res => (this.skillEmployeeOptions = res.body), (res: HttpErrorResponse) => this.onError(res.message));
+  onSkillEmployeeLazyLoadEvent(event: LazyLoadEvent): void {
+    this.employeeService.query(lazyLoadEventToServerQueryParams(event, 'fullname.contains')).subscribe(
+      (res: HttpResponse<IEmployee[]>) => (this.skillEmployeeOptions = res.body),
+      (res: HttpErrorResponse) => this.onError(res.message)
+    );
   }
 
-  updateForm(employeeSkillCertificate: IEmployeeSkillCertificate) {
+  updateForm(employeeSkillCertificate: IEmployeeSkillCertificate | null): void {
     if (employeeSkillCertificate) {
       this.edit = true;
       this.editForm.reset({ ...employeeSkillCertificate });
@@ -85,11 +88,11 @@ export class EmployeeSkillCertificateUpdateComponent implements OnInit {
     }
   }
 
-  previousState() {
+  previousState(): void {
     window.history.back();
   }
 
-  save() {
+  save(): void {
     this.isSaving = true;
     const employeeSkillCertificate = this.editForm.value;
     if (this.edit) {
@@ -99,19 +102,22 @@ export class EmployeeSkillCertificateUpdateComponent implements OnInit {
     }
   }
 
-  protected subscribeToSaveResponse(result: Observable<HttpResponse<IEmployeeSkillCertificate>>) {
-    result.subscribe(() => this.onSaveSuccess(), () => this.onSaveError());
+  protected subscribeToSaveResponse(result: Observable<HttpResponse<IEmployeeSkillCertificate>>): void {
+    result.subscribe(
+      () => this.onSaveSuccess(),
+      () => this.onSaveError()
+    );
   }
 
-  protected onSaveSuccess() {
+  protected onSaveSuccess(): void {
     this.isSaving = false;
     this.previousState();
   }
 
-  protected onSaveError() {
+  protected onSaveError(): void {
     this.isSaving = false;
   }
-  protected onError(errorMessage: string) {
+  protected onError(errorMessage: string): void {
     this.messageService.add({ severity: 'error', summary: errorMessage });
   }
 }

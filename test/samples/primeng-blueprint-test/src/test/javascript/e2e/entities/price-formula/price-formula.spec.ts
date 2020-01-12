@@ -1,5 +1,4 @@
-/* tslint:disable no-unused-expression */
-import { browser, by, ExpectedConditions as ec } from 'protractor';
+import { browser, by, ExpectedConditions as ec, promise } from 'protractor';
 import { NavBarPage, SignInPage } from '../../page-objects/jhi-page-objects';
 
 import { PriceFormulaComponentsPage, PriceFormulaDeleteDialog, PriceFormulaUpdatePage } from './price-formula.page-object';
@@ -9,8 +8,8 @@ const expect = chai.expect;
 describe('PriceFormula e2e test', () => {
   let navBarPage: NavBarPage;
   let signInPage: SignInPage;
-  let priceFormulaUpdatePage: PriceFormulaUpdatePage;
   let priceFormulaComponentsPage: PriceFormulaComponentsPage;
+  let priceFormulaUpdatePage: PriceFormulaUpdatePage;
   let priceFormulaDeleteDialog: PriceFormulaDeleteDialog;
 
   before(async () => {
@@ -39,9 +38,9 @@ describe('PriceFormula e2e test', () => {
     const nbButtonsBeforeCreate = await priceFormulaComponentsPage.countDeleteButtons();
 
     await priceFormulaComponentsPage.clickOnCreateButton();
-    await priceFormulaUpdatePage.setMaxInput('5');
+    await priceFormulaUpdatePage.setMaxInput('9999999');
     await priceFormulaUpdatePage.setFormulaInput('formula');
-    expect(await priceFormulaUpdatePage.getMaxInput()).to.eq('5', 'Expected max value to be equals to 5');
+    expect(await priceFormulaUpdatePage.getMaxInput()).to.eq('9999999', 'Expected max value to be equals to 9999999');
     expect(await priceFormulaUpdatePage.getFormulaInput()).to.eq('formula', 'Expected Formula value to be equals to formula');
     await priceFormulaUpdatePage.save();
     expect(await priceFormulaUpdatePage.getSaveButton().isPresent(), 'Expected save button disappear').to.be.false;

@@ -16,15 +16,15 @@ import { Table } from 'primeng/table';
   templateUrl: './price-formula.component.html'
 })
 export class PriceFormulaComponent implements OnInit, OnDestroy {
-  priceFormulas: IPriceFormula[];
-  eventSubscriber: Subscription;
+  priceFormulas?: IPriceFormula[];
+  eventSubscriber?: Subscription;
 
   private filtersDetails: { [_: string]: { matchMode?: string; flatten?: (_: any) => string; unflatten?: (_: string) => any } } = {
-    max: { matchMode: 'equals', unflatten: x => +x }
+    max: { matchMode: 'equals', unflatten: (x: string) => +x }
   };
 
   @ViewChild('priceFormulaTable', { static: true })
-  priceFormulaTable: Table;
+  priceFormulaTable!: Table;
 
   constructor(
     protected priceFormulaService: PriceFormulaService,
@@ -34,35 +34,37 @@ export class PriceFormulaComponent implements OnInit, OnDestroy {
     protected translateService: TranslateService
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loadAll();
     this.registerChangeInPriceFormulas();
   }
 
-  ngOnDestroy() {
-    this.eventManager.destroy(this.eventSubscriber);
+  ngOnDestroy(): void {
+    if (this.eventSubscriber) {
+      this.eventManager.destroy(this.eventSubscriber);
+    }
   }
 
-  loadAll() {
+  loadAll(): void {
     this.priceFormulaService
       .query()
       .pipe(
         filter((res: HttpResponse<IPriceFormula[]>) => res.ok),
-        map((res: HttpResponse<IPriceFormula[]>) => res.body)
+        map((res: HttpResponse<IPriceFormula[]>) => res.body!)
       )
       .subscribe(
-        (res: IPriceFormula[]) => {
-          this.priceFormulas = res;
+        (priceFormulas: IPriceFormula[]) => {
+          this.priceFormulas = priceFormulas;
         },
         (res: HttpErrorResponse) => this.onError(res.message)
       );
   }
 
-  filter(value, field) {
+  filter(value: any, field: string): void {
     this.priceFormulaTable.filter(value, field, computeFilterMatchMode(this.filtersDetails[field]));
   }
 
-  delete(max: number) {
+  delete(max: number): void {
     this.confirmationService.confirm({
       header: this.translateService.instant('entity.delete.title'),
       message: this.translateService.instant('primengtestApp.priceFormula.delete.question', { id: max }),
@@ -77,15 +79,15 @@ export class PriceFormulaComponent implements OnInit, OnDestroy {
     });
   }
 
-  trackId(index: number, item: IPriceFormula) {
-    return item.max;
+  trackId(index: number, item: IPriceFormula): string {
+    return '' + item.max;
   }
 
-  registerChangeInPriceFormulas() {
-    this.eventSubscriber = this.eventManager.subscribe('priceFormulaListModification', response => this.loadAll());
+  registerChangeInPriceFormulas(): void {
+    this.eventSubscriber = this.eventManager.subscribe('priceFormulaListModification', () => this.loadAll());
   }
 
-  protected onError(errorMessage: string) {
+  protected onError(errorMessage: string): void {
     this.messageService.add({ severity: 'error', summary: errorMessage });
   }
 }

@@ -1,5 +1,4 @@
-/* tslint:disable no-unused-expression */
-import { browser, by, ExpectedConditions as ec, protractor } from 'protractor';
+import { browser, by, ExpectedConditions as ec, protractor, promise } from 'protractor';
 import { NavBarPage, SignInPage } from '../../page-objects/jhi-page-objects';
 
 import { TaskComponentsPage, TaskDeleteDialog, TaskUpdatePage } from './task.page-object';
@@ -10,8 +9,8 @@ const expect = chai.expect;
 describe('Task e2e test', () => {
   let navBarPage: NavBarPage;
   let signInPage: SignInPage;
-  let taskUpdatePage: TaskUpdatePage;
   let taskComponentsPage: TaskComponentsPage;
+  let taskUpdatePage: TaskUpdatePage;
   let taskDeleteDialog: TaskDeleteDialog;
   const fileNameToUpload = 'logo-jhipster.png';
   const fileToUpload = '../../../../../../src/main/webapp/content/images/' + fileNameToUpload;

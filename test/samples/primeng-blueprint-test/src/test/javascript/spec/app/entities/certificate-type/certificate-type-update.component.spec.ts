@@ -1,8 +1,7 @@
-/* tslint:disable max-line-length */
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { HttpResponse } from '@angular/common/http';
 import { FormBuilder } from '@angular/forms';
-import { Observable, of } from 'rxjs';
+import { of } from 'rxjs';
 
 import { PrimengtestTestModule } from '../../../test.module';
 import { CertificateTypeUpdateComponent } from 'app/entities/certificate-type/certificate-type-update.component';

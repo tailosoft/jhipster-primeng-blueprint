@@ -43,7 +43,7 @@
     }
 _%>
 <%_ if (isAutoIncrement && fields[idx].partOfId) { _%>
-                <ng-container *ngIf="editForm.get('id').value">
+                <ng-container *ngIf="editForm.get('id')!.value">
 <%_ } _%>
 <%= (isAutoIncrement && fields[idx].partOfId) ? '    ' : '' -%>
                 <label jhiTranslate="<%= translationKey %>" for="field_<%= fieldName %>"<% if (fields[idx].javadoc) { if (enableTranslation) { %> [pTooltip]="'<%= i18nKeyPrefix %>.help.<%= fieldName %>' | translate"<% } else { %> pTooltip="<%= fields[idx].javadoc %>"<% } } %>><%= fieldNameHumanized %></label>

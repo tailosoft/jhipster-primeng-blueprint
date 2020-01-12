@@ -66,7 +66,7 @@ entity TaskComment {
 
 //relationship with name and without id to make sure we do not brake those
 relationship ManyToOne {
-    TaskComment{task(name) required} to Task{comment}
+    TaskComment{task(name) required} to Task
 }
 
 //ManyToMany with complex ids

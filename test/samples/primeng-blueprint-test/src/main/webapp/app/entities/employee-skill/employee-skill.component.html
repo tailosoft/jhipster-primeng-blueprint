@@ -63,17 +63,17 @@
                 <td>{{employeeSkill.level}}</td>
                 <td>
                     <span *ngFor="let task of employeeSkill.tasks; let last = last">
-                        <a class="form-control-static" [routerLink]="['../task', task?.id, 'view' ]">{{task.name}}</a>{{last ? '' : ', '}}
+                        <a class="form-control-static" [routerLink]="['/task', task?.id, 'view' ]">{{task.name}}</a>{{last ? '' : ', '}}
                     </span>
                 </td>
                 <td>
                     <div *ngIf="employeeSkill.employeeUsername">
-                        <a [routerLink]="['../employee', employeeSkill.employeeUsername , 'view' ]" >{{employeeSkill.employeeFullname}}</a>
+                        <a [routerLink]="['/employee', employeeSkill.employeeUsername , 'view' ]" >{{employeeSkill.employeeFullname}}</a>
                     </div>
                 </td>
                 <td>
                     <div *ngIf="employeeSkill.teacherUsername">
-                        <a [routerLink]="['../employee', employeeSkill.teacherUsername , 'view' ]" >{{employeeSkill.teacherFullname}}</a>
+                        <a [routerLink]="['/employee', employeeSkill.teacherUsername , 'view' ]" >{{employeeSkill.teacherFullname}}</a>
                     </div>
                 </td>
                 <td>

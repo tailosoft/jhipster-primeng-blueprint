@@ -8,17 +8,17 @@ import { IPriceFormula } from 'app/shared/model/price-formula.model';
   templateUrl: './price-formula-detail.component.html'
 })
 export class PriceFormulaDetailComponent implements OnInit {
-  priceFormula: IPriceFormula;
+  priceFormula: IPriceFormula | null = null;
 
   constructor(protected activatedRoute: ActivatedRoute) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.activatedRoute.data.subscribe(({ priceFormula }) => {
       this.priceFormula = priceFormula;
     });
   }
 
-  previousState() {
+  previousState(): void {
     window.history.back();
   }
 }

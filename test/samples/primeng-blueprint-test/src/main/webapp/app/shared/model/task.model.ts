@@ -1,13 +1,5 @@
-import { ITaskComment } from 'app/shared/model/task-comment.model';
 import { IEmployeeSkill } from 'app/shared/model/employee-skill.model';
-
-export const enum TaskType {
-  TYPE1 = 'TYPE1',
-  TYPE2 = 'TYPE2',
-  TYPE3 = 'TYPE3'
-}
-
-export const TASK_TYPE_ARRAY = [TaskType.TYPE1, TaskType.TYPE2, TaskType.TYPE3];
+import { TaskType } from 'app/shared/model/enumerations/task-type.model';
 
 export interface ITask {
   id?: number;
@@ -22,7 +14,6 @@ export interface ITask {
   attachment?: any;
   pictureContentType?: string;
   picture?: any;
-  comments?: ITaskComment[];
   employeeSkills?: IEmployeeSkill[];
 }
 
@@ -40,7 +31,6 @@ export class Task implements ITask {
     public attachment?: any,
     public pictureContentType?: string,
     public picture?: any,
-    public comments?: ITaskComment[],
     public employeeSkills?: IEmployeeSkill[]
   ) {}
 }

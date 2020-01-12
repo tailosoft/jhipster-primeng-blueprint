@@ -7,7 +7,7 @@ import { JhiEventManager } from 'ng-jhipster';
 import { MessageService } from 'primeng/api';
 import { IEmployee } from 'app/shared/model/employee.model';
 import { EmployeeService } from './employee.service';
-import { ITEMS_PER_PAGE } from 'app/shared';
+import { ITEMS_PER_PAGE } from 'app/shared/constants/pagination.constants';
 import {
   computeFilterMatchMode,
   lazyLoadEventToServerQueryParams,
@@ -23,17 +23,17 @@ import { Table } from 'primeng/table';
   templateUrl: './employee.component.html'
 })
 export class EmployeeComponent implements OnInit, OnDestroy {
-  employees: IEmployee[];
-  eventSubscriber: Subscription;
+  employees?: IEmployee[];
+  eventSubscriber?: Subscription;
 
-  totalItems: number;
-  itemsPerPage: number;
-  loading: boolean;
+  totalItems?: number;
+  itemsPerPage!: number;
+  loading!: boolean;
 
   private filtersDetails: { [_: string]: { matchMode?: string; flatten?: (_: any) => string; unflatten?: (_: string) => any } } = {};
 
   @ViewChild('employeeTable', { static: true })
-  employeeTable: Table;
+  employeeTable!: Table;
 
   constructor(
     protected employeeService: EmployeeService,
@@ -48,7 +48,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
     this.loading = true;
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.registerChangeInEmployees();
     this.activatedRoute.queryParams
       .pipe(
@@ -59,7 +59,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
       )
       .subscribe(
         (res: HttpResponse<IEmployee[]>) => {
-          this.paginateEmployees(res.body, res.headers);
+          this.paginateEmployees(res.body!, res.headers);
           this.loading = false;
         },
         (res: HttpErrorResponse) => {
@@ -69,20 +69,22 @@ export class EmployeeComponent implements OnInit, OnDestroy {
       );
   }
 
-  ngOnDestroy() {
-    this.eventManager.destroy(this.eventSubscriber);
+  ngOnDestroy(): void {
+    if (this.eventSubscriber) {
+      this.eventManager.destroy(this.eventSubscriber);
+    }
   }
 
-  onLazyLoadEvent(event: LazyLoadEvent) {
+  onLazyLoadEvent(event: LazyLoadEvent): void {
     const queryParams = lazyLoadEventToRouterQueryParams(event, this.filtersDetails);
     this.router.navigate(['/employee'], { queryParams });
   }
 
-  filter(value, field) {
+  filter(value: any, field: string): void {
     this.employeeTable.filter(value, field, computeFilterMatchMode(this.filtersDetails[field]));
   }
 
-  delete(username: string) {
+  delete(username: string): void {
     this.confirmationService.confirm({
       header: this.translateService.instant('entity.delete.title'),
       message: this.translateService.instant('primengtestApp.employee.delete.question', { id: username }),
@@ -97,22 +99,22 @@ export class EmployeeComponent implements OnInit, OnDestroy {
     });
   }
 
-  trackId(index: number, item: IEmployee) {
-    return item.username;
+  trackId(index: number, item: IEmployee): string {
+    return '' + item.username;
   }
 
-  registerChangeInEmployees() {
-    this.eventSubscriber = this.eventManager.subscribe('employeeListModification', response =>
+  registerChangeInEmployees(): void {
+    this.eventSubscriber = this.eventManager.subscribe('employeeListModification', () =>
       this.router.navigate(['/employee'], { queryParams: { r: Date.now() } })
     );
   }
 
-  protected paginateEmployees(data: IEmployee[], headers: HttpHeaders) {
-    this.totalItems = parseInt(headers.get('X-Total-Count'), 10);
+  protected paginateEmployees(data: IEmployee[], headers: HttpHeaders): void {
+    this.totalItems = Number(headers.get('X-Total-Count'));
     this.employees = data;
   }
 
-  protected onError(errorMessage: string) {
+  protected onError(errorMessage: string): void {
     this.messageService.add({ severity: 'error', summary: errorMessage });
   }
 }

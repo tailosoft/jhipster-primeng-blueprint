@@ -5,19 +5,19 @@ export class PriceFormulaComponentsPage {
   deleteButtons = element.all(by.css('jhi-price-formula div table .ui-button-danger'));
   title = element.all(by.css('jhi-price-formula div h2#page-heading span')).first();
 
-  async clickOnCreateButton(timeout?: number) {
+  async clickOnCreateButton(): Promise<void> {
     await this.createButton.click();
   }
 
-  async clickOnLastDeleteButton(timeout?: number) {
+  async clickOnLastDeleteButton(): Promise<void> {
     await this.deleteButtons.last().click();
   }
 
-  async countDeleteButtons() {
+  async countDeleteButtons(): Promise<number> {
     return this.deleteButtons.count();
   }
 
-  async getTitle() {
+  async getTitle(): Promise<string> {
     return this.title.getAttribute('jhiTranslate');
   }
 }
@@ -29,31 +29,31 @@ export class PriceFormulaUpdatePage {
   maxInput = element(by.id('field_max'));
   formulaInput = element(by.id('field_formula'));
 
-  async getPageTitle() {
+  async getPageTitle(): Promise<string> {
     return this.pageTitle.getAttribute('jhiTranslate');
   }
 
-  async setMaxInput(max) {
+  async setMaxInput(max: string): Promise<void> {
     await this.maxInput.sendKeys(max);
   }
 
-  async getMaxInput() {
+  async getMaxInput(): Promise<string> {
     return await this.maxInput.getAttribute('value');
   }
 
-  async setFormulaInput(formula) {
+  async setFormulaInput(formula: string): Promise<void> {
     await this.formulaInput.sendKeys(formula);
   }
 
-  async getFormulaInput() {
+  async getFormulaInput(): Promise<string> {
     return await this.formulaInput.getAttribute('value');
   }
 
-  async save(timeout?: number) {
+  async save(): Promise<void> {
     await this.saveButton.click();
   }
 
-  async cancel(timeout?: number) {
+  async cancel(): Promise<void> {
     await this.cancelButton.click();
   }
 
@@ -65,7 +65,7 @@ export class PriceFormulaUpdatePage {
 export class PriceFormulaDeleteDialog {
   private confirmButton = element(by.css('p-confirmdialog .ui-dialog-footer button:first-of-type'));
 
-  async clickOnConfirmButton(timeout?: number) {
+  async clickOnConfirmButton(): Promise<void> {
     await this.confirmButton.click();
   }
 }

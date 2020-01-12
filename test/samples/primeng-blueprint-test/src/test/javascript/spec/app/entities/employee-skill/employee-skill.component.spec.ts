@@ -1,4 +1,3 @@
-/* tslint:disable max-line-length */
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { of, BehaviorSubject } from 'rxjs';
 import { HttpResponse } from '@angular/common/http';
@@ -33,7 +32,7 @@ describe('Component Tests', () => {
 
       fixture = TestBed.createComponent(EmployeeSkillComponent);
       comp = fixture.componentInstance;
-      comp.employeeSkillTable = <any>new MockTable();
+      comp.employeeSkillTable = new MockTable() as any;
       service = fixture.debugElement.injector.get(EmployeeSkillService);
       mockConfirmationService = fixture.debugElement.injector.get(ConfirmationService);
       activatedRoute = fixture.debugElement.injector.get(ActivatedRoute);
@@ -55,7 +54,9 @@ describe('Component Tests', () => {
 
       // THEN
       expect(service.query).toHaveBeenCalled();
-      expect(comp.employeeSkills[0]).toEqual(jasmine.objectContaining({ name: 'AAAAAAA', employeeUsername: 'AAAAAAA' }));
+      expect(comp.employeeSkills && comp.employeeSkills[0]).toEqual(
+        jasmine.objectContaining({ name: 'AAAAAAA', employeeUsername: 'AAAAAAA' })
+      );
     }));
 
     it('should load a page', fakeAsync(() => {
@@ -71,11 +72,13 @@ describe('Component Tests', () => {
       // WHEN
       fixture.detectChanges();
       tick(100);
-      (<BehaviorSubject<any>>activatedRoute.queryParams).next({ first: 3 });
+      (activatedRoute.queryParams as BehaviorSubject<any>).next({ first: 3 });
 
       // THEN
       expect(service.query).toHaveBeenCalled();
-      expect(comp.employeeSkills[0]).toEqual(jasmine.objectContaining({ name: 'AAAAAAA', employeeUsername: 'AAAAAAA' }));
+      expect(comp.employeeSkills && comp.employeeSkills[0]).toEqual(
+        jasmine.objectContaining({ name: 'AAAAAAA', employeeUsername: 'AAAAAAA' })
+      );
     }));
 
     it('should call delete service using confirmDialog', fakeAsync(() => {

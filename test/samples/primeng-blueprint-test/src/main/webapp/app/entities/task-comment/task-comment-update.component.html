@@ -3,7 +3,7 @@
         <form name="editForm" role="form" novalidate (ngSubmit)="save()" [formGroup]="editForm">
             <h2 id="jhi-task-comment-heading" jhiTranslate="primengtestApp.taskComment.home.createOrEditLabel">Create or edit a Task Comment</h2>
             <div class="form-grid">
-                <ng-container *ngIf="editForm.get('id').value">
+                <ng-container *ngIf="editForm.get('id')!.value">
                     <label jhiTranslate="global.field.id" for="field_id">ID</label>
                     <input pInputText type="number" name="id" id="field_id" formControlName="id" readonly/>
                     <div class="validation-messages">

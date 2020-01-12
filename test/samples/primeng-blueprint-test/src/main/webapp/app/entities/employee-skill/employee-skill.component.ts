@@ -7,7 +7,7 @@ import { JhiEventManager } from 'ng-jhipster';
 import { MessageService } from 'primeng/api';
 import { IEmployeeSkill } from 'app/shared/model/employee-skill.model';
 import { EmployeeSkillService } from './employee-skill.service';
-import { ITEMS_PER_PAGE } from 'app/shared';
+import { ITEMS_PER_PAGE } from 'app/shared/constants/pagination.constants';
 import {
   computeFilterMatchMode,
   lazyLoadEventToServerQueryParams,
@@ -17,9 +17,9 @@ import {
 import { ConfirmationService, LazyLoadEvent } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
 import { ITask } from 'app/shared/model/task.model';
-import { TaskService } from 'app/entities/task';
+import { TaskService } from 'app/entities/task/task.service';
 import { IEmployee } from 'app/shared/model/employee.model';
-import { EmployeeService } from 'app/entities/employee';
+import { EmployeeService } from 'app/entities/employee/employee.service';
 import { Table } from 'primeng/table';
 
 @Component({
@@ -27,25 +27,25 @@ import { Table } from 'primeng/table';
   templateUrl: './employee-skill.component.html'
 })
 export class EmployeeSkillComponent implements OnInit, OnDestroy {
-  employeeSkills: IEmployeeSkill[];
-  eventSubscriber: Subscription;
-  taskOptions: ITask[];
-  employeeOptions: IEmployee[];
-  teacherOptions: IEmployee[];
+  employeeSkills?: IEmployeeSkill[];
+  eventSubscriber?: Subscription;
+  taskOptions: ITask[] | null = null;
+  employeeOptions: IEmployee[] | null = null;
+  teacherOptions: IEmployee[] | null = null;
 
-  totalItems: number;
-  itemsPerPage: number;
-  loading: boolean;
+  totalItems?: number;
+  itemsPerPage!: number;
+  loading!: boolean;
 
   private filtersDetails: { [_: string]: { matchMode?: string; flatten?: (_: any) => string; unflatten?: (_: string) => any } } = {
-    level: { matchMode: 'equals', unflatten: x => +x },
+    level: { matchMode: 'equals', unflatten: (x: string) => +x },
     taskId: { matchMode: 'in', flatten: a => a.join(','), unflatten: a => a.split(',').map(x => +x) },
     employeeUsername: { matchMode: 'in' },
     teacherUsername: { matchMode: 'in' }
   };
 
   @ViewChild('employeeSkillTable', { static: true })
-  employeeSkillTable: Table;
+  employeeSkillTable!: Table;
 
   constructor(
     protected employeeSkillService: EmployeeSkillService,
@@ -62,7 +62,7 @@ export class EmployeeSkillComponent implements OnInit, OnDestroy {
     this.loading = true;
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loadAllTasks();
     this.registerChangeInEmployeeSkills();
     this.activatedRoute.queryParams
@@ -76,7 +76,7 @@ export class EmployeeSkillComponent implements OnInit, OnDestroy {
       )
       .subscribe(
         (res: HttpResponse<IEmployeeSkill[]>) => {
-          this.paginateEmployeeSkills(res.body, res.headers);
+          this.paginateEmployeeSkills(res.body!, res.headers);
           this.loading = false;
         },
         (res: HttpErrorResponse) => {
@@ -86,20 +86,22 @@ export class EmployeeSkillComponent implements OnInit, OnDestroy {
       );
   }
 
-  ngOnDestroy() {
-    this.eventManager.destroy(this.eventSubscriber);
+  ngOnDestroy(): void {
+    if (this.eventSubscriber) {
+      this.eventManager.destroy(this.eventSubscriber);
+    }
   }
 
-  onLazyLoadEvent(event: LazyLoadEvent) {
+  onLazyLoadEvent(event: LazyLoadEvent): void {
     const queryParams = lazyLoadEventToRouterQueryParams(event, this.filtersDetails);
     this.router.navigate(['/employee-skill'], { queryParams });
   }
 
-  filter(value, field) {
+  filter(value: any, field: string): void {
     this.employeeSkillTable.filter(value, field, computeFilterMatchMode(this.filtersDetails[field]));
   }
 
-  delete(name: string, employeeUsername: string) {
+  delete(name: string, employeeUsername: string): void {
     this.confirmationService.confirm({
       header: this.translateService.instant('entity.delete.title'),
       message: this.translateService.instant('primengtestApp.employeeSkill.delete.question', { id: name + ',' + employeeUsername }),
@@ -114,38 +116,38 @@ export class EmployeeSkillComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadAllTasks() {
+  loadAllTasks(): void {
     this.taskService.query().subscribe(res => (this.taskOptions = res.body));
   }
 
-  onEmployeeLazyLoadEvent(event: LazyLoadEvent) {
+  onEmployeeLazyLoadEvent(event: LazyLoadEvent): void {
     this.employeeService
-      .query(lazyLoadEventToServerQueryParams(event || {}, 'fullname.contains'))
+      .query(lazyLoadEventToServerQueryParams(event, 'fullname.contains'))
       .subscribe(res => (this.employeeOptions = res.body));
   }
 
-  onTeacherLazyLoadEvent(event: LazyLoadEvent) {
+  onTeacherLazyLoadEvent(event: LazyLoadEvent): void {
     this.employeeService
-      .query(lazyLoadEventToServerQueryParams(event || {}, 'fullname.contains'))
+      .query(lazyLoadEventToServerQueryParams(event, 'fullname.contains'))
       .subscribe(res => (this.teacherOptions = res.body));
   }
 
-  trackId(index: number, item: IEmployeeSkill) {
-    return item.name + ',' + item.employeeUsername;
+  trackId(index: number, item: IEmployeeSkill): string {
+    return '' + item.name + ',' + item.employeeUsername;
   }
 
-  registerChangeInEmployeeSkills() {
-    this.eventSubscriber = this.eventManager.subscribe('employeeSkillListModification', response =>
+  registerChangeInEmployeeSkills(): void {
+    this.eventSubscriber = this.eventManager.subscribe('employeeSkillListModification', () =>
       this.router.navigate(['/employee-skill'], { queryParams: { r: Date.now() } })
     );
   }
 
-  protected paginateEmployeeSkills(data: IEmployeeSkill[], headers: HttpHeaders) {
-    this.totalItems = parseInt(headers.get('X-Total-Count'), 10);
+  protected paginateEmployeeSkills(data: IEmployeeSkill[], headers: HttpHeaders): void {
+    this.totalItems = Number(headers.get('X-Total-Count'));
     this.employeeSkills = data;
   }
 
-  protected onError(errorMessage: string) {
+  protected onError(errorMessage: string): void {
     this.messageService.add({ severity: 'error', summary: errorMessage });
   }
 }

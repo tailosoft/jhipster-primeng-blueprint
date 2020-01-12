@@ -7,6 +7,6 @@ export class MockConfirmationService extends SpyObject {
 
   constructor() {
     super(ConfirmationService);
-    this.confirmSpy = this.spy('confirm').andCallFake((confirmation: Confirmation) => confirmation.accept());
+    this.confirmSpy = this.spy('confirm').andCallFake((confirmation: Confirmation) => confirmation.accept && confirmation.accept());
   }
 }

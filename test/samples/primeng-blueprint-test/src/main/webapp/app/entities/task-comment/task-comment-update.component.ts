@@ -3,20 +3,20 @@ import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
-import { MessageService } from 'primeng/api';
-import { ITaskComment, TaskComment } from 'app/shared/model/task-comment.model';
+import { ITaskComment } from 'app/shared/model/task-comment.model';
 import { TaskCommentService } from './task-comment.service';
+import { MessageService } from 'primeng/api';
 import { ITask } from 'app/shared/model/task.model';
-import { TaskService } from 'app/entities/task';
+import { TaskService } from 'app/entities/task/task.service';
 
 @Component({
   selector: 'jhi-task-comment-update',
   templateUrl: './task-comment-update.component.html'
 })
 export class TaskCommentUpdateComponent implements OnInit {
-  isSaving: boolean;
-  taskOptions: ITask[];
-  taskFilterValue: any;
+  isSaving = false;
+  taskOptions: ITask[] | null = null;
+  taskFilterValue?: any;
 
   editForm = this.fb.group({
     id: [],
@@ -32,7 +32,7 @@ export class TaskCommentUpdateComponent implements OnInit {
     private fb: FormBuilder
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.isSaving = false;
     this.activatedRoute.data.subscribe(({ taskComment }) => {
       this.updateForm(taskComment);
@@ -40,11 +40,14 @@ export class TaskCommentUpdateComponent implements OnInit {
     this.loadAllTasks();
   }
 
-  loadAllTasks() {
-    this.taskService.query().subscribe(res => (this.taskOptions = res.body), (res: HttpErrorResponse) => this.onError(res.message));
+  loadAllTasks(): void {
+    this.taskService.query().subscribe(
+      (res: HttpResponse<ITask[]>) => (this.taskOptions = res.body),
+      (res: HttpErrorResponse) => this.onError(res.message)
+    );
   }
 
-  updateForm(taskComment: ITaskComment) {
+  updateForm(taskComment: ITaskComment | null): void {
     if (taskComment) {
       this.editForm.reset({ ...taskComment });
       this.taskFilterValue = taskComment.taskId;
@@ -53,11 +56,11 @@ export class TaskCommentUpdateComponent implements OnInit {
     }
   }
 
-  previousState() {
+  previousState(): void {
     window.history.back();
   }
 
-  save() {
+  save(): void {
     this.isSaving = true;
     const taskComment = this.editForm.value;
     if (taskComment.id !== null) {
@@ -67,19 +70,22 @@ export class TaskCommentUpdateComponent implements OnInit {
     }
   }
 
-  protected subscribeToSaveResponse(result: Observable<HttpResponse<ITaskComment>>) {
-    result.subscribe(() => this.onSaveSuccess(), () => this.onSaveError());
+  protected subscribeToSaveResponse(result: Observable<HttpResponse<ITaskComment>>): void {
+    result.subscribe(
+      () => this.onSaveSuccess(),
+      () => this.onSaveError()
+    );
   }
 
-  protected onSaveSuccess() {
+  protected onSaveSuccess(): void {
     this.isSaving = false;
     this.previousState();
   }
 
-  protected onSaveError() {
+  protected onSaveError(): void {
     this.isSaving = false;
   }
-  protected onError(errorMessage: string) {
+  protected onError(errorMessage: string): void {
     this.messageService.add({ severity: 'error', summary: errorMessage });
   }
 }

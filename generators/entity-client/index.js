@@ -25,14 +25,14 @@ module.exports = class extends EntityClientGenerator {
     constructor(args, opts) {
         super(args, Object.assign({ fromBlueprint: true }, opts)); // fromBlueprint variable is important
 
-        //TODO issue to report to jhipster
+        // TODO issue to report to jhipster
         // super overrides this this.options with this.options.context.options losing the refernce of options
         // thankfully we can retreive it from the opts param
         // MAYBE we should do another check for blueprint in the if below
         const jhContext = (this.jhipsterContext = opts.jhipsterContext);
 
         // TODO check with jhispter team what this is supposed to do:
-        //- in case of EntityClientGenerator options doesn't contain jhipsterContext
+        // - in case of EntityClientGenerator options doesn't contain jhipsterContext
 
         if (!jhContext) {
             this.error(
@@ -92,9 +92,11 @@ module.exports = class extends EntityClientGenerator {
                     const otherEntityData = this._getEntityJson(relationship.otherEntityName);
                     relationship.pagination = otherEntityData.pagination;
                     relationship.jpaMetamodelFiltering = otherEntityData.jpaMetamodelFiltering;
-                    if (relationship.relationshipType === 'many-to-one'
-                        || (relationship.relationshipType === 'one-to-one' && relationship.ownerSide === true)
-                        || (relationship.relationshipType === 'many-to-many' && relationship.ownerSide === true)) {
+                    if (
+                        relationship.relationshipType === 'many-to-one' ||
+                        (relationship.relationshipType === 'one-to-one' && relationship.ownerSide === true) ||
+                        (relationship.relationshipType === 'many-to-many' && relationship.ownerSide === true)
+                    ) {
                         relationship.inList = true;
                         relationship.inForm = true;
                     }
@@ -139,7 +141,7 @@ module.exports = class extends EntityClientGenerator {
         const phaseFromJHipster = super._writing();
         const customPhaseSteps = {
             writeClientFiles() {
-                //override the writeClientFiles method from the _writing phase of JHipster
+                // override the writeClientFiles method from the _writing phase of JHipster
                 writeFiles().writeClientFiles.call(this);
             }
         };
@@ -223,10 +225,10 @@ module.exports = class extends EntityClientGenerator {
         context.fields.forEach(field => {
             const fieldName = field.fieldName;
             if (['byte[]', 'ByteBuffer'].includes(field.fieldType) && field.fieldTypeBlobContent !== 'text') {
-                context.tsVariables.push({name: `${fieldName}ContentType`, type: 'string', tsTestValue: "'image/png'"});
+                context.tsVariables.push({ name: `${fieldName}ContentType`, type: 'string', tsTestValue: "'image/png'" });
             }
-            const res = {name: fieldName, type: field.tsType, tsTestValue: field.tsTestValue};
-            if(field.partOfId) {
+            const res = { name: fieldName, type: field.tsType, tsTestValue: field.tsTestValue };
+            if (field.partOfId) {
                 context.tsVariables.splice(lastPartOfIdIdx, 0, res);
                 lastPartOfIdIdx++;
             } else {
@@ -241,11 +243,11 @@ module.exports = class extends EntityClientGenerator {
             if (relationshipType === 'one-to-many' || relationshipType === 'many-to-many') {
                 fieldType = `I${relationship.otherEntityAngularName}[]`;
                 fieldName = relationship.relationshipFieldNamePlural;
-                context.tsVariables.push({name: fieldName, type: fieldType, tsTestValue: 'undefined'});
+                context.tsVariables.push({ name: fieldName, type: fieldType, tsTestValue: 'undefined' });
             } else if (context.dto === 'no') {
                 fieldType = `I${relationship.otherEntityAngularName}`;
                 fieldName = relationship.relationshipFieldName;
-                context.tsVariables.push({name: fieldName, type: fieldType, tsTestValue: 'undefined'});
+                context.tsVariables.push({ name: fieldName, type: fieldType, tsTestValue: 'undefined' });
             } else {
                 const relationshipFieldName = relationship.relationshipFieldName;
                 const relationshipFieldNamePlural = relationship.relationshipFieldNamePlural;
@@ -256,28 +258,32 @@ module.exports = class extends EntityClientGenerator {
                 if (relationshipType === 'many-to-many' && ownerSide === true) {
                     fieldType = `I${otherEntityFieldCapitalized}[]`;
                     fieldName = relationshipFieldNamePlural;
-                    context.tsVariables.push({name: fieldName, type: fieldType, tsTestValue: 'undefined'});
+                    context.tsVariables.push({ name: fieldName, type: fieldType, tsTestValue: 'undefined' });
                 } else {
                     if (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true)) {
-                        if (otherEntityFieldCapitalized !== 'Id' && otherEntityFieldCapitalized !== ''  && !relationship.pkData.some(pk => relationship.otherEntityField === pk.name)) {
-                            //otherEntityField used for display most probably string
+                        if (
+                            otherEntityFieldCapitalized !== 'Id' &&
+                            otherEntityFieldCapitalized !== '' &&
+                            !relationship.pkData.some(pk => relationship.otherEntityField === pk.name)
+                        ) {
+                            // otherEntityField used for display most probably string
                             fieldType = 'string';
                             fieldName = `${relationshipFieldName}${otherEntityFieldCapitalized}`;
-                            context.tsVariables.push({name: fieldName, type: fieldType, tsTestValue: "'AAAAAAA'"});
+                            context.tsVariables.push({ name: fieldName, type: fieldType, tsTestValue: "'AAAAAAA'" });
                         }
                     }
                     relationship.pkData.forEach(pk => {
                         fieldName = `${relationship.relationshipFieldName}${pk.nameCapitalized}`;
-                        const res = {name: fieldName, type: pk.field.tsType, tsTestValue: pk.field.tsTestValue};
-                        if(relationship.partOfId) {
+                        const res = { name: fieldName, type: pk.field.tsType, tsTestValue: pk.field.tsTestValue };
+                        if (relationship.partOfId) {
                             context.tsVariables.splice(lastPartOfIdIdx, 0, res);
                             lastPartOfIdIdx++;
                         } else {
                             context.tsVariables.push(res);
                         }
                         fieldName = `${pk.formName}${_.upperFirst(pk.otherEntityField)}`;
-                        if(!context.tsVariables.some(x => x.name === fieldName)) {
-                            context.tsVariables.push({name: fieldName, type: 'string', tsTestValue: "'AAAAAAA'"});
+                        if (!context.tsVariables.some(x => x.name === fieldName)) {
+                            context.tsVariables.push({ name: fieldName, type: 'string', tsTestValue: "'AAAAAAA'" });
                         }
                     });
                 }
@@ -335,29 +341,23 @@ module.exports = class extends EntityClientGenerator {
                 entityJson.clientRootFolder = entityJson.microserviceName;
             }
         }
-        if(entityJson.microserviceName && !entityJson.clientRootFolder) {
+        if (entityJson.microserviceName && !entityJson.clientRootFolder) {
             entityJson.clientRootFolder = entityJson.microserviceName;
         }
         if (_.upperFirst(entityJson.name) !== 'User') {
             entityJson.moduleName = `${entityJson.angularXAppName + _.upperFirst(entityJson.name)}Module`;
             entityJson.fileName = _.kebabCase(entityJson.angularName);
-            if (
-                entityJson.skipUiGrouping ||
-                entityJson.clientRootFolder === '' ||
-                entityJson.clientRootFolder === undefined
-            ) {
+            if (entityJson.skipUiGrouping || entityJson.clientRootFolder === '' || entityJson.clientRootFolder === undefined) {
                 entityJson.clientRootFolder = '';
             }
             if (entityJson.clientRootFolder) {
-                entityJson.modulePath = `${
-                    entityJson.parentPathAddition ? `${entityJson.parentPathAddition}/` : ''
-                    }${entityJson.clientRootFolder}/${entityJson.fileName}`;
+                entityJson.modulePath = `${entityJson.parentPathAddition ? `${entityJson.parentPathAddition}/` : ''}${
+                    entityJson.clientRootFolder
+                }/${entityJson.fileName}`;
                 entityJson.modelName = `${entityJson.clientRootFolder}/${entityJson.filename}`;
                 entityJson.path = `${entityJson.clientRootFolder}/${entityJson.filename}`;
             } else {
-                entityJson.modulePath = `${
-                    entityJson.parentPathAddition ? `${entityJson.parentPathAddition}/` : ''
-                    }${entityJson.filename}`;
+                entityJson.modulePath = `${entityJson.parentPathAddition ? `${entityJson.parentPathAddition}/` : ''}${entityJson.filename}`;
                 entityJson.modelName = entityJson.fileName;
                 entityJson.path = entityJson.fileName;
             }
@@ -372,7 +372,7 @@ module.exports = class extends EntityClientGenerator {
     _populateRelationshipPkData(relationship, context) {
         // cloning each pk in pkData to be able to modify it (add relationshipName prefix...)
         relationship.pkData = this._loadRelationshipPkData(relationship.otherEntityName, context).map(pk => ({ ...pk }));
-        if(!relationship.otherEntityField || relationship.otherEntityField === 'id') {
+        if (!relationship.otherEntityField || relationship.otherEntityField === 'id') {
             relationship.otherEntityField = relationship.pkData[0].name;
         }
         relationship.pkData.forEach(pk => {

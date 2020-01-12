@@ -5,19 +5,19 @@ export class EmployeeSkillComponentsPage {
   deleteButtons = element.all(by.css('jhi-employee-skill div table .ui-button-danger'));
   title = element.all(by.css('jhi-employee-skill div h2#page-heading span')).first();
 
-  async clickOnCreateButton(timeout?: number) {
+  async clickOnCreateButton(): Promise<void> {
     await this.createButton.click();
   }
 
-  async clickOnLastDeleteButton(timeout?: number) {
+  async clickOnLastDeleteButton(): Promise<void> {
     await this.deleteButtons.last().click();
   }
 
-  async countDeleteButtons() {
+  async countDeleteButtons(): Promise<number> {
     return this.deleteButtons.count();
   }
 
-  async getTitle() {
+  async getTitle(): Promise<string> {
     return this.title.getAttribute('jhiTranslate');
   }
 }
@@ -32,27 +32,27 @@ export class EmployeeSkillUpdatePage {
   employeeSelect = element(by.id('field_employee'));
   teacherSelect = element(by.id('field_teacher'));
 
-  async getPageTitle() {
+  async getPageTitle(): Promise<string> {
     return this.pageTitle.getAttribute('jhiTranslate');
   }
 
-  async setNameInput(name) {
+  async setNameInput(name: string): Promise<void> {
     await this.nameInput.sendKeys(name);
   }
 
-  async getNameInput() {
+  async getNameInput(): Promise<string> {
     return await this.nameInput.getAttribute('value');
   }
 
-  async setLevelInput(level) {
+  async setLevelInput(level: string): Promise<void> {
     await this.levelInput.sendKeys(level);
   }
 
-  async getLevelInput() {
+  async getLevelInput(): Promise<string> {
     return await this.levelInput.getAttribute('value');
   }
 
-  async taskSelectLastOption(timeout?: number) {
+  async taskSelectLastOption(): Promise<void> {
     await this.taskSelect.click();
     await this.taskSelect
       .all(by.tagName('.ui-multiselect-item'))
@@ -66,11 +66,11 @@ export class EmployeeSkillUpdatePage {
     return this.taskSelect;
   }
 
-  async getTaskSelectedOption() {
+  async getTaskSelectedOption(): Promise<string> {
     return await this.taskSelect.element(by.css('.ui-multiselect-label')).getText();
   }
 
-  async employeeSelectLastOption(timeout?: number) {
+  async employeeSelectLastOption(): Promise<void> {
     await this.employeeSelect.click();
     await this.employeeSelect
       .all(by.tagName('.ui-dropdown-item'))
@@ -83,11 +83,11 @@ export class EmployeeSkillUpdatePage {
     return this.employeeSelect;
   }
 
-  async getEmployeeSelectedOption() {
+  async getEmployeeSelectedOption(): Promise<string> {
     return await this.employeeSelect.element(by.css('.ui-dropdown-label')).getText();
   }
 
-  async teacherSelectLastOption(timeout?: number) {
+  async teacherSelectLastOption(): Promise<void> {
     await this.teacherSelect.click();
     await this.teacherSelect
       .all(by.tagName('.ui-dropdown-item'))
@@ -100,15 +100,15 @@ export class EmployeeSkillUpdatePage {
     return this.teacherSelect;
   }
 
-  async getTeacherSelectedOption() {
+  async getTeacherSelectedOption(): Promise<string> {
     return await this.teacherSelect.element(by.css('.ui-dropdown-label')).getText();
   }
 
-  async save(timeout?: number) {
+  async save(): Promise<void> {
     await this.saveButton.click();
   }
 
-  async cancel(timeout?: number) {
+  async cancel(): Promise<void> {
     await this.cancelButton.click();
   }
 
@@ -120,7 +120,7 @@ export class EmployeeSkillUpdatePage {
 export class EmployeeSkillDeleteDialog {
   private confirmButton = element(by.css('p-confirmdialog .ui-dialog-footer button:first-of-type'));
 
-  async clickOnConfirmButton(timeout?: number) {
+  async clickOnConfirmButton(): Promise<void> {
     await this.confirmButton.click();
   }
 }

@@ -1,8 +1,5 @@
-/* tslint:disable max-line-length */
 import { TestBed, getTestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { HttpClient, HttpResponse } from '@angular/common/http';
-import { of } from 'rxjs';
 import { take, map } from 'rxjs/operators';
 import { DATE_FORMAT } from 'app/shared/constants/input.constants';
 import { DatePipe } from '@angular/common';
@@ -15,7 +12,7 @@ describe('Service Tests', () => {
     let service: EmployeeSkillCertificateService;
     let httpMock: HttpTestingController;
     let elemDefault: IEmployeeSkillCertificate;
-    let expectedResult;
+    let expectedResult: IEmployeeSkillCertificate | IEmployeeSkillCertificate[] | boolean | null;
     let currentDate: Date;
     let datePipe: DatePipe;
     beforeEach(() => {
@@ -23,7 +20,7 @@ describe('Service Tests', () => {
         imports: [HttpClientTestingModule],
         providers: [DatePipe]
       });
-      expectedResult = {};
+      expectedResult = null;
       injector = getTestBed();
       service = injector.get(EmployeeSkillCertificateService);
       httpMock = injector.get(HttpTestingController);
@@ -34,7 +31,7 @@ describe('Service Tests', () => {
     });
 
     describe('Service methods', () => {
-      it('should find an element', async () => {
+      it('should find an element', () => {
         const returnedFromService = Object.assign(
           {
             date: datePipe.transform(currentDate, DATE_FORMAT)
@@ -44,14 +41,14 @@ describe('Service Tests', () => {
         service
           .find(123, 'AAAAAAA', 'AAAAAAA')
           .pipe(take(1))
-          .subscribe(resp => (expectedResult = resp));
+          .subscribe(resp => (expectedResult = resp.body));
 
         const req = httpMock.expectOne({ method: 'GET' });
         req.flush(returnedFromService);
-        expect(expectedResult).toMatchObject({ body: elemDefault });
+        expect(expectedResult).toMatchObject(elemDefault);
       });
 
-      it('should create a EmployeeSkillCertificate', async () => {
+      it('should create a EmployeeSkillCertificate', () => {
         const returnedFromService = Object.assign(
           {
             id: 0,
@@ -66,15 +63,15 @@ describe('Service Tests', () => {
           returnedFromService
         );
         service
-          .create(new EmployeeSkillCertificate(null))
+          .create(new EmployeeSkillCertificate())
           .pipe(take(1))
-          .subscribe(resp => (expectedResult = resp));
+          .subscribe(resp => (expectedResult = resp.body));
         const req = httpMock.expectOne({ method: 'POST' });
         req.flush(returnedFromService);
-        expect(expectedResult).toMatchObject({ body: expected });
+        expect(expectedResult).toMatchObject(expected);
       });
 
-      it('should update a EmployeeSkillCertificate', async () => {
+      it('should update a EmployeeSkillCertificate', () => {
         const returnedFromService = Object.assign(
           {
             grade: 1,
@@ -92,13 +89,13 @@ describe('Service Tests', () => {
         service
           .update(expected)
           .pipe(take(1))
-          .subscribe(resp => (expectedResult = resp));
+          .subscribe(resp => (expectedResult = resp.body));
         const req = httpMock.expectOne({ method: 'PUT' });
         req.flush(returnedFromService);
-        expect(expectedResult).toMatchObject({ body: expected });
+        expect(expectedResult).toMatchObject(expected);
       });
 
-      it('should return a list of EmployeeSkillCertificate', async () => {
+      it('should return a list of EmployeeSkillCertificate', () => {
         const returnedFromService = Object.assign(
           {
             grade: 1,
@@ -113,7 +110,7 @@ describe('Service Tests', () => {
           returnedFromService
         );
         service
-          .query(expected)
+          .query()
           .pipe(
             take(1),
             map(resp => resp.body)
@@ -125,8 +122,8 @@ describe('Service Tests', () => {
         expect(expectedResult).toContainEqual(expected);
       });
 
-      it('should delete a EmployeeSkillCertificate', async () => {
-        const rxPromise = service.delete(123, 'AAAAAAA', 'AAAAAAA').subscribe(resp => (expectedResult = resp.ok));
+      it('should delete a EmployeeSkillCertificate', () => {
+        service.delete(123, 'AAAAAAA', 'AAAAAAA').subscribe(resp => (expectedResult = resp.ok));
 
         const req = httpMock.expectOne({ method: 'DELETE' });
         req.flush({ status: 200 });

@@ -5,19 +5,19 @@ export class CertificateTypeComponentsPage {
   deleteButtons = element.all(by.css('jhi-certificate-type div table .ui-button-danger'));
   title = element.all(by.css('jhi-certificate-type div h2#page-heading span')).first();
 
-  async clickOnCreateButton(timeout?: number) {
+  async clickOnCreateButton(): Promise<void> {
     await this.createButton.click();
   }
 
-  async clickOnLastDeleteButton(timeout?: number) {
+  async clickOnLastDeleteButton(): Promise<void> {
     await this.deleteButtons.last().click();
   }
 
-  async countDeleteButtons() {
+  async countDeleteButtons(): Promise<number> {
     return this.deleteButtons.count();
   }
 
-  async getTitle() {
+  async getTitle(): Promise<string> {
     return this.title.getAttribute('jhiTranslate');
   }
 }
@@ -29,31 +29,31 @@ export class CertificateTypeUpdatePage {
   idInput = element(by.id('field_id'));
   nameInput = element(by.id('field_name'));
 
-  async getPageTitle() {
+  async getPageTitle(): Promise<string> {
     return this.pageTitle.getAttribute('jhiTranslate');
   }
 
-  async setInput(id) {
+  async setInput(id: string): Promise<void> {
     await this.idInput.sendKeys(id);
   }
 
-  async getInput() {
+  async getInput(): Promise<string> {
     return await this.idInput.getAttribute('value');
   }
 
-  async setNameInput(name) {
+  async setNameInput(name: string): Promise<void> {
     await this.nameInput.sendKeys(name);
   }
 
-  async getNameInput() {
+  async getNameInput(): Promise<string> {
     return await this.nameInput.getAttribute('value');
   }
 
-  async save(timeout?: number) {
+  async save(): Promise<void> {
     await this.saveButton.click();
   }
 
-  async cancel(timeout?: number) {
+  async cancel(): Promise<void> {
     await this.cancelButton.click();
   }
 
@@ -65,7 +65,7 @@ export class CertificateTypeUpdatePage {
 export class CertificateTypeDeleteDialog {
   private confirmButton = element(by.css('p-confirmdialog .ui-dialog-footer button:first-of-type'));
 
-  async clickOnConfirmButton(timeout?: number) {
+  async clickOnConfirmButton(): Promise<void> {
     await this.confirmButton.click();
   }
 }

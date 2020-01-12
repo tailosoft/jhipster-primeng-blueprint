@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
+import { HttpResponse } from '@angular/common/http';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
-import { IEmployee, Employee } from 'app/shared/model/employee.model';
+import { IEmployee } from 'app/shared/model/employee.model';
 import { EmployeeService } from './employee.service';
 
 @Component({
@@ -11,8 +11,8 @@ import { EmployeeService } from './employee.service';
   templateUrl: './employee-update.component.html'
 })
 export class EmployeeUpdateComponent implements OnInit {
-  edit: boolean;
-  isSaving: boolean;
+  edit = false;
+  isSaving = false;
 
   editForm = this.fb.group({
     username: [null, [Validators.required]],
@@ -21,14 +21,14 @@ export class EmployeeUpdateComponent implements OnInit {
 
   constructor(protected employeeService: EmployeeService, protected activatedRoute: ActivatedRoute, private fb: FormBuilder) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.isSaving = false;
     this.activatedRoute.data.subscribe(({ employee }) => {
       this.updateForm(employee);
     });
   }
 
-  updateForm(employee: IEmployee) {
+  updateForm(employee: IEmployee | null): void {
     if (employee) {
       this.edit = true;
       this.editForm.reset({ ...employee });
@@ -37,11 +37,11 @@ export class EmployeeUpdateComponent implements OnInit {
     }
   }
 
-  previousState() {
+  previousState(): void {
     window.history.back();
   }
 
-  save() {
+  save(): void {
     this.isSaving = true;
     const employee = this.editForm.value;
     if (this.edit) {
@@ -51,16 +51,19 @@ export class EmployeeUpdateComponent implements OnInit {
     }
   }
 
-  protected subscribeToSaveResponse(result: Observable<HttpResponse<IEmployee>>) {
-    result.subscribe(() => this.onSaveSuccess(), () => this.onSaveError());
+  protected subscribeToSaveResponse(result: Observable<HttpResponse<IEmployee>>): void {
+    result.subscribe(
+      () => this.onSaveSuccess(),
+      () => this.onSaveError()
+    );
   }
 
-  protected onSaveSuccess() {
+  protected onSaveSuccess(): void {
     this.isSaving = false;
     this.previousState();
   }
 
-  protected onSaveError() {
+  protected onSaveError(): void {
     this.isSaving = false;
   }
 }

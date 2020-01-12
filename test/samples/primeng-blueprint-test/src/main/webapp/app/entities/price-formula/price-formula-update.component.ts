@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
+import { HttpResponse } from '@angular/common/http';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
-import { IPriceFormula, PriceFormula } from 'app/shared/model/price-formula.model';
+import { IPriceFormula } from 'app/shared/model/price-formula.model';
 import { PriceFormulaService } from './price-formula.service';
 
 @Component({
@@ -11,8 +11,8 @@ import { PriceFormulaService } from './price-formula.service';
   templateUrl: './price-formula-update.component.html'
 })
 export class PriceFormulaUpdateComponent implements OnInit {
-  edit: boolean;
-  isSaving: boolean;
+  edit = false;
+  isSaving = false;
 
   editForm = this.fb.group({
     max: [null, [Validators.required]],
@@ -21,14 +21,14 @@ export class PriceFormulaUpdateComponent implements OnInit {
 
   constructor(protected priceFormulaService: PriceFormulaService, protected activatedRoute: ActivatedRoute, private fb: FormBuilder) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.isSaving = false;
     this.activatedRoute.data.subscribe(({ priceFormula }) => {
       this.updateForm(priceFormula);
     });
   }
 
-  updateForm(priceFormula: IPriceFormula) {
+  updateForm(priceFormula: IPriceFormula | null): void {
     if (priceFormula) {
       this.edit = true;
       this.editForm.reset({ ...priceFormula });
@@ -37,11 +37,11 @@ export class PriceFormulaUpdateComponent implements OnInit {
     }
   }
 
-  previousState() {
+  previousState(): void {
     window.history.back();
   }
 
-  save() {
+  save(): void {
     this.isSaving = true;
     const priceFormula = this.editForm.value;
     if (this.edit) {
@@ -51,16 +51,19 @@ export class PriceFormulaUpdateComponent implements OnInit {
     }
   }
 
-  protected subscribeToSaveResponse(result: Observable<HttpResponse<IPriceFormula>>) {
-    result.subscribe(() => this.onSaveSuccess(), () => this.onSaveError());
+  protected subscribeToSaveResponse(result: Observable<HttpResponse<IPriceFormula>>): void {
+    result.subscribe(
+      () => this.onSaveSuccess(),
+      () => this.onSaveError()
+    );
   }
 
-  protected onSaveSuccess() {
+  protected onSaveSuccess(): void {
     this.isSaving = false;
     this.previousState();
   }
 
-  protected onSaveError() {
+  protected onSaveError(): void {
     this.isSaving = false;
   }
 }

@@ -28,8 +28,8 @@ relationships.filter(r => r.inForm).forEach(r => {
     });
 })
 _%>
-import { Component, OnInit<% if (fieldsContainImageBlob) { %>, ElementRef<% } %> } from '@angular/core';
-import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
+import { HttpResponse<% if(relationships.filter(r => r.inForm).length) { %>, HttpErrorResponse<% } %> } from '@angular/common/http';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -40,22 +40,23 @@ import { LazyLoadEvent } from 'primeng/api';
 <%_ if (fieldsContainBlob) { _%>
 import { JhiDataUtils } from 'ng-jhipster';
 <%_ } _%>
+import { I<%= entityAngularName %> } from 'app/shared/model/<%= entityModelFileName %>.model';
+<%_
+if ( jpaMetamodelFiltering) {
+    const enumOptions = [];
+    fields.forEach(field => {
+        if (field.fieldIsEnum && !enumOptions.includes(field.fieldType)) {
+            enumOptions.push(field.fieldType);
+        }
+    });
+    enumOptions.forEach(e => { _%>
+import { <%= e %>, <%= _.snakeCase(e).toUpperCase() %>_ARRAY } from 'app/shared/model/enumerations/<%= _.kebabCase(e) %>.model';
+    <%_ }); _%>
+<%_ } _%>
+import { <%= entityAngularName %>Service } from './<%= entityFileName %>.service';
 <%_ if (hasRelationshipQuery || fieldsContainBlob) { _%>
 import { MessageService } from 'primeng/api';
 <%_ } _%>
-<%_
-let enumOptions = '';
-const enumsAlreadyDeclared = [];
-fields.forEach(field => {
-    if (field.fieldIsEnum && !enumsAlreadyDeclared.includes(field.fieldType)) {
-        enumsAlreadyDeclared.push(field.fieldType);
-        field.fieldTypeUnderscoreCapitalized = _.snakeCase(field.fieldType).toUpperCase();
-        enumOptions = fields.filter(f => f.fieldIsEnum).map(f => f.fieldTypeUnderscoreCapitalized + '_ARRAY').join(', ');
-    }
-});
-_%>
-import { I<%= entityAngularName %>, <%= entityAngularName %><%= enumOptions ? ', ' + enumOptions : '' %> } from 'app/shared/model/<%= entityModelFileName %>.model';
-import { <%= entityAngularName %>Service } from './<%= entityFileName %>.service';
 <%_
 const importedEntities = [];
 relationships.filter(r => r.inForm).forEach(r => {
@@ -63,10 +64,11 @@ relationships.filter(r => r.inForm).forEach(r => {
         if(!importedEntities.includes(pk.entity.angularName)) {
             importedEntities.push(pk.entity.angularName);
             if(pk.entity.angularName === 'User') { _%>
-import { IUser, UserService } from 'app/core';
+import { IUser } from 'app/core/user/user.model';
+import { UserService } from 'app/core/user/user.service';
             <%_ } else { _%>
 import { I<%= pk.entity.angularName %> } from 'app/shared/model/<%= pk.entity.modelName %>.model';
-import { <%= pk.entity.angularName%>Service } from 'app/entities/<%= pk.entity.path %>';
+import { <%= pk.entity.angularName%>Service } from 'app/entities/<%= pk.entity.path %>/<%= pk.entity.fileName %>.service';
 <%_
             }
         }
@@ -80,24 +82,24 @@ import { <%= pk.entity.angularName%>Service } from 'app/entities/<%= pk.entity.p
 export class <%= entityAngularName %>UpdateComponent implements OnInit {
 
 <%_ if(!isAutoIncrement){ _%>
-    edit: boolean;
+    edit = false;
 <%_} _%>
-    isSaving: boolean;
+    isSaving = false;
 <%_ for (idx in relationships) { _%>
     <%_ if (relationships[idx].inForm) { _%>
         <%_ relationships[idx].pkData.forEach(pk => { _%>
-    <%= pk.formName %>Options: I<%= _.upperFirst(pk.entityName) %>[];
+    <%= pk.formName %>Options: I<%= _.upperFirst(pk.entityName) %>[] | null = null;
             <%_ if (relationships[idx].relationshipType === 'many-to-one' || (relationships[idx].relationshipType === 'one-to-one' && relationships[idx].ownerSide === true)) { _%>
-    <%= pk.formName %>FilterValue: any;
+    <%= pk.formName %>FilterValue?: any;
             <%_ } _%>
         <%_ }) _%>
     <%_ } _%>
 <%_ } _%>
 <%_ for ( idx in fields ) { _%>
     <%_ if(fields[idx].fieldIsEnum) { _%>
-    <%= fields[idx].fieldName %>Options = <%= fields[idx].fieldTypeUnderscoreCapitalized %>_ARRAY.map(s => ({ label: s.toString(), value: s }));
+    <%= fields[idx].fieldName %>Options = <%= _.snakeCase(fields[idx].fieldType).toUpperCase() %>_ARRAY.map((s: <%=fields[idx].fieldType%>) => ({ label: s.toString(), value: s }));
     <%_ } else if (['byte[]', 'ByteBuffer'].includes(fields[idx].fieldType) && fields[idx].fieldTypeBlobContent !== 'text') { _%>
-    <%= fields[idx].fieldName %>File: File;
+    <%= fields[idx].fieldName %>File?: File;
     <%_ } _%>
 <%_ } _%>
 
@@ -164,7 +166,7 @@ relationships.filter(r => r.inForm).forEach(r => {
     ) {
     }
 
-    ngOnInit() {
+    ngOnInit(): void {
         this.isSaving = false;
         this.activatedRoute.data.subscribe(({<%= entityInstance %>}) => {
             this.updateForm(<%= entityInstance %>);
@@ -183,25 +185,25 @@ relationships.filter(r => r.inForm).forEach(r => {
         <%_ relationships[idx].pkData.forEach(pk => { _%>
             <%_ if (relationships[idx].pagination == 'no') { _%>
 
-    loadAll<%= _.upperFirst(pluralize(pk.formName)) %>() {
+    loadAll<%= _.upperFirst(pluralize(pk.formName)) %>(): void {
                 <%_ if (relationships[idx].relationshipType === 'one-to-one' && relationships[idx].ownerSide === true && relationships[idx].jpaMetamodelFiltering) { _%>
         //TODO change this to load only unspecified + add selectedTo options if any
                 <%_ } _%>
         this.<%= _.lowerFirst(pk.entityName) %>Service.query()
-            .subscribe(res => this.<%= pk.formName %>Options = res.body, (res: HttpErrorResponse) => this.onError(res.message));
+            .subscribe((res: HttpResponse<I<%= pk.entityName %>[]>) => this.<%= pk.formName %>Options = res.body, (res: HttpErrorResponse) => this.onError(res.message));
     }
             <%_ } else { _%>
 
-    on<%= _.upperFirst(pk.formName) %>LazyLoadEvent(event: LazyLoadEvent) {
-        this.<%= _.lowerFirst(pk.entityName) %>Service.query(lazyLoadEventToServerQueryParams(event || {}, '<%= pk.otherEntityField %>.contains'))
-            .subscribe(res => this.<%= pk.formName %>Options = res.body, (res: HttpErrorResponse) => this.onError(res.message));
+    on<%= _.upperFirst(pk.formName) %>LazyLoadEvent(event: LazyLoadEvent): void {
+        this.<%= _.lowerFirst(pk.entityName) %>Service.query(lazyLoadEventToServerQueryParams(event, '<%= pk.otherEntityField %>.contains'))
+            .subscribe((res: HttpResponse<I<%= pk.entityName %>[]>) => this.<%= pk.formName %>Options = res.body, (res: HttpErrorResponse) => this.onError(res.message));
     }
             <%_ } _%>
         <%_ }) _%>
     <%_ } _%>
 <%_ } _%>
 
-    updateForm(<%= entityInstance %>: I<%= entityAngularName %>) {
+    updateForm(<%= entityInstance %>: I<%= entityAngularName %> | null): void {
         if (<%= entityInstance %>) {
 <%_ if(!isAutoIncrement) {_%>
             this.edit = true;
@@ -215,7 +217,7 @@ _%>
     <%_ if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent !== 'text') { _%>
             if (<%= entityInstance %>.<%= fieldName %>) {
                 fetch(`data:${<%= entityInstance %>.<%= fieldName %>ContentType};base64,${<%= entityInstance %>.<%= fieldName %>}`)
-                    .then(res => res.blob())
+                    .then((res: any) => res.blob())
                     .then(blob => {
                         this.<%= fieldName %>File = new File([blob], '', {type: <%= entityInstance %>.<%= fieldName %>ContentType});
                     });
@@ -241,9 +243,9 @@ _%>
     }
 
 <%_ if (fieldsContainBlob) { _%>
-    onFileSelect(event, field) {
+    onFileSelect(event: {event: Event, files: File[]}, field: string): void {
         const file = event.files[0];
-        this.dataUtils.toBase64(file, base64Data => {
+        this.dataUtils.toBase64(file, (base64Data: string) => {
             this.editForm.patchValue({
                 [field]: base64Data,
                 [field + 'ContentType']: file.type
@@ -251,7 +253,7 @@ _%>
         });
     }
 
-    onFileRemove(event, field) {
+    onFileRemove(event: {event: Event, files: File[]}, field: string): void {
         this.editForm.patchValue({
             [field]: null,
             [field + 'ContentType']: null
@@ -259,11 +261,11 @@ _%>
     }
 
 <%_ } _%>
-    previousState() {
+    previousState(): void {
         window.history.back();
     }
 
-    save() {
+    save(): void {
         this.isSaving = true;
         const <%= entityInstance %> = this.editForm.value;
 <%_ if(isAutoIncrement){ _%>
@@ -279,21 +281,21 @@ _%>
         }
     }
 
-    protected subscribeToSaveResponse(result: Observable<HttpResponse<I<%= entityAngularName %>>>) {
+    protected subscribeToSaveResponse(result: Observable<HttpResponse<I<%= entityAngularName %>>>): void {
         result.subscribe(() =>
             this.onSaveSuccess(), () => this.onSaveError());
     }
 
-    protected onSaveSuccess() {
+    protected onSaveSuccess(): void {
         this.isSaving = false;
         this.previousState();
     }
 
-    protected onSaveError() {
+    protected onSaveError(): void {
         this.isSaving = false;
     }
 <%_ if (fieldsContainBlob || hasRelationshipQuery) { _%>
-    protected onError(errorMessage: string) {
+    protected onError(errorMessage: string): void {
         this.messageService.add({severity:'error', summary: errorMessage});
     }
 <%_ } _%>

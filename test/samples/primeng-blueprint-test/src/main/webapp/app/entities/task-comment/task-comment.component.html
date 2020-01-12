@@ -45,7 +45,7 @@
                 <td>{{taskComment.value}}</td>
                 <td>
                     <div *ngIf="taskComment.taskId">
-                        <a [routerLink]="['../task', taskComment.taskId , 'view' ]" >{{taskComment.taskName}}</a>
+                        <a [routerLink]="['/task', taskComment.taskId , 'view' ]" >{{taskComment.taskName}}</a>
                     </div>
                 </td>
                 <td>

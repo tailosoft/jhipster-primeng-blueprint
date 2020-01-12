@@ -8,17 +8,17 @@ import { ITaskComment } from 'app/shared/model/task-comment.model';
   templateUrl: './task-comment-detail.component.html'
 })
 export class TaskCommentDetailComponent implements OnInit {
-  taskComment: ITaskComment;
+  taskComment: ITaskComment | null = null;
 
   constructor(protected activatedRoute: ActivatedRoute) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.activatedRoute.data.subscribe(({ taskComment }) => {
       this.taskComment = taskComment;
     });
   }
 
-  previousState() {
+  previousState(): void {
     window.history.back();
   }
 }

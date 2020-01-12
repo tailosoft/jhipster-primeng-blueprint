@@ -19,9 +19,11 @@
 <div>
     <h2 id="page-heading">
         <span jhiTranslate="<%= i18nKeyPrefix %>.home.title"><%= entityClassPluralHumanized %></span>
+        <%_ if (!readOnly) { _%>
         <p-button id="jh-create-entity" class="float-right jh-create-entity create-<%= entityUrl %>" [routerLink]="['/<%= entityUrl %>/new']"
                   [label]="'<%= i18nKeyPrefix %>.home.createLabel' | translate" icon="pi pi-plus" iconPos="left">
         </p-button>
+        <%_ } _%>
     </h2>
     <%_ if (searchEngine === 'elasticsearch') { _%>
     <div class="row">
@@ -32,7 +34,7 @@
                     <button class="input-group-append btn btn-info" (click)="search(currentSearch)">
                         <fa-icon [icon]="'search'"></fa-icon>
                     </button>
-                    <button class="input-group-append btn btn-danger" (click)="clear()" *ngIf="currentSearch">
+                    <button class="input-group-append btn btn-danger" (click)="search('')" *ngIf="currentSearch">
                         <fa-icon [icon]="'trash-alt'"></fa-icon>
                     </button>
                 </div>
@@ -186,21 +188,21 @@
                         <%_ if (relationshipType === 'many-to-many') { _%>
                 <td>
                     <span *ngFor="let <%= relationshipFieldName %> of <%= entityInstance %>.<%= relationshipFieldNamePlural %>; let last = last">
-                        <a class="form-control-static" [routerLink]="['../<%= otherEntityStateName %>', <%= relationshipFieldName %>?.id, 'view' ]">{{<%= relationshipFieldName %>.<%= otherEntityField %>}}</a>{{last ? '' : ', '}}
+                        <a class="form-control-static" [routerLink]="['/<%= otherEntityStateName %>', <%= relationshipFieldName %>?.id, 'view' ]">{{<%= relationshipFieldName %>.<%= otherEntityField %>}}</a>{{last ? '' : ', '}}
                     </span>
                 </td>
                         <%_ } else { _%>
                             <%_ if (dto === 'no') { _%>
                 <td>
                     <div *ngIf="<%= entityInstance + "." + relationshipFieldName %>">
-                        <a [routerLink]="['../<%= otherEntityStateName %>', <%= entityInstance + "." + relationshipFieldName + "?.id" %>, 'view' ]" >{{<%= entityInstance + "." + relationshipFieldName + "?." + otherEntityField %>}}</a>
+                        <a [routerLink]="['/<%= otherEntityStateName %>', <%= entityInstance + "." + relationshipFieldName + "?.id" %>, 'view' ]" >{{<%= entityInstance + "." + relationshipFieldName + "?." + otherEntityField %>}}</a>
                     </div>
                 </td>
                             <%_ } else { _%>
                                 <%_ relationships[idx].pkData.forEach(pk => { _%>
                 <td>
                     <div *ngIf="<%= entityInstance + "." + relationshipFieldName + pk.nameCapitalized %>">
-                        <a [routerLink]="['../<%= otherEntityStateName %>', <%= entityInstance + "." + relationshipFieldName + pk.nameCapitalized %> %>, 'view' ]" >{{<%= entityInstance + "." + pk.formName + _.upperFirst(pk.otherEntityField) %>}}</a>
+                        <a [routerLink]="['/<%= otherEntityStateName %>', <%= entityInstance + "." + relationshipFieldName + pk.nameCapitalized %> %>, 'view' ]" >{{<%= entityInstance + "." + pk.formName + _.upperFirst(pk.otherEntityField) %>}}</a>
                     </div>
                 </td>
                                 <%_ }) _%>
@@ -215,12 +217,14 @@
                         <p-button type="submit" [routerLink]="['/<%= entityUrl %>', <%- idParam %>, 'view' ]"
                                   icon="pi pi-eye" styleClass="ui-button-info">
                         </p-button>
+                        <%_ if (!readOnly) { _%>
                         <p-button type="submit" [routerLink]="['/<%= entityUrl %>', <%- idParam %>, 'edit' ]"
                                   icon="pi pi-pencil" styleClass="ui-button-warning">
                         </p-button>
                         <p-button type="submit" (click)="delete(<%- pkData.map(pk => `${entityInstance}.${pk.name}`).join(', ') %>)"
                                   icon="pi pi-times" styleClass="ui-button-danger">
                         </p-button>
+                        <%_ } _%>
                     </div>
                 </td>
             </tr>

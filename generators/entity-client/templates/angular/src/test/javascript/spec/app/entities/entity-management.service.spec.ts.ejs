@@ -18,26 +18,20 @@
 -%>
 <%_
 const tsKeyId = pkData.map(pk => pk.field.tsTestValue).join(', ');
+const enumImports = generateEntityClientEnumImports(fields);
 _%>
-/* tslint:disable max-line-length */
 import { TestBed, getTestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { HttpClient, HttpResponse } from '@angular/common/http';
-import { of } from 'rxjs';
 import { take, map } from 'rxjs/operators';
 <%_ if (fieldsContainLocalDate) { _%>
 import { DATE_FORMAT } from 'app/shared/constants/input.constants';
 import { DatePipe } from '@angular/common';
 <%_ } _%>
 import { <%= entityAngularName %>Service } from 'app/entities/<%= entityFolderName %>/<%= entityFileName %>.service';
-import { I<%= entityAngularName %>, <%= entityAngularName %>, <%_ const enumsAlreadyDeclared = [];
-fields.forEach(field => {
-if (field.fieldIsEnum && !enumsAlreadyDeclared.includes(field.fieldType)) {
-    enumsAlreadyDeclared.push(field.fieldType); _%>
-<%=field.fieldType%>,
-<%_ }
-}) _%>
-} from 'app/shared/model/<%= entityModelFileName %>.model';
+import { I<%= entityAngularName %>, <%= entityAngularName %> } from 'app/shared/model/<%= entityModelFileName %>.model';
+<%_ enumImports.forEach( (importedPath, importedType) => { _%>
+import { <%- importedType %> } from '<%- importedPath %>';
+<%_ }); _%>
 
 describe('Service Tests', () => {
 
@@ -46,7 +40,7 @@ describe('Service Tests', () => {
         let service: <%= entityAngularName %>Service;
         let httpMock: HttpTestingController;
         let elemDefault: I<%= entityAngularName %>;
-        let expectedResult;
+        let expectedResult: I<%= entityAngularName %> | I<%= entityAngularName %>[] | boolean | null;
         <%_ if (fieldsContainDate) { _%>
         let currentDate: Date;
             <%_ if (fieldsContainLocalDate) { _%>
@@ -60,7 +54,7 @@ describe('Service Tests', () => {
                 providers: [DatePipe]
 <%_ } _%>
             });
-            expectedResult = {};
+            expectedResult = null;
             injector = getTestBed();
             service = injector.get(<%= entityAngularName %>Service);
             httpMock = injector.get(HttpTestingController);
@@ -75,7 +69,7 @@ describe('Service Tests', () => {
         });
 
         describe('Service methods', () => {
-            it('should find an element', async () => {
+            it('should find an element', () => {
                 const returnedFromService = Object.assign({
 <%_ fields.forEach((field) => {
     const fieldType = field.fieldType; _%>
@@ -88,16 +82,17 @@ describe('Service Tests', () => {
                 }, elemDefault);
                 service
                     .find(<%- tsKeyId %>)
-                    .pipe(take(1)).subscribe(resp => expectedResult = resp);
+                    .pipe(take(1)).subscribe(resp => expectedResult = resp.body);
 
                 const req  = httpMock.expectOne({ method: 'GET' });
                 req.flush(returnedFromService);
-                expect(expectedResult).toMatchObject({body: elemDefault});
+                expect(expectedResult).toMatchObject(elemDefault);
             });
 
-            it('should create a <%= entityAngularName %>', async () => {
+        <%_ if (!readOnly) { _%>
+            it('should create a <%= entityAngularName %>', () => {
                 const returnedFromService = Object.assign({
-<%_ if (pkType === 'String') { _%>
+<%_ if (pkType === 'String' || pkType === 'UUID') { _%>
                     id: 'ID',
 <%_ } else { _%>
                     id: 0,
@@ -122,14 +117,14 @@ describe('Service Tests', () => {
 <%_ }) _%>
                 }, returnedFromService);
                 service
-                    .create(new <%= entityAngularName %>(null))
-                    .pipe(take(1)).subscribe(resp => expectedResult = resp);
+                    .create(new <%= entityAngularName %>())
+                    .pipe(take(1)).subscribe(resp => expectedResult = resp.body);
                 const req  = httpMock.expectOne({ method: 'POST' });
                 req.flush(returnedFromService);
-                expect(expectedResult).toMatchObject({body: expected});
+                expect(expectedResult).toMatchObject(expected);
             });
 
-            it('should update a <%= entityAngularName %>', async () => {
+            it('should update a <%= entityAngularName %>', () => {
                 const returnedFromService = Object.assign({
 <%_ fields.forEach((field) => {
     const fieldType = field.fieldType; _%>
@@ -161,13 +156,14 @@ describe('Service Tests', () => {
                 }, returnedFromService);
                 service
                     .update(expected)
-                    .pipe(take(1)).subscribe(resp => expectedResult = resp);
+                    .pipe(take(1)).subscribe(resp => expectedResult = resp.body);
                 const req  = httpMock.expectOne({ method: 'PUT' });
                 req.flush(returnedFromService);
-                expect(expectedResult).toMatchObject({body: expected});
+                expect(expectedResult).toMatchObject(expected);
             });
+        <%_ } _%>
 
-            it('should return a list of <%= entityAngularName %>', async () => {
+            it('should return a list of <%= entityAngularName %>', () => {
                 const returnedFromService = Object.assign({
 <%_ fields.forEach((field) => {
     const fieldType = field.fieldType; _%>
@@ -197,7 +193,7 @@ describe('Service Tests', () => {
 <%_ }) _%>
                 }, returnedFromService);
                 service
-                    .query(expected)
+                    .query()
                     .pipe(
                         take(1),
                         map(resp => resp.body)
@@ -208,14 +204,15 @@ describe('Service Tests', () => {
                 expect(expectedResult).toContainEqual(expected);
             });
 
-            it('should delete a <%= entityAngularName %>', async () => {
-                const rxPromise = service
-                    .delete(<%- tsKeyId %>).subscribe(resp => expectedResult = resp.ok);
+        <%_ if (!readOnly) { _%>
+            it('should delete a <%= entityAngularName %>', () => {
+                service.delete(<%- tsKeyId %>).subscribe(resp => expectedResult = resp.ok);
 
                 const req  = httpMock.expectOne({ method: 'DELETE' });
                 req.flush({ status: 200 });
                 expect(expectedResult);
             });
+        <%_ } _%>
         });
 
         afterEach(() => {

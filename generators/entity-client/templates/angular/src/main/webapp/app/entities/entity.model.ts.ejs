@@ -20,31 +20,15 @@
 const variablesWithTypes = tsVariables.map(v => `${v.name}?: ${v.type}`);
 const typeImports = generateEntityClientImports(relationships, dto);
 const defaultVariablesValues = generateEntityClientFieldDefaultValues(fields);
+const enumImports = generateEntityClientEnumImports(fields);
 %>
 <%_ typeImports.forEach( (importedPath, importedType) => { _%>
 import { <%- importedType %> } from '<%- importedPath %>';
 <%_ }); _%>
+<%_ enumImports.forEach( (importedPath, importedType) => { _%>
+import { <%- importedType %> } from '<%- importedPath %>';
+<%_ }); _%>
 
-<%_ const enumsAlreadyDeclared = [];
-fields.forEach(field => {
-    if (field.fieldIsEnum && !enumsAlreadyDeclared.includes(field.fieldType)) {
-        field.fieldTypeUnderscoreCapitalized = _.snakeCase(field.fieldType).toUpperCase();
-        enumsAlreadyDeclared.push(field.fieldType); _%>
-export const enum <%= field.fieldType %> {<%
-        const enums = field.fieldValues.split(',');
-        for (let i = 0; i < enums.length; i++) { %>
-    <%= enums[i] %> = '<%= enums[i] %>'<%if (i < enums.length - 1) { %>,<% }
-        } %>
-}
-
-export const <%= field.fieldTypeUnderscoreCapitalized %>_ARRAY = [<%
-        for (let i = 0; i < enums.length; i++) { %>
-    <%= field.fieldType %>.<%= enums[i] %><%if (i < enums.length - 1) { %>,<% }
-        } %>
-];
-
-<%_ }
-}); _%>
 export interface I<%= entityAngularName %> {
     <%_ variablesWithTypes.forEach(variablesWithType => { _%>
     <%- variablesWithType %>;

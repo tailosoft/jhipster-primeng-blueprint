@@ -1,26 +1,32 @@
 import { Injectable } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
-import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot, Routes } from '@angular/router';
-import { UserRouteAccessService } from 'app/core';
-import { Observable, of } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { Resolve, ActivatedRouteSnapshot, Routes, Router } from '@angular/router';
+import { Observable, of, EMPTY } from 'rxjs';
+import { flatMap } from 'rxjs/operators';
+import { UserRouteAccessService } from 'app/core/auth/user-route-access-service';
+import { IEmployeeSkill } from 'app/shared/model/employee-skill.model';
 import { EmployeeSkillService } from './employee-skill.service';
 import { EmployeeSkillComponent } from './employee-skill.component';
 import { EmployeeSkillDetailComponent } from './employee-skill-detail.component';
 import { EmployeeSkillUpdateComponent } from './employee-skill-update.component';
-import { IEmployeeSkill } from 'app/shared/model/employee-skill.model';
 
 @Injectable({ providedIn: 'root' })
-export class EmployeeSkillResolve implements Resolve<IEmployeeSkill> {
-  constructor(private service: EmployeeSkillService) {}
+export class EmployeeSkillResolve implements Resolve<IEmployeeSkill | null> {
+  constructor(private service: EmployeeSkillService, private router: Router) {}
 
-  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<IEmployeeSkill> {
+  resolve(route: ActivatedRouteSnapshot): Observable<IEmployeeSkill | null> {
     const name = route.params['name'] ? route.params['name'] : null;
     const employeeUsername = route.params['employeeUsername'] ? route.params['employeeUsername'] : null;
     if (name && employeeUsername) {
       return this.service.find(name, employeeUsername).pipe(
-        filter((response: HttpResponse<IEmployeeSkill>) => response.ok),
-        map((employeeSkill: HttpResponse<IEmployeeSkill>) => employeeSkill.body)
+        flatMap((employeeSkill: HttpResponse<IEmployeeSkill>) => {
+          if (employeeSkill.body) {
+            return of(employeeSkill.body);
+          } else {
+            this.router.navigate(['404']);
+            return EMPTY;
+          }
+        })
       );
     }
     return of(null);

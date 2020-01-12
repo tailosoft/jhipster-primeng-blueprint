@@ -1,26 +1,14 @@
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { JhiLanguageService } from 'ng-jhipster';
-import { JhiLanguageHelper } from 'app/core';
 
-import { PrimengtestSharedModule } from 'app/shared';
-import { CertificateTypeComponent, CertificateTypeDetailComponent, CertificateTypeUpdateComponent, certificateTypeRoute } from './';
-
-const ENTITY_STATES = [...certificateTypeRoute];
+import { PrimengtestSharedModule } from 'app/shared/shared.module';
+import { CertificateTypeComponent } from './certificate-type.component';
+import { CertificateTypeDetailComponent } from './certificate-type-detail.component';
+import { CertificateTypeUpdateComponent } from './certificate-type-update.component';
+import { certificateTypeRoute } from './certificate-type.route';
 
 @NgModule({
-  imports: [PrimengtestSharedModule, RouterModule.forChild(ENTITY_STATES)],
-  declarations: [CertificateTypeComponent, CertificateTypeDetailComponent, CertificateTypeUpdateComponent],
-  entryComponents: [CertificateTypeComponent, CertificateTypeUpdateComponent],
-  providers: [{ provide: JhiLanguageService, useClass: JhiLanguageService }],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  imports: [PrimengtestSharedModule, RouterModule.forChild(certificateTypeRoute)],
+  declarations: [CertificateTypeComponent, CertificateTypeDetailComponent, CertificateTypeUpdateComponent]
 })
-export class PrimengtestCertificateTypeModule {
-  constructor(private languageService: JhiLanguageService, private languageHelper: JhiLanguageHelper) {
-    this.languageHelper.language.subscribe((languageKey: string) => {
-      if (languageKey !== undefined) {
-        this.languageService.changeLanguage(languageKey);
-      }
-    });
-  }
-}
+export class PrimengtestCertificateTypeModule {}

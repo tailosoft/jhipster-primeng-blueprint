@@ -1,11 +1,10 @@
-/* tslint:disable no-unused-expression */
-import { browser, by, ExpectedConditions as ec } from 'protractor';
+import { browser, by, ExpectedConditions as ec /* , promise */ } from 'protractor';
 import { NavBarPage, SignInPage } from '../../page-objects/jhi-page-objects';
 
 import {
   EmployeeSkillCertificateComponentsPage,
-  EmployeeSkillCertificateDeleteDialog,
-  EmployeeSkillCertificateUpdatePage
+  /* EmployeeSkillCertificateDeleteDialog,
+   */ EmployeeSkillCertificateUpdatePage
 } from './employee-skill-certificate.page-object';
 
 const expect = chai.expect;
@@ -13,9 +12,9 @@ const expect = chai.expect;
 describe('EmployeeSkillCertificate e2e test', () => {
   let navBarPage: NavBarPage;
   let signInPage: SignInPage;
-  let employeeSkillCertificateUpdatePage: EmployeeSkillCertificateUpdatePage;
   let employeeSkillCertificateComponentsPage: EmployeeSkillCertificateComponentsPage;
-  /*let employeeSkillCertificateDeleteDialog: EmployeeSkillCertificateDeleteDialog;*/
+  let employeeSkillCertificateUpdatePage: EmployeeSkillCertificateUpdatePage;
+  /* let employeeSkillCertificateDeleteDialog: EmployeeSkillCertificateDeleteDialog; */
 
   before(async () => {
     await browser.get('/');
@@ -39,24 +38,24 @@ describe('EmployeeSkillCertificate e2e test', () => {
     await employeeSkillCertificateUpdatePage.cancel();
   });
 
-  /* it('should create and save EmployeeSkillCertificates', async () => {
+  /*  it('should create and save EmployeeSkillCertificates', async () => {
         const nbButtonsBeforeCreate = await employeeSkillCertificateComponentsPage.countDeleteButtons();
 
         await employeeSkillCertificateComponentsPage.clickOnCreateButton();
-        await employeeSkillCertificateUpdatePage.setGradeInput('5');
+        await employeeSkillCertificateUpdatePage.setGradeInput('9999999');
         await employeeSkillCertificateUpdatePage.setDateInput('12/31/2000');
         await employeeSkillCertificateUpdatePage.typeSelectLastOption();
         await employeeSkillCertificateUpdatePage.skillSelectLastOption();
         await employeeSkillCertificateUpdatePage.skillEmployeeSelectLastOption();
-        expect(await employeeSkillCertificateUpdatePage.getGradeInput()).to.eq('5', 'Expected grade value to be equals to 5');
+        expect(await employeeSkillCertificateUpdatePage.getGradeInput()).to.eq('9999999', 'Expected grade value to be equals to 9999999');
         expect(await employeeSkillCertificateUpdatePage.getDateInput()).to.eq('12/31/2000', 'Expected date value to be equals to 12/31/2000');
         await employeeSkillCertificateUpdatePage.save();
         expect(await employeeSkillCertificateUpdatePage.getSaveButton().isPresent(), 'Expected save button disappear').to.be.false;
 
         expect(await employeeSkillCertificateComponentsPage.countDeleteButtons()).to.eq(nbButtonsBeforeCreate + 1, 'Expected one more entry in the table');
-    });*/
+    }); */
 
-  /* it('should delete last EmployeeSkillCertificate', async () => {
+  /*  it('should delete last EmployeeSkillCertificate', async () => {
         const nbButtonsBeforeDelete = await employeeSkillCertificateComponentsPage.countDeleteButtons();
         await employeeSkillCertificateComponentsPage.clickOnLastDeleteButton();
 
@@ -64,7 +63,7 @@ describe('EmployeeSkillCertificate e2e test', () => {
         await employeeSkillCertificateDeleteDialog.clickOnConfirmButton();
 
         expect(await employeeSkillCertificateComponentsPage.countDeleteButtons()).to.eq(nbButtonsBeforeDelete - 1);
-    });*/
+    }); */
 
   after(async () => {
     await navBarPage.autoSignOut();

@@ -4,8 +4,9 @@ import { of, BehaviorSubject } from 'rxjs';
 import { HttpResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { PrimengtestTestModule } from '../../../test.module';
-import { UserMgmtComponent } from 'app/admin/user-management/user-management.component';
-import { UserService, User } from 'app/core';
+import { UserManagementComponent } from 'app/admin/user-management/user-management.component';
+import { User } from 'app/core/user/user.model';
+import { UserService } from 'app/core/user/user.service';
 import { ConfirmationService } from 'primeng/api';
 import { MockActivatedRoute } from '../../../helpers/mock-route.service';
 import { MockTable } from '../../../helpers/mock-table';
@@ -13,8 +14,8 @@ import { JhiEventManager } from 'ng-jhipster';
 
 describe('Component Tests', () => {
   describe('User Management Component', () => {
-    let comp: UserMgmtComponent;
-    let fixture: ComponentFixture<UserMgmtComponent>;
+    let comp: UserManagementComponent;
+    let fixture: ComponentFixture<UserManagementComponent>;
     let service: UserService;
     let mockConfirmationService: any;
 
@@ -24,14 +25,14 @@ describe('Component Tests', () => {
     beforeEach(() => {
       TestBed.configureTestingModule({
         imports: [PrimengtestTestModule],
-        declarations: [UserMgmtComponent]
+        declarations: [UserManagementComponent]
       })
-        .overrideTemplate(UserMgmtComponent, '')
+        .overrideTemplate(UserManagementComponent, '')
         .compileComponents();
 
-      fixture = TestBed.createComponent(UserMgmtComponent);
+      fixture = TestBed.createComponent(UserManagementComponent);
       comp = fixture.componentInstance;
-      comp.userTable = <any>new MockTable();
+      comp.userTable = new MockTable() as any;
       service = fixture.debugElement.injector.get(UserService);
       mockConfirmationService = fixture.debugElement.injector.get(ConfirmationService);
       activatedRoute = fixture.debugElement.injector.get(ActivatedRoute);
@@ -53,7 +54,7 @@ describe('Component Tests', () => {
 
       // THEN
       expect(service.query).toHaveBeenCalled();
-      expect(comp.users[0]).toEqual(jasmine.objectContaining({ id: 123 }));
+      expect(comp.users![0]).toEqual(jasmine.objectContaining({ id: 123 }));
     }));
 
     it('should load a page', fakeAsync(() => {
@@ -69,11 +70,11 @@ describe('Component Tests', () => {
       // WHEN
       fixture.detectChanges();
       tick(100);
-      (<BehaviorSubject<any>>activatedRoute.queryParams).next({ first: 3 });
+      (activatedRoute.queryParams as BehaviorSubject<any>).next({ first: 3 });
 
       // THEN
       expect(service.query).toHaveBeenCalled();
-      expect(comp.users[0]).toEqual(jasmine.objectContaining({ id: 123 }));
+      expect(comp.users![0]).toEqual(jasmine.objectContaining({ id: 123 }));
     }));
 
     it('should call delete service using confirmDialog', fakeAsync(() => {

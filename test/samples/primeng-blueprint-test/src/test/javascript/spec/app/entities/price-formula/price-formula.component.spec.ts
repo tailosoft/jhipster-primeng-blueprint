@@ -1,4 +1,3 @@
-/* tslint:disable max-line-length */
 import { ComponentFixture, TestBed, fakeAsync } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { HttpResponse } from '@angular/common/http';
@@ -47,7 +46,7 @@ describe('Component Tests', () => {
 
       // THEN
       expect(service.query).toHaveBeenCalled();
-      expect(comp.priceFormulas[0]).toEqual(jasmine.objectContaining({ max: 123 }));
+      expect(comp.priceFormulas && comp.priceFormulas[0]).toEqual(jasmine.objectContaining({ max: 123 }));
     }));
 
     it('should call delete service using confirmDialog', fakeAsync(() => {

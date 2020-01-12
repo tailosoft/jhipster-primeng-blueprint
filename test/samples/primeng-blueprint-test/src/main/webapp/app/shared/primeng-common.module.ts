@@ -51,10 +51,4 @@ import { FileUploadModule } from 'primeng/fileupload';
     FileUploadModule
   ]
 })
-export class PrimeNGCommonModule {
-  static forRoot() {
-    return {
-      ngModule: PrimeNGCommonModule
-    };
-  }
-}
+export class PrimeNGCommonModule {}

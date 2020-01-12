@@ -18,30 +18,36 @@
 -%>
 import { Injectable } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
-import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot, Routes } from '@angular/router';
-import { UserRouteAccessService } from 'app/core';
-import { Observable, of } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { Resolve, ActivatedRouteSnapshot, Routes, Router } from '@angular/router';
+import { Observable, of, EMPTY } from 'rxjs';
+import { flatMap } from 'rxjs/operators';
+import { UserRouteAccessService } from 'app/core/auth/user-route-access-service';
+import { I<%= entityAngularName %> } from 'app/shared/model/<%= entityModelFileName %>.model';
 import { <%= entityAngularName %>Service } from './<%= entityFileName %>.service';
 import { <%= entityAngularName %>Component } from './<%= entityFileName %>.component';
 import { <%= entityAngularName %>DetailComponent } from './<%= entityFileName %>-detail.component';
+<%_ if (!readOnly) { _%>
 import { <%= entityAngularName %>UpdateComponent } from './<%= entityFileName %>-update.component';
-import { I<%= entityAngularName %> } from 'app/shared/model/<%= entityModelFileName %>.model';
+<%_ } _%>
 
 @Injectable({providedIn: 'root'})
-export class <%= entityAngularName %>Resolve implements Resolve<I<%= entityAngularName %>> {
+export class <%= entityAngularName %>Resolve implements Resolve<I<%= entityAngularName %> | null> {
+    constructor(private service: <%= entityAngularName %>Service, private router: Router) {}
 
-    constructor(private service: <%= entityAngularName %>Service) {
-    }
-
-    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<I<%= entityAngularName %>> {
+    resolve(route: ActivatedRouteSnapshot): Observable<I<%= entityAngularName %> | null> {
 <%_ pkData.forEach(pk => { _%>
         const <%= pk.name %> = route.params['<%= pk.name %>'] ? route.params['<%= pk.name %>'] : null;
 <%_ }) _%>
         if (<%- pkData.map(pk => pk.name).join(' && ') %>) {
             return this.service.find(<%- pkData.map(pk => pk.name).join(', ') %>).pipe(
-                filter((response: HttpResponse<I<%= entityAngularName %>>) => response.ok),
-                map((<%= entityInstance %>: HttpResponse<I<%= entityAngularName %>>) => <%= entityInstance %>.body)
+                flatMap((<%= entityInstance %>: HttpResponse<I<%= entityAngularName %>>) => {
+                    if (<%= entityInstance %>.body) {
+                        return of(<%= entityInstance %>.body);
+                    } else {
+                        this.router.navigate(['404']);
+                        return EMPTY;
+                    }
+                })
             );
         }
         return of(null);
@@ -70,6 +76,7 @@ export const <%= entityInstance %>Route: Routes = [
         },
         canActivate: [UserRouteAccessService]
     },
+    <%_ if (!readOnly) { _%>
     {
         path: 'new',
         component: <%= entityAngularName %>UpdateComponent,
@@ -94,4 +101,5 @@ export const <%= entityInstance %>Route: Routes = [
         },
         canActivate: [UserRouteAccessService]
     },
+    <%_ } _%>
 ];

@@ -8,17 +8,17 @@ import { ICertificateType } from 'app/shared/model/certificate-type.model';
   templateUrl: './certificate-type-detail.component.html'
 })
 export class CertificateTypeDetailComponent implements OnInit {
-  certificateType: ICertificateType;
+  certificateType: ICertificateType | null = null;
 
   constructor(protected activatedRoute: ActivatedRoute) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.activatedRoute.data.subscribe(({ certificateType }) => {
       this.certificateType = certificateType;
     });
   }
 
-  previousState() {
+  previousState(): void {
     window.history.back();
   }
 }

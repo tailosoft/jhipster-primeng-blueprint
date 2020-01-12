@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { DatePipe } from '@angular/common';
 import { DATE_FORMAT } from 'app/shared/constants/input.constants';
-import { map } from 'rxjs/operators';
 import { SERVER_API_URL } from 'app/app.constants';
 import { createRequestOption } from 'app/shared/util/request-util';
 import { IEmployeeSkillCertificate } from 'app/shared/model/employee-skill-certificate.model';
@@ -56,14 +56,14 @@ export class EmployeeSkillCertificateService {
 
   protected convertDateFromClient(employeeSkillCertificate: IEmployeeSkillCertificate): IEmployeeSkillCertificate {
     const copy: IEmployeeSkillCertificate = Object.assign({}, employeeSkillCertificate, {
-      date: employeeSkillCertificate.date != null ? this.datePipe.transform(employeeSkillCertificate.date, DATE_FORMAT) : null
+      date: employeeSkillCertificate.date != null ? this.datePipe.transform(employeeSkillCertificate.date, DATE_FORMAT) : undefined
     });
     return copy;
   }
 
   protected convertDateFromServer(res: EntityResponseType): EntityResponseType {
     if (res.body) {
-      res.body.date = res.body.date != null ? new Date(res.body.date) : null;
+      res.body.date = res.body.date ? new Date(res.body.date) : undefined;
     }
     return res;
   }
@@ -71,7 +71,7 @@ export class EmployeeSkillCertificateService {
   protected convertDateArrayFromServer(res: EntityArrayResponseType): EntityArrayResponseType {
     if (res.body) {
       res.body.forEach((employeeSkillCertificate: IEmployeeSkillCertificate) => {
-        employeeSkillCertificate.date = employeeSkillCertificate.date != null ? new Date(employeeSkillCertificate.date) : null;
+        employeeSkillCertificate.date = employeeSkillCertificate.date ? new Date(employeeSkillCertificate.date) : undefined;
       });
     }
     return res;

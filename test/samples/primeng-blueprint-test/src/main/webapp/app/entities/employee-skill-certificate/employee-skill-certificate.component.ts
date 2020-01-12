@@ -7,7 +7,7 @@ import { JhiEventManager } from 'ng-jhipster';
 import { MessageService } from 'primeng/api';
 import { IEmployeeSkillCertificate } from 'app/shared/model/employee-skill-certificate.model';
 import { EmployeeSkillCertificateService } from './employee-skill-certificate.service';
-import { ITEMS_PER_PAGE } from 'app/shared';
+import { ITEMS_PER_PAGE } from 'app/shared/constants/pagination.constants';
 import {
   computeFilterMatchMode,
   lazyLoadEventToServerQueryParams,
@@ -17,11 +17,11 @@ import {
 import { ConfirmationService, LazyLoadEvent } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
 import { ICertificateType } from 'app/shared/model/certificate-type.model';
-import { CertificateTypeService } from 'app/entities/certificate-type';
+import { CertificateTypeService } from 'app/entities/certificate-type/certificate-type.service';
 import { IEmployeeSkill } from 'app/shared/model/employee-skill.model';
-import { EmployeeSkillService } from 'app/entities/employee-skill';
+import { EmployeeSkillService } from 'app/entities/employee-skill/employee-skill.service';
 import { IEmployee } from 'app/shared/model/employee.model';
-import { EmployeeService } from 'app/entities/employee';
+import { EmployeeService } from 'app/entities/employee/employee.service';
 import { Table } from 'primeng/table';
 import { DatePipe } from '@angular/common';
 
@@ -30,27 +30,27 @@ import { DatePipe } from '@angular/common';
   templateUrl: './employee-skill-certificate.component.html'
 })
 export class EmployeeSkillCertificateComponent implements OnInit, OnDestroy {
-  employeeSkillCertificates: IEmployeeSkillCertificate[];
-  eventSubscriber: Subscription;
-  dateRange: Date[];
-  typeOptions: ICertificateType[];
-  skillOptions: IEmployeeSkill[];
-  skillEmployeeOptions: IEmployee[];
+  employeeSkillCertificates?: IEmployeeSkillCertificate[];
+  eventSubscriber?: Subscription;
+  dateRange?: Date[];
+  typeOptions: ICertificateType[] | null = null;
+  skillOptions: IEmployeeSkill[] | null = null;
+  skillEmployeeOptions: IEmployee[] | null = null;
 
-  totalItems: number;
-  itemsPerPage: number;
-  loading: boolean;
+  totalItems?: number;
+  itemsPerPage!: number;
+  loading!: boolean;
 
   private filtersDetails: { [_: string]: { matchMode?: string; flatten?: (_: any) => string; unflatten?: (_: string) => any } } = {
-    grade: { matchMode: 'equals', unflatten: x => +x },
-    date: { matchMode: 'between', flatten: a => a.filter(x => x).join(','), unflatten: a => a.split(',') },
+    grade: { matchMode: 'equals', unflatten: (x: string) => +x },
+    date: { matchMode: 'between', flatten: a => a.filter((x: string) => x).join(','), unflatten: (a: string) => a.split(',') },
     typeId: { matchMode: 'in', flatten: a => a.join(','), unflatten: a => a.split(',').map(x => +x) },
     skillName: { matchMode: 'in' },
     skillEmployeeUsername: { matchMode: 'in' }
   };
 
   @ViewChild('employeeSkillCertificateTable', { static: true })
-  employeeSkillCertificateTable: Table;
+  employeeSkillCertificateTable!: Table;
 
   constructor(
     protected employeeSkillCertificateService: EmployeeSkillCertificateService,
@@ -69,7 +69,7 @@ export class EmployeeSkillCertificateComponent implements OnInit, OnDestroy {
     this.loading = true;
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loadAllTypes();
     this.registerChangeInEmployeeSkillCertificates();
     this.activatedRoute.queryParams
@@ -80,7 +80,7 @@ export class EmployeeSkillCertificateComponent implements OnInit, OnDestroy {
             (this.dateRange =
               this.employeeSkillCertificateTable.filters.date &&
               this.employeeSkillCertificateTable.filters.date.value &&
-              this.employeeSkillCertificateTable.filters.date.value.map(x => new Date(x)))
+              this.employeeSkillCertificateTable.filters.date.value.map((x: string) => new Date(x)))
         ),
         tap(() => (this.loading = true)),
         switchMap(() =>
@@ -92,7 +92,7 @@ export class EmployeeSkillCertificateComponent implements OnInit, OnDestroy {
       )
       .subscribe(
         (res: HttpResponse<IEmployeeSkillCertificate[]>) => {
-          this.paginateEmployeeSkillCertificates(res.body, res.headers);
+          this.paginateEmployeeSkillCertificates(res.body!, res.headers);
           this.loading = false;
         },
         (res: HttpErrorResponse) => {
@@ -102,20 +102,22 @@ export class EmployeeSkillCertificateComponent implements OnInit, OnDestroy {
       );
   }
 
-  ngOnDestroy() {
-    this.eventManager.destroy(this.eventSubscriber);
+  ngOnDestroy(): void {
+    if (this.eventSubscriber) {
+      this.eventManager.destroy(this.eventSubscriber);
+    }
   }
 
-  onLazyLoadEvent(event: LazyLoadEvent) {
+  onLazyLoadEvent(event: LazyLoadEvent): void {
     const queryParams = lazyLoadEventToRouterQueryParams(event, this.filtersDetails);
     this.router.navigate(['/employee-skill-certificate'], { queryParams });
   }
 
-  filter(value, field) {
+  filter(value: any, field: string): void {
     this.employeeSkillCertificateTable.filter(value, field, computeFilterMatchMode(this.filtersDetails[field]));
   }
 
-  delete(typeId: number, skillName: string, skillEmployeeUsername: string) {
+  delete(typeId: number, skillName: string, skillEmployeeUsername: string): void {
     this.confirmationService.confirm({
       header: this.translateService.instant('entity.delete.title'),
       message: this.translateService.instant('primengtestApp.employeeSkillCertificate.delete.question', {
@@ -132,43 +134,43 @@ export class EmployeeSkillCertificateComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadAllTypes() {
+  loadAllTypes(): void {
     this.certificateTypeService.query().subscribe(res => (this.typeOptions = res.body));
   }
 
-  onSkillLazyLoadEvent(event: LazyLoadEvent) {
+  onSkillLazyLoadEvent(event: LazyLoadEvent): void {
     this.employeeSkillService
-      .query(lazyLoadEventToServerQueryParams(event || {}, 'name.contains'))
+      .query(lazyLoadEventToServerQueryParams(event, 'name.contains'))
       .subscribe(res => (this.skillOptions = res.body));
   }
 
-  onSkillEmployeeLazyLoadEvent(event: LazyLoadEvent) {
+  onSkillEmployeeLazyLoadEvent(event: LazyLoadEvent): void {
     this.employeeService
-      .query(lazyLoadEventToServerQueryParams(event || {}, 'fullname.contains'))
+      .query(lazyLoadEventToServerQueryParams(event, 'fullname.contains'))
       .subscribe(res => (this.skillEmployeeOptions = res.body));
   }
 
-  trackId(index: number, item: IEmployeeSkillCertificate) {
-    return item.typeId + ',' + item.skillName + ',' + item.skillEmployeeUsername;
+  trackId(index: number, item: IEmployeeSkillCertificate): string {
+    return '' + item.typeId + ',' + item.skillName + ',' + item.skillEmployeeUsername;
   }
 
-  registerChangeInEmployeeSkillCertificates() {
-    this.eventSubscriber = this.eventManager.subscribe('employeeSkillCertificateListModification', response =>
+  registerChangeInEmployeeSkillCertificates(): void {
+    this.eventSubscriber = this.eventManager.subscribe('employeeSkillCertificateListModification', () =>
       this.router.navigate(['/employee-skill-certificate'], { queryParams: { r: Date.now() } })
     );
   }
 
-  protected paginateEmployeeSkillCertificates(data: IEmployeeSkillCertificate[], headers: HttpHeaders) {
-    this.totalItems = parseInt(headers.get('X-Total-Count'), 10);
+  protected paginateEmployeeSkillCertificates(data: IEmployeeSkillCertificate[], headers: HttpHeaders): void {
+    this.totalItems = Number(headers.get('X-Total-Count'));
     this.employeeSkillCertificates = data;
   }
 
-  protected onError(errorMessage: string) {
+  protected onError(errorMessage: string): void {
     this.messageService.add({ severity: 'error', summary: errorMessage });
   }
 
-  onDateSelect(dateRange: Date[], column: string, time = false) {
-    const dateToString = time ? x => x && x.toISOString() : x => x && this.datePipe.transform(x, 'yyyy-MM-dd');
+  onDateSelect(dateRange: Date[], column: string, time = false): void {
+    const dateToString = time ? (x: Date) => x && x.toISOString() : (x: Date) => x && this.datePipe.transform(x, 'yyyy-MM-dd');
     if (dateRange) {
       this.filter(dateRange.map(dateToString), column);
     } else {

@@ -63,17 +63,17 @@
                 <td>{{employeeSkillCertificate.date | date:'mediumDate'}}</td>
                 <td>
                     <div *ngIf="employeeSkillCertificate.typeId">
-                        <a [routerLink]="['../certificate-type', employeeSkillCertificate.typeId , 'view' ]" >{{employeeSkillCertificate.typeName}}</a>
+                        <a [routerLink]="['/certificate-type', employeeSkillCertificate.typeId , 'view' ]" >{{employeeSkillCertificate.typeName}}</a>
                     </div>
                 </td>
                 <td>
                     <div *ngIf="employeeSkillCertificate.skillName">
-                        <a [routerLink]="['../employee-skill', employeeSkillCertificate.skillName , 'view' ]" >{{employeeSkillCertificate.skillName}}</a>
+                        <a [routerLink]="['/employee-skill', employeeSkillCertificate.skillName , 'view' ]" >{{employeeSkillCertificate.skillName}}</a>
                     </div>
                 </td>
                 <td>
                     <div *ngIf="employeeSkillCertificate.skillEmployeeUsername">
-                        <a [routerLink]="['../employee-skill', employeeSkillCertificate.skillEmployeeUsername , 'view' ]" >{{employeeSkillCertificate.skillEmployeeFullname}}</a>
+                        <a [routerLink]="['/employee-skill', employeeSkillCertificate.skillEmployeeUsername , 'view' ]" >{{employeeSkillCertificate.skillEmployeeFullname}}</a>
                     </div>
                 </td>
                 <td>

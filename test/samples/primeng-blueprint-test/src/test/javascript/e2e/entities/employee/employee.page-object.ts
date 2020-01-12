@@ -5,19 +5,19 @@ export class EmployeeComponentsPage {
   deleteButtons = element.all(by.css('jhi-employee div table .ui-button-danger'));
   title = element.all(by.css('jhi-employee div h2#page-heading span')).first();
 
-  async clickOnCreateButton(timeout?: number) {
+  async clickOnCreateButton(): Promise<void> {
     await this.createButton.click();
   }
 
-  async clickOnLastDeleteButton(timeout?: number) {
+  async clickOnLastDeleteButton(): Promise<void> {
     await this.deleteButtons.last().click();
   }
 
-  async countDeleteButtons() {
+  async countDeleteButtons(): Promise<number> {
     return this.deleteButtons.count();
   }
 
-  async getTitle() {
+  async getTitle(): Promise<string> {
     return this.title.getAttribute('jhiTranslate');
   }
 }
@@ -29,31 +29,31 @@ export class EmployeeUpdatePage {
   usernameInput = element(by.id('field_username'));
   fullnameInput = element(by.id('field_fullname'));
 
-  async getPageTitle() {
+  async getPageTitle(): Promise<string> {
     return this.pageTitle.getAttribute('jhiTranslate');
   }
 
-  async setUsernameInput(username) {
+  async setUsernameInput(username: string): Promise<void> {
     await this.usernameInput.sendKeys(username);
   }
 
-  async getUsernameInput() {
+  async getUsernameInput(): Promise<string> {
     return await this.usernameInput.getAttribute('value');
   }
 
-  async setFullnameInput(fullname) {
+  async setFullnameInput(fullname: string): Promise<void> {
     await this.fullnameInput.sendKeys(fullname);
   }
 
-  async getFullnameInput() {
+  async getFullnameInput(): Promise<string> {
     return await this.fullnameInput.getAttribute('value');
   }
 
-  async save(timeout?: number) {
+  async save(): Promise<void> {
     await this.saveButton.click();
   }
 
-  async cancel(timeout?: number) {
+  async cancel(): Promise<void> {
     await this.cancelButton.click();
   }
 
@@ -65,7 +65,7 @@ export class EmployeeUpdatePage {
 export class EmployeeDeleteDialog {
   private confirmButton = element(by.css('p-confirmdialog .ui-dialog-footer button:first-of-type'));
 
-  async clickOnConfirmButton(timeout?: number) {
+  async clickOnConfirmButton(): Promise<void> {
     await this.confirmButton.click();
   }
 }

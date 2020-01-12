@@ -11,28 +11,25 @@ export class NotificationInterceptor implements HttpInterceptor {
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(
-      tap(
-        (event: HttpEvent<any>) => {
-          if (event instanceof HttpResponse) {
-            const arr = event.headers.keys();
-            let alert = null;
-            let alertParams = null;
-            arr.forEach(entry => {
-              if (entry.toLowerCase().endsWith('app-alert')) {
-                alert = event.headers.get(entry);
-              } else if (entry.toLowerCase().endsWith('app-params')) {
-                alertParams = event.headers.get(entry);
-              }
-            });
-            if (alert) {
-              if (typeof alert === 'string') {
-                this.messageService.add({ severity: 'success', summary: this.translateService.instant(alert, { param: alertParams }) });
-              }
+      tap((event: HttpEvent<any>) => {
+        if (event instanceof HttpResponse) {
+          const arr = event.headers.keys();
+          let alert: string | null = null;
+          let alertParams: string | null = null;
+          arr.forEach(entry => {
+            if (entry.toLowerCase().endsWith('app-alert')) {
+              alert = event.headers.get(entry);
+            } else if (entry.toLowerCase().endsWith('app-params')) {
+              alertParams = decodeURIComponent(event.headers.get(entry)!.replace(/\+/g, ' '));
+            }
+          });
+          if (alert) {
+            if (typeof alert === 'string') {
+              this.messageService.add({ severity: 'success', summary: this.translateService.instant(alert, { param: alertParams }) });
             }
           }
-        },
-        (err: any) => {}
-      )
+        }
+      })
     );
   }
 }

@@ -1,17 +1,20 @@
-/* tslint:disable no-unused-expression */
-import { browser, by, ExpectedConditions as ec } from 'protractor';
+import { browser, by, ExpectedConditions as ec /* , promise */ } from 'protractor';
 import { NavBarPage, SignInPage } from '../../page-objects/jhi-page-objects';
 
-import { EmployeeSkillComponentsPage, EmployeeSkillDeleteDialog, EmployeeSkillUpdatePage } from './employee-skill.page-object';
+import {
+  EmployeeSkillComponentsPage,
+  /* EmployeeSkillDeleteDialog,
+   */ EmployeeSkillUpdatePage
+} from './employee-skill.page-object';
 
 const expect = chai.expect;
 
 describe('EmployeeSkill e2e test', () => {
   let navBarPage: NavBarPage;
   let signInPage: SignInPage;
-  let employeeSkillUpdatePage: EmployeeSkillUpdatePage;
   let employeeSkillComponentsPage: EmployeeSkillComponentsPage;
-  /*let employeeSkillDeleteDialog: EmployeeSkillDeleteDialog;*/
+  let employeeSkillUpdatePage: EmployeeSkillUpdatePage;
+  /* let employeeSkillDeleteDialog: EmployeeSkillDeleteDialog; */
 
   before(async () => {
     await browser.get('/');
@@ -35,24 +38,24 @@ describe('EmployeeSkill e2e test', () => {
     await employeeSkillUpdatePage.cancel();
   });
 
-  /* it('should create and save EmployeeSkills', async () => {
+  /*  it('should create and save EmployeeSkills', async () => {
         const nbButtonsBeforeCreate = await employeeSkillComponentsPage.countDeleteButtons();
 
         await employeeSkillComponentsPage.clickOnCreateButton();
         await employeeSkillUpdatePage.setNameInput('name');
-        await employeeSkillUpdatePage.setLevelInput('5');
+        await employeeSkillUpdatePage.setLevelInput('9999999');
         // await employeeSkillUpdatePage.taskSelectLastOption();
         await employeeSkillUpdatePage.employeeSelectLastOption();
         await employeeSkillUpdatePage.teacherSelectLastOption();
         expect(await employeeSkillUpdatePage.getNameInput()).to.eq('name', 'Expected Name value to be equals to name');
-        expect(await employeeSkillUpdatePage.getLevelInput()).to.eq('5', 'Expected level value to be equals to 5');
+        expect(await employeeSkillUpdatePage.getLevelInput()).to.eq('9999999', 'Expected level value to be equals to 9999999');
         await employeeSkillUpdatePage.save();
         expect(await employeeSkillUpdatePage.getSaveButton().isPresent(), 'Expected save button disappear').to.be.false;
 
         expect(await employeeSkillComponentsPage.countDeleteButtons()).to.eq(nbButtonsBeforeCreate + 1, 'Expected one more entry in the table');
-    });*/
+    }); */
 
-  /* it('should delete last EmployeeSkill', async () => {
+  /*  it('should delete last EmployeeSkill', async () => {
         const nbButtonsBeforeDelete = await employeeSkillComponentsPage.countDeleteButtons();
         await employeeSkillComponentsPage.clickOnLastDeleteButton();
 
@@ -60,7 +63,7 @@ describe('EmployeeSkill e2e test', () => {
         await employeeSkillDeleteDialog.clickOnConfirmButton();
 
         expect(await employeeSkillComponentsPage.countDeleteButtons()).to.eq(nbButtonsBeforeDelete - 1);
-    });*/
+    }); */
 
   after(async () => {
     await navBarPage.autoSignOut();

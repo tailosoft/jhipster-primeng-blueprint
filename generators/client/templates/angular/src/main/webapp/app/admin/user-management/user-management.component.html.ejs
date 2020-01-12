@@ -30,15 +30,15 @@
                 <th<% if (databaseType !== 'cassandra') { %> pSortableColumn="email"<% } %>><span jhiTranslate="userManagement.email">Email</span><% if (databaseType !== 'cassandra') { %><p-sortIcon field="createdBy"></p-sortIcon><% } %></th>
                 <th></th>
                 <%_ if (enableTranslation) { _%>
-                <th<% if (databaseType !== 'cassandra') { %> pSortableColumn="langKey"<% } %>> <span jhiTranslate="userManagement.langKey">Lang Key</span><% if (databaseType !== 'cassandra') { %><p-sortIcon field="createdBy"></p-sortIcon><% } %></th>
+                <th scope="col" <% if (databaseType !== 'cassandra') { %> pSortableColumn="langKey"<% } %>> <span jhiTranslate="userManagement.langKey">Lang Key</span><% if (databaseType !== 'cassandra') { %><p-sortIcon field="createdBy"></p-sortIcon><% } %></th>
                 <%_ } _%>
-                <th><span jhiTranslate="userManagement.profiles">Profiles</span></th>
+                <th scope="col"><span jhiTranslate="userManagement.profiles">Profiles</span></th>
                 <%_ if (databaseType !== 'cassandra') { _%>
                 <th pSortableColumn="createdDate"><span jhiTranslate="userManagement.createdDate">Created Date</span><p-sortIcon field="createdBy"></p-sortIcon></th>
                 <th pSortableColumn="lastModifiedBy"><span jhiTranslate="userManagement.lastModifiedBy">Last Modified By</span><p-sortIcon field="createdBy"></p-sortIcon></th>
                 <th pSortableColumn="lastModifiedDate"><span jhiTranslate="userManagement.lastModifiedDate">Last Modified Date</span><p-sortIcon field="createdBy"></p-sortIcon></th>
                 <%_ } _%>
-                <th></th>
+                <th scope="col"></th>
             </tr>
             </ng-template>
             <ng-template pTemplate="body" let-user>
@@ -50,7 +50,7 @@
                     <button pButton class="ui-button-danger" (click)="setActive(user, true)" *ngIf="!user.activated"
                             [label]="'userManagement.deactivated' | translate"></button>
                     <button pButton class="ui-button-success" (click)="setActive(user, false)" *ngIf="user.activated"
-                            [disabled]="currentAccount.login === user.login" [label]="'userManagement.activated' | translate"></button>
+                            [disabled]="!currentAccount || currentAccount.login === user.login" [label]="'userManagement.activated' | translate"></button>
                 </td>
                 <% if (enableTranslation) { %><td>{{user.langKey}}</td><% } %>
                 <td>

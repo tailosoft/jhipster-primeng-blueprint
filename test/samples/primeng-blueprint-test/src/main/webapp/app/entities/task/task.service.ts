@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { DatePipe } from '@angular/common';
 import { DATE_FORMAT } from 'app/shared/constants/input.constants';
-import { map } from 'rxjs/operators';
 import { SERVER_API_URL } from 'app/app.constants';
 import { createRequestOption } from 'app/shared/util/request-util';
 import { ITask } from 'app/shared/model/task.model';
@@ -50,18 +50,18 @@ export class TaskService {
 
   protected convertDateFromClient(task: ITask): ITask {
     const copy: ITask = Object.assign({}, task, {
-      endDate: task.endDate != null ? this.datePipe.transform(task.endDate, DATE_FORMAT) : null,
-      createdAt: task.createdAt != null ? task.createdAt.toISOString() : null,
-      modifiedAt: task.modifiedAt != null ? task.modifiedAt.toISOString() : null
+      endDate: task.endDate != null ? this.datePipe.transform(task.endDate, DATE_FORMAT) : undefined,
+      createdAt: task.createdAt != null ? task.createdAt.toISOString() : undefined,
+      modifiedAt: task.modifiedAt != null ? task.modifiedAt.toISOString() : undefined
     });
     return copy;
   }
 
   protected convertDateFromServer(res: EntityResponseType): EntityResponseType {
     if (res.body) {
-      res.body.endDate = res.body.endDate != null ? new Date(res.body.endDate) : null;
-      res.body.createdAt = res.body.createdAt != null ? new Date(res.body.createdAt) : null;
-      res.body.modifiedAt = res.body.modifiedAt != null ? new Date(res.body.modifiedAt) : null;
+      res.body.endDate = res.body.endDate ? new Date(res.body.endDate) : undefined;
+      res.body.createdAt = res.body.createdAt ? new Date(res.body.createdAt) : undefined;
+      res.body.modifiedAt = res.body.modifiedAt ? new Date(res.body.modifiedAt) : undefined;
     }
     return res;
   }
@@ -69,9 +69,9 @@ export class TaskService {
   protected convertDateArrayFromServer(res: EntityArrayResponseType): EntityArrayResponseType {
     if (res.body) {
       res.body.forEach((task: ITask) => {
-        task.endDate = task.endDate != null ? new Date(task.endDate) : null;
-        task.createdAt = task.createdAt != null ? new Date(task.createdAt) : null;
-        task.modifiedAt = task.modifiedAt != null ? new Date(task.modifiedAt) : null;
+        task.endDate = task.endDate ? new Date(task.endDate) : undefined;
+        task.createdAt = task.createdAt ? new Date(task.createdAt) : undefined;
+        task.modifiedAt = task.modifiedAt ? new Date(task.modifiedAt) : undefined;
       });
     }
     return res;

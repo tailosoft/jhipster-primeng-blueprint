@@ -1,25 +1,31 @@
 import { Injectable } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
-import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot, Routes } from '@angular/router';
-import { UserRouteAccessService } from 'app/core';
-import { Observable, of } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { Resolve, ActivatedRouteSnapshot, Routes, Router } from '@angular/router';
+import { Observable, of, EMPTY } from 'rxjs';
+import { flatMap } from 'rxjs/operators';
+import { UserRouteAccessService } from 'app/core/auth/user-route-access-service';
+import { ICertificateType } from 'app/shared/model/certificate-type.model';
 import { CertificateTypeService } from './certificate-type.service';
 import { CertificateTypeComponent } from './certificate-type.component';
 import { CertificateTypeDetailComponent } from './certificate-type-detail.component';
 import { CertificateTypeUpdateComponent } from './certificate-type-update.component';
-import { ICertificateType } from 'app/shared/model/certificate-type.model';
 
 @Injectable({ providedIn: 'root' })
-export class CertificateTypeResolve implements Resolve<ICertificateType> {
-  constructor(private service: CertificateTypeService) {}
+export class CertificateTypeResolve implements Resolve<ICertificateType | null> {
+  constructor(private service: CertificateTypeService, private router: Router) {}
 
-  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<ICertificateType> {
+  resolve(route: ActivatedRouteSnapshot): Observable<ICertificateType | null> {
     const id = route.params['id'] ? route.params['id'] : null;
     if (id) {
       return this.service.find(id).pipe(
-        filter((response: HttpResponse<ICertificateType>) => response.ok),
-        map((certificateType: HttpResponse<ICertificateType>) => certificateType.body)
+        flatMap((certificateType: HttpResponse<ICertificateType>) => {
+          if (certificateType.body) {
+            return of(certificateType.body);
+          } else {
+            this.router.navigate(['404']);
+            return EMPTY;
+          }
+        })
       );
     }
     return of(null);

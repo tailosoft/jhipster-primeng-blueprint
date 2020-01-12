@@ -1,31 +1,14 @@
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { JhiLanguageService } from 'ng-jhipster';
-import { JhiLanguageHelper } from 'app/core';
 
-import { PrimengtestSharedModule } from 'app/shared';
-import {
-  EmployeeSkillCertificateComponent,
-  EmployeeSkillCertificateDetailComponent,
-  EmployeeSkillCertificateUpdateComponent,
-  employeeSkillCertificateRoute
-} from './';
-
-const ENTITY_STATES = [...employeeSkillCertificateRoute];
+import { PrimengtestSharedModule } from 'app/shared/shared.module';
+import { EmployeeSkillCertificateComponent } from './employee-skill-certificate.component';
+import { EmployeeSkillCertificateDetailComponent } from './employee-skill-certificate-detail.component';
+import { EmployeeSkillCertificateUpdateComponent } from './employee-skill-certificate-update.component';
+import { employeeSkillCertificateRoute } from './employee-skill-certificate.route';
 
 @NgModule({
-  imports: [PrimengtestSharedModule, RouterModule.forChild(ENTITY_STATES)],
-  declarations: [EmployeeSkillCertificateComponent, EmployeeSkillCertificateDetailComponent, EmployeeSkillCertificateUpdateComponent],
-  entryComponents: [EmployeeSkillCertificateComponent, EmployeeSkillCertificateUpdateComponent],
-  providers: [{ provide: JhiLanguageService, useClass: JhiLanguageService }],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  imports: [PrimengtestSharedModule, RouterModule.forChild(employeeSkillCertificateRoute)],
+  declarations: [EmployeeSkillCertificateComponent, EmployeeSkillCertificateDetailComponent, EmployeeSkillCertificateUpdateComponent]
 })
-export class PrimengtestEmployeeSkillCertificateModule {
-  constructor(private languageService: JhiLanguageService, private languageHelper: JhiLanguageHelper) {
-    this.languageHelper.language.subscribe((languageKey: string) => {
-      if (languageKey !== undefined) {
-        this.languageService.changeLanguage(languageKey);
-      }
-    });
-  }
-}
+export class PrimengtestEmployeeSkillCertificateModule {}

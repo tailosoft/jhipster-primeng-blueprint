@@ -16,15 +16,15 @@ import { Table } from 'primeng/table';
   templateUrl: './certificate-type.component.html'
 })
 export class CertificateTypeComponent implements OnInit, OnDestroy {
-  certificateTypes: ICertificateType[];
-  eventSubscriber: Subscription;
+  certificateTypes?: ICertificateType[];
+  eventSubscriber?: Subscription;
 
   private filtersDetails: { [_: string]: { matchMode?: string; flatten?: (_: any) => string; unflatten?: (_: string) => any } } = {
-    id: { matchMode: 'equals', unflatten: x => +x }
+    id: { matchMode: 'equals', unflatten: (x: string) => +x }
   };
 
   @ViewChild('certificateTypeTable', { static: true })
-  certificateTypeTable: Table;
+  certificateTypeTable!: Table;
 
   constructor(
     protected certificateTypeService: CertificateTypeService,
@@ -34,35 +34,37 @@ export class CertificateTypeComponent implements OnInit, OnDestroy {
     protected translateService: TranslateService
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loadAll();
     this.registerChangeInCertificateTypes();
   }
 
-  ngOnDestroy() {
-    this.eventManager.destroy(this.eventSubscriber);
+  ngOnDestroy(): void {
+    if (this.eventSubscriber) {
+      this.eventManager.destroy(this.eventSubscriber);
+    }
   }
 
-  loadAll() {
+  loadAll(): void {
     this.certificateTypeService
       .query()
       .pipe(
         filter((res: HttpResponse<ICertificateType[]>) => res.ok),
-        map((res: HttpResponse<ICertificateType[]>) => res.body)
+        map((res: HttpResponse<ICertificateType[]>) => res.body!)
       )
       .subscribe(
-        (res: ICertificateType[]) => {
-          this.certificateTypes = res;
+        (certificateTypes: ICertificateType[]) => {
+          this.certificateTypes = certificateTypes;
         },
         (res: HttpErrorResponse) => this.onError(res.message)
       );
   }
 
-  filter(value, field) {
+  filter(value: any, field: string): void {
     this.certificateTypeTable.filter(value, field, computeFilterMatchMode(this.filtersDetails[field]));
   }
 
-  delete(id: number) {
+  delete(id: number): void {
     this.confirmationService.confirm({
       header: this.translateService.instant('entity.delete.title'),
       message: this.translateService.instant('primengtestApp.certificateType.delete.question', { id }),
@@ -77,15 +79,15 @@ export class CertificateTypeComponent implements OnInit, OnDestroy {
     });
   }
 
-  trackId(index: number, item: ICertificateType) {
-    return item.id;
+  trackId(index: number, item: ICertificateType): string {
+    return '' + item.id;
   }
 
-  registerChangeInCertificateTypes() {
-    this.eventSubscriber = this.eventManager.subscribe('certificateTypeListModification', response => this.loadAll());
+  registerChangeInCertificateTypes(): void {
+    this.eventSubscriber = this.eventManager.subscribe('certificateTypeListModification', () => this.loadAll());
   }
 
-  protected onError(errorMessage: string) {
+  protected onError(errorMessage: string): void {
     this.messageService.add({ severity: 'error', summary: errorMessage });
   }
 }

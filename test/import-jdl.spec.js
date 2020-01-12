@@ -3,10 +3,9 @@ const fse = require('fs-extra');
 const fs = require('fs');
 const assert = require('yeoman-assert');
 const helpers = require('yeoman-test');
-const shelljs = require('shelljs');
-const walker = require('./path-walker');
-
+const rimraf = require('rimraf');
 const importJdl = require('generator-jhipster/cli/import-jdl');
+const walker = require('./path-walker');
 
 const noopFork = () => ({
     on(code, cb) {
@@ -14,22 +13,18 @@ const noopFork = () => ({
     }
 });
 
-let testDir;
+let testDir = '/tmp/primeng-blueprint-test';
 describe('Subgenerator client of primeng-blueprint JHipster blueprint', () => {
     describe('Sample test', () => {
         before(done => {
+            rimraf.sync(testDir);
             helpers
                 .run('generator-jhipster/generators/app')
-                .inTmpDir(dir => {
+                .inDir(testDir, dir => {
                     // importJdl doesn't haev a call back there we call the generators manually after it updates the json files
                     testDir = dir;
                     fse.copySync(path.join(__dirname, '../test/templates/primeng-blueprint-test'), dir);
-                    importJdl(
-                        ['jhipster.jh'],
-                        { skipInstall: true, noInsight: true, interactive: false, 'skip-git': false },
-                        {},
-                        noopFork
-                    )
+                    importJdl(['jhipster.jh'], { skipInstall: true, noInsight: true, interactive: false, 'skip-git': false }, {}, noopFork);
                 })
                 .withOptions({
                     'from-cli': true,
@@ -62,10 +57,7 @@ describe('Subgenerator client of primeng-blueprint JHipster blueprint', () => {
             // Adds your tests here
             console.log(testDir);
             const basePath = path.join(__dirname, './samples/primeng-blueprint-test');
-            const filesToTest = [
-                `${basePath}/src/main/`,
-                `${basePath}/src/test/`
-            ];
+            const filesToTest = [`${basePath}/src/main/`, `${basePath}/src/test/`];
             filesToTest.forEach(file =>
                 walker.walk(file).forEach(f => {
                     assert.file(path.join(testDir, f.substring(basePath.length)));

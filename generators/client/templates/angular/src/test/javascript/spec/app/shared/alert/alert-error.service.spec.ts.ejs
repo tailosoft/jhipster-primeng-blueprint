@@ -4,20 +4,20 @@ import { HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
 <%_ } _%>
 import { <%=angularXAppName%>TestModule } from '../../../test.module';
-import { <%=jhiPrefixCapitalized%>AlertErrorService } from 'app/shared/alert/alert-error.service';
+import { AlertErrorService } from 'app/shared/alert/alert-error.service';
 import { MessageService } from 'primeng/api';
 
 describe('Component Tests', () => {
     describe('Alert Error Component', () => {
-        let service: <%=jhiPrefixCapitalized%>AlertErrorService;
+        let service: AlertErrorService;
         let messageService: MessageService;
 
         beforeEach(() => {
             TestBed.configureTestingModule({
                 imports: [<%=angularXAppName%>TestModule<% if (enableTranslation) { %>, TranslateModule.forRoot()<% } %>],
-                providers: [<%=jhiPrefixCapitalized%>AlertErrorService, MessageService]
+                providers: [AlertErrorService, MessageService]
             })
-            service = TestBed.get(<%=jhiPrefixCapitalized%>AlertErrorService);
+            service = TestBed.get(AlertErrorService);
             messageService = TestBed.get(MessageService);
             spyOn(messageService, 'add');
         });

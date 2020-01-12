@@ -16,45 +16,43 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import {
-    <%=angularXAppName%>SharedCommonModule,
-    <%_ if (authenticationType !== 'oauth2') { _%>
-    <%=jhiPrefixCapitalized%>LoginModalComponent,
-    <%_ } _%>
-    HasAnyAuthorityDirective,
-    PrimeNGCommonModule
-} from './';
-
+import { NgModule } from '@angular/core';
+import { <%=angularXAppName%>SharedLibsModule } from './shared-libs.module';
+<%_ if (enableTranslation) { _%>
+import { FindLanguageFromKeyPipe } from './language/find-language-from-key.pipe';
+<%_ } _%>
+<%_ if (authenticationType !== 'oauth2') { _%>
+import { LoginModalComponent } from './login/login.component';
+<%_ } _%>
+import { HasAnyAuthorityDirective } from './auth/has-any-authority.directive';
+import { PrimeNGCommonModule } from 'app/shared/primeng-common.module';
 @NgModule({
     imports: [
-        <%=angularXAppName%>SharedCommonModule,
+        <%=angularXAppName%>SharedLibsModule,
         PrimeNGCommonModule
     ],
     declarations: [
+        <%_ if (enableTranslation) { _%>
+        FindLanguageFromKeyPipe,
+        <%_ } _%>
         <%_ if (authenticationType !== 'oauth2') { _%>
-        <%=jhiPrefixCapitalized%>LoginModalComponent,
+        LoginModalComponent,
         <%_ } _%>
         HasAnyAuthorityDirective
     ],
     <%_ if (authenticationType !== 'oauth2') { _%>
-    entryComponents: [<%=jhiPrefixCapitalized%>LoginModalComponent],
+    entryComponents: [LoginModalComponent],
     <%_ } _%>
     exports: [
-        <%=angularXAppName%>SharedCommonModule,
+        <%=angularXAppName%>SharedLibsModule,
+        <%_ if (enableTranslation) { _%>
+        FindLanguageFromKeyPipe,
+        <%_ } _%>
         <%_ if (authenticationType !== 'oauth2') { _%>
-        <%=jhiPrefixCapitalized%>LoginModalComponent,
+        LoginModalComponent,
         <%_ } _%>
         HasAnyAuthorityDirective,
         PrimeNGCommonModule
-    ],
-    schemas: [CUSTOM_ELEMENTS_SCHEMA]
-
+    ]
 })
-export class <%=angularXAppName%>SharedModule {
-    static forRoot() {
-        return {
-            ngModule: <%=angularXAppName%>SharedModule
-        };
-    }
-}
+export class <%=angularXAppName%>SharedModule {}

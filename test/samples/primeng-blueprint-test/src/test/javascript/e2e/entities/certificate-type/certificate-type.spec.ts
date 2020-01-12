@@ -1,5 +1,4 @@
-/* tslint:disable no-unused-expression */
-import { browser, by, ExpectedConditions as ec } from 'protractor';
+import { browser, by, ExpectedConditions as ec, promise } from 'protractor';
 import { NavBarPage, SignInPage } from '../../page-objects/jhi-page-objects';
 
 import { CertificateTypeComponentsPage, CertificateTypeDeleteDialog, CertificateTypeUpdatePage } from './certificate-type.page-object';
@@ -9,8 +8,8 @@ const expect = chai.expect;
 describe('CertificateType e2e test', () => {
   let navBarPage: NavBarPage;
   let signInPage: SignInPage;
-  let certificateTypeUpdatePage: CertificateTypeUpdatePage;
   let certificateTypeComponentsPage: CertificateTypeComponentsPage;
+  let certificateTypeUpdatePage: CertificateTypeUpdatePage;
   let certificateTypeDeleteDialog: CertificateTypeDeleteDialog;
 
   before(async () => {

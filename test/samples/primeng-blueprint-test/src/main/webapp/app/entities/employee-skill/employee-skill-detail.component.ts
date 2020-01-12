@@ -8,17 +8,17 @@ import { IEmployeeSkill } from 'app/shared/model/employee-skill.model';
   templateUrl: './employee-skill-detail.component.html'
 })
 export class EmployeeSkillDetailComponent implements OnInit {
-  employeeSkill: IEmployeeSkill;
+  employeeSkill: IEmployeeSkill | null = null;
 
   constructor(protected activatedRoute: ActivatedRoute) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.activatedRoute.data.subscribe(({ employeeSkill }) => {
       this.employeeSkill = employeeSkill;
     });
   }
 
-  previousState() {
+  previousState(): void {
     window.history.back();
   }
 }

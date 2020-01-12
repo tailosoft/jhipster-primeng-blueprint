@@ -5,19 +5,19 @@ export class EmployeeSkillCertificateComponentsPage {
   deleteButtons = element.all(by.css('jhi-employee-skill-certificate div table .ui-button-danger'));
   title = element.all(by.css('jhi-employee-skill-certificate div h2#page-heading span')).first();
 
-  async clickOnCreateButton(timeout?: number) {
+  async clickOnCreateButton(): Promise<void> {
     await this.createButton.click();
   }
 
-  async clickOnLastDeleteButton(timeout?: number) {
+  async clickOnLastDeleteButton(): Promise<void> {
     await this.deleteButtons.last().click();
   }
 
-  async countDeleteButtons() {
+  async countDeleteButtons(): Promise<number> {
     return this.deleteButtons.count();
   }
 
-  async getTitle() {
+  async getTitle(): Promise<string> {
     return this.title.getAttribute('jhiTranslate');
   }
 }
@@ -32,29 +32,29 @@ export class EmployeeSkillCertificateUpdatePage {
   skillSelect = element(by.id('field_skill'));
   skillEmployeeSelect = element(by.id('field_skillEmployee'));
 
-  async getPageTitle() {
+  async getPageTitle(): Promise<string> {
     return this.pageTitle.getAttribute('jhiTranslate');
   }
 
-  async setGradeInput(grade) {
+  async setGradeInput(grade: string): Promise<void> {
     await this.gradeInput.sendKeys(grade);
   }
 
-  async getGradeInput() {
+  async getGradeInput(): Promise<string> {
     return await this.gradeInput.getAttribute('value');
   }
 
-  async setDateInput(date) {
+  async setDateInput(date: string): Promise<void> {
     await this.dateInput.element(by.css('.ui-inputtext')).sendKeys(date);
     await this.dateInput.element(by.tagName('.ui-calendar-button')).click();
     await browser.wait(ec.invisibilityOf(this.dateInput.element(by.css('.ui-datepicker'))), 5000);
   }
 
-  async getDateInput() {
+  async getDateInput(): Promise<string> {
     return await this.dateInput.element(by.css('.ui-inputtext')).getAttribute('value');
   }
 
-  async typeSelectLastOption(timeout?: number) {
+  async typeSelectLastOption(): Promise<void> {
     await this.typeSelect.click();
     await this.typeSelect
       .all(by.tagName('.ui-dropdown-item'))
@@ -67,11 +67,11 @@ export class EmployeeSkillCertificateUpdatePage {
     return this.typeSelect;
   }
 
-  async getTypeSelectedOption() {
+  async getTypeSelectedOption(): Promise<string> {
     return await this.typeSelect.element(by.css('.ui-dropdown-label')).getText();
   }
 
-  async skillSelectLastOption(timeout?: number) {
+  async skillSelectLastOption(): Promise<void> {
     await this.skillSelect.click();
     await this.skillSelect
       .all(by.tagName('.ui-dropdown-item'))
@@ -84,11 +84,11 @@ export class EmployeeSkillCertificateUpdatePage {
     return this.skillSelect;
   }
 
-  async getSkillSelectedOption() {
+  async getSkillSelectedOption(): Promise<string> {
     return await this.skillSelect.element(by.css('.ui-dropdown-label')).getText();
   }
 
-  async skillEmployeeSelectLastOption(timeout?: number) {
+  async skillEmployeeSelectLastOption(): Promise<void> {
     await this.skillEmployeeSelect.click();
     await this.skillEmployeeSelect
       .all(by.tagName('.ui-dropdown-item'))
@@ -101,15 +101,15 @@ export class EmployeeSkillCertificateUpdatePage {
     return this.skillEmployeeSelect;
   }
 
-  async getSkillEmployeeSelectedOption() {
+  async getSkillEmployeeSelectedOption(): Promise<string> {
     return await this.skillEmployeeSelect.element(by.css('.ui-dropdown-label')).getText();
   }
 
-  async save(timeout?: number) {
+  async save(): Promise<void> {
     await this.saveButton.click();
   }
 
-  async cancel(timeout?: number) {
+  async cancel(): Promise<void> {
     await this.cancelButton.click();
   }
 
@@ -121,7 +121,7 @@ export class EmployeeSkillCertificateUpdatePage {
 export class EmployeeSkillCertificateDeleteDialog {
   private confirmButton = element(by.css('p-confirmdialog .ui-dialog-footer button:first-of-type'));
 
-  async clickOnConfirmButton(timeout?: number) {
+  async clickOnConfirmButton(): Promise<void> {
     await this.confirmButton.click();
   }
 }

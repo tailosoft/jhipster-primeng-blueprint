@@ -33,14 +33,14 @@
                     <span jhiTranslate="{{'<%= angularAppName %>.<%= fieldType %>.' + <%= entityInstance %>.<%= fieldName %>}}">{{<%= entityInstance %>.<%= fieldName %>}}</span>
                     <%_ } else if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent === 'image') { _%>
                     <div *ngIf="<%= entityInstance %>.<%= fieldName %>">
-                        <a (click)="openFile(<%= entityInstance %>.<%= fieldName %>ContentType, <%= entityInstance %>.<%= fieldName %>)">
+                        <a (click)="openFile(<%= entityInstance %>.<%= fieldName %>ContentType!, <%= entityInstance %>.<%= fieldName %>)">
                             <img [src]="'data:' + <%=entityInstance %>.<%= fieldName %>ContentType + ';base64,' + <%= entityInstance %>.<%= fieldName %>" style="max-width: 100%;" alt="<%=entityInstance %> image"/>
                         </a>
                         {{<%= entityInstance %>.<%= fieldName %>ContentType}}, {{byteSize(<%= entityInstance %>.<%= fieldName %>)}}
                     </div>
                     <%_ } else if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent === 'any') { _%>
                     <div *ngIf="<%= entityInstance %>.<%= fieldName %>">
-                        <a (click)="openFile(<%= entityInstance %>.<%= fieldName %>ContentType, <%= entityInstance %>.<%= fieldName %>)" jhiTranslate="entity.action.open">open</a>
+                        <a (click)="openFile(<%= entityInstance %>.<%= fieldName %>ContentType!, <%= entityInstance %>.<%= fieldName %>)" jhiTranslate="entity.action.open">open</a>
                         {{<%= entityInstance %>.<%= fieldName %>ContentType}}, {{byteSize(<%= entityInstance %>.<%= fieldName %>)}}
                     </div>
                     <%_ } else { _%>
@@ -105,7 +105,9 @@
             </dl>
 
             <button pButton type="submit" (click)="previousState()" class="ui-button-info" icon="pi pi-arrow-left" [label]="'entity.action.back' | translate"></button>
+            <%_ if (!readOnly) { _%>
             <button pButton type="button" icon="pi pi-pencil" [label]="'entity.action.edit' | translate" [routerLink]="['/<%= entityUrl %>', <%- pkData.length === 1 ? `${entityInstance}.${pkName}` : '{ '+ pkData.map(pk => `${pk.name}: ${entityInstance}.${pk.name}`).join(', ') + ' }' _%>, 'edit']"></button>
+            <%_ } _%>
         </div>
     </div>
 </div>
