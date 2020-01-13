@@ -62,7 +62,7 @@ import { <%= pk.entity.angularName%>Service } from 'app/entities/<%= pk.entity.p
     <%_ } _%>
 <%_ } _%>
 import { Table } from 'primeng/table';
-<%_ if(jpaMetamodelFiltering && fields.some(f => f.fieldType === 'LocalDate' )){ _%>
+<%_ if(jpaMetamodelFiltering && fields.some(f => ['LocalDate', 'Instant', 'ZonedDateTime'].includes(f.fieldType))){ _%>
 import { DatePipe } from '@angular/common';
 <%_ } _%>
 
@@ -149,7 +149,7 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy {
         protected confirmationService: ConfirmationService,
 <%_ } _%>
         protected translateService: TranslateService,
-        <%_ if(jpaMetamodelFiltering && fields.some(f => f.fieldType === 'LocalDate' )){ _%>
+        <%_ if(jpaMetamodelFiltering && fields.some(f => ['LocalDate', 'Instant', 'ZonedDateTime'].includes(f.fieldType))){ _%>
         protected datePipe: DatePipe,
         <%_ } _%>
     ) {
