@@ -12,9 +12,9 @@
                 <label jhiTranslate="primengtestApp.certificateType.name" for="field_name">Name</label>
                 <input pInputText type="text" name="name" id="field_name" formControlName="name"/>
                 <div class="validation-messages">
-                    <ng-container *ngIf="editForm.get('name').invalid && (editForm.get('name').dirty || editForm.get('name').touched)">
+                    <ng-container *ngIf="editForm.get('name')!.invalid && (editForm.get('name')!.dirty || editForm.get('name')!.touched)">
                         <p-message severity="error"
-                                   *ngIf="editForm.get('name').errors.required" [text]="'entity.validation.required' | translate">
+                                   *ngIf="editForm.get('name')!.errors!.required" [text]="'entity.validation.required' | translate">
                         </p-message>
                     </ng-container>
                 </div>

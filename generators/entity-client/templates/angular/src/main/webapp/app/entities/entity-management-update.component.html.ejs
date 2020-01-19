@@ -73,55 +73,55 @@ _%>
 <%= (isAutoIncrement && fields[idx].partOfId) ? '    ' : '' -%>
                 <div class="validation-messages">
     <%_ if (fields[idx].fieldValidate === true) { _%>
-                    <ng-container *ngIf="editForm.get('<%= fieldName %>').invalid && (editForm.get('<%= fieldName %>').dirty || editForm.get('<%= fieldName %>').touched)">
+                    <ng-container *ngIf="editForm.get('<%= fieldName %>')!.invalid && (editForm.get('<%= fieldName %>')!.dirty || editForm.get('<%= fieldName %>')!.touched)">
         <%_ if (fields[idx].fieldValidateRules.includes('required')) { _%>
                         <p-message severity="error"
-                                   *ngIf="editForm.get('<%= fieldName %>').errors.required" [text]="'entity.validation.required' | translate">
+                                   *ngIf="editForm.get('<%= fieldName %>')!.errors!.required" [text]="'entity.validation.required' | translate">
                         </p-message>
         <%_ } _%>
         <%_ if (fields[idx].fieldValidateRules.includes('minlength')) { _%>
                         <p-message severity="error"
-                               *ngIf="editForm.get('<%= fieldName %>').errors.minlength" [text]="'entity.validation.minlength' | translate : { min: <%= fields[idx].fieldValidateRulesMinlength %> }">
+                               *ngIf="editForm.get('<%= fieldName %>')!.errors!.minlength" [text]="'entity.validation.minlength' | translate : { min: <%= fields[idx].fieldValidateRulesMinlength %> }">
                         </p-message>
         <%_ } _%>
         <%_ if (fields[idx].fieldValidateRules.includes('maxlength')) { _%>
                         <p-message severity="error"
-                               *ngIf="editForm.get('<%= fieldName %>').errors.maxlength" [text]="'entity.validation.maxlength' | translate : { max: <%= fields[idx].fieldValidateRulesMaxlength %> }">
+                               *ngIf="editForm.get('<%= fieldName %>')!.errors!.maxlength" [text]="'entity.validation.maxlength' | translate : { max: <%= fields[idx].fieldValidateRulesMaxlength %> }">
                         </p-message>
         <%_ } _%>
         <%_ if (fields[idx].fieldValidateRules.includes('min')) { _%>
                         <p-message severity="error"
-                               *ngIf="editForm.get('<%= fieldName %>').errors.min" [text]="'entity.validation.min' | translate : { min: <%= fields[idx].fieldValidateRulesMin %> }">
+                               *ngIf="editForm.get('<%= fieldName %>')!.errors!.min" [text]="'entity.validation.min' | translate : { min: <%= fields[idx].fieldValidateRulesMin %> }">
                         </p-message>
         <%_ } _%>
         <%_ if (fields[idx].fieldValidateRules.includes('max')) { _%>
                         <p-message severity="error"
-                               *ngIf="editForm.get('<%= fieldName %>').errors.max" [text]="'entity.validation.max' | translate : { max: <%= fields[idx].fieldValidateRulesMax %> }">
+                               *ngIf="editForm.get('<%= fieldName %>')!.errors!.max" [text]="'entity.validation.max' | translate : { max: <%= fields[idx].fieldValidateRulesMax %> }">
                         </p-message>
         <%_ } _%>
         <%_ if (fields[idx].fieldValidateRules.includes('minbytes')) { _%>
                     <p-message severity="error"
-                           *ngIf="editForm.get('<%= fieldName %>').errors.minbytes" [text]="'entity.validation.minbytes' | translate : { min: <%= fields[idx].fieldValidateRulesMinbytes %> }">
+                           *ngIf="editForm.get('<%= fieldName %>')!.errors!.minbytes" [text]="'entity.validation.minbytes' | translate : { min: <%= fields[idx].fieldValidateRulesMinbytes %> }">
                         </p-message>
         <%_ } _%>
         <%_ if (fields[idx].fieldValidateRules.includes('maxbytes')) { _%>
                         <p-message severity="error"
-                               *ngIf="editForm.get('<%= fieldName %>').errors.maxbytes" [text]="'entity.validation.maxbytes' | translate : { max: <%= fields[idx].fieldValidateRulesMaxbytes %> }">
+                               *ngIf="editForm.get('<%= fieldName %>')!.errors!.maxbytes" [text]="'entity.validation.maxbytes' | translate : { max: <%= fields[idx].fieldValidateRulesMaxbytes %> }">
                         </p-message>
         <%_ } _%>
         <%_ if (fields[idx].fieldValidateRules.includes('pattern')) { _%>
                         <p-message severity="error"
-                               *ngIf="editForm.get('<%= fieldName %>').errors.pattern" [text]="'entity.validation.pattern' | translate : { pattern: '<%= fieldNameHumanized %>' }">
+                               *ngIf="editForm.get('<%= fieldName %>')!.errors!.pattern" [text]="'entity.validation.pattern' | translate : { pattern: '<%= fieldNameHumanized %>' }">
                         </p-message>
         <%_ } _%>
         <%_ if (['Integer', 'Long', 'Float', 'Double', 'BigDecimal', 'Duration'].includes(fieldType)) { _%>
                         <p-message severity="error"
-                            [hidden]="!editForm.get('<%= fieldName %>')?.errors?.number" [text]="'entity.validation.number' | translate">
+                            [hidden]="!editForm.get('<%= fieldName %>')!.errors!.number" [text]="'entity.validation.number' | translate">
                         </p-message>
         <%_ } _%>
         <%_ if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
                         <p-message severity="error"
-                            [hidden]="!editForm.get('<%= fieldName %>').errors?.ZonedDateTimelocal" [text]="'entity.validation.ZonedDateTimelocal' | translate">
+                            [hidden]="!editForm.get('<%= fieldName %>')!.errors!.ZonedDateTimelocal" [text]="'entity.validation.ZonedDateTimelocal' | translate">
                         </p-message>
         <%_ } _%>
                     </ng-container>
@@ -155,9 +155,9 @@ _%>
                             placeholder="Choose" optionLabel="<%=otherEntityField %>"<%- relationshipRequired?'':' [showClear]="true"' %>></p-dropdown>
                 <div class="validation-messages">
             <%_ if (relationshipRequired) { _%>
-                    <ng-container *ngIf="editForm.get('<%= relationshipName %>').invalid && (editForm.get('<%= relationshipName %>').dirty || editForm.get('<%= relationshipName %>').touched)">
+                    <ng-container *ngIf="editForm.get('<%= relationshipName %>')!.invalid && (editForm.get('<%= relationshipName %>')!.dirty || editForm.get('<%= relationshipName %>')!.touched)">
                         <p-message severity="error"
-                                   *ngIf="editForm.get('<%= relationshipName %>').errors.required" [text]="'entity.validation.required' | translate">
+                                   *ngIf="editForm.get('<%= relationshipName %>')!.errors!.required" [text]="'entity.validation.required' | translate">
                         </p-message>
                     </ng-container>
             <%_ } _%>
@@ -170,9 +170,9 @@ _%>
                             placeholder="Choose" optionLabel="<%= pk.otherEntityField %>" optionValue="<%= pk.field.fieldName %>"<%- relationshipRequired?'':' [showClear]="true"' %>></p-dropdown>
                 <div class="validation-messages">
                 <%_ if (relationshipRequired) { _%>
-                    <ng-container *ngIf="editForm.get('<%= relationshipName %><%= pk.nameCapitalized %>').invalid && (editForm.get('<%= relationshipName %><%= pk.nameCapitalized %>').dirty || editForm.get('<%= relationshipName %><%= pk.nameCapitalized %>').touched)">
+                    <ng-container *ngIf="editForm.get('<%= relationshipName %><%= pk.nameCapitalized %>')!.invalid && (editForm.get('<%= relationshipName %><%= pk.nameCapitalized %>')!.dirty || editForm.get('<%= relationshipName %><%= pk.nameCapitalized %>')!.touched)">
                         <p-message severity="error"
-                                   *ngIf="editForm.get('<%= relationshipName %><%= pk.nameCapitalized %>').errors.required" [text]="'entity.validation.required' | translate">
+                                   *ngIf="editForm.get('<%= relationshipName %><%= pk.nameCapitalized %>')!.errors!.required" [text]="'entity.validation.required' | translate">
                         </p-message>
                     </ng-container>
                 <%_ } _%>
@@ -187,9 +187,9 @@ _%>
                 </p-multiSelect>
                 <div class="validation-messages">
         <%_ if (relationshipRequired) { _%>
-                    <ng-container *ngIf="editForm.get('<%=relationshipFieldNamePlural %>').invalid && (editForm.get('<%=relationshipFieldNamePlural %>').dirty || editForm.get('<%=relationshipFieldNamePlural %>').touched)">
+                    <ng-container *ngIf="editForm.get('<%=relationshipFieldNamePlural %>')!.invalid && (editForm.get('<%=relationshipFieldNamePlural %>')!.dirty || editForm.get('<%=relationshipFieldNamePlural %>')!.touched)">
                         <p-message severity="error"
-                                   *ngIf="editForm.get('<%=relationshipFieldNamePlural %>').errors.required" [text]="'entity.validation.required' | translate">
+                                   *ngIf="editForm.get('<%=relationshipFieldNamePlural %>')!.errors!.required" [text]="'entity.validation.required' | translate">
                         </p-message>
                     </ng-container>
         <%_ } _%>

@@ -169,7 +169,7 @@ export class EmployeeSkillCertificateComponent implements OnInit, OnDestroy {
     this.messageService.add({ severity: 'error', summary: errorMessage });
   }
 
-  onDateSelect(dateRange: Date[], column: string, time = false): void {
+  onDateSelect(dateRange: Date[] | undefined, column: string, time = false): void {
     const dateToString = time ? (x: Date) => x && x.toISOString() : (x: Date) => x && this.datePipe.transform(x, 'yyyy-MM-dd');
     if (dateRange) {
       this.filter(dateRange.map(dateToString), column);

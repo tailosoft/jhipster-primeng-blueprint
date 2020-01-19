@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { PrimengtestSharedModule } from 'app/shared/shared.module';
@@ -9,6 +9,7 @@ import { taskRoute } from './task.route';
 
 @NgModule({
   imports: [PrimengtestSharedModule, RouterModule.forChild(taskRoute)],
-  declarations: [TaskComponent, TaskDetailComponent, TaskUpdateComponent]
+  declarations: [TaskComponent, TaskDetailComponent, TaskUpdateComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class PrimengtestTaskModule {}

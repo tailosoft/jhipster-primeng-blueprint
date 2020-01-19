@@ -52,7 +52,7 @@
                 </th>
                 <th>
                     <p-multiSelect [options]="typeOptions" [ngModel]="taskTable.filters.type?.value"
-                                   (ngModelChange)="taskTable.filter($event, 'type', 'in')">
+                                   (ngModelChange)="filter($event, 'type')">
                         <ng-template let-type pTemplate="item">{{'primengtestApp.TaskType.' + type.label | translate}}</ng-template>
                     </p-multiSelect>
                 </th>
@@ -64,7 +64,7 @@
                 </th>
                 <th>
                     <p-triStateCheckbox [ngModel]="taskTable.filters.billable?.value"
-                                        (ngModelChange)="taskTable.filter($event, 'done')"></p-triStateCheckbox>
+                                        (ngModelChange)="filter($event, 'done')"></p-triStateCheckbox>
                 </th>
                 <th>
                 </th>

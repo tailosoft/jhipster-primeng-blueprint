@@ -12,9 +12,9 @@
                 <label jhiTranslate="primengtestApp.taskComment.value" for="field_value">Value</label>
                 <input pInputText type="text" name="value" id="field_value" formControlName="value"/>
                 <div class="validation-messages">
-                    <ng-container *ngIf="editForm.get('value').invalid && (editForm.get('value').dirty || editForm.get('value').touched)">
+                    <ng-container *ngIf="editForm.get('value')!.invalid && (editForm.get('value')!.dirty || editForm.get('value')!.touched)">
                         <p-message severity="error"
-                                   *ngIf="editForm.get('value').errors.required" [text]="'entity.validation.required' | translate">
+                                   *ngIf="editForm.get('value')!.errors!.required" [text]="'entity.validation.required' | translate">
                         </p-message>
                     </ng-container>
                 </div>
@@ -23,9 +23,9 @@
                 <p-dropdown id="field_task" name="task" [options]="taskOptions" formControlName="taskId" [lazyLoadOnInit]="true" [filter]="true" [filterValue]="taskFilterValue"
                             placeholder="Choose" optionLabel="name" optionValue="id"></p-dropdown>
                 <div class="validation-messages">
-                    <ng-container *ngIf="editForm.get('taskId').invalid && (editForm.get('taskId').dirty || editForm.get('taskId').touched)">
+                    <ng-container *ngIf="editForm.get('taskId')!.invalid && (editForm.get('taskId')!.dirty || editForm.get('taskId')!.touched)">
                         <p-message severity="error"
-                                   *ngIf="editForm.get('taskId').errors.required" [text]="'entity.validation.required' | translate">
+                                   *ngIf="editForm.get('taskId')!.errors!.required" [text]="'entity.validation.required' | translate">
                         </p-message>
                     </ng-container>
                 </div>

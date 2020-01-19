@@ -16,7 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { NgModule } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { <%= angularXAppName %>SharedModule } from 'app/shared/shared.module';
@@ -38,7 +38,8 @@ import { <%= entityInstance %>Route } from './<%= entityFileName %>.route';
         <%_ if (!readOnly) { _%>
         <%= entityAngularName %>UpdateComponent,
         <%_ } %>
-    ]
+    ],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class <%= locals.microserviceName ? upperFirstCamelCase(locals.microserviceName) : angularXAppName %><%= entityAngularName %>Module {
 }

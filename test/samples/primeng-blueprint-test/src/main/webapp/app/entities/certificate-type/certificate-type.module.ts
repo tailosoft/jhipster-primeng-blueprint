@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { PrimengtestSharedModule } from 'app/shared/shared.module';
@@ -9,6 +9,7 @@ import { certificateTypeRoute } from './certificate-type.route';
 
 @NgModule({
   imports: [PrimengtestSharedModule, RouterModule.forChild(certificateTypeRoute)],
-  declarations: [CertificateTypeComponent, CertificateTypeDetailComponent, CertificateTypeUpdateComponent]
+  declarations: [CertificateTypeComponent, CertificateTypeDetailComponent, CertificateTypeUpdateComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class PrimengtestCertificateTypeModule {}

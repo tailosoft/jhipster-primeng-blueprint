@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { PrimengtestSharedModule } from 'app/shared/shared.module';
@@ -9,6 +9,7 @@ import { employeeSkillCertificateRoute } from './employee-skill-certificate.rout
 
 @NgModule({
   imports: [PrimengtestSharedModule, RouterModule.forChild(employeeSkillCertificateRoute)],
-  declarations: [EmployeeSkillCertificateComponent, EmployeeSkillCertificateDetailComponent, EmployeeSkillCertificateUpdateComponent]
+  declarations: [EmployeeSkillCertificateComponent, EmployeeSkillCertificateDetailComponent, EmployeeSkillCertificateUpdateComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class PrimengtestEmployeeSkillCertificateModule {}

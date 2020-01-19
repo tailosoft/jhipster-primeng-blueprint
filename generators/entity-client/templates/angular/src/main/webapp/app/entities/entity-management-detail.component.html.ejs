@@ -19,7 +19,7 @@
 <div class="row justify-content-center">
     <div class="col-8">
         <div *ngIf="<%= entityInstance %>">
-            <h2><span jhiTranslate="<%= i18nKeyPrefix %>.detail.title"><%= entityClassHumanized %></span> {{<%= entityInstance %>.id}}</h2>
+            <h2><span jhiTranslate="<%= i18nKeyPrefix %>.detail.title"><%= entityClassHumanized %></span> <%= pkData.map(pk => `{{${entityInstance}.${pk.name}}}`).join(' / ') %></h2>
             <hr>
             <dl class="row-md jh-entity-details">
                 <%_ for (idx in fields) {

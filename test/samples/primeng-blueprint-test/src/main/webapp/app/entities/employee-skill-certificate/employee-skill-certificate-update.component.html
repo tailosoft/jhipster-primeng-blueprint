@@ -6,21 +6,21 @@
                 <label jhiTranslate="primengtestApp.employeeSkillCertificate.grade" for="field_grade">Grade</label>
                 <input pInputText type="number" name="grade" id="field_grade" formControlName="grade"/>
                 <div class="validation-messages">
-                    <ng-container *ngIf="editForm.get('grade').invalid && (editForm.get('grade').dirty || editForm.get('grade').touched)">
+                    <ng-container *ngIf="editForm.get('grade')!.invalid && (editForm.get('grade')!.dirty || editForm.get('grade')!.touched)">
                         <p-message severity="error"
-                                   *ngIf="editForm.get('grade').errors.required" [text]="'entity.validation.required' | translate">
+                                   *ngIf="editForm.get('grade')!.errors!.required" [text]="'entity.validation.required' | translate">
                         </p-message>
                         <p-message severity="error"
-                            [hidden]="!editForm.get('grade')?.errors?.number" [text]="'entity.validation.number' | translate">
+                            [hidden]="!editForm.get('grade')!.errors!.number" [text]="'entity.validation.number' | translate">
                         </p-message>
                     </ng-container>
                 </div>
                 <label jhiTranslate="primengtestApp.employeeSkillCertificate.date" for="field_date">Date</label>
                 <p-calendar id="field_date" formControlName="date" [showIcon]="true"></p-calendar>
                 <div class="validation-messages">
-                    <ng-container *ngIf="editForm.get('date').invalid && (editForm.get('date').dirty || editForm.get('date').touched)">
+                    <ng-container *ngIf="editForm.get('date')!.invalid && (editForm.get('date')!.dirty || editForm.get('date')!.touched)">
                         <p-message severity="error"
-                                   *ngIf="editForm.get('date').errors.required" [text]="'entity.validation.required' | translate">
+                                   *ngIf="editForm.get('date')!.errors!.required" [text]="'entity.validation.required' | translate">
                         </p-message>
                     </ng-container>
                 </div>
@@ -29,9 +29,9 @@
                 <p-dropdown id="field_type" name="type" [options]="typeOptions" formControlName="typeId" [readonly]="edit" [lazyLoadOnInit]="true" [filter]="true" [filterValue]="typeFilterValue"
                             placeholder="Choose" optionLabel="name" optionValue="id"></p-dropdown>
                 <div class="validation-messages">
-                    <ng-container *ngIf="editForm.get('typeId').invalid && (editForm.get('typeId').dirty || editForm.get('typeId').touched)">
+                    <ng-container *ngIf="editForm.get('typeId')!.invalid && (editForm.get('typeId')!.dirty || editForm.get('typeId')!.touched)">
                         <p-message severity="error"
-                                   *ngIf="editForm.get('typeId').errors.required" [text]="'entity.validation.required' | translate">
+                                   *ngIf="editForm.get('typeId')!.errors!.required" [text]="'entity.validation.required' | translate">
                         </p-message>
                     </ng-container>
                 </div>
@@ -40,9 +40,9 @@
                             [virtualScroll]="true" [lazy]="true" [rows]="10" (onLazyLoad)="onSkillLazyLoadEvent($event)" [lazyLoadOnInit]="true" [filter]="true" [filterValue]="skillFilterValue"
                             placeholder="Choose" optionLabel="name" optionValue="name"></p-dropdown>
                 <div class="validation-messages">
-                    <ng-container *ngIf="editForm.get('skillName').invalid && (editForm.get('skillName').dirty || editForm.get('skillName').touched)">
+                    <ng-container *ngIf="editForm.get('skillName')!.invalid && (editForm.get('skillName')!.dirty || editForm.get('skillName')!.touched)">
                         <p-message severity="error"
-                                   *ngIf="editForm.get('skillName').errors.required" [text]="'entity.validation.required' | translate">
+                                   *ngIf="editForm.get('skillName')!.errors!.required" [text]="'entity.validation.required' | translate">
                         </p-message>
                     </ng-container>
                 </div>
@@ -51,9 +51,9 @@
                             [virtualScroll]="true" [lazy]="true" [rows]="10" (onLazyLoad)="onSkillEmployeeLazyLoadEvent($event)" [lazyLoadOnInit]="true" [filter]="true" [filterValue]="skillEmployeeFilterValue"
                             placeholder="Choose" optionLabel="fullname" optionValue="username"></p-dropdown>
                 <div class="validation-messages">
-                    <ng-container *ngIf="editForm.get('skillEmployeeUsername').invalid && (editForm.get('skillEmployeeUsername').dirty || editForm.get('skillEmployeeUsername').touched)">
+                    <ng-container *ngIf="editForm.get('skillEmployeeUsername')!.invalid && (editForm.get('skillEmployeeUsername')!.dirty || editForm.get('skillEmployeeUsername')!.touched)">
                         <p-message severity="error"
-                                   *ngIf="editForm.get('skillEmployeeUsername').errors.required" [text]="'entity.validation.required' | translate">
+                                   *ngIf="editForm.get('skillEmployeeUsername')!.errors!.required" [text]="'entity.validation.required' | translate">
                         </p-message>
                     </ng-container>
                 </div>
