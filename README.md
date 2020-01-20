@@ -88,7 +88,7 @@ jhipster -d --blueprint primeng-blueprint
 
 ```
 
-#Contribute
+# Contribute
 
 To make it it easy to keep up with the latest jhipster version, we have a branch jhipster-upstream with the original content of the original jhipster generator.
 On each upgrade we edit the needed file and merge back into master (or feature branch).
@@ -97,6 +97,7 @@ once changes are made, `npm run test` one the project insures that application g
 This creates a new project under /tmp/primeng-blueprint-test we use it to run our tests:
 - `npm run test` for angular unit tests (running tests on the sample filder doesn't lint well du to eslint picking up the parent project config I suppose)
 - `npm run e2e` for e2e tests using an already server https://github.com/yelhouti/generator-jhipster-composite-key-server (this project supports composites keys and has the same entities...) (do nor forget to change the generated protractor.conf to use localhost:9000 instead of 8080)
+- `npm build` to make sure that AOT is still working (strict null checks in the HTML...)
 
 Using the samples project makes this code very well suites for test driven development.
 
