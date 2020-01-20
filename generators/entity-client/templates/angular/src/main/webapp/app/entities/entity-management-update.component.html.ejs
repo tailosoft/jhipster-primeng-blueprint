@@ -48,7 +48,7 @@ _%>
 <%= (isAutoIncrement && fields[idx].partOfId) ? '    ' : '' -%>
                 <label jhiTranslate="<%= translationKey %>" for="field_<%= fieldName %>"<% if (fields[idx].javadoc) { if (enableTranslation) { %> [pTooltip]="'<%= i18nKeyPrefix %>.help.<%= fieldName %>' | translate"<% } else { %> pTooltip="<%= fields[idx].javadoc %>"<% } } %>><%= fieldNameHumanized %></label>
     <%_ if (fields[idx].fieldIsEnum) { _%>
-                <p-dropdown [options]="<%= fields[idx].fieldName %>Options" name="<%= fieldName %>" formControlName="<%= fieldName %>" id="field_<%= fieldName %>" placeholder="Choose"<%_ if(!fields[idx].fieldValidateRules.includes('required')){ %> [showClear]="true"<%_ } _%><% if (fields[idx].partOfId) { %> [readonly]="edit"<% } %>>
+                <p-dropdown [options]="<%= fields[idx].fieldName %>Options" name="<%= fieldName %>" formControlName="<%= fieldName %>" id="field_<%= fieldName %>" placeholder="Choose"<%_ if(!_.includes(fields[idx].fieldValidateRules, 'required')){ %> [showClear]="true"<%_ } _%><% if (fields[idx].partOfId) { %> [readonly]="edit"<% } %>>
                     <ng-template let-<%= fields[idx].fieldName %> pTemplate="item">{{'<%= `${angularAppName}.${fields[idx].fieldType}` %>.' + <%= fields[idx].fieldName %>.label | translate}}</ng-template>
                 </p-dropdown>
     <%_ } else { _%>
@@ -74,42 +74,42 @@ _%>
                 <div class="validation-messages">
     <%_ if (fields[idx].fieldValidate === true) { _%>
                     <ng-container *ngIf="editForm.get('<%= fieldName %>')!.invalid && (editForm.get('<%= fieldName %>')!.dirty || editForm.get('<%= fieldName %>')!.touched)">
-        <%_ if (fields[idx].fieldValidateRules.includes('required')) { _%>
+        <%_ if (_.includes(fields[idx].fieldValidateRules, 'required')) { _%>
                         <p-message severity="error"
                                    *ngIf="editForm.get('<%= fieldName %>')!.errors!.required" [text]="'entity.validation.required' | translate">
                         </p-message>
         <%_ } _%>
-        <%_ if (fields[idx].fieldValidateRules.includes('minlength')) { _%>
+        <%_ if (_.includes(fields[idx].fieldValidateRules, 'minlength')) { _%>
                         <p-message severity="error"
                                *ngIf="editForm.get('<%= fieldName %>')!.errors!.minlength" [text]="'entity.validation.minlength' | translate : { min: <%= fields[idx].fieldValidateRulesMinlength %> }">
                         </p-message>
         <%_ } _%>
-        <%_ if (fields[idx].fieldValidateRules.includes('maxlength')) { _%>
+        <%_ if (_.includes(fields[idx].fieldValidateRules, 'maxlength')) { _%>
                         <p-message severity="error"
                                *ngIf="editForm.get('<%= fieldName %>')!.errors!.maxlength" [text]="'entity.validation.maxlength' | translate : { max: <%= fields[idx].fieldValidateRulesMaxlength %> }">
                         </p-message>
         <%_ } _%>
-        <%_ if (fields[idx].fieldValidateRules.includes('min')) { _%>
+        <%_ if (_.includes(fields[idx].fieldValidateRules, 'min')) { _%>
                         <p-message severity="error"
                                *ngIf="editForm.get('<%= fieldName %>')!.errors!.min" [text]="'entity.validation.min' | translate : { min: <%= fields[idx].fieldValidateRulesMin %> }">
                         </p-message>
         <%_ } _%>
-        <%_ if (fields[idx].fieldValidateRules.includes('max')) { _%>
+        <%_ if (_.includes(fields[idx].fieldValidateRules, 'max')) { _%>
                         <p-message severity="error"
                                *ngIf="editForm.get('<%= fieldName %>')!.errors!.max" [text]="'entity.validation.max' | translate : { max: <%= fields[idx].fieldValidateRulesMax %> }">
                         </p-message>
         <%_ } _%>
-        <%_ if (fields[idx].fieldValidateRules.includes('minbytes')) { _%>
+        <%_ if (_.includes(fields[idx].fieldValidateRules, 'minbytes')) { _%>
                     <p-message severity="error"
                            *ngIf="editForm.get('<%= fieldName %>')!.errors!.minbytes" [text]="'entity.validation.minbytes' | translate : { min: <%= fields[idx].fieldValidateRulesMinbytes %> }">
                         </p-message>
         <%_ } _%>
-        <%_ if (fields[idx].fieldValidateRules.includes('maxbytes')) { _%>
+        <%_ if (_.includes(fields[idx].fieldValidateRules, 'maxbytes')) { _%>
                         <p-message severity="error"
                                *ngIf="editForm.get('<%= fieldName %>')!.errors!.maxbytes" [text]="'entity.validation.maxbytes' | translate : { max: <%= fields[idx].fieldValidateRulesMaxbytes %> }">
                         </p-message>
         <%_ } _%>
-        <%_ if (fields[idx].fieldValidateRules.includes('pattern')) { _%>
+        <%_ if (_.includes(fields[idx].fieldValidateRules, 'pattern')) { _%>
                         <p-message severity="error"
                                *ngIf="editForm.get('<%= fieldName %>')!.errors!.pattern" [text]="'entity.validation.pattern' | translate : { pattern: '<%= fieldNameHumanized %>' }">
                         </p-message>
