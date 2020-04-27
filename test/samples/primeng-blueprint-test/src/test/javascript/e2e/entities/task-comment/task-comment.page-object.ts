@@ -1,4 +1,4 @@
-import { browser, ExpectedConditions as ec, element, by, ElementFinder } from 'protractor';
+import { element, by, ElementFinder } from 'protractor';
 
 export class TaskCommentComponentsPage {
   createButton = element(by.id('jh-create-entity'));
@@ -26,8 +26,10 @@ export class TaskCommentUpdatePage {
   pageTitle = element(by.id('jhi-task-comment-heading'));
   saveButton = element(by.id('save-entity'));
   cancelButton = element(by.id('cancel-save'));
+
   idInput = element(by.id('field_id'));
   valueInput = element(by.id('field_value'));
+
   taskSelect = element(by.id('field_task'));
 
   async getPageTitle(): Promise<string> {
@@ -56,7 +58,6 @@ export class TaskCommentUpdatePage {
       .all(by.tagName('.ui-dropdown-item'))
       .last()
       .click();
-    await browser.wait(ec.invisibilityOf(this.taskSelect.element(by.css('.ui-dropdown-panel'))), 5000);
   }
 
   getTaskSelect(): ElementFinder {

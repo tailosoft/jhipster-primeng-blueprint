@@ -18,7 +18,6 @@
                         </p-message>
                     </ng-container>
                 </div>
-
                 <label jhiTranslate="primengtestApp.taskComment.task" for="field_task">Task</label>
                 <p-dropdown id="field_task" name="task" [options]="taskOptions" formControlName="taskId" [lazyLoadOnInit]="true" [filter]="true" [filterValue]="taskFilterValue"
                             placeholder="Choose" optionLabel="name" optionValue="id"></p-dropdown>
@@ -30,6 +29,7 @@
                     </ng-container>
                 </div>
             </div>
+
             <div>
                 <button pButton type="button" id="cancel-save" icon="pi pi-ban" class="ui-button-secondary" (click)="previousState()" [label]="'entity.action.cancel' | translate"></button>
                 <button pButton type="submit" id="save-entity" icon="pi pi-save" [disabled]="editForm.invalid || isSaving" [label]="'entity.action.save' | translate"></button>

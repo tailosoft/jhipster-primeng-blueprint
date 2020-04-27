@@ -68,6 +68,9 @@ export class TaskUpdateComponent implements OnInit {
       }
     } else {
       this.editForm.reset({
+        endDate: new Date(),
+        createdAt: new Date(),
+        modifiedAt: new Date(),
         done: false
       });
     }

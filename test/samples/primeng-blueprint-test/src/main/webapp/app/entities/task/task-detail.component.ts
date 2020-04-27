@@ -14,9 +14,7 @@ export class TaskDetailComponent implements OnInit {
   constructor(protected dataUtils: JhiDataUtils, protected activatedRoute: ActivatedRoute) {}
 
   ngOnInit(): void {
-    this.activatedRoute.data.subscribe(({ task }) => {
-      this.task = task;
-    });
+    this.activatedRoute.data.subscribe(({ task }) => (this.task = task));
   }
 
   byteSize(base64String: string): string {

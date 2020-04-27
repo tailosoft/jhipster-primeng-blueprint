@@ -78,7 +78,7 @@
                 </div>
                 <label jhiTranslate="primengtestApp.task.attachment" for="field_attachment">Attachment</label>
                 <p-fileUpload name="attachment" id="field_attachment" [showUploadButton]="false" (onSelect)="onFileSelect($event, 'attachment')"
-                              (onClear)="onFileRemove($event, 'attachment')" (onRemove)="onFileRemove($event, 'attachment')" [files]="attachmentFile?[attachmentFile]:null"></p-fileUpload>
+                              (onClear)="onFileRemove($event, 'attachment')" (onRemove)="onFileRemove($event, 'attachment')" [files]="attachmentFile?[attachmentFile]:[]"></p-fileUpload>
                 <div class="validation-messages">
                     <ng-container *ngIf="editForm.get('attachment')!.invalid && (editForm.get('attachment')!.dirty || editForm.get('attachment')!.touched)">
                         <p-message severity="error"
@@ -88,7 +88,7 @@
                 </div>
                 <label jhiTranslate="primengtestApp.task.picture" for="field_picture">Picture</label>
                 <p-fileUpload name="picture" id="field_picture" [showUploadButton]="false" (onSelect)="onFileSelect($event, 'picture')" accept="image/*"
-                              (onClear)="onFileRemove($event, 'picture')" (onRemove)="onFileRemove($event, 'picture')" [files]="pictureFile?[pictureFile]:null"></p-fileUpload>
+                              (onClear)="onFileRemove($event, 'picture')" (onRemove)="onFileRemove($event, 'picture')" [files]="pictureFile?[pictureFile]:[]"></p-fileUpload>
                 <div class="validation-messages">
                     <ng-container *ngIf="editForm.get('picture')!.invalid && (editForm.get('picture')!.dirty || editForm.get('picture')!.touched)">
                         <p-message severity="error"
@@ -96,8 +96,8 @@
                         </p-message>
                     </ng-container>
                 </div>
-
             </div>
+
             <div>
                 <button pButton type="button" id="cancel-save" icon="pi pi-ban" class="ui-button-secondary" (click)="previousState()" [label]="'entity.action.cancel' | translate"></button>
                 <button pButton type="submit" id="save-entity" icon="pi pi-save" [disabled]="editForm.invalid || isSaving" [label]="'entity.action.save' | translate"></button>

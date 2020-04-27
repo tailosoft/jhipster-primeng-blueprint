@@ -1,4 +1,4 @@
-import { browser, ExpectedConditions as ec, element, by, ElementFinder } from 'protractor';
+import { element, by, ElementFinder } from 'protractor';
 
 export class EmployeeSkillComponentsPage {
   createButton = element(by.id('jh-create-entity'));
@@ -26,8 +26,10 @@ export class EmployeeSkillUpdatePage {
   pageTitle = element(by.id('jhi-employee-skill-heading'));
   saveButton = element(by.id('save-entity'));
   cancelButton = element(by.id('cancel-save'));
+
   nameInput = element(by.id('field_name'));
   levelInput = element(by.id('field_level'));
+
   taskSelect = element(by.id('field_tasks'));
   employeeSelect = element(by.id('field_employee'));
   teacherSelect = element(by.id('field_teacher'));
@@ -59,7 +61,6 @@ export class EmployeeSkillUpdatePage {
       .last()
       .click();
     await this.taskSelect.element(by.css('.ui-multiselect-close')).click();
-    await browser.wait(ec.invisibilityOf(this.taskSelect.element(by.css('.ui-multiselect-panel'))), 5000);
   }
 
   getTaskSelect(): ElementFinder {
@@ -69,14 +70,12 @@ export class EmployeeSkillUpdatePage {
   async getTaskSelectedOption(): Promise<string> {
     return await this.taskSelect.element(by.css('.ui-multiselect-label')).getText();
   }
-
   async employeeSelectLastOption(): Promise<void> {
     await this.employeeSelect.click();
     await this.employeeSelect
       .all(by.tagName('.ui-dropdown-item'))
       .last()
       .click();
-    await browser.wait(ec.invisibilityOf(this.employeeSelect.element(by.css('.ui-dropdown-panel'))), 5000);
   }
 
   getEmployeeSelect(): ElementFinder {
@@ -93,7 +92,6 @@ export class EmployeeSkillUpdatePage {
       .all(by.tagName('.ui-dropdown-item'))
       .last()
       .click();
-    await browser.wait(ec.invisibilityOf(this.teacherSelect.element(by.css('.ui-dropdown-panel'))), 5000);
   }
 
   getTeacherSelect(): ElementFinder {

@@ -1,4 +1,4 @@
-import { element, by, ElementFinder, browser, ExpectedConditions as ec } from 'protractor';
+import { element, by, ElementFinder } from 'protractor';
 
 /* eslint @typescript-eslint/no-use-before-define: 0 */
 export class NavBarPage {
@@ -10,7 +10,7 @@ export class NavBarPage {
   signOut = element(by.id('logout'));
   passwordMenu = element(by.css('[routerLink="account/password"]'));
   settingsMenu = element(by.css('[routerLink="account/settings"]'));
-  allToasts = element.all(by.css('p-toastitem'));
+  allToasts = element.all(by.css('p-toast p-toastitem'));
 
   constructor(asAdmin?: Boolean) {
     if (asAdmin) {
@@ -20,7 +20,6 @@ export class NavBarPage {
 
   async closeAllToasts(): Promise<void> {
     await this.allToasts.each(e => e!.element(by.css('.ui-toast-close-icon')).click());
-    await browser.wait(ec.invisibilityOf(this.allToasts.first()), 5000);
   }
 
   async clickOnEntityMenu(): Promise<void> {
@@ -69,6 +68,7 @@ export class NavBarPage {
     await this.clickOnSignIn();
     return new SignInPage();
   }
+
   async getPasswordPage(): Promise<PasswordPage> {
     await this.clickOnAccountMenu();
     await this.clickOnPasswordMenu();
@@ -141,6 +141,7 @@ export class SignInPage {
     await this.loginButton.click();
   }
 }
+
 export class PasswordPage {
   currentPassword = element(by.id('currentPassword'));
   password = element(by.id('newPassword'));

@@ -13,9 +13,7 @@ export class EmployeeSkillCertificateDetailComponent implements OnInit {
   constructor(protected activatedRoute: ActivatedRoute) {}
 
   ngOnInit(): void {
-    this.activatedRoute.data.subscribe(({ employeeSkillCertificate }) => {
-      this.employeeSkillCertificate = employeeSkillCertificate;
-    });
+    this.activatedRoute.data.subscribe(({ employeeSkillCertificate }) => (this.employeeSkillCertificate = employeeSkillCertificate));
   }
 
   previousState(): void {

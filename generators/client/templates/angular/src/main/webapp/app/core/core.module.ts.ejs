@@ -28,7 +28,7 @@ import { NotificationInterceptor } from 'app/blocks/interceptor/notification.int
     imports: [
         HttpClientModule,
         CookieModule.forRoot(),
-        NgxWebstorageModule.forRoot({ prefix: '<%=jhiPrefixDashed %>', separator: '-'}),
+        NgxWebstorageModule.forRoot({ prefix: '<%= jhiPrefixDashed %>', separator: '-' }),
         NgJhipsterModule.forRoot({
             // set below to true to make alerts look like toast
             alertAsToast: false,
@@ -57,11 +57,11 @@ import { NotificationInterceptor } from 'app/blocks/interceptor/notification.int
         Title,
         {
             provide: LOCALE_ID,
-        <%_ if (skipLanguageForLocale(nativeLanguage)) { _%>
+            <%_ if (skipLanguageForLocale(nativeLanguage)) { _%>
             useValue: 'en'
-        <%_ } else { _%>
+            <%_ } else { _%>
             useValue: '<%= localeId %>'
-        <%_ } _%>
+            <%_ } _%>
         },
         <%_ if (enableI18nRTL) { _%>
         FindLanguageFromKeyPipe,
@@ -93,7 +93,7 @@ import { NotificationInterceptor } from 'app/blocks/interceptor/notification.int
         MessageService,
     ]
 })
-export class <%=angularXAppName%>CoreModule {
+export class <%= angularXAppName %>CoreModule {
     constructor(<% if (enableTranslation) { %>languageService: JhiLanguageService<% } %>) {
         registerLocaleData(locale);
         <%_ if (enableTranslation) { _%>

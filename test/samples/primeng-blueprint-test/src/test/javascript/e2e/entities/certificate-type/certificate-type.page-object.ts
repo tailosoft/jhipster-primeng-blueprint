@@ -1,4 +1,4 @@
-import { browser, ExpectedConditions as ec, element, by, ElementFinder } from 'protractor';
+import { element, by, ElementFinder } from 'protractor';
 
 export class CertificateTypeComponentsPage {
   createButton = element(by.id('jh-create-entity'));
@@ -26,6 +26,7 @@ export class CertificateTypeUpdatePage {
   pageTitle = element(by.id('jhi-certificate-type-heading'));
   saveButton = element(by.id('save-entity'));
   cancelButton = element(by.id('cancel-save'));
+
   idInput = element(by.id('field_id'));
   nameInput = element(by.id('field_name'));
 

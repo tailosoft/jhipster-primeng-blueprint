@@ -1,4 +1,4 @@
-import { browser, by, ExpectedConditions as ec, promise } from 'protractor';
+import { browser } from 'protractor';
 import { NavBarPage, SignInPage } from '../../page-objects/jhi-page-objects';
 
 import { PriceFormulaComponentsPage, PriceFormulaDeleteDialog, PriceFormulaUpdatePage } from './price-formula.page-object';
@@ -17,13 +17,11 @@ describe('PriceFormula e2e test', () => {
     navBarPage = new NavBarPage();
     signInPage = await navBarPage.getSignInPage();
     await signInPage.autoSignInUsing('admin', 'admin');
-    await browser.wait(ec.visibilityOf(navBarPage.entityMenu), 5000);
   });
 
   it('should load PriceFormulas', async () => {
     await navBarPage.goToEntity('price-formula');
     priceFormulaComponentsPage = new PriceFormulaComponentsPage();
-    await browser.wait(ec.visibilityOf(priceFormulaComponentsPage.title), 5000);
     expect(await priceFormulaComponentsPage.getTitle()).to.eq('primengtestApp.priceFormula.home.title');
   });
 
@@ -42,6 +40,7 @@ describe('PriceFormula e2e test', () => {
     await priceFormulaUpdatePage.setFormulaInput('formula');
     expect(await priceFormulaUpdatePage.getMaxInput()).to.eq('9999999', 'Expected max value to be equals to 9999999');
     expect(await priceFormulaUpdatePage.getFormulaInput()).to.eq('formula', 'Expected Formula value to be equals to formula');
+
     await priceFormulaUpdatePage.save();
     expect(await priceFormulaUpdatePage.getSaveButton().isPresent(), 'Expected save button disappear').to.be.false;
 

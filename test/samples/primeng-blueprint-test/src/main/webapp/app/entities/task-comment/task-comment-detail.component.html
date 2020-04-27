@@ -6,13 +6,13 @@
             <dl class="row-md jh-entity-details">
                 <dt><span jhiTranslate="primengtestApp.taskComment.value">Value</span></dt>
                 <dd>
-                    <span>{{taskComment.value}}</span>
+                    <span>{{ taskComment.value }}</span>
                 </dd>
                 <dt><span jhiTranslate="primengtestApp.taskComment.task">Task</span></dt>
                 <dd>
                     <div *ngIf="taskComment.taskId">
                         <a [routerLink]="['/task', taskComment.taskId, 'view']">
-                            {{taskComment.taskName}}
+                            {{ taskComment.taskName }}
                         </a>
                     </div>
                 </dd>

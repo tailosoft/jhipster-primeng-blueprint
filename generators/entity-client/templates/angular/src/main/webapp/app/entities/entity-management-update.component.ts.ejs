@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2019 the original author or authors from the JHipster project.
+ Copyright 2013-2020 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -236,6 +236,8 @@ _%>
 <%_ for (idx in fields) { _%>
     <%_ if (fields[idx].fieldType === 'Boolean') { _%>
                 <%= fields[idx].fieldName %>: false,
+    <%_ } else if ( ['Instant', 'ZonedDateTime', 'LocalDate'].includes(fields[idx].fieldType) ) { _%>
+                <%= fields[idx].fieldName %>: new Date(),
     <%_ } _%>
 <%_ } _%>
             });

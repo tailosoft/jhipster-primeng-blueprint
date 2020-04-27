@@ -11,18 +11,21 @@ export const computeFilterMatchMode = (filterDetails: { matchMode?: string }): s
 
 export const createRequestOption = (req?: any): HttpParams => {
   let options: HttpParams = new HttpParams();
+
   if (req) {
     Object.keys(req).forEach(key => {
       if (key !== 'sort') {
         options = options.set(key, req[key]);
       }
     });
+
     if (req.sort) {
       req.sort.forEach((val: string) => {
         options = options.append('sort', val);
       });
     }
   }
+
   return options;
 };
 
@@ -62,9 +65,9 @@ export const fillTableFromQueryParams = (
   queryParams: Params,
   filtersDetails: { [_: string]: { matchMode?: string; unflatten?: Function } }
 ) => {
-  const params = unflatten(queryParams);
+  const params: any = unflatten(queryParams);
   table.first = +queryParams.first || 0;
-  table.multiSortMeta = params['msm'] || [];
+  table.multiSortMeta = (params['msm'] || []).map((sm: any) => ({ field: sm.field, order: +sm.order }));
   const filters = {};
   if (params['f']) {
     Object.entries(params['f']).forEach(
@@ -81,7 +84,7 @@ export const fillTableFromQueryParams = (
 export const lazyLoadEventToRouterQueryParams = (
   event: LazyLoadEvent,
   filtersDetails: { [_: string]: { matchMode?: string; flatten?: Function } }
-) => {
+): Params => {
   const queryParams: { [_: string]: any } = {};
   if (event) {
     if (event.first) {

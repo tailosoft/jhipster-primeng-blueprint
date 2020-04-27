@@ -1,5 +1,5 @@
 /**
- * Copyright 2013-2019 the original author or authors from the JHipster project.
+ * Copyright 2013-2020 the original author or authors from the JHipster project.
  *
  * This file is part of the JHipster project, see https://www.jhipster.tech/
  * for more information.
@@ -35,7 +35,7 @@ const files = {
                 'package.json',
                 'proxy.conf.json',
                 'tsconfig.json',
-                'tsconfig-aot.json',
+                'tsconfig.app.json',
                 'tslint.json',
                 '.eslintrc.json',
                 '.eslintignore',
@@ -94,6 +94,7 @@ const files = {
     ],
     swagger: [
         {
+            condition: generator => !generator.reactive,
             path: MAIN_SRC_DIR,
             templates: ['swagger-ui/index.html', { file: 'swagger-ui/dist/images/throbber.gif', method: 'copy' }]
         }
@@ -237,6 +238,7 @@ const files = {
                 { file: 'admin/docs/docs.module.ts', method: 'processJs' },
                 { file: 'admin/docs/docs.component.ts', method: 'processJs' },
                 'admin/docs/docs.component.html',
+                'admin/docs/docs.scss',
                 { file: 'admin/health/health.route.ts', method: 'processJs' },
                 { file: 'admin/health/health.module.ts', method: 'processJs' },
                 { file: 'admin/health/health.component.ts', method: 'processJs' },
@@ -317,7 +319,10 @@ const files = {
                 'core/core.module.ts',
                 // login
                 'core/login/login.service.ts',
-                'core/user/account.model.ts'
+                'core/user/account.model.ts',
+
+                // icons
+                'core/icons/font-awesome-icons.ts'
             ]
         },
         {
@@ -342,7 +347,7 @@ const files = {
         {
             condition: generator => generator.enableTranslation,
             path: ANGULAR_DIR,
-            templates: ['core/language/language.constants.ts', 'core/language/language.helper.ts']
+            templates: ['core/language/language.constants.ts']
         }
     ],
     angularShared: [
@@ -355,6 +360,7 @@ const files = {
                 'shared/constants/error.constants.ts',
                 'shared/constants/input.constants.ts',
                 'shared/constants/pagination.constants.ts',
+                'shared/constants/authority.constants.ts',
                 // models
                 'shared/util/request-util.ts',
                 // alert service code
@@ -501,7 +507,7 @@ module.exports = {
 };
 
 function writeFiles() {
-    mkdirp(MAIN_SRC_DIR);
+    mkdirp(this.CLIENT_MAIN_SRC_DIR);
     // write angular 2.x and above files
     this.writeFilesToDisk(files, this, false, './angular');
 }

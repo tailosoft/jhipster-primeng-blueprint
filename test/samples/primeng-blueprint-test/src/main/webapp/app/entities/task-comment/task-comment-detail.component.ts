@@ -13,9 +13,7 @@ export class TaskCommentDetailComponent implements OnInit {
   constructor(protected activatedRoute: ActivatedRoute) {}
 
   ngOnInit(): void {
-    this.activatedRoute.data.subscribe(({ taskComment }) => {
-      this.taskComment = taskComment;
-    });
+    this.activatedRoute.data.subscribe(({ taskComment }) => (this.taskComment = taskComment));
   }
 
   previousState(): void {

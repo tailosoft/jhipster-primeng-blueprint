@@ -3,6 +3,8 @@ import { HttpResponse } from '@angular/common/http';
 import { Resolve, ActivatedRouteSnapshot, Routes, Router } from '@angular/router';
 import { Observable, of, EMPTY } from 'rxjs';
 import { flatMap } from 'rxjs/operators';
+
+import { Authority } from 'app/shared/constants/authority.constants';
 import { UserRouteAccessService } from 'app/core/auth/user-route-access-service';
 import { IEmployeeSkill } from 'app/shared/model/employee-skill.model';
 import { EmployeeSkillService } from './employee-skill.service';
@@ -38,7 +40,7 @@ export const employeeSkillRoute: Routes = [
     path: '',
     component: EmployeeSkillComponent,
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: [Authority.USER],
       pageTitle: 'primengtestApp.employeeSkill.home.title'
     },
     canActivate: [UserRouteAccessService]
@@ -50,7 +52,7 @@ export const employeeSkillRoute: Routes = [
       employeeSkill: EmployeeSkillResolve
     },
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: [Authority.USER],
       pageTitle: 'primengtestApp.employeeSkill.home.title'
     },
     canActivate: [UserRouteAccessService]
@@ -62,7 +64,7 @@ export const employeeSkillRoute: Routes = [
       employeeSkill: EmployeeSkillResolve
     },
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: [Authority.USER],
       pageTitle: 'primengtestApp.employeeSkill.home.title'
     },
     canActivate: [UserRouteAccessService]
@@ -74,7 +76,7 @@ export const employeeSkillRoute: Routes = [
       employeeSkill: EmployeeSkillResolve
     },
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: [Authority.USER],
       pageTitle: 'primengtestApp.employeeSkill.home.title'
     },
     canActivate: [UserRouteAccessService]

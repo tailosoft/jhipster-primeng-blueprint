@@ -1,4 +1,4 @@
-import { browser, element, by, ExpectedConditions as ec } from 'protractor';
+import { browser, element, by } from 'protractor';
 
 import { NavBarPage, SignInPage } from '../page-objects/jhi-page-objects';
 
@@ -13,7 +13,6 @@ describe('administration', () => {
     navBarPage = new NavBarPage(true);
     signInPage = await navBarPage.getSignInPage();
     await signInPage.autoSignInUsing('admin', 'admin');
-    await browser.wait(ec.visibilityOf(navBarPage.adminMenu), 5000);
   });
 
   beforeEach(async () => {

@@ -5,26 +5,11 @@ const writeFiles = require('./files').writeFiles;
 
 module.exports = class extends EntityI18nGenerator {
     constructor(args, opts) {
-        super(args, Object.assign({ fromBlueprint: true }, opts)); // fromBlueprint variable is important
+        super(args, { fromBlueprint: true, ...opts }); // fromBlueprint variable is important
 
-        // TODO issue to report to jhipster
-        // super overrides this this.options with this.options.context.options losing the refernce of options
-        // thankfully we can retreive it from the opts param
-        // MAYBE we should do another check for blueprint in the if below
-        const jhContext = (this.jhipsterContext = opts.jhipsterContext);
-
-        // TODO check with jhispter team what this is supposed to do:
-        // - in case of EntityClientGenerator options doesn't contain jhipsterContext
-
-        if (!jhContext) {
-            this.error(
-                `This is a JHipster blueprint and should be used only like ${chalk.yellow('jhipster --blueprint primeng-blueprint')}`
-            );
+        if (!this.jhipsterContext) {
+            this.error(`This is a JHipster blueprint and should be used only like ${chalk.yellow('jhipster --blueprint helloworld')}`);
         }
-
-        this.configOptions = jhContext.configOptions || {};
-        // This sets up options for this sub generator and is being reused from JHipster
-        jhContext.setupEntityOptions(this, jhContext);
     }
 
     get writing() {

@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2019 the original author or authors from the JHipster project.
+ Copyright 2013-2020 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -61,7 +61,7 @@ _%>
                           formControlName="<%= fieldName %>"<% if (fields[idx].partOfId) { %> [readonly]="edit"<% } %>></textarea>
         <%_ } else if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent !== 'text') { _%>
                 <p-fileUpload name="<%= fieldName %>" id="field_<%= fieldName %>" [showUploadButton]="false" (onSelect)="onFileSelect($event, '<%= fieldName %>')"<% if (fieldTypeBlobContent === 'image') { %> accept="image/*"<% } %>
-                              (onClear)="onFileRemove($event, '<%= fieldName %>')" (onRemove)="onFileRemove($event, '<%= fieldName %>')" [files]="<%= fieldName %>File?[<%= fieldName %>File]:null"></p-fileUpload>
+                              (onClear)="onFileRemove($event, '<%= fieldName %>')" (onRemove)="onFileRemove($event, '<%= fieldName %>')" [files]="<%= fieldName %>File?[<%= fieldName %>File]:[]"></p-fileUpload>
         <%_ } else if (fieldType === 'Boolean') { _%>
                 <p-inputSwitch name="<%= fieldName %>" id="field_<%= fieldName %>" formControlName="<%= fieldName %>"<% if (fields[idx].partOfId) { %> [readonly]="edit"<% } %>></p-inputSwitch>
         <%_ } else if (isAutoIncrement && fields[idx].partOfId) { _%>
@@ -132,7 +132,6 @@ _%>
                 </ng-container>
 <%_ } _%>
 <%_ } _%>
-
 <%_ for (idx in relationships) {
     const relationshipType = relationships[idx].relationshipType;
     const ownerSide = relationships[idx].ownerSide;
@@ -197,6 +196,7 @@ _%>
     <%_ } _%>
 <%_ } _%>
             </div>
+
             <div>
                 <button pButton type="button" id="cancel-save" icon="pi pi-ban" class="ui-button-secondary" (click)="previousState()" [label]="'entity.action.cancel' | translate"></button>
                 <button pButton type="submit" id="save-entity" icon="pi pi-save" [disabled]="editForm.invalid || isSaving" [label]="'entity.action.save' | translate"></button>

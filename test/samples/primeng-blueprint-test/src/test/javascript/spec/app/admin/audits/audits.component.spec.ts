@@ -26,12 +26,12 @@ function getDate(isToday = true): string {
         // Today + 1 day - needed if the current day must be included
         date.setDate(date.getDate() + 1);
     } else {
-      // get last month
-      if (date.getMonth() === 0) {
-        date = new Date(date.getFullYear() - 1, 11, date.getDate());
-      } else {
-        date = new Date(date.getFullYear(), date.getMonth() - 1, date.getDate());
-      }
+        // get last month
+        if (date.getMonth() === 0) {
+            date = new Date(date.getFullYear() - 1, 11, date.getDate());
+        } else {
+            date = new Date(date.getFullYear(), date.getMonth() - 1, date.getDate());
+        }
     }
     const monthString = build2DigitsDatePart(date.getMonth() + 1);
     const dateString = build2DigitsDatePart(date.getDate());
@@ -39,9 +39,7 @@ function getDate(isToday = true): string {
 }
 
 describe('Component Tests', () => {
-
     describe('AuditsComponent', () => {
-
         let comp: AuditsComponent;
         let fixture: ComponentFixture<AuditsComponent>;
         let service: AuditsService;

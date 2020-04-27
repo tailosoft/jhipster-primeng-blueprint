@@ -13,9 +13,7 @@ export class CertificateTypeDetailComponent implements OnInit {
   constructor(protected activatedRoute: ActivatedRoute) {}
 
   ngOnInit(): void {
-    this.activatedRoute.data.subscribe(({ certificateType }) => {
-      this.certificateType = certificateType;
-    });
+    this.activatedRoute.data.subscribe(({ certificateType }) => (this.certificateType = certificateType));
   }
 
   previousState(): void {

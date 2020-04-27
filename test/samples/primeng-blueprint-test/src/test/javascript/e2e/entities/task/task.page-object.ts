@@ -1,4 +1,4 @@
-import { browser, ExpectedConditions as ec, element, by, ElementFinder } from 'protractor';
+import { element, by, ElementFinder, protractor } from 'protractor';
 
 export class TaskComponentsPage {
   createButton = element(by.id('jh-create-entity'));
@@ -26,6 +26,7 @@ export class TaskUpdatePage {
   pageTitle = element(by.id('jhi-task-heading'));
   saveButton = element(by.id('save-entity'));
   cancelButton = element(by.id('cancel-save'));
+
   idInput = element(by.id('field_id'));
   nameInput = element(by.id('field_name'));
   typeSelect = element(by.id('field_type'));
@@ -63,7 +64,6 @@ export class TaskUpdatePage {
       .all(by.tagName('.ui-dropdown-item'))
       .last()
       .click();
-    await browser.wait(ec.invisibilityOf(this.typeSelect.element(by.css('.ui-dropdown-panel'))), 5000);
   }
 
   async getTypeSelect(): Promise<string> {
@@ -71,9 +71,9 @@ export class TaskUpdatePage {
   }
 
   async setEndDateInput(endDate: string): Promise<void> {
+    await this.endDateInput.element(by.css('.ui-inputtext')).sendKeys(protractor.Key.chord(protractor.Key.CONTROL, 'a'));
     await this.endDateInput.element(by.css('.ui-inputtext')).sendKeys(endDate);
-    await this.endDateInput.element(by.tagName('.ui-calendar-button')).click();
-    await browser.wait(ec.invisibilityOf(this.endDateInput.element(by.css('.ui-datepicker'))), 5000);
+    await this.endDateInput.element(by.css('.ui-inputtext')).sendKeys(protractor.Key.ESCAPE);
   }
 
   async getEndDateInput(): Promise<string> {
@@ -81,9 +81,9 @@ export class TaskUpdatePage {
   }
 
   async setCreatedAtInput(createdAt: string): Promise<void> {
+    await this.createdAtInput.element(by.css('.ui-inputtext')).sendKeys(protractor.Key.chord(protractor.Key.CONTROL, 'a'));
     await this.createdAtInput.element(by.css('.ui-inputtext')).sendKeys(createdAt);
-    await this.createdAtInput.element(by.tagName('.ui-calendar-button')).click();
-    await browser.wait(ec.invisibilityOf(this.createdAtInput.element(by.css('.ui-datepicker'))), 5000);
+    await this.createdAtInput.element(by.css('.ui-inputtext')).sendKeys(protractor.Key.ESCAPE);
   }
 
   async getCreatedAtInput(): Promise<string> {
@@ -91,9 +91,9 @@ export class TaskUpdatePage {
   }
 
   async setModifiedAtInput(modifiedAt: string): Promise<void> {
+    await this.modifiedAtInput.element(by.css('.ui-inputtext')).sendKeys(protractor.Key.chord(protractor.Key.CONTROL, 'a'));
     await this.modifiedAtInput.element(by.css('.ui-inputtext')).sendKeys(modifiedAt);
-    await this.modifiedAtInput.element(by.tagName('.ui-calendar-button')).click();
-    await browser.wait(ec.invisibilityOf(this.modifiedAtInput.element(by.css('.ui-datepicker'))), 5000);
+    await this.modifiedAtInput.element(by.css('.ui-inputtext')).sendKeys(protractor.Key.ESCAPE);
   }
 
   async getModifiedAtInput(): Promise<string> {
@@ -102,6 +102,12 @@ export class TaskUpdatePage {
 
   getDoneInput(): ElementFinder {
     return this.doneInput;
+  }
+
+  isDoneInputSelected(): Promise<boolean> {
+    return this.getDoneInput()
+      .element(by.css('input[type="checkbox"]'))
+      .isSelected() as Promise<boolean>;
   }
 
   async setDescriptionInput(description: string): Promise<void> {

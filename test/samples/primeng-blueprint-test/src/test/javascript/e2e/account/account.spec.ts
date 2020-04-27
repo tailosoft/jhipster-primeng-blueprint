@@ -1,4 +1,4 @@
-import { browser, element, by, ExpectedConditions as ec } from 'protractor';
+import { browser, element, by } from 'protractor';
 
 import { NavBarPage, SignInPage, PasswordPage, SettingsPage } from '../page-objects/jhi-page-objects';
 
@@ -37,7 +37,6 @@ describe('account', () => {
     await signInPage.autoSignInUsing('admin', 'admin');
 
     const expect2 = 'home.logged.message';
-    await browser.wait(ec.visibilityOf(element(by.id('home-logged-message'))));
     const value2 = await element(by.id('home-logged-message')).getAttribute('jhiTranslate');
     expect(value2).to.eq(expect2);
   });
@@ -83,10 +82,10 @@ describe('account', () => {
     await passwordPage.setConfirmPassword('newpassword');
     await passwordPage.save();
 
-    const expect2 = 'password.messages.success';
+    const successMsg = 'password.messages.success';
     const alert = element(by.css('.alert-success'));
-    const value2 = await alert.getAttribute('jhiTranslate');
-    expect(value2).to.eq(expect2);
+    const alertValue = await alert.getAttribute('jhiTranslate');
+    expect(alertValue).to.eq(successMsg);
     await navBarPage.autoSignOut();
     await navBarPage.goToSignInPage();
     await signInPage.autoSignInUsing('admin', 'newpassword');
@@ -97,6 +96,10 @@ describe('account', () => {
     await passwordPage.setPassword('admin');
     await passwordPage.setConfirmPassword('admin');
     await passwordPage.save();
+
+    // wait for success message
+    const alertValue2 = await alert.getAttribute('jhiTranslate');
+    expect(alertValue2).to.eq(successMsg);
   });
 
   it('should navigate to 404 not found error page on non existing route and show user own navbar if valid authentication exists', async () => {

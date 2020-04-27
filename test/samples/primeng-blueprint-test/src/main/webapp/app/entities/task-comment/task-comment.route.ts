@@ -3,6 +3,8 @@ import { HttpResponse } from '@angular/common/http';
 import { Resolve, ActivatedRouteSnapshot, Routes, Router } from '@angular/router';
 import { Observable, of, EMPTY } from 'rxjs';
 import { flatMap } from 'rxjs/operators';
+
+import { Authority } from 'app/shared/constants/authority.constants';
 import { UserRouteAccessService } from 'app/core/auth/user-route-access-service';
 import { ITaskComment } from 'app/shared/model/task-comment.model';
 import { TaskCommentService } from './task-comment.service';
@@ -37,7 +39,7 @@ export const taskCommentRoute: Routes = [
     path: '',
     component: TaskCommentComponent,
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: [Authority.USER],
       pageTitle: 'primengtestApp.taskComment.home.title'
     },
     canActivate: [UserRouteAccessService]
@@ -49,7 +51,7 @@ export const taskCommentRoute: Routes = [
       taskComment: TaskCommentResolve
     },
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: [Authority.USER],
       pageTitle: 'primengtestApp.taskComment.home.title'
     },
     canActivate: [UserRouteAccessService]
@@ -61,7 +63,7 @@ export const taskCommentRoute: Routes = [
       taskComment: TaskCommentResolve
     },
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: [Authority.USER],
       pageTitle: 'primengtestApp.taskComment.home.title'
     },
     canActivate: [UserRouteAccessService]
@@ -73,7 +75,7 @@ export const taskCommentRoute: Routes = [
       taskComment: TaskCommentResolve
     },
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: [Authority.USER],
       pageTitle: 'primengtestApp.taskComment.home.title'
     },
     canActivate: [UserRouteAccessService]

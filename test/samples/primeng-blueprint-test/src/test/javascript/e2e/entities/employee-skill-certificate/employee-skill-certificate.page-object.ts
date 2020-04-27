@@ -1,4 +1,4 @@
-import { browser, ExpectedConditions as ec, element, by, ElementFinder } from 'protractor';
+import { element, by, ElementFinder, protractor } from 'protractor';
 
 export class EmployeeSkillCertificateComponentsPage {
   createButton = element(by.id('jh-create-entity'));
@@ -26,8 +26,10 @@ export class EmployeeSkillCertificateUpdatePage {
   pageTitle = element(by.id('jhi-employee-skill-certificate-heading'));
   saveButton = element(by.id('save-entity'));
   cancelButton = element(by.id('cancel-save'));
+
   gradeInput = element(by.id('field_grade'));
   dateInput = element(by.id('field_date'));
+
   typeSelect = element(by.id('field_type'));
   skillSelect = element(by.id('field_skill'));
   skillEmployeeSelect = element(by.id('field_skillEmployee'));
@@ -45,9 +47,9 @@ export class EmployeeSkillCertificateUpdatePage {
   }
 
   async setDateInput(date: string): Promise<void> {
+    await this.dateInput.element(by.css('.ui-inputtext')).sendKeys(protractor.Key.chord(protractor.Key.CONTROL, 'a'));
     await this.dateInput.element(by.css('.ui-inputtext')).sendKeys(date);
-    await this.dateInput.element(by.tagName('.ui-calendar-button')).click();
-    await browser.wait(ec.invisibilityOf(this.dateInput.element(by.css('.ui-datepicker'))), 5000);
+    await this.dateInput.element(by.css('.ui-inputtext')).sendKeys(protractor.Key.ESCAPE);
   }
 
   async getDateInput(): Promise<string> {
@@ -60,7 +62,6 @@ export class EmployeeSkillCertificateUpdatePage {
       .all(by.tagName('.ui-dropdown-item'))
       .last()
       .click();
-    await browser.wait(ec.invisibilityOf(this.typeSelect.element(by.css('.ui-dropdown-panel'))), 5000);
   }
 
   getTypeSelect(): ElementFinder {
@@ -77,7 +78,6 @@ export class EmployeeSkillCertificateUpdatePage {
       .all(by.tagName('.ui-dropdown-item'))
       .last()
       .click();
-    await browser.wait(ec.invisibilityOf(this.skillSelect.element(by.css('.ui-dropdown-panel'))), 5000);
   }
 
   getSkillSelect(): ElementFinder {
@@ -94,7 +94,6 @@ export class EmployeeSkillCertificateUpdatePage {
       .all(by.tagName('.ui-dropdown-item'))
       .last()
       .click();
-    await browser.wait(ec.invisibilityOf(this.skillEmployeeSelect.element(by.css('.ui-dropdown-panel'))), 5000);
   }
 
   getSkillEmployeeSelect(): ElementFinder {

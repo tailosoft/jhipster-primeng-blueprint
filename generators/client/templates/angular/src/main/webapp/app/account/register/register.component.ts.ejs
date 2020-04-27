@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2019 the original author or authors from the JHipster project.
+ Copyright 2013-2020 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,7 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Component, AfterViewInit, Renderer, ElementRef, ViewChild } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, Validators } from '@angular/forms';
 <%_ if (enableTranslation) { _%>
@@ -34,7 +34,7 @@ import { RegisterService } from './register.service';
 export class RegisterComponent implements AfterViewInit {
     @ViewChild('login', { static: false })
     login?: ElementRef;
-  
+
     doNotMatch = false;
     error = false;
     errorEmailExists = false;
@@ -49,19 +49,17 @@ export class RegisterComponent implements AfterViewInit {
     });
 
     constructor(
-<%_ if (enableTranslation) { _%>
+        <%_ if (enableTranslation) { _%>
         private languageService: JhiLanguageService,
-<%_ } _%>
+        <%_ } _%>
         private loginModalService: LoginModalService,
         private registerService: RegisterService,
-        private renderer: Renderer,
         private fb: FormBuilder
-    ) {
-    }
+    ) {}
 
     ngAfterViewInit(): void {
         if (this.login) {
-            this.renderer.invokeElementMethod(this.login.nativeElement, 'focus', []);
+            this.login.nativeElement.focus();
         }
     }
 

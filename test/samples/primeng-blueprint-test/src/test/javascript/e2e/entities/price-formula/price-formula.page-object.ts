@@ -1,4 +1,4 @@
-import { browser, ExpectedConditions as ec, element, by, ElementFinder } from 'protractor';
+import { element, by, ElementFinder } from 'protractor';
 
 export class PriceFormulaComponentsPage {
   createButton = element(by.id('jh-create-entity'));
@@ -26,6 +26,7 @@ export class PriceFormulaUpdatePage {
   pageTitle = element(by.id('jhi-price-formula-heading'));
   saveButton = element(by.id('save-entity'));
   cancelButton = element(by.id('cancel-save'));
+
   maxInput = element(by.id('field_max'));
   formulaInput = element(by.id('field_formula'));
 

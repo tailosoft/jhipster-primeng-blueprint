@@ -3,6 +3,8 @@ import { HttpResponse } from '@angular/common/http';
 import { Resolve, ActivatedRouteSnapshot, Routes, Router } from '@angular/router';
 import { Observable, of, EMPTY } from 'rxjs';
 import { flatMap } from 'rxjs/operators';
+
+import { Authority } from 'app/shared/constants/authority.constants';
 import { UserRouteAccessService } from 'app/core/auth/user-route-access-service';
 import { IEmployee } from 'app/shared/model/employee.model';
 import { EmployeeService } from './employee.service';
@@ -37,7 +39,7 @@ export const employeeRoute: Routes = [
     path: '',
     component: EmployeeComponent,
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: [Authority.USER],
       pageTitle: 'primengtestApp.employee.home.title'
     },
     canActivate: [UserRouteAccessService]
@@ -49,7 +51,7 @@ export const employeeRoute: Routes = [
       employee: EmployeeResolve
     },
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: [Authority.USER],
       pageTitle: 'primengtestApp.employee.home.title'
     },
     canActivate: [UserRouteAccessService]
@@ -61,7 +63,7 @@ export const employeeRoute: Routes = [
       employee: EmployeeResolve
     },
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: [Authority.USER],
       pageTitle: 'primengtestApp.employee.home.title'
     },
     canActivate: [UserRouteAccessService]
@@ -73,7 +75,7 @@ export const employeeRoute: Routes = [
       employee: EmployeeResolve
     },
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: [Authority.USER],
       pageTitle: 'primengtestApp.employee.home.title'
     },
     canActivate: [UserRouteAccessService]

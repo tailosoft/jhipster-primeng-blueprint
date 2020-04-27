@@ -1,10 +1,10 @@
-import { browser, by, ExpectedConditions as ec /* , promise */ } from 'protractor';
+import { browser } from 'protractor';
 import { NavBarPage, SignInPage } from '../../page-objects/jhi-page-objects';
 
 import {
   EmployeeSkillComponentsPage,
-  /* EmployeeSkillDeleteDialog,
-   */ EmployeeSkillUpdatePage
+  /* EmployeeSkillDeleteDialog, */
+  EmployeeSkillUpdatePage
 } from './employee-skill.page-object';
 
 const expect = chai.expect;
@@ -21,13 +21,11 @@ describe('EmployeeSkill e2e test', () => {
     navBarPage = new NavBarPage();
     signInPage = await navBarPage.getSignInPage();
     await signInPage.autoSignInUsing('admin', 'admin');
-    await browser.wait(ec.visibilityOf(navBarPage.entityMenu), 5000);
   });
 
   it('should load EmployeeSkills', async () => {
     await navBarPage.goToEntity('employee-skill');
     employeeSkillComponentsPage = new EmployeeSkillComponentsPage();
-    await browser.wait(ec.visibilityOf(employeeSkillComponentsPage.title), 5000);
     expect(await employeeSkillComponentsPage.getTitle()).to.eq('primengtestApp.employeeSkill.home.title');
   });
 
@@ -38,7 +36,7 @@ describe('EmployeeSkill e2e test', () => {
     await employeeSkillUpdatePage.cancel();
   });
 
-  /*  it('should create and save EmployeeSkills', async () => {
+  /* it('should create and save EmployeeSkills', async () => {
         const nbButtonsBeforeCreate = await employeeSkillComponentsPage.countDeleteButtons();
 
         await employeeSkillComponentsPage.clickOnCreateButton();
@@ -49,13 +47,14 @@ describe('EmployeeSkill e2e test', () => {
         await employeeSkillUpdatePage.teacherSelectLastOption();
         expect(await employeeSkillUpdatePage.getNameInput()).to.eq('name', 'Expected Name value to be equals to name');
         expect(await employeeSkillUpdatePage.getLevelInput()).to.eq('9999999', 'Expected level value to be equals to 9999999');
+
         await employeeSkillUpdatePage.save();
         expect(await employeeSkillUpdatePage.getSaveButton().isPresent(), 'Expected save button disappear').to.be.false;
 
         expect(await employeeSkillComponentsPage.countDeleteButtons()).to.eq(nbButtonsBeforeCreate + 1, 'Expected one more entry in the table');
     }); */
 
-  /*  it('should delete last EmployeeSkill', async () => {
+  /* it('should delete last EmployeeSkill', async () => {
         const nbButtonsBeforeDelete = await employeeSkillComponentsPage.countDeleteButtons();
         await employeeSkillComponentsPage.clickOnLastDeleteButton();
 

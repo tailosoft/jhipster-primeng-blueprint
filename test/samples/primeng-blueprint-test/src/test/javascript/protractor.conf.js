@@ -40,9 +40,6 @@ exports.config = {
 
     onPrepare: function() {
         browser.driver.manage().window().setSize(1280, 1024);
-        // Disable animations
-        // @ts-ignore
-        browser.executeScript('document.body.className += " notransition";');
         const chai = require('chai');
         const chaiAsPromised = require('chai-as-promised');
         chai.use(chaiAsPromised);
@@ -50,6 +47,12 @@ exports.config = {
         chai.use(chaiString);
         // @ts-ignore
         global.chai = chai;
+        // Disable animations
+        // @ts-ignore
+        return Promise.resolve(browser.ignoreSynchronization = true)
+            .then(browser.get('/'))
+            .then(browser.executeScript('document.body.className += " notransition"; window.localStorage.setItem("animationsDisabled", "true");'))
+            .then(browser.ignoreSynchronization = false);
     },
 
     useAllAngular2AppRoots: true

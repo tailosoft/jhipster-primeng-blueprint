@@ -13,9 +13,7 @@ export class EmployeeSkillDetailComponent implements OnInit {
   constructor(protected activatedRoute: ActivatedRoute) {}
 
   ngOnInit(): void {
-    this.activatedRoute.data.subscribe(({ employeeSkill }) => {
-      this.employeeSkill = employeeSkill;
-    });
+    this.activatedRoute.data.subscribe(({ employeeSkill }) => (this.employeeSkill = employeeSkill));
   }
 
   previousState(): void {

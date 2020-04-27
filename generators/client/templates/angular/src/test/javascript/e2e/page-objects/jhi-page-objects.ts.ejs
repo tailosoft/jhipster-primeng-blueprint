@@ -1,10 +1,11 @@
-import { element, by, ElementFinder, browser, ExpectedConditions as ec } from 'protractor';
+import { element, by, ElementFinder, browser } from 'protractor';
 
 <%_
 let elementGetter = `getText()`;
 if (enableTranslation) {
     elementGetter = `getAttribute('jhiTranslate')`;
-} _%>
+}
+_%>
 /* eslint @typescript-eslint/no-use-before-define: 0 */
 export class NavBarPage {
     entityMenu = element(by.id('entity-menu'));
@@ -15,7 +16,7 @@ export class NavBarPage {
     signOut = element(by.id('logout'));
     passwordMenu = element(by.css('[routerLink="account/password"]'));
     settingsMenu = element(by.css('[routerLink="account/settings"]'));
-    allToasts = element.all(by.css('p-toastitem'));
+    allToasts = element.all(by.css('p-toast p-toastitem'));
 
     constructor(asAdmin?: Boolean) {
         if (asAdmin) {
@@ -25,7 +26,6 @@ export class NavBarPage {
 
     async closeAllToasts(): Promise<void> {
         await this.allToasts.each(e => e!.element(by.css('.ui-toast-close-icon')).click());
-        await browser.wait(ec.invisibilityOf(this.allToasts.first()), 5000);
     }
 
     async clickOnEntityMenu(): Promise<void> {
@@ -74,6 +74,7 @@ export class NavBarPage {
         await this.clickOnSignIn();
         return new SignInPage();
     }
+
     <%_ if (!skipUserManagement) { _%>
     async getPasswordPage(): Promise<PasswordPage> {
         await this.clickOnAccountMenu();
@@ -143,15 +144,14 @@ export class SignInPage {
     async clearPassword(): Promise<void> {
         await this.password.clear();
     }
-    <%_ if (authenticationType !== 'oauth2') { _%>
 
+    <%_ if (authenticationType !== 'oauth2') { _%>
     async autoSignInUsing(username: string, password: string): Promise<void> {
         await this.setUserName(username);
         await this.setPassword(password);
         await this.login();
     }
     <%_ } else { _%>
-
     async loginWithOAuth(username: string, password: string): Promise<void> {
         // Entering non angular site, tell webdriver to switch to synchronous mode.
         await browser.waitForAngularEnabled(false);
@@ -173,6 +173,7 @@ export class SignInPage {
         await this.loginButton.click();
     }
 }
+
 <%_ if (!skipUserManagement) { _%>
 export class PasswordPage {
     currentPassword = element(by.id('currentPassword'));

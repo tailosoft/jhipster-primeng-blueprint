@@ -84,7 +84,9 @@ export class EmployeeSkillCertificateUpdateComponent implements OnInit {
       this.skillFilterValue = employeeSkillCertificate.skillName;
       this.skillEmployeeFilterValue = employeeSkillCertificate.skillEmployeeUsername;
     } else {
-      this.editForm.reset({});
+      this.editForm.reset({
+        date: new Date()
+      });
     }
   }
 

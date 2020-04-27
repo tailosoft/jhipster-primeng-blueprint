@@ -3,6 +3,8 @@ import { HttpResponse } from '@angular/common/http';
 import { Resolve, ActivatedRouteSnapshot, Routes, Router } from '@angular/router';
 import { Observable, of, EMPTY } from 'rxjs';
 import { flatMap } from 'rxjs/operators';
+
+import { Authority } from 'app/shared/constants/authority.constants';
 import { UserRouteAccessService } from 'app/core/auth/user-route-access-service';
 import { IEmployeeSkillCertificate } from 'app/shared/model/employee-skill-certificate.model';
 import { EmployeeSkillCertificateService } from './employee-skill-certificate.service';
@@ -39,7 +41,7 @@ export const employeeSkillCertificateRoute: Routes = [
     path: '',
     component: EmployeeSkillCertificateComponent,
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: [Authority.USER],
       pageTitle: 'primengtestApp.employeeSkillCertificate.home.title'
     },
     canActivate: [UserRouteAccessService]
@@ -51,7 +53,7 @@ export const employeeSkillCertificateRoute: Routes = [
       employeeSkillCertificate: EmployeeSkillCertificateResolve
     },
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: [Authority.USER],
       pageTitle: 'primengtestApp.employeeSkillCertificate.home.title'
     },
     canActivate: [UserRouteAccessService]
@@ -63,7 +65,7 @@ export const employeeSkillCertificateRoute: Routes = [
       employeeSkillCertificate: EmployeeSkillCertificateResolve
     },
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: [Authority.USER],
       pageTitle: 'primengtestApp.employeeSkillCertificate.home.title'
     },
     canActivate: [UserRouteAccessService]
@@ -75,7 +77,7 @@ export const employeeSkillCertificateRoute: Routes = [
       employeeSkillCertificate: EmployeeSkillCertificateResolve
     },
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: [Authority.USER],
       pageTitle: 'primengtestApp.employeeSkillCertificate.home.title'
     },
     canActivate: [UserRouteAccessService]

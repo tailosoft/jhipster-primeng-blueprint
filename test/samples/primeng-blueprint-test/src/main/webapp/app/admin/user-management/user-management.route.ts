@@ -12,7 +12,7 @@ export class UserManagementResolve implements Resolve<IUser | null> {
   constructor(private service: UserService) {}
 
   resolve(route: ActivatedRouteSnapshot): Observable<User | null> {
-    const id = route.params['login'] ? route.params['login'] : null;
+    const id = route.params['login'];
     if (id) {
       return this.service.find(id);
     }

@@ -6,17 +6,17 @@
             <dl class="row-md jh-entity-details">
                 <dt><span jhiTranslate="primengtestApp.employeeSkillCertificate.grade">Grade</span></dt>
                 <dd>
-                    <span>{{employeeSkillCertificate.grade}}</span>
+                    <span>{{ employeeSkillCertificate.grade }}</span>
                 </dd>
                 <dt><span jhiTranslate="primengtestApp.employeeSkillCertificate.date">Date</span></dt>
                 <dd>
-                    <span>{{employeeSkillCertificate.date}}</span>
+                    <span>{{ employeeSkillCertificate.date }}</span>
                 </dd>
                 <dt><span jhiTranslate="primengtestApp.employeeSkillCertificate.type">Type</span></dt>
                 <dd>
                     <div *ngIf="employeeSkillCertificate.typeId">
                         <a [routerLink]="['/certificate-type', employeeSkillCertificate.typeId, 'view']">
-                            {{employeeSkillCertificate.typeName}}
+                            {{ employeeSkillCertificate.typeName }}
                         </a>
                     </div>
                 </dd>

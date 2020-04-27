@@ -1,4 +1,4 @@
-import { browser, by, ExpectedConditions as ec, protractor, promise } from 'protractor';
+import { browser } from 'protractor';
 import { NavBarPage, SignInPage } from '../../page-objects/jhi-page-objects';
 
 import { TaskComponentsPage, TaskDeleteDialog, TaskUpdatePage } from './task.page-object';
@@ -21,13 +21,11 @@ describe('Task e2e test', () => {
     navBarPage = new NavBarPage();
     signInPage = await navBarPage.getSignInPage();
     await signInPage.autoSignInUsing('admin', 'admin');
-    await browser.wait(ec.visibilityOf(navBarPage.entityMenu), 5000);
   });
 
   it('should load Tasks', async () => {
     await navBarPage.goToEntity('task');
     taskComponentsPage = new TaskComponentsPage();
-    await browser.wait(ec.visibilityOf(taskComponentsPage.title), 5000);
     expect(await taskComponentsPage.getTitle()).to.eq('primengtestApp.task.home.title');
   });
 
@@ -47,6 +45,8 @@ describe('Task e2e test', () => {
     await taskUpdatePage.setEndDateInput('12/31/2000');
     await taskUpdatePage.setCreatedAtInput('01/01/2001 02:30');
     await taskUpdatePage.setModifiedAtInput('01/01/2001 02:30');
+    const doneBeforeClick = await taskUpdatePage.isDoneInputSelected();
+    await taskUpdatePage.getDoneInput().click();
     await taskUpdatePage.setDescriptionInput('description');
     await taskUpdatePage.setAttachmentInput(absolutePath);
     await taskUpdatePage.setPictureInput(absolutePath);
@@ -60,14 +60,7 @@ describe('Task e2e test', () => {
       '01/01/2001 02:30',
       'Expected modifiedAt value to be equals to 01/01/2001 02:30'
     );
-    const selectedDone = taskUpdatePage.getDoneInput();
-    if (await selectedDone.element(by.css('input[type="checkbox"]')).isSelected()) {
-      await selectedDone.click();
-      expect(await selectedDone.element(by.css('input[type="checkbox"]')).isSelected(), 'Expected done not to be selected').to.be.false;
-    } else {
-      await selectedDone.click();
-      expect(await selectedDone.element(by.css('input[type="checkbox"]')).isSelected(), 'Expected done to be selected').to.be.true;
-    }
+    expect(await taskUpdatePage.isDoneInputSelected(), 'Expected done to change after click').to.eq(!doneBeforeClick);
     expect(await taskUpdatePage.getDescriptionInput()).to.eq('description', 'Expected Description value to be equals to description');
     expect(await taskUpdatePage.getAttachmentInput()).to.endsWith(
       fileNameToUpload,
@@ -77,6 +70,7 @@ describe('Task e2e test', () => {
       fileNameToUpload,
       'Expected Picture value to be end with ' + fileNameToUpload
     );
+
     await taskUpdatePage.save();
     expect(await taskUpdatePage.getSaveButton().isPresent(), 'Expected save button disappear').to.be.false;
 

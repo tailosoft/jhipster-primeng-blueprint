@@ -13,9 +13,7 @@ export class PriceFormulaDetailComponent implements OnInit {
   constructor(protected activatedRoute: ActivatedRoute) {}
 
   ngOnInit(): void {
-    this.activatedRoute.data.subscribe(({ priceFormula }) => {
-      this.priceFormula = priceFormula;
-    });
+    this.activatedRoute.data.subscribe(({ priceFormula }) => (this.priceFormula = priceFormula));
   }
 
   previousState(): void {

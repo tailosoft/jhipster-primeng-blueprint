@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2019 the original author or authors from the JHipster project.
+ Copyright 2013-2020 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -22,7 +22,6 @@ const enumImports = generateEntityClientEnumImports(fields);
 _%>
 import { TestBed, getTestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { take, map } from 'rxjs/operators';
 <%_ if (fieldsContainLocalDate) { _%>
 import { DATE_FORMAT } from 'app/shared/constants/input.constants';
 import { DatePipe } from '@angular/common';
@@ -34,7 +33,6 @@ import { <%- importedType %> } from '<%- importedPath %>';
 <%_ }); _%>
 
 describe('Service Tests', () => {
-
     describe('<%= entityAngularName %> Service', () => {
         let injector: TestBed;
         let service: <%= entityAngularName %>Service;
@@ -47,6 +45,7 @@ describe('Service Tests', () => {
         let datePipe: DatePipe;
             <%_ } _%>
         <%_ } _%>
+
         beforeEach(() => {
             TestBed.configureTestingModule({
                 imports: [HttpClientTestingModule],
@@ -65,26 +64,26 @@ describe('Service Tests', () => {
                 <%_ } _%>
             <%_ } _%>
 
-            elemDefault = new <%= entityAngularName %>(<%- tsVariables.map(ts =>ts.tsTestValue).join(', ') %>)
+            elemDefault = new <%= entityAngularName %>(<%- tsVariables.map(ts =>ts.tsTestValue).join(', ') %>);
         });
 
         describe('Service methods', () => {
             it('should find an element', () => {
                 const returnedFromService = Object.assign({
-<%_ fields.forEach((field) => {
-    const fieldType = field.fieldType; _%>
-    <%_ if (['LocalDate'].includes(fieldType)) { _%>
-                    <%= field.fieldName%>: datePipe.transform(currentDate, DATE_FORMAT),
-    <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
-                    <%= field.fieldName%>: currentDate.toISOString(),
-    <%_ } _%>
-<%_ }) _%>
+                <%_ fields.forEach((field) => {
+                    const fieldType = field.fieldType;
+                _%>
+                    <%_ if (['LocalDate'].includes(fieldType)) { _%>
+                    <%= field.fieldName %>: datePipe.transform(currentDate, DATE_FORMAT),
+                    <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
+                    <%= field.fieldName %>: currentDate.toISOString(),
+                    <%_ } _%>
+                <%_ }) _%>
                 }, elemDefault);
-                service
-                    .find(<%- tsKeyId %>)
-                    .pipe(take(1)).subscribe(resp => expectedResult = resp.body);
 
-                const req  = httpMock.expectOne({ method: 'GET' });
+                service.find(<%- tsKeyId %>).subscribe(resp => expectedResult = resp.body);
+
+                const req = httpMock.expectOne({ method: 'GET' });
                 req.flush(returnedFromService);
                 expect(expectedResult).toMatchObject(elemDefault);
             });
@@ -92,72 +91,77 @@ describe('Service Tests', () => {
         <%_ if (!readOnly) { _%>
             it('should create a <%= entityAngularName %>', () => {
                 const returnedFromService = Object.assign({
-<%_ if (pkType === 'String' || pkType === 'UUID') { _%>
+                    <%_ if (pkType === 'String' || pkType === 'UUID') { _%>
                     id: 'ID',
-<%_ } else { _%>
+                    <%_ } else { _%>
                     id: 0,
-<%_ } _%>
-<%_ fields.forEach((field) => {
-    const fieldType = field.fieldType; _%>
-    <%_ if (['LocalDate'].includes(fieldType)) { _%>
-                    <%= field.fieldName%>: datePipe.transform(currentDate, DATE_FORMAT),
-    <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
-                    <%= field.fieldName%>: currentDate.toISOString(),
-    <%_ } _%>
-<%_ }) _%>
+                    <%_ } _%>
+                <%_ fields.forEach((field) => {
+                    const fieldType = field.fieldType;
+                _%>
+                    <%_ if (['LocalDate'].includes(fieldType)) { _%>
+                    <%= field.fieldName %>: datePipe.transform(currentDate, DATE_FORMAT),
+                    <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
+                    <%= field.fieldName %>: currentDate.toISOString(),
+                    <%_ } _%>
+                <%_ }) _%>
                 }, elemDefault);
+
                 const expected = Object.assign({
-<%_ fields.forEach((field) => {
-    const fieldType = field.fieldType; _%>
-    <%_ if (['LocalDate'].includes(fieldType)) { _%>
-                    <%= field.fieldName%>: currentDate,
-    <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
-                    <%= field.fieldName%>: currentDate,
-    <%_ } _%>
-<%_ }) _%>
+                <%_ fields.forEach((field) => {
+                    const fieldType = field.fieldType;
+                _%>
+                    <%_ if (['LocalDate'].includes(fieldType)) { _%>
+                    <%= field.fieldName %>: currentDate,
+                    <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
+                    <%= field.fieldName %>: currentDate,
+                    <%_ } _%>
+                <%_ }) _%>
                 }, returnedFromService);
-                service
-                    .create(new <%= entityAngularName %>())
-                    .pipe(take(1)).subscribe(resp => expectedResult = resp.body);
-                const req  = httpMock.expectOne({ method: 'POST' });
+
+                service.create(new <%= entityAngularName %>()).subscribe(resp => expectedResult = resp.body);
+
+                const req = httpMock.expectOne({ method: 'POST' });
                 req.flush(returnedFromService);
                 expect(expectedResult).toMatchObject(expected);
             });
 
             it('should update a <%= entityAngularName %>', () => {
                 const returnedFromService = Object.assign({
-<%_ fields.forEach((field) => {
-    const fieldType = field.fieldType; _%>
-    <%_ if (fieldType === 'Boolean') { _%>
-                    <%= field.fieldName%>: true,
-    <%_ } else if (['Integer', 'Long', 'Float', 'Double', 'BigDecimal'].includes(fieldType)) { _%>
-                    <%= field.fieldName%>: 1,
-    <%_ } else if (fieldType === 'String' || fieldType === 'UUID') { _%>
-                    <%= field.fieldName%>: 'BBBBBB',
-    <%_ } else if (['LocalDate'].includes(fieldType)) { _%>
-                    <%= field.fieldName%>: datePipe.transform(currentDate, DATE_FORMAT),
-    <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
-                    <%= field.fieldName%>: currentDate.toISOString(),
-    <%_ } else { _%>
-                    <%= field.fieldName%>: 'BBBBBB',
-    <%_ } _%>
-<%_ }) _%>
+                <%_ fields.forEach((field) => {
+                    const fieldType = field.fieldType;
+                _%>
+                    <%_ if (fieldType === 'Boolean') { _%>
+                    <%= field.fieldName %>: true,
+                    <%_ } else if (['Integer', 'Long', 'Float', 'Double', 'BigDecimal'].includes(fieldType)) { _%>
+                    <%= field.fieldName %>: 1,
+                    <%_ } else if (fieldType === 'String' || fieldType === 'UUID') { _%>
+                    <%= field.fieldName %>: 'BBBBBB',
+                    <%_ } else if (['LocalDate'].includes(fieldType)) { _%>
+                    <%= field.fieldName %>: datePipe.transform(currentDate, DATE_FORMAT),
+                    <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
+                    <%= field.fieldName %>: currentDate.toISOString(),
+                    <%_ } else { _%>
+                    <%= field.fieldName %>: 'BBBBBB',
+                    <%_ } _%>
+                <%_ }) _%>
                 }, elemDefault);
 
                 const expected = Object.assign({
-<%_ fields.forEach((field) => {
-    const fieldType = field.fieldType; _%>
-    <%_ if (['LocalDate'].includes(fieldType)) { _%>
-                    <%= field.fieldName%>: currentDate,
-    <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
-                    <%= field.fieldName%>: currentDate,
-    <%_ } _%>
-<%_ }) _%>
+                <%_ fields.forEach((field) => {
+                    const fieldType = field.fieldType;
+                _%>
+                    <%_ if (['LocalDate'].includes(fieldType)) { _%>
+                    <%= field.fieldName %>: currentDate,
+                    <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
+                    <%= field.fieldName %>: currentDate,
+                    <%_ } _%>
+                <%_ }) _%>
                 }, returnedFromService);
-                service
-                    .update(expected)
-                    .pipe(take(1)).subscribe(resp => expectedResult = resp.body);
-                const req  = httpMock.expectOne({ method: 'PUT' });
+
+                service.update(expected).subscribe(resp => expectedResult = resp.body);
+
+                const req = httpMock.expectOne({ method: 'PUT' });
                 req.flush(returnedFromService);
                 expect(expectedResult).toMatchObject(expected);
             });
@@ -165,54 +169,54 @@ describe('Service Tests', () => {
 
             it('should return a list of <%= entityAngularName %>', () => {
                 const returnedFromService = Object.assign({
-<%_ fields.forEach((field) => {
-    const fieldType = field.fieldType; _%>
-    <%_ if (fieldType === 'Boolean') { _%>
-                    <%= field.fieldName%>: true,
-    <%_ } else if (['Integer', 'Long', 'Float', 'Double', 'BigDecimal'].includes(fieldType)) { _%>
-                    <%= field.fieldName%>: 1,
-    <%_ } else if (fieldType === 'String' || fieldType === 'UUID') { _%>
-                    <%= field.fieldName%>: 'BBBBBB',
-    <%_ } else if (['LocalDate'].includes(fieldType)) { _%>
-                    <%= field.fieldName%>: datePipe.transform(currentDate, DATE_FORMAT),
-    <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
-                    <%= field.fieldName%>: currentDate.toISOString(),
-    <%_ } else { // (fieldType === 'byte[]' || fieldType === 'ByteBuffer') && fieldTypeBlobContent === 'any' || (fieldType === 'byte[]' || fieldType === 'ByteBuffer') && fieldTypeBlobContent === 'image' || fieldType === 'LocalDate' _%>
-                    <%= field.fieldName%>: 'BBBBBB',
-    <%_ } _%>
-<%_ }) _%>
+                <%_ fields.forEach((field) => {
+                    const fieldType = field.fieldType;
+                _%>
+                    <%_ if (fieldType === 'Boolean') { _%>
+                    <%= field.fieldName %>: true,
+                    <%_ } else if (['Integer', 'Long', 'Float', 'Double', 'BigDecimal'].includes(fieldType)) { _%>
+                    <%= field.fieldName %>: 1,
+                    <%_ } else if (fieldType === 'String' || fieldType === 'UUID') { _%>
+                    <%= field.fieldName %>: 'BBBBBB',
+                    <%_ } else if (['LocalDate'].includes(fieldType)) { _%>
+                    <%= field.fieldName %>: datePipe.transform(currentDate, DATE_FORMAT),
+                    <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
+                    <%= field.fieldName %>: currentDate.toISOString(),
+                    <%_ } else { // (fieldType === 'byte[]' || fieldType === 'ByteBuffer') && fieldTypeBlobContent === 'any' || (fieldType === 'byte[]' || fieldType === 'ByteBuffer') && fieldTypeBlobContent === 'image' || fieldType === 'LocalDate' _%>
+                    <%= field.fieldName %>: 'BBBBBB',
+                    <%_ } _%>
+                <%_ }) _%>
                 }, elemDefault);
+
                 const expected = Object.assign({
-<%_ fields.forEach((field) => {
-    const fieldType = field.fieldType; _%>
-    <%_ if (['LocalDate'].includes(fieldType)) { _%>
-                    <%= field.fieldName%>: currentDate,
-    <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
-                    <%= field.fieldName%>: currentDate,
-    <%_ } _%>
-<%_ }) _%>
+                <%_ fields.forEach((field) => {
+                    const fieldType = field.fieldType;
+                _%>
+                    <%_ if (['LocalDate'].includes(fieldType)) { _%>
+                    <%= field.fieldName %>: currentDate,
+                    <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
+                    <%= field.fieldName %>: currentDate,
+                    <%_ } _%>
+                <%_ }) _%>
                 }, returnedFromService);
-                service
-                    .query()
-                    .pipe(
-                        take(1),
-                        map(resp => resp.body)
-                    ).subscribe(body  => expectedResult = body);
-                const req  = httpMock.expectOne({ method: 'GET' });
+
+                service.query().subscribe(resp => expectedResult = resp.body);
+
+                const req = httpMock.expectOne({ method: 'GET' });
                 req.flush([returnedFromService]);
                 httpMock.verify();
                 expect(expectedResult).toContainEqual(expected);
             });
 
-        <%_ if (!readOnly) { _%>
+            <%_ if (!readOnly) { _%>
             it('should delete a <%= entityAngularName %>', () => {
                 service.delete(<%- tsKeyId %>).subscribe(resp => expectedResult = resp.ok);
 
-                const req  = httpMock.expectOne({ method: 'DELETE' });
+                const req = httpMock.expectOne({ method: 'DELETE' });
                 req.flush({ status: 200 });
                 expect(expectedResult);
             });
-        <%_ } _%>
+            <%_ } _%>
         });
 
         afterEach(() => {

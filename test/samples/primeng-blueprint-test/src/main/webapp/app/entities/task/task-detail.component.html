@@ -6,37 +6,37 @@
             <dl class="row-md jh-entity-details">
                 <dt><span jhiTranslate="primengtestApp.task.name">Name</span></dt>
                 <dd>
-                    <span>{{task.name}}</span>
+                    <span>{{ task.name }}</span>
                 </dd>
                 <dt><span jhiTranslate="primengtestApp.task.type">Type</span></dt>
                 <dd>
-                    <span jhiTranslate="{{'primengtestApp.TaskType.' + task.type}}">{{task.type}}</span>
+                    <span jhiTranslate="{{ 'primengtestApp.TaskType.' + task.type }}">{{ task.type }}</span>
                 </dd>
                 <dt><span jhiTranslate="primengtestApp.task.endDate">End Date</span></dt>
                 <dd>
-                    <span>{{task.endDate}}</span>
+                    <span>{{ task.endDate }}</span>
                 </dd>
                 <dt><span jhiTranslate="primengtestApp.task.createdAt">Created At</span></dt>
                 <dd>
-                    <span>{{task.createdAt}}</span>
+                    <span>{{ task.createdAt }}</span>
                 </dd>
                 <dt><span jhiTranslate="primengtestApp.task.modifiedAt">Modified At</span></dt>
                 <dd>
-                    <span>{{task.modifiedAt}}</span>
+                    <span>{{ task.modifiedAt }}</span>
                 </dd>
                 <dt><span jhiTranslate="primengtestApp.task.done">Done</span></dt>
                 <dd>
-                    <span>{{task.done}}</span>
+                    <span>{{ task.done }}</span>
                 </dd>
                 <dt><span jhiTranslate="primengtestApp.task.description">Description</span></dt>
                 <dd>
-                    <span>{{task.description}}</span>
+                    <span>{{ task.description }}</span>
                 </dd>
                 <dt><span jhiTranslate="primengtestApp.task.attachment">Attachment</span></dt>
                 <dd>
                     <div *ngIf="task.attachment">
                         <a (click)="openFile(task.attachmentContentType!, task.attachment)" jhiTranslate="entity.action.open">open</a>
-                        {{task.attachmentContentType}}, {{byteSize(task.attachment)}}
+                        {{ task.attachmentContentType }}, {{ byteSize(task.attachment) }}
                     </div>
                 </dd>
                 <dt><span jhiTranslate="primengtestApp.task.picture">Picture</span></dt>
@@ -45,7 +45,7 @@
                         <a (click)="openFile(task.pictureContentType!, task.picture)">
                             <img [src]="'data:' + task.pictureContentType + ';base64,' + task.picture" style="max-width: 100%;" alt="task image"/>
                         </a>
-                        {{task.pictureContentType}}, {{byteSize(task.picture)}}
+                        {{ task.pictureContentType }}, {{ byteSize(task.picture) }}
                     </div>
                 </dd>
             </dl>

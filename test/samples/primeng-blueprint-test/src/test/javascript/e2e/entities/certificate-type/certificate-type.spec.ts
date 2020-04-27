@@ -1,4 +1,4 @@
-import { browser, by, ExpectedConditions as ec, promise } from 'protractor';
+import { browser } from 'protractor';
 import { NavBarPage, SignInPage } from '../../page-objects/jhi-page-objects';
 
 import { CertificateTypeComponentsPage, CertificateTypeDeleteDialog, CertificateTypeUpdatePage } from './certificate-type.page-object';
@@ -17,13 +17,11 @@ describe('CertificateType e2e test', () => {
     navBarPage = new NavBarPage();
     signInPage = await navBarPage.getSignInPage();
     await signInPage.autoSignInUsing('admin', 'admin');
-    await browser.wait(ec.visibilityOf(navBarPage.entityMenu), 5000);
   });
 
   it('should load CertificateTypes', async () => {
     await navBarPage.goToEntity('certificate-type');
     certificateTypeComponentsPage = new CertificateTypeComponentsPage();
-    await browser.wait(ec.visibilityOf(certificateTypeComponentsPage.title), 5000);
     expect(await certificateTypeComponentsPage.getTitle()).to.eq('primengtestApp.certificateType.home.title');
   });
 
@@ -40,6 +38,7 @@ describe('CertificateType e2e test', () => {
     await certificateTypeComponentsPage.clickOnCreateButton();
     await certificateTypeUpdatePage.setNameInput('name');
     expect(await certificateTypeUpdatePage.getNameInput()).to.eq('name', 'Expected Name value to be equals to name');
+
     await certificateTypeUpdatePage.save();
     expect(await certificateTypeUpdatePage.getSaveButton().isPresent(), 'Expected save button disappear').to.be.false;
 

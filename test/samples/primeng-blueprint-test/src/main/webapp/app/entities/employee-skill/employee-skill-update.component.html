@@ -24,7 +24,6 @@
                         </p-message>
                     </ng-container>
                 </div>
-
                 <label jhiTranslate="primengtestApp.employeeSkill.task" for="field_tasks">Task</label>
                 <p-multiSelect id="field_tasks" name="tasks" formControlName="tasks"
                     [options]="taskOptions" optionLabel="name">
@@ -54,6 +53,7 @@
                     </ng-container>
                 </div>
             </div>
+
             <div>
                 <button pButton type="button" id="cancel-save" icon="pi pi-ban" class="ui-button-secondary" (click)="previousState()" [label]="'entity.action.cancel' | translate"></button>
                 <button pButton type="submit" id="save-entity" icon="pi pi-save" [disabled]="editForm.invalid || isSaving" [label]="'entity.action.save' | translate"></button>
