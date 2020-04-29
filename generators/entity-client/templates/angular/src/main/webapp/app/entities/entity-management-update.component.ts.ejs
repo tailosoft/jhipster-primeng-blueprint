@@ -89,7 +89,7 @@ export class <%= entityAngularName %>UpdateComponent implements OnInit {
     <%_ if (relationships[idx].inForm) { _%>
         <%_ relationships[idx].pkData.forEach(pk => { _%>
     <%= pk.formName %>Options: I<%= _.upperFirst(pk.entityName) %>[] | null = null;
-            <%_ if (relationships[idx].relationshipType === 'many-to-one' || (relationships[idx].relationshipType === 'one-to-one' && relationships[idx].ownerSide === true)) { _%>
+            <%_ if (pk.entity.pagination != 'no' && relationships[idx].relationshipType === 'many-to-one' || (relationships[idx].relationshipType === 'one-to-one' && relationships[idx].ownerSide === true)) { _%>
     <%= pk.formName %>FilterValue?: any;
             <%_ } _%>
         <%_ }) _%>
@@ -226,7 +226,7 @@ _%>
 <%_ } _%>
 <%_ for (idx in relationships) { _%>
     <%_ if (relationships[idx].relationshipType === 'many-to-one' || (relationships[idx].relationshipType === 'one-to-one' && relationships[idx].ownerSide === true)) { _%>
-        <%_ relationships[idx].pkData.forEach(pk => { _%>
+        <%_ relationships[idx].pkData.filter(pk => pk.entity.pagination != 'no').forEach(pk => { _%>
             this.<%= pk.formName %>FilterValue = <%= entityInstance %>.<%= relationships[idx].relationshipName %><%= pk.nameCapitalized %>;
         <%_ }); _%>
     <%_ } _%>

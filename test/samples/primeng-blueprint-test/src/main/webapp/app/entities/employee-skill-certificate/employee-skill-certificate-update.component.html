@@ -25,7 +25,7 @@
                     </ng-container>
                 </div>
                 <label jhiTranslate="primengtestApp.employeeSkillCertificate.type" for="field_type">Type</label>
-                <p-dropdown id="field_type" name="type" [options]="typeOptions" formControlName="typeId" [readonly]="edit" [lazyLoadOnInit]="true" [filter]="true" [filterValue]="typeFilterValue"
+                <p-dropdown id="field_type" name="type" [options]="typeOptions" formControlName="typeId" [readonly]="edit" [lazyLoadOnInit]="true" [filter]="true"
                             placeholder="Choose" optionLabel="name" optionValue="id"></p-dropdown>
                 <div class="validation-messages">
                     <ng-container *ngIf="editForm.get('typeId')!.invalid && (editForm.get('typeId')!.dirty || editForm.get('typeId')!.touched)">

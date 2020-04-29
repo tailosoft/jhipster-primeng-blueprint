@@ -19,7 +19,7 @@
                     </ng-container>
                 </div>
                 <label jhiTranslate="primengtestApp.taskComment.task" for="field_task">Task</label>
-                <p-dropdown id="field_task" name="task" [options]="taskOptions" formControlName="taskId" [lazyLoadOnInit]="true" [filter]="true" [filterValue]="taskFilterValue"
+                <p-dropdown id="field_task" name="task" [options]="taskOptions" formControlName="taskId" [lazyLoadOnInit]="true" [filter]="true"
                             placeholder="Choose" optionLabel="name" optionValue="id"></p-dropdown>
                 <div class="validation-messages">
                     <ng-container *ngIf="editForm.get('taskId')!.invalid && (editForm.get('taskId')!.dirty || editForm.get('taskId')!.touched)">

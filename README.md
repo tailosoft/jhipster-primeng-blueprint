@@ -88,6 +88,13 @@ jhipster -d --blueprint primeng-blueprint
 
 ```
 
+# Primeng themes
+Our aim is to be able to purchase a theme and drop it directly on top of the generated code, without putting code in the generator that shouldn't be there,
+of course the default version should still be clean and usable.
+
+Here are the manual step to change the theme files before placing theme, we recommand that these steps are done on a versioned repository of theme to be able to rebase on the next upgrade.
+
+
 # Contribute
 
 To make it it easy to keep up with the latest jhipster version, we have a branch jhipster-upstream with the original content of the original jhipster generator.

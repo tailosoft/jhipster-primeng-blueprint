@@ -16,7 +16,6 @@ import { TaskService } from 'app/entities/task/task.service';
 export class TaskCommentUpdateComponent implements OnInit {
   isSaving = false;
   taskOptions: ITask[] | null = null;
-  taskFilterValue?: any;
 
   editForm = this.fb.group({
     id: [],
@@ -50,7 +49,6 @@ export class TaskCommentUpdateComponent implements OnInit {
   updateForm(taskComment: ITaskComment | null): void {
     if (taskComment) {
       this.editForm.reset({ ...taskComment });
-      this.taskFilterValue = taskComment.taskId;
     } else {
       this.editForm.reset({});
     }

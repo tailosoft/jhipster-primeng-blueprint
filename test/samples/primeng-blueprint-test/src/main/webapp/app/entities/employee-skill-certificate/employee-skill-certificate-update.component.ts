@@ -23,7 +23,6 @@ export class EmployeeSkillCertificateUpdateComponent implements OnInit {
   edit = false;
   isSaving = false;
   typeOptions: ICertificateType[] | null = null;
-  typeFilterValue?: any;
   skillOptions: IEmployeeSkill[] | null = null;
   skillFilterValue?: any;
   skillEmployeeOptions: IEmployee[] | null = null;
@@ -80,7 +79,6 @@ export class EmployeeSkillCertificateUpdateComponent implements OnInit {
     if (employeeSkillCertificate) {
       this.edit = true;
       this.editForm.reset({ ...employeeSkillCertificate });
-      this.typeFilterValue = employeeSkillCertificate.typeId;
       this.skillFilterValue = employeeSkillCertificate.skillName;
       this.skillEmployeeFilterValue = employeeSkillCertificate.skillEmployeeUsername;
     } else {
