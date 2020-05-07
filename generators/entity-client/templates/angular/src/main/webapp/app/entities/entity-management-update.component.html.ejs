@@ -48,7 +48,7 @@ _%>
 <%= (isAutoIncrement && fields[idx].partOfId) ? '    ' : '' -%>
                 <label jhiTranslate="<%= translationKey %>" for="field_<%= fieldName %>"<% if (fields[idx].javadoc) { if (enableTranslation) { %> [pTooltip]="'<%= i18nKeyPrefix %>.help.<%= fieldName %>' | translate"<% } else { %> pTooltip="<%= fields[idx].javadoc %>"<% } } %>><%= fieldNameHumanized %></label>
     <%_ if (fields[idx].fieldIsEnum) { _%>
-                <p-dropdown [options]="<%= fields[idx].fieldName %>Options" name="<%= fieldName %>" formControlName="<%= fieldName %>" id="field_<%= fieldName %>" placeholder="Choose"<%_ if(!fields[idx].fieldValidateRules.includes('required')){ %> [showClear]="true"<%_ } _%><% if (fields[idx].partOfId) { %> [readonly]="edit"<% } %>>
+                <p-dropdown [options]="<%= fields[idx].fieldName %>Options" name="<%= fieldName %>" formControlName="<%= fieldName %>" id="field_<%= fieldName %>" placeholder="Choose"<%_ if(!fields[idx].fieldValidateRules || !fields[idx].fieldValidateRules.includes('required')){ %> [showClear]="true"<%_ } _%><% if (fields[idx].partOfId) { %> [readonly]="edit"<% } %>>
                     <ng-template let-<%= fields[idx].fieldName %> pTemplate="item">{{'<%= `${angularAppName}.${fields[idx].fieldType}` %>.' + <%= fields[idx].fieldName %>.label | translate}}</ng-template>
                 </p-dropdown>
     <%_ } else { _%>
