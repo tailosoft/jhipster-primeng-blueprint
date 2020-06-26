@@ -120,6 +120,7 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy {
 
     @ViewChild('<%= entityInstance %>Table', { static: true })
     <%= entityInstance %>Table!: Table;
+    currentSearch: string;
 
     constructor(
         protected <%= entityInstance %>Service: <%= entityAngularName %>Service,
@@ -190,7 +191,7 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy {
         <%_ if (searchEngine === 'elasticsearch') { _%>
             switchMap(() => {
                 if (this.currentSearch) {
-                    this.<%= entityInstance %>Service.search(this.<%= entityInstance %>Table.filters.global.value)
+                    return this.<%= entityInstance %>Service.search(this.<%= entityInstance %>Table.filters.global.value);
                 } else {
                     return this.<%= entityInstance %>Service.query(lazyLoadEventToServerQueryParams(this.<%= entityInstance %>Table.createLazyLoadMetadata()));
                 }
