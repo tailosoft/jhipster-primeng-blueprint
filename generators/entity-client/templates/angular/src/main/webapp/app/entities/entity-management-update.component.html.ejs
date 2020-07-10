@@ -148,8 +148,8 @@ _%>
     const relationshipRequired = relationships[idx].relationshipRequired;
     const translationKey = `${i18nKeyPrefix}.${relationshipName}`; _%>
     <%_ if (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true)) { _%>
-                <div class="p-field p-grid">
         <%_ if (dto === 'no') { _%>
+                <div class="p-field p-grid">
                     <label jhiTranslate="<%= translationKey %>" for="field_<%= relationshipName %>" class="p-col-12 p-md-2"><%= relationshipNameHumanized %></label>
                     <div class="p-col-12 p-md-10">
                         <p-dropdown id="field_<%= relationshipName %>" name="<%= relationshipName %>" [options]="<%= relationshipName %>Options" formControlName="<%= relationshipName %>"<% if (relationships[idx].partOfId) { %> [readonly]="edit"<% } %><% if(relationships[idx].pagination !== 'no') { %>
