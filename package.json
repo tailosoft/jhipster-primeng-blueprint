@@ -22,7 +22,7 @@
     "url": "git+https://github.com/elhoutico/jhipster-primeng-blueprint.git"
   },
   "dependencies": {
-    "lodash": "4.17.10",
+    "lodash": "4.17.13",
     "mkdirp": "0.5.1",
     "pluralize": "7.0.0",
     "chalk": "2.4.1",
