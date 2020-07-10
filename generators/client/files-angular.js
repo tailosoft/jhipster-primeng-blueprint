@@ -364,7 +364,7 @@ const files = {
                 // models
                 'shared/util/request-util.ts',
                 // alert service code
-                'shared/alert/alert-error.service.ts',
+                'shared/alert/alert-error.service.ts'
             ]
         },
         {

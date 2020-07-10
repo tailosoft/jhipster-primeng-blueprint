@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 const _ = require('lodash');
-const faker = require('faker');
 const utils = require('generator-jhipster/generators/utils');
 const constants = require('generator-jhipster/generators/generator-constants');
 const ClientAngular = require('../client/needle-api/needle-client-angular');
@@ -282,13 +281,6 @@ function addSampleRegexTestingStrings(generator) {
 
 function writeFiles() {
     return {
-        setupReproducibility() {
-            if (this.skipClient) return;
-
-            // In order to have consistent results with Faker, restart seed with current entity name hash.
-            faker.seed(utils.stringHashCode(this.name.toLowerCase()));
-        },
-
         writeClientFiles() {
             // override needle api
             this.needleApi.clientAngular = new ClientAngular(this);
@@ -330,7 +322,7 @@ function writeFiles() {
                     this.entityFileName,
                     this.entityUrl,
                     this.clientFramework,
-                    this.microserviceName
+                    microserviceName
                 );
                 this.addEntityToMenu(this.entityStateName, this.enableTranslation, this.clientFramework, this.entityTranslationKeyMenu);
             }
