@@ -2,27 +2,35 @@
     <div class="col-8">
         <form name="editForm" role="form" novalidate (ngSubmit)="save()" [formGroup]="editForm">
             <h2 id="jhi-price-formula-heading" jhiTranslate="primengtestApp.priceFormula.home.createOrEditLabel">Create or edit a Price Formula</h2>
-            <div class="form-grid">
-                <label jhiTranslate="primengtestApp.priceFormula.max" for="field_max">Max</label>
-                <input pInputText type="number" name="max" id="field_max" formControlName="max" [readonly]="edit"/>
-                <div class="validation-messages">
-                    <ng-container *ngIf="editForm.get('max')!.invalid && (editForm.get('max')!.dirty || editForm.get('max')!.touched)">
-                        <p-message severity="error"
-                                   *ngIf="editForm.get('max')!.errors!.required" [text]="'entity.validation.required' | translate">
-                        </p-message>
-                        <p-message severity="error"
-                            [hidden]="!editForm.get('max')!.errors!.number" [text]="'entity.validation.number' | translate">
-                        </p-message>
-                    </ng-container>
+            <div class="form-grid ui-fluid">
+                <div class="p-field p-grid">
+                    <label jhiTranslate="primengtestApp.priceFormula.max" for="field_max" class="p-col-12 p-md-2">Max</label>
+                    <div class="p-col-12 p-md-10">
+                        <input pInputText type="number" name="max" id="field_max" formControlName="max" [readonly]="edit"/>
+                        <div class="validation-messages">
+                            <ng-container *ngIf="editForm.get('max')!.invalid && (editForm.get('max')!.dirty || editForm.get('max')!.touched)">
+                                <p-message severity="error"
+                                           *ngIf="editForm.get('max')!.errors!.required" [text]="'entity.validation.required' | translate">
+                                </p-message>
+                                <p-message severity="error"
+                                    [hidden]="!editForm.get('max')!.errors!.number" [text]="'entity.validation.number' | translate">
+                                </p-message>
+                            </ng-container>
+                        </div>
+                    </div>
                 </div>
-                <label jhiTranslate="primengtestApp.priceFormula.formula" for="field_formula">Formula</label>
-                <input pInputText type="text" name="formula" id="field_formula" formControlName="formula"/>
-                <div class="validation-messages">
-                    <ng-container *ngIf="editForm.get('formula')!.invalid && (editForm.get('formula')!.dirty || editForm.get('formula')!.touched)">
-                        <p-message severity="error"
-                                   *ngIf="editForm.get('formula')!.errors!.required" [text]="'entity.validation.required' | translate">
-                        </p-message>
-                    </ng-container>
+                <div class="p-field p-grid">
+                    <label jhiTranslate="primengtestApp.priceFormula.formula" for="field_formula" class="p-col-12 p-md-2">Formula</label>
+                    <div class="p-col-12 p-md-10">
+                        <input pInputText type="text" name="formula" id="field_formula" formControlName="formula"/>
+                        <div class="validation-messages">
+                            <ng-container *ngIf="editForm.get('formula')!.invalid && (editForm.get('formula')!.dirty || editForm.get('formula')!.touched)">
+                                <p-message severity="error"
+                                           *ngIf="editForm.get('formula')!.errors!.required" [text]="'entity.validation.required' | translate">
+                                </p-message>
+                            </ng-container>
+                        </div>
+                    </div>
                 </div>
             </div>
 

@@ -54,7 +54,7 @@ describe('Subgenerator client of primeng-blueprint JHipster blueprint', () => {
         });
 
         it('it works', () => {
-            // Adds your tests here
+            // eslint-disable-next-line no-console
             console.log(testDir);
             const basePath = path.join(__dirname, './samples/primeng-blueprint-test');
             const filesToTest = [`${basePath}/src/main/`, `${basePath}/src/test/`];

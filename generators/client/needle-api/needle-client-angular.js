@@ -18,9 +18,9 @@
  */
 const chalk = require('chalk');
 const _ = require('lodash');
-const needleClientBase = require('./needle-client');
 const constants = require('generator-jhipster/generators/generator-constants');
 const jhipsterUtils = require('generator-jhipster/generators/utils');
+const needleClientBase = require('./needle-client');
 
 module.exports = class extends needleClientBase {
     addGlobalSCSSStyle(style, comment) {
