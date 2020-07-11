@@ -46,18 +46,19 @@ _%>
                 <ng-container *ngIf="editForm.get('id')!.value">
 <%_ } _%>
 <%= (isAutoIncrement && fields[idx].partOfId) ? '    ' : '' -%>
-                <label jhiTranslate="<%= translationKey %>" for="field_<%= fieldName %>"<% if (fields[idx].javadoc) { if (enableTranslation) { %> [pTooltip]="'<%= i18nKeyPrefix %>.help.<%= fieldName %>' | translate"<% } else { %> pTooltip="<%= fields[idx].javadoc %>"<% } } %>><%= fieldNameHumanized %></label>
+            <div class="form-group">
+                <label class="form-control-label" jhiTranslate="<%= translationKey %>" for="field_<%= fieldName %>"<% if (fields[idx].javadoc) { if (enableTranslation) { %> [pTooltip]="'<%= i18nKeyPrefix %>.help.<%= fieldName %>' | translate"<% } else { %> pTooltip="<%= fields[idx].javadoc %>"<% } } %>><%= fieldNameHumanized %></label>
     <%_ if (fields[idx].fieldIsEnum) { _%>
                 <p-dropdown [options]="<%= fields[idx].fieldName %>Options" name="<%= fieldName %>" formControlName="<%= fieldName %>" id="field_<%= fieldName %>" placeholder="Choose"<%_ if(!fields[idx].fieldValidateRules || !fields[idx].fieldValidateRules.includes('required')){ %> [showClear]="true"<%_ } _%><% if (fields[idx].partOfId) { %> [readonly]="edit"<% } %>>
                     <ng-template let-<%= fields[idx].fieldName %> pTemplate="item">{{'<%= `${angularAppName}.${fields[idx].fieldType}` %>.' + <%= fields[idx].fieldName %>.label | translate}}</ng-template>
                 </p-dropdown>
     <%_ } else { _%>
         <%_ if (fieldType === 'LocalDate') { _%>
-                <p-calendar id="field_<%= fieldName %>" formControlName="<%= fieldName %>" [showIcon]="true"<% if (fields[idx].partOfId) { %> [disabled]="edit"<% } %>></p-calendar>
+                <p-calendar class="form-control" id="field_<%= fieldName %>" formControlName="<%= fieldName %>" [showIcon]="true"<% if (fields[idx].partOfId) { %> [disabled]="edit"<% } %>></p-calendar>
         <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
-                <p-calendar id="field_<%= fieldName %>" formControlName="<%= fieldName %>" [showIcon]="true" [showTime]="true"<% if (fields[idx].partOfId) { %> [disabled]="edit"<% } %>></p-calendar>
+                <p-calendar class="form-control" id="field_<%= fieldName %>" formControlName="<%= fieldName %>" [showIcon]="true" [showTime]="true"<% if (fields[idx].partOfId) { %> [disabled]="edit"<% } %>></p-calendar>
         <%_ } else if (fieldTypeBlobContent === 'text') { _%>
-                <textarea pInputTextarea name="<%= fieldName %>" id="field_<%= fieldName %>"
+                <textarea class="form-control" pInputTextarea name="<%= fieldName %>" id="field_<%= fieldName %>"
                           formControlName="<%= fieldName %>"<% if (fields[idx].partOfId) { %> [readonly]="edit"<% } %>></textarea>
         <%_ } else if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent !== 'text') { _%>
                 <p-fileUpload name="<%= fieldName %>" id="field_<%= fieldName %>" [showUploadButton]="false" (onSelect)="onFileSelect($event, '<%= fieldName %>')"<% if (fieldTypeBlobContent === 'image') { %> accept="image/*"<% } %>
@@ -65,9 +66,9 @@ _%>
         <%_ } else if (fieldType === 'Boolean') { _%>
                 <p-inputSwitch name="<%= fieldName %>" id="field_<%= fieldName %>" formControlName="<%= fieldName %>"<% if (fields[idx].partOfId) { %> [readonly]="edit"<% } %>></p-inputSwitch>
         <%_ } else if (isAutoIncrement && fields[idx].partOfId) { _%>
-                    <input pInputText type="<%= fieldInputType %>" name="<%= fieldName %>" id="field_<%= fieldName %>" formControlName="<%= fieldName %>" readonly/>
+                    <input class="form-control" pInputText type="<%= fieldInputType %>" name="<%= fieldName %>" id="field_<%= fieldName %>" formControlName="<%= fieldName %>" readonly/>
         <%_ } else { _%>
-                <input pInputText type="<%= fieldInputType %>" name="<%= fieldName %>" id="field_<%= fieldName %>" formControlName="<%= fieldName %>"<% if (fields[idx].partOfId) { %> [readonly]="edit"<% } %>/>
+                <input class="form-control"class="form-control" pInputText type="<%= fieldInputType %>" name="<%= fieldName %>" id="field_<%= fieldName %>" formControlName="<%= fieldName %>"<% if (fields[idx].partOfId) { %> [readonly]="edit"<% } %>/>
         <%_ } _%>
     <%_ } _%>
 <%= (isAutoIncrement && fields[idx].partOfId) ? '    ' : '' -%>
@@ -128,6 +129,7 @@ _%>
     <%_ } _%>
 <%= (isAutoIncrement && fields[idx].partOfId) ? '    ' : '' -%>
                 </div>
+            </div>
 <%_ if (isAutoIncrement && fields[idx].partOfId) { _%>
                 </ng-container>
 <%_ } _%>
@@ -198,8 +200,9 @@ _%>
             </div>
 
             <div>
-                <button pButton type="button" id="cancel-save" icon="pi pi-ban" class="ui-button-secondary" (click)="previousState()" [label]="'entity.action.cancel' | translate"></button>
-                <button pButton type="submit" id="save-entity" icon="pi pi-save" [disabled]="editForm.invalid || isSaving" [label]="'entity.action.save' | translate"></button>
+                <br />
+                <button pButton type="button" id="cancel-save" icon="pi pi-ban" class="ui-button-secondary" (click)="previousState()" [label]="'entity.action.cancel' | translate" class="btn btn-secondary"></button>
+                <button pButton type="submit" id="save-entity" icon="pi pi-save" [disabled]="editForm.invalid || isSaving" [label]="'entity.action.save' | translate" class="btn btn-primary"></button>
             </div>
         </form>
     </div>
