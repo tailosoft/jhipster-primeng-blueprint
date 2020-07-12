@@ -41,6 +41,8 @@ describe('Service Tests', () => {
         undefined,
         'image/png',
         undefined,
+        'AAAAAAA',
+        123,
         undefined
       );
     });

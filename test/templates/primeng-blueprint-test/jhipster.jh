@@ -85,6 +85,10 @@ entity PriceFormula {
     formula String required
 }
 
+relationship ManyToOne {
+    Task{user(login) required} to User
+}
+
 dto * with mapstruct
 service * with serviceImpl
 filter *

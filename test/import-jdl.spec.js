@@ -14,7 +14,7 @@ const noopFork = () => ({
 });
 
 let testDir = '/tmp/primeng-blueprint-test';
-describe('Subgenerator client of primeng-blueprint JHipster blueprint', () => {
+describe('import-jdl of primeng-blueprint JHipster blueprint', () => {
     describe('Sample test', () => {
         before(done => {
             rimraf.sync(testDir);

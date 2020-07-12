@@ -1,13 +1,17 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpResponse } from '@angular/common/http';
+import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
+import { lazyLoadEventToServerQueryParams } from 'app/shared/util/request-util';
+import { LazyLoadEvent } from 'primeng/api';
 import { JhiDataUtils } from 'ng-jhipster';
 import { ITask } from 'app/shared/model/task.model';
 import { TaskType, TASK_TYPE_ARRAY } from 'app/shared/model/enumerations/task-type.model';
 import { TaskService } from './task.service';
 import { MessageService } from 'primeng/api';
+import { IUser } from 'app/core/user/user.model';
+import { UserService } from 'app/core/user/user.service';
 
 @Component({
   selector: 'jhi-task-update',
@@ -15,6 +19,8 @@ import { MessageService } from 'primeng/api';
 })
 export class TaskUpdateComponent implements OnInit {
   isSaving = false;
+  userOptions: IUser[] | null = null;
+  userFilterValue?: any;
   typeOptions = TASK_TYPE_ARRAY.map((s: TaskType) => ({ label: s.toString(), value: s }));
   attachmentFile?: File;
   pictureFile?: File;
@@ -31,13 +37,15 @@ export class TaskUpdateComponent implements OnInit {
     attachment: [null, [Validators.required]],
     attachmentContentType: [],
     picture: [null, [Validators.required]],
-    pictureContentType: []
+    pictureContentType: [],
+    userId: [null, Validators.required]
   });
 
   constructor(
     protected dataUtils: JhiDataUtils,
     protected messageService: MessageService,
     protected taskService: TaskService,
+    protected userService: UserService,
     protected activatedRoute: ActivatedRoute,
     private fb: FormBuilder
   ) {}
@@ -47,6 +55,13 @@ export class TaskUpdateComponent implements OnInit {
     this.activatedRoute.data.subscribe(({ task }) => {
       this.updateForm(task);
     });
+  }
+
+  onUserLazyLoadEvent(event: LazyLoadEvent): void {
+    this.userService.query(lazyLoadEventToServerQueryParams(event, 'login.contains')).subscribe(
+      (res: HttpResponse<IUser[]>) => (this.userOptions = res.body),
+      (res: HttpErrorResponse) => this.onError(res.message)
+    );
   }
 
   updateForm(task: ITask | null): void {
@@ -66,6 +81,7 @@ export class TaskUpdateComponent implements OnInit {
             this.pictureFile = new File([blob], '', { type: task.pictureContentType });
           });
       }
+      this.userFilterValue = task.userId;
     } else {
       this.editForm.reset({
         endDate: new Date(),

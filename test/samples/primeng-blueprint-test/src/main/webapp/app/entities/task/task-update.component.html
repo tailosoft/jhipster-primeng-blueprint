@@ -132,6 +132,21 @@
                         </div>
                     </div>
                 </div>
+                <div class="p-field p-grid">
+                    <label jhiTranslate="primengtestApp.task.user" for="field_user" class="p-col-12 p-md-2">User</label>
+                    <div class="p-col-12 p-md-10">
+                        <p-dropdown id="field_user" name="user" [options]="userOptions" formControlName="userId"
+                                    [virtualScroll]="true" [lazy]="true" [rows]="10" (onLazyLoad)="onUserLazyLoadEvent($event)" [lazyLoadOnInit]="true" [filter]="true" [filterValue]="userFilterValue"
+                                    placeholder="Choose" optionLabel="login" optionValue="id"></p-dropdown>
+                        <div class="validation-messages">
+                            <ng-container *ngIf="editForm.get('userId')!.invalid && (editForm.get('userId')!.dirty || editForm.get('userId')!.touched)">
+                                <p-message severity="error"
+                                           *ngIf="editForm.get('userId')!.errors!.required" [text]="'entity.validation.required' | translate">
+                                </p-message>
+                            </ng-container>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div>

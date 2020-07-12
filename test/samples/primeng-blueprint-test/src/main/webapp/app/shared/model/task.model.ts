@@ -14,6 +14,8 @@ export interface ITask {
   attachment?: any;
   pictureContentType?: string;
   picture?: any;
+  userLogin?: string;
+  userId?: number;
   employeeSkills?: IEmployeeSkill[];
 }
 
@@ -31,6 +33,8 @@ export class Task implements ITask {
     public attachment?: any,
     public pictureContentType?: string,
     public picture?: any,
+    public userLogin?: string,
+    public userId?: number,
     public employeeSkills?: IEmployeeSkill[]
   ) {}
 }

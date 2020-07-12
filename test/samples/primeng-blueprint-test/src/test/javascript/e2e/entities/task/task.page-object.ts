@@ -38,6 +38,8 @@ export class TaskUpdatePage {
   attachmentInput = element(by.id('field_attachment'));
   pictureInput = element(by.id('field_picture'));
 
+  userSelect = element(by.id('field_user'));
+
   async getPageTitle(): Promise<string> {
     return this.pageTitle.getAttribute('jhiTranslate');
   }
@@ -138,6 +140,22 @@ export class TaskUpdatePage {
       .all(by.css('.ui-fileupload-row > div'))
       .get(1)
       .getText();
+  }
+
+  async userSelectLastOption(): Promise<void> {
+    await this.userSelect.click();
+    await this.userSelect
+      .all(by.tagName('.ui-dropdown-item'))
+      .last()
+      .click();
+  }
+
+  getUserSelect(): ElementFinder {
+    return this.userSelect;
+  }
+
+  async getUserSelectedOption(): Promise<string> {
+    return await this.userSelect.element(by.css('.ui-dropdown-label')).getText();
   }
 
   async save(): Promise<void> {
