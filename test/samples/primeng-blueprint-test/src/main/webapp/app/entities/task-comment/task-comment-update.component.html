@@ -2,31 +2,41 @@
     <div class="col-8">
         <form name="editForm" role="form" novalidate (ngSubmit)="save()" [formGroup]="editForm">
             <h2 id="jhi-task-comment-heading" jhiTranslate="primengtestApp.taskComment.home.createOrEditLabel">Create or edit a Task Comment</h2>
-            <div class="form-grid">
-                <ng-container *ngIf="editForm.get('id')!.value">
-                    <label jhiTranslate="global.field.id" for="field_id">ID</label>
-                    <input pInputText type="number" name="id" id="field_id" formControlName="id" readonly/>
-                    <div class="validation-messages">
+            <div class="form-grid ui-fluid">
+                <div class="p-field p-grid">
+                    <ng-container *ngIf="editForm.get('id')!.value">
+                    <label jhiTranslate="global.field.id" for="field_id" class="p-col-12 p-md-2">ID</label>
+                    <div class="p-col-12 p-md-10">
+                        <input pInputText type="number" name="id" id="field_id" formControlName="id" readonly/>
                     </div>
-                </ng-container>
-                <label jhiTranslate="primengtestApp.taskComment.value" for="field_value">Value</label>
-                <input pInputText type="text" name="value" id="field_value" formControlName="value"/>
-                <div class="validation-messages">
-                    <ng-container *ngIf="editForm.get('value')!.invalid && (editForm.get('value')!.dirty || editForm.get('value')!.touched)">
-                        <p-message severity="error"
-                                   *ngIf="editForm.get('value')!.errors!.required" [text]="'entity.validation.required' | translate">
-                        </p-message>
                     </ng-container>
                 </div>
-                <label jhiTranslate="primengtestApp.taskComment.task" for="field_task">Task</label>
-                <p-dropdown id="field_task" name="task" [options]="taskOptions" formControlName="taskId" [lazyLoadOnInit]="true" [filter]="true"
-                            placeholder="Choose" optionLabel="name" optionValue="id"></p-dropdown>
-                <div class="validation-messages">
-                    <ng-container *ngIf="editForm.get('taskId')!.invalid && (editForm.get('taskId')!.dirty || editForm.get('taskId')!.touched)">
-                        <p-message severity="error"
-                                   *ngIf="editForm.get('taskId')!.errors!.required" [text]="'entity.validation.required' | translate">
-                        </p-message>
-                    </ng-container>
+                <div class="p-field p-grid">
+                    <label jhiTranslate="primengtestApp.taskComment.value" for="field_value" class="p-col-12 p-md-2">Value</label>
+                    <div class="p-col-12 p-md-10">
+                        <input pInputText type="text" name="value" id="field_value" formControlName="value"/>
+                        <div class="validation-messages">
+                            <ng-container *ngIf="editForm.get('value')!.invalid && (editForm.get('value')!.dirty || editForm.get('value')!.touched)">
+                                <p-message severity="error"
+                                           *ngIf="editForm.get('value')!.errors!.required" [text]="'entity.validation.required' | translate">
+                                </p-message>
+                            </ng-container>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-field p-grid">
+                    <label jhiTranslate="primengtestApp.taskComment.task" for="field_task" class="p-col-12 p-md-2">Task</label>
+                    <div class="p-col-12 p-md-10">
+                        <p-dropdown id="field_task" name="task" [options]="taskOptions" formControlName="taskId" [lazyLoadOnInit]="true" [filter]="true"
+                                    placeholder="Choose" optionLabel="name" optionValue="id"></p-dropdown>
+                        <div class="validation-messages">
+                            <ng-container *ngIf="editForm.get('taskId')!.invalid && (editForm.get('taskId')!.dirty || editForm.get('taskId')!.touched)">
+                                <p-message severity="error"
+                                           *ngIf="editForm.get('taskId')!.errors!.required" [text]="'entity.validation.required' | translate">
+                                </p-message>
+                            </ng-container>
+                        </div>
+                    </div>
                 </div>
             </div>
 

@@ -2,21 +2,27 @@
     <div class="col-8">
         <form name="editForm" role="form" novalidate (ngSubmit)="save()" [formGroup]="editForm">
             <h2 id="jhi-certificate-type-heading" jhiTranslate="primengtestApp.certificateType.home.createOrEditLabel">Create or edit a Certificate Type</h2>
-            <div class="form-grid">
-                <ng-container *ngIf="editForm.get('id')!.value">
-                    <label jhiTranslate="global.field.id" for="field_id">ID</label>
-                    <input pInputText type="number" name="id" id="field_id" formControlName="id" readonly/>
-                    <div class="validation-messages">
+            <div class="form-grid ui-fluid">
+                <div class="p-field p-grid">
+                    <ng-container *ngIf="editForm.get('id')!.value">
+                    <label jhiTranslate="global.field.id" for="field_id" class="p-col-12 p-md-2">ID</label>
+                    <div class="p-col-12 p-md-10">
+                        <input pInputText type="number" name="id" id="field_id" formControlName="id" readonly/>
                     </div>
-                </ng-container>
-                <label jhiTranslate="primengtestApp.certificateType.name" for="field_name">Name</label>
-                <input pInputText type="text" name="name" id="field_name" formControlName="name"/>
-                <div class="validation-messages">
-                    <ng-container *ngIf="editForm.get('name')!.invalid && (editForm.get('name')!.dirty || editForm.get('name')!.touched)">
-                        <p-message severity="error"
-                                   *ngIf="editForm.get('name')!.errors!.required" [text]="'entity.validation.required' | translate">
-                        </p-message>
                     </ng-container>
+                </div>
+                <div class="p-field p-grid">
+                    <label jhiTranslate="primengtestApp.certificateType.name" for="field_name" class="p-col-12 p-md-2">Name</label>
+                    <div class="p-col-12 p-md-10">
+                        <input pInputText type="text" name="name" id="field_name" formControlName="name"/>
+                        <div class="validation-messages">
+                            <ng-container *ngIf="editForm.get('name')!.invalid && (editForm.get('name')!.dirty || editForm.get('name')!.touched)">
+                                <p-message severity="error"
+                                           *ngIf="editForm.get('name')!.errors!.required" [text]="'entity.validation.required' | translate">
+                                </p-message>
+                            </ng-container>
+                        </div>
+                    </div>
                 </div>
             </div>
 

@@ -2,24 +2,32 @@
     <div class="col-8">
         <form name="editForm" role="form" novalidate (ngSubmit)="save()" [formGroup]="editForm">
             <h2 id="jhi-employee-heading" jhiTranslate="primengtestApp.employee.home.createOrEditLabel">Create or edit a Employee</h2>
-            <div class="form-grid">
-                <label jhiTranslate="primengtestApp.employee.username" for="field_username">Username</label>
-                <input pInputText type="text" name="username" id="field_username" formControlName="username" [readonly]="edit"/>
-                <div class="validation-messages">
-                    <ng-container *ngIf="editForm.get('username')!.invalid && (editForm.get('username')!.dirty || editForm.get('username')!.touched)">
-                        <p-message severity="error"
-                                   *ngIf="editForm.get('username')!.errors!.required" [text]="'entity.validation.required' | translate">
-                        </p-message>
-                    </ng-container>
+            <div class="form-grid ui-fluid">
+                <div class="p-field p-grid">
+                    <label jhiTranslate="primengtestApp.employee.username" for="field_username" class="p-col-12 p-md-2">Username</label>
+                    <div class="p-col-12 p-md-10">
+                        <input pInputText type="text" name="username" id="field_username" formControlName="username" [readonly]="edit"/>
+                        <div class="validation-messages">
+                            <ng-container *ngIf="editForm.get('username')!.invalid && (editForm.get('username')!.dirty || editForm.get('username')!.touched)">
+                                <p-message severity="error"
+                                           *ngIf="editForm.get('username')!.errors!.required" [text]="'entity.validation.required' | translate">
+                                </p-message>
+                            </ng-container>
+                        </div>
+                    </div>
                 </div>
-                <label jhiTranslate="primengtestApp.employee.fullname" for="field_fullname">Fullname</label>
-                <input pInputText type="text" name="fullname" id="field_fullname" formControlName="fullname"/>
-                <div class="validation-messages">
-                    <ng-container *ngIf="editForm.get('fullname')!.invalid && (editForm.get('fullname')!.dirty || editForm.get('fullname')!.touched)">
-                        <p-message severity="error"
-                                   *ngIf="editForm.get('fullname')!.errors!.required" [text]="'entity.validation.required' | translate">
-                        </p-message>
-                    </ng-container>
+                <div class="p-field p-grid">
+                    <label jhiTranslate="primengtestApp.employee.fullname" for="field_fullname" class="p-col-12 p-md-2">Fullname</label>
+                    <div class="p-col-12 p-md-10">
+                        <input pInputText type="text" name="fullname" id="field_fullname" formControlName="fullname"/>
+                        <div class="validation-messages">
+                            <ng-container *ngIf="editForm.get('fullname')!.invalid && (editForm.get('fullname')!.dirty || editForm.get('fullname')!.touched)">
+                                <p-message severity="error"
+                                           *ngIf="editForm.get('fullname')!.errors!.required" [text]="'entity.validation.required' | translate">
+                                </p-message>
+                            </ng-container>
+                        </div>
+                    </div>
                 </div>
             </div>
 

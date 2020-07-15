@@ -1,6 +1,6 @@
 {
   "name": "generator-jhipster-primeng-blueprint",
-  "version": "6.8.0",
+  "version": "6.8.2",
   "description": "This blueprint generated code that uses primeng components instead of bootstrap ones",
   "keywords": [
     "yeoman-generator",
@@ -22,6 +22,9 @@
     "url": "git+https://github.com/elhoutico/jhipster-primeng-blueprint.git"
   },
   "dependencies": {
+    "lodash": "4.17.10",
+    "mkdirp": "0.5.1",
+    "pluralize": "7.0.0",
     "chalk": "2.4.1",
     "generator-jhipster": "6.8.0"
   },
