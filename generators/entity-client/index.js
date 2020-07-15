@@ -1,6 +1,6 @@
 /* eslint-disable consistent-return */
-const EntityClientGenerator = require('generator-jhipster/generators/entity-client');
 const chalk = require('chalk');
+const EntityClientGenerator = require('generator-jhipster/generators/entity-client');
 const _ = require('lodash');
 const pluralize = require('pluralize');
 const path = require('path');
@@ -71,7 +71,16 @@ module.exports = class extends EntityClientGenerator {
             // making sure name is unique to not override any step
             primengBlueprintPopulatingRelationshipPagination() {
                 if (!this.allContexts) {
-                    this.allContexts = {};
+                    const userContext = {
+                        name: 'User',
+                        angularName: 'User',
+                        fields: [],
+                        relationships: []
+                    };
+                    this._computePkData(userContext);
+                    this.allContexts = {
+                        user: userContext
+                    };
                 }
                 this.relationships.forEach(relationship => {
                     const otherEntityData = this._getEntityJson(relationship.otherEntityName);
@@ -114,7 +123,7 @@ module.exports = class extends EntityClientGenerator {
 
             primengBlueprintLoadFieldsInRelationship() {
                 this.relationships.forEach(r => {
-                    const otherContext = this._getEntityJson(r.otherEntityNameCapitalized);
+                    const otherContext = this._getEntityJson(r.otherEntityName);
                     r.fields = otherContext.fields;
                     if (r.pkData.length === 1 && r.pkData[0].name === 'id' && r.pkData[0].type === 'Long') {
                         r.fields.unshift(defaultIdField);

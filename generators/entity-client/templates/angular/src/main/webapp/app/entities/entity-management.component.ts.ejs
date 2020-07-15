@@ -53,9 +53,14 @@ import { TranslateService } from '@ngx-translate/core';
         <%_ if (relationships[idx].inList) { _%>
             <%_ relationships[idx].pkData.forEach(pk => { _%>
                 <%_ if(!alreadyImported.has(pk.entity.name)) { _%>
-                <%_ alreadyImported.add(pk.entity.name); _%>
+                    <%_ alreadyImported.add(pk.entity.name); _%>
+                    <%_ if(pk.entity.name === 'User') { _%>
+import { IUser } from 'app/core/user/user.model';
+import { UserService } from 'app/core/user/user.service';
+                    <%_ } else {_%>
 import { I<%= pk.entity.angularName %> } from 'app/shared/model/<%= pk.entity.modelName %>.model';
 import { <%= pk.entity.angularName%>Service } from 'app/entities/<%= pk.entity.path %>/<%= pk.entity.fileName %>.service';
+                    <%_ } _%>
                 <%_ } _%>
             <%_ }) _%>
         <%_ } _%>

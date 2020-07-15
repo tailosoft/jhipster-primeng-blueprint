@@ -57,18 +57,6 @@ Browser Upgrade Prompt
 Generic styles
 ========================================================================== */
 
-/* Error highlight on input fields */
-.ng-valid[required],
-.ng-valid.required {
-  border-left: 5px solid green;
-}
-
-.ng-invalid:not(form) {
-  border-left: 5px solid red;
-}
-
-/* other generic styles */
-
 .jh-card {
   padding: 1.5%;
   margin-top: 20px;

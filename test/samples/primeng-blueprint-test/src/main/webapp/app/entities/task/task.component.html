@@ -39,6 +39,10 @@
                 <th>
                     <span jhiTranslate="primengtestApp.task.picture">Picture</span>
                 </th>
+                <th>
+                    <span jhiTranslate="primengtestApp.task.user">User</span>
+                    
+                </th>
                 <th style="width: 124px"></th>
             </tr>
             <tr>
@@ -72,6 +76,11 @@
                 </th>
                 <th>
                 </th>
+                <th>
+                    <p-multiSelect [options]="userOptions" [ngModel]="taskTable.filters.userId?.value" optionLabel="login" optionValue="id"
+                                   [lazy]="true" [rows]="10" (onLazyLoad)="onUserLazyLoadEvent($event)"
+                                   (ngModelChange)="filter($event, 'userId')"></p-multiSelect>
+                </th>
                 <th></th>
             </tr>
         </ng-template>
@@ -95,6 +104,7 @@
                     </a>
                     <span *ngIf="task.picture">{{task.pictureContentType}}, {{byteSize(task.picture)}}</span>
                 </td>
+                    {{task.userLogin}}
                 <td>
                     <div class="btn-group flex-btn-group-container">
                         <p-button type="submit" [routerLink]="['/task', task.id, 'view' ]"

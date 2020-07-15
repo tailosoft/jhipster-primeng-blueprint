@@ -48,6 +48,10 @@
                         {{ task.pictureContentType }}, {{ byteSize(task.picture) }}
                     </div>
                 </dd>
+                <dt><span jhiTranslate="primengtestApp.task.user">User</span></dt>
+                <dd>
+                    {{ task.userLogin }}
+                </dd>
             </dl>
 
             <button pButton type="submit" (click)="previousState()" class="ui-button-info" icon="pi pi-arrow-left" [label]="'entity.action.back' | translate"></button>

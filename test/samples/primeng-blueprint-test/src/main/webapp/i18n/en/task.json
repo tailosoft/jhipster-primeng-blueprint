@@ -25,7 +25,8 @@
       "done": "Done",
       "description": "Description",
       "attachment": "Attachment",
-      "picture": "Picture"
+      "picture": "Picture",
+      "user": "User"
     }
   }
 }

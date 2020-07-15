@@ -7,9 +7,11 @@ import { MessageService } from 'primeng/api';
 import { ITask } from 'app/shared/model/task.model';
 import { TaskType, TASK_TYPE_ARRAY } from 'app/shared/model/enumerations/task-type.model';
 import { TaskService } from './task.service';
-import { computeFilterMatchMode } from 'app/shared/util/request-util';
-import { ConfirmationService } from 'primeng/api';
+import { computeFilterMatchMode, lazyLoadEventToServerQueryParams } from 'app/shared/util/request-util';
+import { ConfirmationService, LazyLoadEvent } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
+import { IUser } from 'app/core/user/user.model';
+import { UserService } from 'app/core/user/user.service';
 import { Table } from 'primeng/table';
 import { DatePipe } from '@angular/common';
 
@@ -21,6 +23,7 @@ export class TaskComponent implements OnInit, OnDestroy {
   tasks?: ITask[];
   eventSubscriber?: Subscription;
   typeOptions = TASK_TYPE_ARRAY.map((s: TaskType) => ({ label: s.toString(), value: s }));
+  userOptions: IUser[] | null = null;
 
   private filtersDetails: { [_: string]: { matchMode?: string; flatten?: (_: any) => string; unflatten?: (_: string) => any } } = {
     id: { matchMode: 'equals', unflatten: (x: string) => +x },
@@ -28,7 +31,8 @@ export class TaskComponent implements OnInit, OnDestroy {
     endDate: { matchMode: 'between', flatten: a => a.filter((x: string) => x).join(','), unflatten: (a: string) => a.split(',') },
     createdAt: { matchMode: 'between', flatten: a => a.filter((x: string) => x).join(','), unflatten: (a: string) => a.split(',') },
     modifiedAt: { matchMode: 'between', flatten: a => a.filter((x: string) => x).join(','), unflatten: (a: string) => a.split(',') },
-    done: { matchMode: 'equals', unflatten: (x: string) => x === 'true' }
+    done: { matchMode: 'equals', unflatten: (x: string) => x === 'true' },
+    userId: { matchMode: 'in', flatten: a => a.join(','), unflatten: a => a.split(',').map(x => +x) }
   };
 
   @ViewChild('taskTable', { static: true })
@@ -36,6 +40,7 @@ export class TaskComponent implements OnInit, OnDestroy {
 
   constructor(
     protected taskService: TaskService,
+    protected userService: UserService,
     protected messageService: MessageService,
     protected dataUtils: JhiDataUtils,
     protected eventManager: JhiEventManager,
@@ -87,6 +92,10 @@ export class TaskComponent implements OnInit, OnDestroy {
         });
       }
     });
+  }
+
+  onUserLazyLoadEvent(event: LazyLoadEvent): void {
+    this.userService.query(lazyLoadEventToServerQueryParams(event, 'login.contains')).subscribe(res => (this.userOptions = res.body));
   }
 
   trackId(index: number, item: ITask): string {

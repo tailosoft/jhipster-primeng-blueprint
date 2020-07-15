@@ -26,6 +26,7 @@
       "description": "Description",
       "attachment": "Attachment",
       "picture": "Picture",
+      "user": "User",
       "employeeSkill": "Employee Skill"
     }
   }
