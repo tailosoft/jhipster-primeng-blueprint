@@ -23,8 +23,8 @@
                 Create or edit a User
             </h2>
 
-            <div *ngIf="user">
-                <div class="form-group" [hidden]="!user.id">
+            <div>
+                <div class="form-group" *ngIf="editForm.get('id')!.value">
                     <label jhiTranslate="global.field.id">ID</label>
                     <input type="text" class="form-control" name="id" formControlName="id" readonly>
                 </div>
@@ -121,7 +121,7 @@
 
                 <div class="form-check">
                     <label class="form-check-label" for="activated">
-                        <input class="form-check-input" [attr.disabled]="user.id === undefined ? 'disabled' : null"
+                        <input class="form-check-input" [attr.disabled]="!editForm.get('id')!.value ? 'disabled' : null"
                                type="checkbox" id="activated" name="activated" formControlName="activated">
                         <span jhiTranslate="userManagement.activated">Activated</span>
                     </label>
@@ -144,7 +144,7 @@
                 </div>
             </div>
 
-            <div *ngIf="user">
+            <div>
                 <button pButton type="button" id="cancel-save" icon="pi pi-ban" class="ui-button-secondary" (click)="previousState()" [label]="'entity.action.cancel' | translate"></button>
                 <button pButton type="submit" id="save-entity" icon="pi pi-save" [disabled]="editForm.invalid || isSaving" [label]="'entity.action.save' | translate"></button>
             </div>
