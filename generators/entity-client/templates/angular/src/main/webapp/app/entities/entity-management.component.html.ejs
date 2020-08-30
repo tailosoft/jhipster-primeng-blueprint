@@ -25,7 +25,7 @@
         </p-button>
         <%_ } _%>
     </h2>
-    <%_ if (searchEngine === 'elasticsearch') { _%>
+    <!-- <%_ if (searchEngine === 'elasticsearch') { _%>
     <div class="row">
         <div class="col-sm-12">
             <form name="searchForm" class="form-inline">
@@ -39,7 +39,7 @@
             </form>
         </div>
     </div>
-    <%_ } _%>
+    <%_ } _%> -->
     <br/>
     <p-table #<%= entityInstance %>Table [value]="<%= entityInstancePlural %>" [rowTrackBy]="trackId" [responsive]="true"<%
     if (pagination !== 'no') {
