@@ -318,7 +318,7 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy {
     <%_
     let eventCallBack = 'this.loadAll()';
     if (pagination !== 'no') {
-        eventCallBack = "this.router.navigate(['/" + entityUrl + "'], {queryParams: {r: Date.now()}})";
+        eventCallBack = "this.router.navigate(['/" + entityUrl + "'], {queryParams: {r: Date.now()}, queryParamsHandling: 'merge'})";
     }
     _%>
 

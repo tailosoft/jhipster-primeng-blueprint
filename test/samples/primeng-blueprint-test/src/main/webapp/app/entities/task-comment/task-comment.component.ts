@@ -117,7 +117,7 @@ export class TaskCommentComponent implements OnInit, OnDestroy {
 
   registerChangeInTaskComments(): void {
     this.eventSubscriber = this.eventManager.subscribe('taskCommentListModification', () =>
-      this.router.navigate(['/task-comment'], { queryParams: { r: Date.now() } })
+      this.router.navigate(['/task-comment'], { queryParams: { r: Date.now() }, queryParamsHandling: 'merge' })
     );
   }
 

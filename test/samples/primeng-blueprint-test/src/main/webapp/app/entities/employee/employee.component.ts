@@ -105,7 +105,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
 
   registerChangeInEmployees(): void {
     this.eventSubscriber = this.eventManager.subscribe('employeeListModification', () =>
-      this.router.navigate(['/employee'], { queryParams: { r: Date.now() } })
+      this.router.navigate(['/employee'], { queryParams: { r: Date.now() }, queryParamsHandling: 'merge' })
     );
   }
 

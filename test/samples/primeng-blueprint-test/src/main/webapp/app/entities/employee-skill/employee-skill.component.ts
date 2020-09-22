@@ -138,7 +138,7 @@ export class EmployeeSkillComponent implements OnInit, OnDestroy {
 
   registerChangeInEmployeeSkills(): void {
     this.eventSubscriber = this.eventManager.subscribe('employeeSkillListModification', () =>
-      this.router.navigate(['/employee-skill'], { queryParams: { r: Date.now() } })
+      this.router.navigate(['/employee-skill'], { queryParams: { r: Date.now() }, queryParamsHandling: 'merge' })
     );
   }
 
