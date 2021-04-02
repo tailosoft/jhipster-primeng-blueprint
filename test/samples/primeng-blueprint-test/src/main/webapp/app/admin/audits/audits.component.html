@@ -26,7 +26,7 @@
     <div class="table-responsive" *ngIf="audits?.length > 0">
         <table class="table table-sm table-striped" aria-describedby="audits-page-heading">
             <thead [ngSwitch]="canLoad()">
-                <tr jhiSort [(predicate)]="predicate" [(ascending)]="ascending" [callback]="transition.bind(this)" *ngSwitchCase="true">
+                <tr jhiSort [(predicate)]="predicate" *ngSwitchCase="true">
                     <th scope="col" jhiSortBy="auditEventDate"><span jhiTranslate="audits.table.header.date">Date</span> <i class="pi pi-sort"></i></th>
                     <th scope="col" jhiSortBy="principal"><span jhiTranslate="audits.table.header.principal">User</span> <i class="pi pi-sort"></i></th>
                     <th scope="col" jhiSortBy="auditEventType"><span jhiTranslate="audits.table.header.status">State</span> <i class="pi pi-sort"></i></th>

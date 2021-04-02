@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2020 the original author or authors from the JHipster project.
+ Copyright 2013-2021 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -8,7 +8,7 @@
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
 
-      http://www.apache.org/licenses/LICENSE-2.0
+      https://www.apache.org/licenses/LICENSE-2.0
 
  Unless required by applicable law or agreed to in writing, software
  distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,7 @@ import { element, by<% if (!readOnly) { %>, ElementFinder<% } %><% if ( fieldsCo
 <%_
 let elementGetter = `getText()`;
 if (enableTranslation) {
-    elementGetter = `getAttribute('jhiTranslate')`;
+    elementGetter = `getAttribute('${jhiPrefix}Translate')`;
 }
 _%>
 export class <%= entityClass %>ComponentsPage {
@@ -78,12 +78,8 @@ _%>
     const relationshipName = relationship.relationshipName;
     const relationshipFieldName = relationship.relationshipFieldName;
 _%>
-    <%_ if (((relationshipType === 'many-to-one') || (relationshipType === 'one-to-one' && ownerSide === true)) && dto === 'no') { _%>
+    <%_ if ((relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true))) { _%>
     <%=relationshipName %>Select = element(by.id('field_<%= relationshipName %>'));
-    <%_ } else if (((relationshipType === 'many-to-one') || (relationshipType === 'one-to-one' && ownerSide === true)) && dto !== 'no') { _%>
-        <%_ relationship.pkData.forEach(pk => { _%>
-    <%= pk.formName %>Select = element(by.id('field_<%= pk.formName %>'));
-        <%_ }) _%>
     <%_ } else if(relationshipType === 'many-to-many' && ownerSide === true) { _%>
     <%=relationshipName %>Select = element(by.id('field_<%= relationship.relationshipFieldNamePlural %>'));
     <%_ } _%>
@@ -175,7 +171,7 @@ _%>
     const relationshipFieldName = relationship.relationshipFieldName;
     const relationshipNameCapitalized = relationship.relationshipNameCapitalized;
 _%>
-    <%_ if (((relationshipType === 'many-to-one') || (relationshipType === 'one-to-one' && ownerSide === true)) && dto === 'no') { _%>
+    <%_ if ((relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true))) { _%>
     async <%=relationshipName %>SelectLastOption(): Promise<void> {
         await this.<%= relationshipName %>Select.click();
         await this.<%= relationshipName %>Select
@@ -192,25 +188,6 @@ _%>
         return await this.<%= relationshipName %>Select.element(by.css('.ui-dropdown-label')).getText();
     }
 
-    <%_ } else if(((relationshipType === 'many-to-one') || (relationshipType === 'one-to-one' && ownerSide === true)) && dto !== 'no') { _%>
-        <%_ relationship.pkData.forEach(pk => { _%>
-    async <%= pk.formName %>SelectLastOption(): Promise<void> {
-        await this.<%= pk.formName %>Select.click();
-        await this.<%= pk.formName %>Select
-          .all(by.tagName('.ui-dropdown-item'))
-          .last()
-          .click();
-    }
-
-    get<%= _.upperFirst(pk.formName) %>Select(): ElementFinder {
-        return this.<%= pk.formName %>Select;
-    }
-
-    async get<%= _.upperFirst(pk.formName) %>SelectedOption(): Promise<string> {
-        return await this.<%= pk.formName %>Select.element(by.css('.ui-dropdown-label')).getText();
-    }
-
-        <%_ }) _%>
     <%_ } else if (relationshipType === 'many-to-many' && ownerSide === true) {_%>
     async <%=relationshipName %>SelectLastOption(): Promise<void> {
         await this.<%= relationshipName %>Select.click();

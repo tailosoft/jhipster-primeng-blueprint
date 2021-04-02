@@ -1,6 +1,6 @@
 import { HttpParams } from '@angular/common/http';
 import { FilterMetadata, LazyLoadEvent } from 'primeng/api';
-import { ITEMS_PER_PAGE } from 'app/shared/constants/pagination.constants';
+import { ITEMS_PER_PAGE } from 'app/config/pagination.constants';
 import { flatten, unflatten } from 'flat';
 import { Params } from '@angular/router';
 import { Table } from 'primeng/table';
@@ -60,48 +60,101 @@ export const lazyLoadEventToServerQueryParams = (event?: LazyLoadEvent, globalFi
   return params;
 };
 
-export const fillTableFromQueryParams = (
-  table: Table,
-  queryParams: Params,
-  filtersDetails: { [_: string]: { matchMode?: string; unflatten?: Function } }
-) => {
+export const fillTableFromQueryParams = (table: Table, queryParams: Params, filtersDetails: { [_: string]: { type: string } }): void => {
   const params: any = unflatten(queryParams);
   table.first = +queryParams.first || 0;
   table.multiSortMeta = (params['msm'] || []).map((sm: any) => ({ field: sm.field, order: +sm.order }));
-  const filters = {};
+  const filters: { [_: string]: FilterMetadata | FilterMetadata[] } = {};
   if (params['f']) {
-    Object.entries(params['f']).forEach(
-      ([field, value]) =>
-        (filters[field] = {
-          value: (filtersDetails[field] && filtersDetails[field].unflatten && filtersDetails[field].unflatten!(value)) || value,
-          matchMode: computeFilterMatchMode(filtersDetails[field])
-        })
-    );
+    Object.entries(flatten(params['f'], { safe: true })).forEach(([field, value]) => {
+      let filterName = field;
+      let filterValue = value;
+      if (filterName === 'globalFilter') {
+        filters[filterName] = {
+          value: filterName
+        };
+      } else {
+        const matchMode = Object.keys(matchModes).find(mm => field.endsWith(`.${mm}`));
+        if (matchMode) {
+          filterName = field.substring(0, -matchMode.length - 1); // -1 for the dot (.)
+        }
+        if (matchMode === FilterMatchMode.IN) {
+          filterValue = (value as string).split(',');
+          filterValue = (filterValue as string[]).map(fv => deserializeFilter(fv, filtersDetails[filterName].type));
+        } else {
+          filterValue = deserializeFilter(filterValue as string, filtersDetails[filterName].type);
+        }
+        if (!filters[filterName]) {
+          filters[filterName] = [];
+        }
+        (filters[filterName] as FilterMetadata[]).push({
+          value: filterValue,
+          matchMode: matchMode
+        });
+      }
+    });
   }
   table.filters = filters;
 };
 
-export const lazyLoadEventToRouterQueryParams = (
-  event: LazyLoadEvent,
-  filtersDetails: { [_: string]: { matchMode?: string; flatten?: Function } }
-): Params => {
+export const lazyLoadEventToRouterQueryParams = (event: LazyLoadEvent, filtersDetails: { [_: string]: { type: string } }): Params => {
   const queryParams: { [_: string]: any } = {};
-  if (event) {
-    if (event.first) {
-      queryParams['first'] = event.first;
-    }
-    if (event.multiSortMeta && event.multiSortMeta.length) {
-      queryParams['msm'] = event.multiSortMeta;
-    }
-    if (event.filters) {
-      Object.entries(event.filters).forEach(([field, filter]: [string, FilterMetadata]) => {
-        let filterValue = filter.value;
-        if (filterValue && filtersDetails[field] && filtersDetails[field].flatten) {
-          filterValue = filtersDetails[field].flatten!(filterValue);
-        }
-        queryParams[`f.${field}`] = filterValue;
-      });
-    }
+  if (event.first) {
+    queryParams['first'] = event.first;
   }
-  return flatten(queryParams);
+  if (event.multiSortMeta?.length) {
+    queryParams['msm'] = event.multiSortMeta;
+  }
+  if (event.filters) {
+    Object.entries(event.filters).forEach(([field, filterMetas]: [string, FilterMetadata | FilterMetadata[]]) => {
+      if (!Array.isArray(filterMetas)) {
+        filterMetas = [filterMetas];
+      }
+      filterMetas.forEach(filter => {
+        const matchMode = filter.matchMode;
+        let filterValue = filter.value;
+        if (matchMode === 'in') {
+          filterValue = filterValue.join(',');
+        }
+        const paramKey = matchMode ? `f.${field}.${matchMode}` : `f.${field}`;
+        queryParams[paramKey] = filterValue;
+      });
+    });
+  }
+  // return flatten(queryParams);
+  return queryParams;
+};
+
+const deserializeFilter = (value: string, type: string): any => {
+  if (type === 'number') {
+    return +value;
+  }
+  if (type === 'date') {
+    return new Date(value);
+  }
+  if (type === 'boolean') {
+    return value === 'true';
+  }
+  return value;
+};
+
+const matchModes = {
+  [FilterMatchMode.STARTS_WITH]: 'contains',
+  [FilterMatchMode.CONTAINS]: 'contains',
+  [FilterMatchMode.ENDS_WITH]: 'contains',
+  [FilterMatchMode.EQUALS]: 'equals',
+  [FilterMatchMode.NOT_EQUALS]: 'notEquals',
+  [FilterMatchMode.IN]: 'in',
+  [FilterMatchMode.LESS_THAN]: 'lessThan',
+  [FilterMatchMode.LESS_THAN_OR_EQUAL_TO]: 'lessThanOrEqual',
+  [FilterMatchMode.GREATER_THAN]: 'greaterThan',
+  [FilterMatchMode.GREATER_THAN_OR_EQUAL_TO]: 'greaterThanOrEqual',
+  [FilterMatchMode.IS]: 'equals',
+  [FilterMatchMode.IS_NOT]: 'notEquals',
+  [FilterMatchMode.BEFORE]: 'lessThanOrEqual',
+  [FilterMatchMode.AFTER]: 'greaterThanOrEqual',
+  [FilterMatchMode.IS]: 'equals',
+  [FilterMatchMode.IS_NOT]: 'notEquals',
+  [FilterMatchMode.BEFORE]: 'lte',
+  [FilterMatchMode.AFTER]: 'gte'
 };

@@ -1,10 +1,11 @@
 application {
   config {
-    baseName primengtest
+    baseName compositekey
     applicationType monolith
-    prodDatabaseType mysql
+    prodDatabaseType postgresql
     buildTool gradle
-    testFrameworks [protractor]
+    testFrameworks [cypress]
+    skipServer true
   }
   entities *
 }
@@ -14,6 +15,10 @@ entity Employee{
 	fullname String required
 }
 
+relationship OneToMany{
+	Employee{teamMember(fullname)} to Employee{manager(fullname)}
+}
+
 entity EmployeeSkill{
 	// compositeId employeeSkill.name, employee.id
 	@id name String required
@@ -21,7 +26,7 @@ entity EmployeeSkill{
 }
 
 relationship OneToMany{
-	@id Employee{skill(name)} to EmployeeSkill{employee(fullname) required}
+    @id Employee{skill(name)} to EmployeeSkill{employee(fullname) required}
 }
 
 entity CertificateType{
@@ -39,7 +44,7 @@ relationship OneToMany{
 }
 
 relationship OneToMany{
-	@id EmployeeSkill to EmployeeSkillCertificate{skill required}
+	@id EmployeeSkill to EmployeeSkillCertificate{skill(name) required}
 }
 
 entity Task {
@@ -79,17 +84,37 @@ relationship OneToMany {
     Employee{taughtSkill(name)} to EmployeeSkill{teacher(fullname) required}
 }
 
-//Entity With integer id not called Id (not autoIncrement)
-entity PriceFormula {
-    @id max Integer required
-    formula String required
-}
-
 relationship ManyToOne {
     Task{user(login) required} to User
+}
+
+entity WithIdString {
+    @id id String
+    name String
+}
+
+entity WithIdStringDetails {
+    details String
+}
+
+relationship OneToOne {
+    WithIdStringDetails to WithIdString with jpaDerivedIdentifier
+}
+
+entity WithUUID {
+    @id uuid UUID
+    name String required
+}
+
+entity WithUUIDDetails {
+    details String
+}
+
+relationship OneToOne {
+    WithUUIDDetails to WithUUID with jpaDerivedIdentifier
 }
 
 dto * with mapstruct
 service * with serviceImpl
 filter *
-paginate TaskComment, Employee, EmployeeSkill, EmployeeSkillCertificate with pagination
+paginate TaskComment, Employee, EmployeeSkill, EmployeeSkillCertificate, Task with pagination

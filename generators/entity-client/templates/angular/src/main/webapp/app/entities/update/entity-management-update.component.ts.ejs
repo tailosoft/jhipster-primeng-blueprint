@@ -1,0 +1,332 @@
+<%#
+ Copyright 2013-2021 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+<%_
+const hasRelationshipQuery = relationships && relationships.some(r => r.ownerSide);
+const hasXToOneRelationshipQuery = relationships && relationships.some(r => r.ownerSide && r.relationshipType !== 'many-to-many');
+const hasPaginationRelationship = relationships && relationships.some(r => r.ownerSide && r.otherEntity.pagination !== 'no');
+const hasMultiFieldRelationship = relationships && relationships.some(r => r.ownerSide && r.clientFields.length > 1 && r.relationshipType !== 'many-to-many');
+const hasValidationRule = fields.some(field =>
+        field.fieldValidate && (
+                field.fieldValidateRules.includes('required') ||
+                field.fieldValidateRules.includes('minlength') ||
+                field.fieldValidateRules.includes('maxlength') ||
+                field.fieldValidateRules.includes('min') ||
+                field.fieldValidateRules.includes('max') ||
+                field.fieldValidateRules.includes('pattern')
+        )
+);
+const hasRequiredRelationship = relationships.some(relationship => relationship.relationshipRequired);
+const isValidatorsRequired = hasValidationRule || hasRequiredRelationship || entity.primaryKey.derived;
+_%>
+import { Component, OnInit<% if (hasMultiFieldRelationship) { %>, OnDestroy<% } %> } from '@angular/core';
+import { HttpResponse<% if (relationships.filter(r => r.ownerSide).length) { %>, HttpErrorResponse<% } %> } from '@angular/common/http';
+import { FormBuilder<%_ if (hasXToOneRelationshipQuery) { _%> , FormGroup<%_ } _%><%_ if (isValidatorsRequired) { _%>, Validators<%_ } _%> } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { Observable<% if (hasMultiFieldRelationship) { %>, Subject<% } %> } from 'rxjs';
+<% if (hasMultiFieldRelationship) { %>
+import { filter, takeUntil } from 'rxjs/operators';
+<%_ } _%>
+<%_ if (hasPaginationRelationship) { _%>
+import { lazyLoadEventToServerQueryParams } from 'app/core/request/request-util';
+import { LazyLoadEvent } from 'primeng/api';
+<%_ } _%>
+<%_
+if ( jpaMetamodelFiltering) {
+    const enumOptions = [];
+    fields.forEach(field => {
+        if (field.fieldIsEnum && !enumOptions.includes(field.fieldType)) {
+            enumOptions.push(field.fieldType);
+        }
+    });
+    enumOptions.forEach(e => { _%>
+import { <%= e %>, <%= _.snakeCase(e).toUpperCase() %>_ARRAY } from 'app/entities/enumerations/<%= _.kebabCase(e) %>.model';
+    <%_ }); _%>
+<%_ } _%>
+
+import { I<%= entityAngularName %> } from '../<%= entityFileName %>.model';
+import { <%= entityAngularName %>Service } from '../service/<%= entityFileName %>.service';
+<%_ if (hasRelationshipQuery || fieldsContainBlob) { _%>
+import { MessageService } from 'primeng/api';
+<%_ } _%>
+<%_ if (fieldsContainBlob) { _%>
+import { DataUtils } from 'app/core/util/data-util.service';
+<%_ } _%>
+<%_ const alreadyImported = new Set([name]) _%>
+<%_ for (const relationship of relationships) { _%>
+    <%_ if (relationship.ownerSide) { _%>
+        <%_ relationship.otherEntity.primaryKey.fields.forEach(field => { _%>
+            <%_ if(!alreadyImported.has(field.entity.name)) { _%>
+                <%_ alreadyImported.add(field.entity.name); _%>
+import { I<%= field.entity.entityAngularName %> } from 'app/entities/<%= field.entity.entityFolderName %>/<%= field.entity.entityFileName %>.model';
+                <%_ if(relationship.otherEntity.name === 'User') { _%>
+import { UserService } from 'app/entities/user/user.service';
+                <%_ } else {_%>
+    import { <%= field.entity.entityAngularName%>Service } from 'app/entities/<%= field.entity.entityFolderName %>/service/<%= field.entity.entityFileName %>.service';
+                <%_ } _%>
+            <%_ } _%>
+        <%_ }) _%>
+    <%_ } _%>
+<%_ } _%>
+
+@Component({
+    selector: '<%= jhiPrefixDashed %>-<%= entityFileName %>-update',
+    templateUrl: './<%= entityFileName %>-update.component.html'
+})
+
+export class <%= entityAngularName %>UpdateComponent implements OnInit<% if (hasMultiFieldRelationship) { %>, OnDestroy<% } %> {
+<%_ if (!primaryKey.autoGenerate || primaryKey.derived) { _%>
+    edit = false;
+<%_ } _%>
+    isSaving = false;
+<%_ for (const relationship of relationships) { _%>
+    <%_ if (relationship.ownerSide) { _%>
+        <%_ relationship.clientFields.forEach(cf => { _%>
+    <%= cf.name %>Options: I<%= cf.entity.name %>[] | null = null;
+            <%_ if (relationship.relationshipType !== 'many-to-many') { _%>
+    <%= cf.name %>FilterValue?: any;
+            <%_ } else { _%>
+                <%_ if (cf.lastRelationship.pagination !== 'no') { _%>
+    <%= cf.name %>SelectedOptions: I<%= cf.entity.name %>[] | null = null;
+                <%_ } _%>
+            <%_ } _%>
+        <%_ }) _%>
+    <%_ } _%>
+<%_ } _%>
+<%_ for (const field of fields) { _%>
+    <%_ if(field.fieldIsEnum) {_%>
+    <%= field.fieldName %>Options = <%= _.snakeCase(field.fieldType).toUpperCase() %>_ARRAY.map((s: <%=field.fieldType%>) => ({ label: s.toString(), value: s }));
+    <%_ } else if (['byte[]', 'ByteBuffer'].includes(field.fieldType) && field.fieldTypeBlobContent !== 'text') { _%>
+    <%= field.fieldName %>File?: File;
+    <%_ } _%>
+<%_ } _%>
+
+    editForm = this.fb.group({
+    <%_ for (const field of fields) {
+        const fieldName = field.fieldName;
+        const fieldType = field.fieldType;
+    const fieldTypeBlobContent = field.fieldTypeBlobContent; _%>
+        <%= fieldName %>: [<% if (field.fieldValidate === true) { %>null,[<% if (field.fieldValidateRules.includes('required')) { %>Validators.required,<% } %><% if (field.fieldValidateRules.includes('minlength')) { %>Validators.minLength(<%= field.fieldValidateRulesMinlength %>),<% } %><% if (field.fieldValidateRules.includes('maxlength')) { %>Validators.maxLength(<%= field.fieldValidateRulesMaxlength %>),<% } %><% if (field.fieldValidateRules.includes('min')) { %>Validators.min(<%= field.fieldValidateRulesMin %>),<% } %><% if (field.fieldValidateRules.includes('max')) { %>Validators.max(<%= field.fieldValidateRulesMax %>),<% } %><% if (field.fieldValidateRules.includes('pattern')) { %>Validators.pattern('<%= field.fieldValidateRulesPattern %>'),<% } %>]<% } %>],
+        <%_ if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent !== 'text') { _%>
+        <%= fieldName %>ContentType: [],
+        <%_ } _%>
+    <%_ } _%>
+<%_ function generateRelationshipForm(relationship) {
+    return `${relationship.relationshipName}: this.fb.group({
+    ${relationship.otherEntity.fields.filter(f => f.id).map(f => `${f.fieldName}: [null, [Validators.required]],`).join('\n')}
+    ${relationship.otherEntity.relationships.filter(r => r.id).map(r => generateRelationshipForm(r)).join('\n')}
+    }),`;
+} _%>
+<%_ relationships.filter(r => r.ownerSide).forEach(r => {
+    if (r.relationshipType === 'many-to-many') { _%>
+    <%= r.relationshipNamePlural %>: [],
+    <%_ } else { _%>
+<%- generateRelationshipForm(r) -%>
+    <%_ }
+}) _%>
+    });
+
+<%_ if (hasMultiFieldRelationship) { _%>
+    onDestroySubject = new Subject<void>();
+<%_ } _%>
+
+    constructor(
+        <%_ if (fieldsContainBlob) { _%>
+        protected dataUtils: DataUtils,
+<%_ } _%>
+<%_ if (fieldsContainBlob || hasRelationshipQuery) { _%>
+        protected messageService: MessageService,
+        <%_ } _%>
+        protected <%= entityInstance %>Service: <%= entityAngularName %>Service,
+<%_ const alreadyInConstructor = new Set([name]) _%>
+<%_ for (const relationship of relationships) { _%>
+    <%_ if (relationship.ownerSide) { _%>
+        <%_ relationship.clientFields.forEach(cf => { _%>
+            <%_ if(!alreadyInConstructor.has(cf.entity.name)) { _%>
+                <%_ alreadyInConstructor.add(cf.entity.name); _%>
+        protected <%= _.lowerFirst(cf.entity.name) %>Service: <%= cf.entity.entityAngularName %>Service,
+            <%_ } _%>
+        <%_ }) _%>
+    <%_ } _%>
+<%_ } _%>
+        protected activatedRoute: ActivatedRoute,
+        private fb: FormBuilder
+    ) {
+    }
+
+    ngOnInit(): void {
+        this.isSaving = false;
+<%_
+relationships.filter(r => r.ownerSide && r.relationshipType !== 'many-to-many').forEach(relationship => {
+  for (let i = 0; i < relationship.clientFields.length - 1; i++) {
+      const cf = relationship.clientFields[i];
+      const nextCf = relationship.clientFields[i + 1];
+_%>
+
+        this.<%= cf.formName %>.get('<%= cf.fieldName %>')!.valueChanges.pipe(
+            takeUntil(this.onDestroySubject),
+            filter(() => !this.edit)
+        ).subscribe(() => {
+            this.on<%= nextCf.nameCapitalized %>LazyLoadEvent({});
+            this.<%= nextCf.formName %>.get('<%= nextCf.fieldName %>')!.reset();
+        });
+<%_
+    }
+}) _%>
+
+        this.activatedRoute.data.subscribe(({ <%= entityInstance %> }) => {
+            this.updateForm(<%= entityInstance %>);
+        });
+<%_ for (const relationship of relationships.filter(r => r.ownerSide)) { _%>
+    <%_ /* same condition and explanation as in relationship_load_emplate*/ _%>
+    <%_ relationship.clientFields.forEach((cf, i) => { _%>
+        <%_ if ((i === 0 && cf.entity.pagination === 'no') || !cf.entity.jpaMetamodelFiltering) { _%>
+        this.loadAll<%= cf.nameCapitalizedPlural %>()
+        <%_ } _%>
+    <%_ }) _%>
+<%_ } _%>
+    }
+
+<%_ if (hasMultiFieldRelationship) { _%>
+    ngOnDestroy(): void {
+        this.onDestroySubject.next(undefined);
+        this.onDestroySubject.complete();
+    }
+<%_ } _%>
+
+<%_ function generateForms(relationship, formName) {
+    return `get ${relationship.relationshipName}Form(): FormGroup {
+    return this.${formName}.get('${relationship.relationshipName}')! as FormGroup;
+    }
+
+    ${relationship.otherEntity.relationships.filter(r => r.id).map(r => generateForms(r, `${relationship.relationshipName}Form`)).join('')}`;
+} _%>
+<%_ relationships.filter(r => r.ownerSide).forEach(r => { _%>
+    <%- generateForms(r, "editForm") -%>
+<%_ }) _%>
+
+<%_ for (relationship of relationships.filter(r => r.ownerSide)) { _%>
+    <%- include('./relationship_load_template', {relationship}) %>
+<%_ } _%>
+
+    updateForm(<%= entityInstance %>: I<%= entityAngularName %> | null): void {
+        if (<%= entityInstance %>) {
+<%_ if (!primaryKey.autoGenerate || primaryKey.derived) {_%>
+            this.edit = true;
+<%_ } _%>
+            this.editForm.reset({ ...<%= entityInstance %> });
+<%_ for (const field of fields) {
+    const fieldName = field.fieldName;
+    const fieldType = field.fieldType;
+    const fieldTypeBlobContent = field.fieldTypeBlobContent;
+            _%>
+    <%_ if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent !== 'text') { _%>
+            if (<%= entityInstance %>.<%= fieldName %>) {
+                fetch(`data:${<%= entityInstance %>.<%= fieldName %>ContentType!};base64,${<%= entityInstance %>.<%= fieldName %>}`)
+                    .then((res: any) => res.blob() as string)
+                    .then(blob => {
+                        this.<%= fieldName %>File = new File([blob], '', {type: <%= entityInstance %>.<%= fieldName %>ContentType});
+                    });
+            }
+    <%_ } _%>
+<%_ } _%>
+<%_ for (const relationship of relationships) { _%>
+    <%_ if (relationship.ownerSide) { _%>
+        <%_ relationship.clientFields.forEach(cf => { _%>
+            <%_ if(cf.lastRelationship.relationshipType === 'many-to-many') { _%>
+                <%_ if (cf.lastRelationship.pagination !== 'no') { _%>
+            this.<%= cf.name %>SelectedOptions = <%= entityInstance %>.<%= cf.fullPath.slice(0, -1).join('?.') %> ?? [];
+                <%_ } _%>
+            <%_ } else { _%>
+            this.<%= cf.name %>FilterValue = <%= entityInstance %>.<%= relationship.relationshipName %>?.<%= cf.relatedFieldPath.join('?.') %>;
+            <%_ } _%>
+        <%_ }) _%>
+    <%_ } _%>
+<%_ } _%>
+        } else {
+<%_ if (!primaryKey.autoGenerate || primaryKey.derived) { _%>
+            this.edit = false;
+        <%_ } _%>
+            this.editForm.reset({
+<%_ for (const field of fields) { _%>
+    <%_ if (field.fieldType === 'Boolean') { _%>
+                <%= field.fieldName %>: false,
+    <%_ } else if ( ['Instant', 'ZonedDateTime', 'LocalDate'].includes(field.fieldType) ) { _%>
+                <%= field.fieldName %>: new Date(),
+        <%_ } _%>
+<%_ } _%>
+        });
+    }
+    }
+
+<%_ if (fieldsContainBlob) { _%>
+    onFileSelect(event: {event: Event, files: File[]}, field: string): void {
+        const file = event.files[0];
+        this.dataUtils.toBase64(file, (base64Data: string) => {
+            this.editForm.patchValue({
+                [field]: base64Data,
+                [field + 'ContentType']: file.type
+            });
+        });
+    }
+
+    onFileRemove(event: {event: Event, files: File[]}, field: string): void {
+        this.editForm.patchValue({
+            [field]: null,
+            [field + 'ContentType']: null,
+        });
+        }
+
+    <%_ } _%>
+    previousState(): void {
+        window.history.back();
+    }
+
+    save(): void {
+        this.isSaving = true;
+        const <%= entityInstance %> = this.editForm.value;
+    <%_ if (!primaryKey.autoGenerate || primaryKey.derived) {_%>
+        if (this.edit) {
+        <%_ } else { _%>
+        if (<%= entityInstance %>.<%= primaryKey.name %> !== null) {
+        <%_ } _%>
+            this.subscribeToSaveResponse(this.<%= entityInstance %>Service.update(<%= entityInstance %>));
+        } else {
+            this.subscribeToSaveResponse(this.<%= entityInstance %>Service.create(<%= entityInstance %>));
+    }
+        }
+
+    protected subscribeToSaveResponse(result: Observable<HttpResponse<I<%= entityAngularName %>>>): void {
+        result.subscribe(() => this.onSaveSuccess(), () => this.onSaveError());
+    }
+
+    protected onSaveSuccess(): void {
+        this.isSaving = false;
+        this.previousState();
+    }
+
+    protected onSaveError(): void {
+        this.isSaving = false;
+    }
+
+<%_ if (fieldsContainBlob || hasRelationshipQuery) { _%>
+    protected onError(errorMessage: string): void {
+        this.messageService.add({severity:'error', summary: errorMessage});
+    }
+    <%_ } _%>
+}

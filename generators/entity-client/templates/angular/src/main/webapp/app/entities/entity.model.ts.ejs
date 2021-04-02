@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2020 the original author or authors from the JHipster project.
+ Copyright 2013-2021 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -8,7 +8,7 @@
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
 
-      http://www.apache.org/licenses/LICENSE-2.0
+      https://www.apache.org/licenses/LICENSE-2.0
 
  Unless required by applicable law or agreed to in writing, software
  distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,7 @@
  limitations under the License.
 -%>
 <%
-const variablesWithTypes = tsVariables.map(v => `${v.name}?: ${v.type}`);
+const variablesWithTypes = generateEntityClientFields(primaryKey, fields, relationships, dto, 'Date', embedded);
 const typeImports = generateEntityClientImports(relationships, dto);
 const defaultVariablesValues = generateEntityClientFieldDefaultValues(fields);
 const enumImports = generateEntityClientEnumImports(fields);
@@ -42,3 +42,32 @@ export class <%= entityAngularName %> implements I<%= entityAngularName %> {
         public <%- variablesWithType %>,<% }); %>
     ) {}
 }
+<%_ if (primaryKey) { _%>
+
+export function get<%= entityAngularName %>Identifier(<%= entityInstance %>: I<%= entityAngularName %>): <%= primaryKey.tsType %> | undefined {
+<%_ if (primaryKey.ids.length === 1) { _%>
+  return <%= entityInstance %>.<%= primaryKey.name %>;
+<%_ } else {
+    // this complicated code ensures that the optional chaining operator '?.' is not called twice in the same relationship casing an error.
+    let usedRelationships = new Set();
+    values = [];
+    primaryKey.fields.forEach(field => {
+        let value = `!${entityInstance}.`;
+        field.path && field.path.forEach((p, i) => {
+            if (i === field.path.length -1) {
+                value += `${p}`;
+            } else if (usedRelationships.has(p)) {
+                value += `${p}.`;
+            } else {
+                value += `${p}?.`;
+            }
+            usedRelationships.add(p);
+        });
+        values.push(value);
+    });
+_%>
+  return (<%- values.join(' || ') %>) ? undefined : `<%- primaryKey.ids.map(pk => `${pk.name}=\${${entityInstance}.${pk.nameDotted}}`).join(';') %>`;
+<%_ } _%>
+}
+<%_ } _%>
+

@@ -6,6 +6,15 @@
 
 This is a [JHipster](https://www.jhipster.tech/) blueprint, that is meant to be used in a JHipster application.
 
+This blueprint supports composite keys and can be used with [the composite key blueprint](https://www.npmjs.com/package/generator-jhipster-composite-key-server)
+
+When using composite keys, multiple dropdowns are generated per relationships (one per id) to facilitate the filtering,
+Each dropdown is filtered based on what was selected before, we therefore require all entities that are part from the id to be filterable.
+
+# Caveats
+
+Many-To-many where other side is composite is not yet supported (We don't know yet how we want it to be implemented, suggestion are welcome)
+
 # Prerequisites
 
 As this is a [JHipster](https://www.jhipster.tech/) blueprint, we expect you have JHipster and its related tools already installed:
@@ -119,3 +128,4 @@ Apache-2.0 © [Youssef El Houti](https://elhouti.com)
 [travis-url]: https://travis-ci.org/yelhouti/generator-jhipster-primeng-blueprint
 [daviddm-image]: https://david-dm.org/yelhouti/generator-jhipster-primeng-blueprint.svg?theme=shields.io
 [daviddm-url]: https://david-dm.org/yelhouti/generator-jhipster-primeng-blueprint
+

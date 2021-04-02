@@ -1,0 +1,64 @@
+<%_
+// the dropdowns can be seen as the nodes of a tree, where the root is the entity we are trying to create the dropdown for
+// the nodes are the primaryKey.fields of that entity (some do not contain fields)
+// and the edges are the id relationships that lead to building the primaryKey
+// To query each dropdown based on the previously selected ones, we do a depth first tree traversal using relationship.clientFields that have a reverse order of primaryKey.ids
+//
+_%>
+
+<%_ relationship.clientFields.forEach((cf, i) => { _%>
+    <%_
+        // we want to be able to filter for all dropdowns after the first one, to allow only for possible selection
+        // if the first dropdown
+
+        // we can only afford to load all at once if:
+        // 1- we are in the first dropdown and we will show all choices (because no pagination) and filer locally
+        // 2- after the first one:
+        //      2.1- filter (with and without pagination): we want to filter to allow only possible choices
+        //      2.2- no filter no pagination => loadAll
+        //      2.3- no filter pagination => loadAll to at least be possible to filter locally (this should never happen)
+    _%>
+    <%_ if ((i === 0 && cf.entity.pagination === 'no') || !cf.entity.jpaMetamodelFiltering) { _%>
+    loadAll<%= cf.nameCapitalizedPlural %>(): void {
+            <%_ if (cf.lastRelationship.relationshipType === 'one-to-one') { _%>
+        // TODO change this to load only unspecified + add selected to options if on edit (not create)
+            <%_ } _%>
+        this.<%= cf.entity.entityInstance %>Service.query()
+            .subscribe((res: HttpResponse<I<%= cf.entity.entityAngularName %>[]>) => this.<%= cf.name %>Options = res.body, (res: HttpErrorResponse) => this.onError(res.message));
+    }
+    <%_ } else { _%>
+    on<%= cf.nameCapitalized %>LazyLoadEvent(event: LazyLoadEvent): void {
+        <%_ if (cf.lastRelationship.relationshipType === 'one-to-one') { _%>
+        // TODO change this to load only unspecified + add selected to options if on edit (not create)
+        <%_ } _%>
+        <%_ if (i > 0) { _%>
+        if (<%- relationship.clientFields.slice(0, i).map(previousCf => `this.${previousCf.formName}.get('${previousCf.fieldName}')!.value`).join(' && ') %>) {
+        <%_ } _%>
+            this.<%= cf.entity.entityInstance %>Service.query(
+        <%_ if (i > 0) { _%>
+                {
+                    ...lazyLoadEventToServerQueryParams(event, '<%= cf.lastRelationship.relatedField.fieldName %>.<%= cf.relatedFieldMatchMode %>'),
+            <%_
+            relationship.clientFields.slice(0, i).forEach(previousCf => {
+                let splitDepth;
+                for(splitDepth = 0; splitDepth < cf.id.relationshipsPath.length; splitDepth ++) {
+                  if (cf.id.relationshipsPath[splitDepth].relationshipName !== previousCf.id.relationshipsPath[splitDepth].relationshipName) {
+                    break;
+                  }
+                }
+            _%>
+                    '<%= [...cf.id.relationshipsPath.slice(splitDepth).map(r => r.otherEntityRelationshipName).reverse(), ...previousCf.id.relationshipsPath.slice(splitDepth).map(r => r.relationshipName)].join('.') %>.<%= previousCf.fieldName %>.equals': this.<%= previousCf.formName %>.get('<%= previousCf.fieldName %>')!.value,
+            <%_ }) _%>
+                }
+        <%_ } else { _%>
+                lazyLoadEventToServerQueryParams(event, '<%= cf.lastRelationship.relatedField.fieldName %>.<%= cf.relatedFieldMatchMode %>')
+        <%_ } _%>
+            ).subscribe((res: HttpResponse<I<%= cf.entity.entityAngularName %>[]>) => this.<%= cf.name %>Options = res.body, (res: HttpErrorResponse) => this.onError(res.message));
+        <%_ if (i > 0) { _%>
+        } else {
+            this.<%= cf.name %>Options = null;
+        }
+        <%_ } _%>
+    }
+    <%_ } _%>
+<%_ }) _%>

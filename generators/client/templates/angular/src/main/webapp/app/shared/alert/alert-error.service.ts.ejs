@@ -41,15 +41,15 @@ export class AlertErrorService {
                 const arr = httpErrorResponse.headers.keys();
                 let errorHeader = null;
                 let entityKey = null;
-                arr.forEach((entry) => {
+                for (const entry of arr) {
                     if (entry.toLowerCase().endsWith('app-error')) {
                         errorHeader = httpErrorResponse.headers.get(entry);
                     } else if (entry.toLowerCase().endsWith('app-params')) {
                         entityKey = httpErrorResponse.headers.get(entry);
                     }
-                });
+                }
                 if (errorHeader) {
-                    const entityName = <% if (enableTranslation) { %>this.translateService.instant('global.menu.entities.' + entityKey)<% }else{ %>entityKey<% } %>;
+                    const entityName = <% if (enableTranslation) { %> entityKey ? this.translateService.instant(`global.menu.entities.${entityKey}`) : undefined <% }else{ %>entityKey ?  entityKey : undefined<% } %>;
                     this.messageService.add({severity: 'error', summary: <% if (enableTranslation) { %>this.translateService.instant(errorHeader, {entityName})<% }else{ %>errorHeader<% } %>});
                 } else if (httpErrorResponse.error !== '' && httpErrorResponse.error.fieldErrors) {
                     const fieldErrors = httpErrorResponse.error.fieldErrors;
@@ -60,10 +60,10 @@ export class AlertErrorService {
                         }
                         // convert 'something[14].other[4].id' to 'something[].other[].id' so translations can be written to it
                         const convertedField = fieldError.field.replace(/\[\d*\]/g, '[]');
-                        const fieldName = <% if (enableTranslation) { %>this.translateService.instant('<%=angularAppName%>.' +
-                            fieldError.objectName + '.' + convertedField)<% } else { %>convertedField.charAt(0).toUpperCase() +
+                        const fieldName: string = <% if (enableTranslation) { %>this.translateService.instant(`<%= frontendAppName %>.${
+                            fieldError.objectName as string}.${convertedField as string}`)<% } else { %>convertedField.charAt(0).toUpperCase() +
                             convertedField.slice(1)<% } %>;
-                        this.messageService.add({severity: 'error', summary: <% if (enableTranslation) { %>this.translateService.instant('error.' + fieldError.message, {fieldName})<% }else{ %>'Error on field "' + fieldName + '"'<% } %>});
+                        this.messageService.add({severity: 'error', summary: <% if (enableTranslation) { %>this.translateService.instant(`error.${fieldError.message as string}`, {fieldName})<% }else{ %>'Error on field "' + fieldName + '"'<% } %>});
                     }
                 } else if (httpErrorResponse.error !== '' && httpErrorResponse.error.message) {
                     this.messageService.add({severity: 'error', summary: <% if (enableTranslation) { %>this.translateService.instant(httpErrorResponse.error.message, httpErrorResponse.error.params)<% }else{ %>httpErrorResponse.error.message<% } %>});
