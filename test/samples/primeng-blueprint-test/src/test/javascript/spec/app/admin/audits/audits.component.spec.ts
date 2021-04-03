@@ -14,7 +14,7 @@ import { PrimengtestTestModule } from '../../../test.module';
 import { AuditsComponent } from 'app/admin/audits/audits.component';
 import { AuditsService } from 'app/admin/audits/audits.service';
 import { Audit } from 'app/admin/audits/audit.model';
-import { ITEMS_PER_PAGE } from 'app/shared/constants/pagination.constants';
+import { ITEMS_PER_PAGE } from 'app/config/pagination.constants';
 
 function build2DigitsDatePart(datePart: number): string {
     return `0${datePart}`.slice(-2);

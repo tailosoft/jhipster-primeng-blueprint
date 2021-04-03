@@ -1,6 +1,6 @@
 import { TestBed, getTestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { DATE_FORMAT } from 'app/shared/constants/input.constants';
+import { DATE_FORMAT } from 'app/config/input.constants';
 import { DatePipe } from '@angular/common';
 import { TaskService } from 'app/entities/task/task.service';
 import { ITask, Task } from 'app/shared/model/task.model';
@@ -26,7 +26,7 @@ describe('Service Tests', () => {
       service = injector.get(TaskService);
       httpMock = injector.get(HttpTestingController);
       currentDate = new Date();
-      datePipe = injector.get(DatePipe);
+      datePipe = TestBed.inject(DatePipe);
 
       elemDefault = new Task(
         123,

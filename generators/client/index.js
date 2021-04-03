@@ -1,3 +1,21 @@
+/**
+ * Copyright 2013-2021 the original author or authors from the JHipster project.
+ *
+ * This file is part of the JHipster project, see https://www.jhipster.tech/
+ * for more information.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 /* eslint-disable consistent-return */
 const chalk = require('chalk');
 const ClientGenerator = require('generator-jhipster/generators/client');
@@ -12,11 +30,11 @@ module.exports = class extends ClientGenerator {
         if (!jhContext) {
             this.error(`This is a JHipster blueprint and should be used only like ${chalk.yellow('jhipster --blueprint helloworld')}`);
         }
-
-        this.configOptions = jhContext.configOptions || {};
-
-        // This sets up options for this sub generator and is being reused from JHipster
-        jhContext.setupClientOptions(this, jhContext);
+        //
+        // this.configOptions = jhContext.configOptions || {};
+        //
+        // // This sets up options for this sub generator and is being reused from JHipster
+        // jhContext.setupClientOptions(this, jhContext);
     }
 
     get initializing() {
@@ -84,6 +102,18 @@ module.exports = class extends ClientGenerator {
         return super._configuring();
     }
 
+    get composing() {
+        return super._composing();
+    }
+
+    get loading() {
+        return super._loading();
+    }
+
+    get preparing() {
+        return super._preparing();
+    }
+
     get default() {
         // Here we are not overriding this phase and hence its being handled by JHipster
         return super._default();
@@ -100,9 +130,8 @@ module.exports = class extends ClientGenerator {
         return Object.assign(phaseFromJHipster, customPhaseSteps);
     }
 
-    get install() {
-        // Here we are not overriding this phase and hence its being handled by JHipster
-        return super._install();
+    get postWriting() {
+        return super._postWriting();
     }
 
     get end() {

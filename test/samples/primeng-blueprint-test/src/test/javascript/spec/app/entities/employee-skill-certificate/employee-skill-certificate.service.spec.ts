@@ -1,6 +1,6 @@
 import { TestBed, getTestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { DATE_FORMAT } from 'app/shared/constants/input.constants';
+import { DATE_FORMAT } from 'app/config/input.constants';
 import { DatePipe } from '@angular/common';
 import { EmployeeSkillCertificateService } from 'app/entities/employee-skill-certificate/employee-skill-certificate.service';
 import { IEmployeeSkillCertificate, EmployeeSkillCertificate } from 'app/shared/model/employee-skill-certificate.model';
@@ -25,7 +25,7 @@ describe('Service Tests', () => {
       service = injector.get(EmployeeSkillCertificateService);
       httpMock = injector.get(HttpTestingController);
       currentDate = new Date();
-      datePipe = injector.get(DatePipe);
+      datePipe = TestBed.inject(DatePipe);
 
       elemDefault = new EmployeeSkillCertificate(123, 'AAAAAAA', 'AAAAAAA', 123, currentDate, 'AAAAAAA', 'AAAAAAA');
     });

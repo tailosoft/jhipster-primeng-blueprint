@@ -1,9 +1,27 @@
-import { element, by, ElementFinder<% if (authenticationType === 'oauth2') { %>, browser<% } %>%> } from 'protractor';
+<%#
+ Copyright 2013-2021 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+import { element, by, ElementFinder<% if (authenticationType === 'oauth2') { _%>, browser<%_ } %> } from 'protractor';
 
 <%_
 let elementGetter = `getText()`;
 if (enableTranslation) {
-    elementGetter = `getAttribute('jhiTranslate')`;
+    elementGetter = `getAttribute('${jhiPrefix}Translate')`;
 }
 _%>
 /* eslint @typescript-eslint/no-use-before-define: 0 */
@@ -18,7 +36,7 @@ export class NavBarPage {
     settingsMenu = element(by.css('[routerLink="account/settings"]'));
     allToasts = element.all(by.css('p-toast p-toastitem'));
 
-    constructor(asAdmin?: Boolean) {
+    constructor(asAdmin?: boolean) {
         if (asAdmin) {
             this.adminMenu = element(by.id('admin-menu'));
         }
@@ -111,7 +129,7 @@ export class NavBarPage {
 }
 
 export class SignInPage {
-    <%_ if (authenticationType !== 'oauth2') { _%>
+    <%_ if (!authenticationTypeOauth2) { _%>
     username = element(by.id('username'));
     password = element(by.id('password'));
     loginButton = element(by.css('button[type=submit]'));
@@ -145,7 +163,7 @@ export class SignInPage {
         await this.password.clear();
     }
 
-    <%_ if (authenticationType !== 'oauth2') { _%>
+    <%_ if (!authenticationTypeOauth2) { _%>
     async autoSignInUsing(username: string, password: string): Promise<void> {
         await this.setUserName(username);
         await this.setPassword(password);
@@ -155,6 +173,7 @@ export class SignInPage {
     async loginWithOAuth(username: string, password: string): Promise<void> {
         // Entering non angular site, tell webdriver to switch to synchronous mode.
         await browser.waitForAngularEnabled(false);
+        await browser.sleep(1000);
 
         if (await this.username.isPresent()) {
             await this.username.sendKeys(username);

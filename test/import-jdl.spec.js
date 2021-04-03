@@ -7,11 +7,11 @@ const rimraf = require('rimraf');
 const importJdl = require('generator-jhipster/cli/import-jdl');
 const walker = require('./path-walker');
 
-const noopFork = () => ({
-    on(code, cb) {
-        cb(0);
-    }
-});
+// const noopFork = () => ({
+//     on(code, cb) {
+//         cb(0);
+//     }
+// });
 
 let testDir = '/tmp/primeng-blueprint-test';
 describe('import-jdl of primeng-blueprint JHipster blueprint', () => {
@@ -24,7 +24,7 @@ describe('import-jdl of primeng-blueprint JHipster blueprint', () => {
                     // importJdl doesn't haev a call back there we call the generators manually after it updates the json files
                     testDir = dir;
                     fse.copySync(path.join(__dirname, '../test/templates/primeng-blueprint-test'), dir);
-                    importJdl(['jhipster.jh'], { skipInstall: true, noInsight: true, interactive: false, 'skip-git': false }, {}, noopFork);
+                    importJdl(['jhipster.jh'], { skipInstall: true, noInsight: true, interactive: false, 'skip-git': false }, {});
                 })
                 .withOptions({
                     'from-cli': true,
@@ -34,6 +34,11 @@ describe('import-jdl of primeng-blueprint JHipster blueprint', () => {
                     withEntities: true
                 })
                 .withGenerators([
+                    // [
+                    //     require('generator-jhipster/generators/entity'), // eslint-disable-line global-require
+                    //     'jhipster:client',
+                    //     require.resolve('generator-jhipster/generators/entity')
+                    // ],
                     [
                         require('../generators/client'), // eslint-disable-line global-require
                         'jhipster-primeng-blueprint:client',
