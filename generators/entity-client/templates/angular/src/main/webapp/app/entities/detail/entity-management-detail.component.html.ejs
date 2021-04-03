@@ -98,7 +98,7 @@
                 <dd>
                     <div *ngIf="<%= entityInstance + "." + relationship.relationshipName %>">
                         <p-button type="submit" [routerLink]="['/<%= relationship.otherEntity.entityStateName %>', <%- routerLink %>, 'view' ]"
-                                  icon="pi pi-eye" styleClass="ui-button-info">
+                                  icon="pi pi-eye" styleClass="p-button-info">
                         </p-button>
                     </div>
                 </dd>
@@ -121,7 +121,7 @@
             <%_ } _%>
             </dl>
 
-            <button pButton type="submit" (click)="previousState()" class="ui-button-info" icon="pi pi-arrow-left" [label]="'entity.action.back' | translate" data-cy="entityDetailsBackButton"></button>
+            <button pButton type="submit" (click)="previousState()" class="p-button-info" icon="pi pi-arrow-left" [label]="'entity.action.back' | translate" data-cy="entityDetailsBackButton"></button>
             <%_ if (!readOnly) { _%>
             <button pButton type="button" icon="pi pi-pencil" [label]="'entity.action.edit' | translate" [routerLink]="['/<%= entityUrl %>', <%= entity.primaryKey.ids.length === 1 ? `${entityInstance}!.${entity.primaryKey.name}` : '{ '+ entity.primaryKey.ids.map(pk => `${pk.name}: ${entityInstance}!.${pk.nameDottedAsserted}`).join(', ') + ' }' %>, 'edit']"></button>
             <%_ } _%>

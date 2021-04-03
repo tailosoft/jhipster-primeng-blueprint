@@ -29,7 +29,7 @@ import { Authority } from 'app/config/authority.constants';
 
 @Injectable({ providedIn: 'root' })
 export class UserManagementService {
-  public resourceUrl = this.applicationConfigService.getEndpointFor('api/users');
+  public resourceUrl = this.applicationConfigService.getEndpointFor('api/admin/users');
 
   constructor(private http: HttpClient, private applicationConfigService: ApplicationConfigService) {}
 
@@ -59,7 +59,7 @@ export class UserManagementService {
 
   authorities(): Observable<string[]> {
   <%_ if (databaseTypeSql || databaseTypeMongodb || databaseTypeCouchbase) { _%>
-    return this.http.get<string[]>(this.applicationConfigService.getEndpointFor('api/users/authorities'));
+    return this.http.get<string[]>(this.applicationConfigService.getEndpointFor('api/authorities'));
   <%_ } else { _%>
     return of([Authority.ADMIN, Authority.USER]);
   <%_ } _%>

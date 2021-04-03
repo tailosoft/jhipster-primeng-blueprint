@@ -114,7 +114,9 @@ export class <%= entityAngularName %>Component implements OnInit {
         <%= field.fieldName %>: {type: 'string'},
     <%_ } else if (field.fieldType === 'String') { _%>
         <%= field.fieldName %>: {type: 'string'},
-    <%_ } else if (['LocalDate', 'Instant', 'ZonedDateTime'].includes(field.fieldType)) { _%>
+    <%_ } else if (['Instant', 'ZonedDateTime'].includes(field.fieldType)) { _%>
+        <%= field.fieldName %>: {type: 'dateTime'},
+    <%_ } else if (field.fieldType === 'LocalDate') { _%>
         <%= field.fieldName %>: {type: 'date'},
     <%_ } else if (field.fieldType === 'Boolean') { _%>
         <%= field.fieldName %>: {type: 'boolean'},
@@ -192,11 +194,11 @@ export class <%= entityAngularName %>Component implements OnInit {
                 if (this.currentSearch) {
                     this.<%= entityInstance %>Service.search(this.<%= entityInstance %>Table.filters.global.value)
                 } else {
-                    return this.<%= entityInstance %>Service.query(lazyLoadEventToServerQueryParams(this.<%= entityInstance %>Table.createLazyLoadMetadata()));
+                    return this.<%= entityInstance %>Service.query(lazyLoadEventToServerQueryParams(this.<%= entityInstance %>Table.createLazyLoadMetadata(), undefined, this.filtersDetails));
                 }
             }),
         <%_ } else { _%>
-            switchMap(() => this.<%= entityInstance %>Service.query(lazyLoadEventToServerQueryParams(this.<%= entityInstance %>Table.createLazyLoadMetadata()))),
+            switchMap(() => this.<%= entityInstance %>Service.query(lazyLoadEventToServerQueryParams(this.<%= entityInstance %>Table.createLazyLoadMetadata(), undefined, this.filtersDetails))),
             // TODO add catchError inside switchMap in blueprint
         <%_ } _%>
             filter((res: HttpResponse<I<%= entityAngularName %>[]>) => res.ok)

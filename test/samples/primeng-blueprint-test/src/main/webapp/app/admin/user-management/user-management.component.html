@@ -40,15 +40,19 @@
                 <td>{{user.lastModifiedBy}}</td>
                 <td>{{user.lastModifiedDate | date:'dd/MM/yy HH:mm'}}</td>
                 <td>
-                    <button pButton type="submit" [routerLink]="[ user.login, 'view' ]"
-                            icon="pi pi-eye" class="ui-button-info">
-                    </button>
-                    <button pButton type="submit" [routerLink]="[ user.login, 'edit' ]"
-                            icon="pi pi-pencil" class="ui-button-warning">
-                    </button>
-                    <button pButton type="submit" (click)="delete(user.login)"
-                            icon="pi pi-times" class="ui-button-danger">
-                    </button>
+                    <div class='btn-group flex-btn-group-container'>
+                        <p-button type="submit" [routerLink]="['./', user.login!, 'view']" icon="pi pi-eye" styleClass="p-button-info"> </p-button>
+                        <p-button
+                            type="submit"
+                            [routerLink]="['./', user.login!, 'edit']"
+                            icon="pi pi-pencil"
+                            styleClass="p-button-warning"
+                            data-cy="entityEditButton"
+                        >
+                        </p-button>
+                        <p-button type="submit" (click)="delete(user.login)" icon="pi pi-times" styleClass="p-button-danger" data-cy="entityDeleteButton">
+                        </p-button>
+                    </div>
                 </td>
             </tr>
             </ng-template>

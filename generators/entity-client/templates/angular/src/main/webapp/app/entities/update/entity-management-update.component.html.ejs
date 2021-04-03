@@ -20,7 +20,7 @@
     <div class="col-8">
         <form name="editForm" role="form" novalidate (ngSubmit)="save()" [formGroup]="editForm">
             <h2 id="<%= jhiPrefixDashed %>-<%= entityFileName %>-heading" data-cy="<%= entityClass %>CreateUpdateHeading" jhiTranslate="<%= i18nKeyPrefix %>.home.createOrEditLabel">Create or edit a <%= entityClassHumanized %></h2>
-            <div class="form-grid ui-fluid">
+            <div class="form-grid p-fluid">
 <%_ for (const field of fields) {
     const fieldName = field.fieldName;
     const fieldNameCapitalized = field.fieldNameCapitalized;
@@ -178,7 +178,7 @@ _%>
             </div>
 
             <div>
-                <button pButton type="button" id="cancel-save" icon="pi pi-ban" class="ui-button-secondary" (click)="previousState()" [label]="'entity.action.cancel' | translate"></button>
+                <button pButton type="button" id="cancel-save" icon="pi pi-ban" class="p-button-secondary" (click)="previousState()" [label]="'entity.action.cancel' | translate"></button>
                 <button pButton type="submit" id="save-entity" icon="pi pi-save" [disabled]="editForm.invalid || isSaving" [label]="'entity.action.save' | translate"></button>
             </div>
         </form>

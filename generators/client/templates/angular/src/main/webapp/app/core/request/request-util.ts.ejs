@@ -18,10 +18,16 @@
 -%>
 import { HttpParams } from '@angular/common/http';
 import { FilterMatchMode, FilterMetadata, LazyLoadEvent } from 'primeng/api';
-import { ITEMS_PER_PAGE } from '../../config/pagination.constants';
+import { ITEMS_PER_PAGE } from 'app/config/pagination.constants';
 import { flatten, unflatten } from 'flat';
 import { Params } from '@angular/router';
 import { Table } from 'primeng/table';
+import { DatePipe } from '@angular/common';
+import { DATE_FORMAT } from 'app/config/input.constants';
+
+type FiltersDetails = { [_: string]: { type: string } | undefined };
+
+const datePipe = new DatePipe('en');
 
 export const createRequestOption = (req?: any): HttpParams => {
   let options: HttpParams = new HttpParams();
@@ -43,7 +49,11 @@ export const createRequestOption = (req?: any): HttpParams => {
   return options;
 };
 
-export const lazyLoadEventToServerQueryParams = (event?: LazyLoadEvent, globalFilter = 'globalFilter'): { [_: string]: any } => {
+export const lazyLoadEventToServerQueryParams = (
+  event?: LazyLoadEvent,
+  globalFilter = 'globalFilter',
+  filtersDetails: FiltersDetails = {}
+): { [_: string]: any } => {
   const params: { [index: string]: any } = {};
   if (event) {
     if (event.filters) {
@@ -55,13 +65,13 @@ export const lazyLoadEventToServerQueryParams = (event?: LazyLoadEvent, globalFi
           filters = event.filters[filterName] as FilterMetadata[];
         }
         filters.forEach(filter => {
-          if (filter.value) {
+          if (filter.value !== undefined && filter.value !== null) {
             let matchMode = filter.matchMode;
             if (matchMode) {
               if (matchModes.has(matchMode)) {
                 matchMode = matchModes.get(matchMode);
               }
-              params[`${filterName}.${matchMode!}`] = filter.value;
+              params[`${filterName}.${matchMode!}`] = serializeFilter(filter.value, filtersDetails[filterName]?.type);
             } else {
               params[filterName] = filter.value;
             }
@@ -83,11 +93,11 @@ export const lazyLoadEventToServerQueryParams = (event?: LazyLoadEvent, globalFi
   return params;
 };
 
-export const fillTableFromQueryParams = (table: Table, queryParams: Params, filtersDetails: { [_: string]: { type: string } }): void => {
+export const fillTableFromQueryParams = (table: Table, queryParams: Params, filtersDetails: FiltersDetails): void => {
   const params: any = unflatten(queryParams);
   table.first = +queryParams.first || 0;
   table.multiSortMeta = (params['msm'] || []).map((sm: any) => ({ field: sm.field, order: +sm.order }));
-  const filters: { [_: string]: FilterMetadata | FilterMetadata[] } = {};
+  const filters: { [_: string]: FilterMetadata | FilterMetadata[] | undefined } = {};
   if (params['f']) {
     Object.entries(flatten(params['f'], { safe: true })).forEach(([field, value]) => {
       let filterName = field;
@@ -97,17 +107,18 @@ export const fillTableFromQueryParams = (table: Table, queryParams: Params, filt
           value: filterName,
         };
       } else {
-        const matchMode = Array.from(matchModes.values()).find(mm => field.endsWith(`.${mm}`));
+        const matchMode = Array.from(matchModes.keys()).find(mm => field.endsWith(`.${mm}`));
         if (matchMode) {
           filterName = field.slice(0, -matchMode.length - 1); // -1 for the dot (.)
         }
-        if (matchMode === FilterMatchMode.IN) {
+        if (matchMode === 'specified') {
+          filterValue = deserializeFilter(filterValue as string, 'boolean');
+        } else if (matchMode === FilterMatchMode.IN) {
           filterValue = (value as string).split(',');
-          filterValue = (filterValue as string[]).map(fv => deserializeFilter(fv, filtersDetails[filterName].type));
+          filterValue = (filterValue as string[]).map(fv => deserializeFilter(fv, filtersDetails[filterName]?.type));
         } else {
-          filterValue = deserializeFilter(filterValue as string, filtersDetails[filterName].type);
+          filterValue = deserializeFilter(filterValue as string, filtersDetails[filterName]?.type);
         }
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (!filters[filterName]) {
           filters[filterName] = [];
         }
@@ -118,10 +129,34 @@ export const fillTableFromQueryParams = (table: Table, queryParams: Params, filt
       }
     });
   }
-  Object.assign(table.filters, filters);
+  // merge filters making sure not recreate any to avoid auto close on small change (example dateTime)
+  Object.keys(table.filters).forEach(k => {
+    if (!Array.isArray(table.filters[k])) {
+      if (!filters[k]) {
+        table.filters[k] = { ...(table.filters[k] as FilterMetadata), value: null };
+      } else {
+        table.filters[k] = { ...(table.filters[k] as FilterMetadata), ...filters[k] };
+      }
+    } else {
+      const tableFilter = table.filters[k] as FilterMetadata[];
+      if (!filters[k]) {
+        tableFilter.splice(1);
+        tableFilter[0].value = null;
+      } else {
+        tableFilter.splice((filters[k] as FilterMetadata[]).length);
+        for (let i = 0; i < (filters[k] as FilterMetadata[]).length; i++) {
+          if (!tableFilter[i]) {
+            tableFilter[i] = (filters[k] as FilterMetadata[])[i];
+          } else {
+            Object.assign(tableFilter[i], (filters[k] as FilterMetadata[])[i]);
+          }
+        }
+      }
+    }
+  });
 };
 
-export const lazyLoadEventToRouterQueryParams = (event: LazyLoadEvent, filtersDetails: { [_: string]: { type: string } }): Params => {
+export const lazyLoadEventToRouterQueryParams = (event: LazyLoadEvent, filtersDetails: FiltersDetails): Params => {
   const queryParams: { [_: string]: any } = {};
   if (event.first) {
     queryParams['first'] = event.first;
@@ -136,13 +171,18 @@ export const lazyLoadEventToRouterQueryParams = (event: LazyLoadEvent, filtersDe
       }
       filterMetas.forEach(filter => {
         let filterValue = filter.value;
-        if (filterValue) {
+        if (filterValue !== undefined && filterValue !== null) {
           const matchMode = filter.matchMode;
-          if (matchMode === 'in') {
-            filterValue = filterValue.map((v: any) => serializeFilter(v, filtersDetails[field].type));
+          if (matchMode === 'specified') {
+            filterValue = serializeFilter(filterValue, 'boolean');
+          } else if (matchMode === 'in') {
+            if (filterValue.length === 0) {
+              return;
+            }
+            filterValue = filterValue.map((v: any) => serializeFilter(v, filtersDetails[field]?.type));
             filterValue = filterValue.join(',');
           } else {
-            serializeFilter(filterValue, filtersDetails[field].type);
+            filterValue = serializeFilter(filterValue, filtersDetails[field]?.type);
           }
           const paramKey = matchMode ? `f.${field}.${matchMode}` : `f.${field}`;
           queryParams[paramKey] = filterValue;
@@ -153,11 +193,14 @@ export const lazyLoadEventToRouterQueryParams = (event: LazyLoadEvent, filtersDe
   return flatten(queryParams);
 };
 
-const serializeFilter = (value: any, type: string): string => {
+const serializeFilter = (value: any, type?: string): string => {
   if (type === 'number') {
     return `${value as number}`;
   }
   if (type === 'date') {
+    return datePipe.transform(value, DATE_FORMAT) as string;
+  }
+  if (type === 'dateTime') {
     return value.toISOString() as string;
   }
   if (type === 'boolean') {
@@ -166,11 +209,14 @@ const serializeFilter = (value: any, type: string): string => {
   return value as string;
 };
 
-const deserializeFilter = (value: string, type: string): number | Date | boolean | string => {
+const deserializeFilter = (value: string, type?: string): number | Date | boolean | string => {
   if (type === 'number') {
     return +value;
   }
   if (type === 'date') {
+    return new Date(value);
+  }
+  if (type === 'dateTime') {
     return new Date(value);
   }
   if (type === 'boolean') {
@@ -179,9 +225,13 @@ const deserializeFilter = (value: string, type: string): number | Date | boolean
   return value;
 };
 
+/**
+ * maps default primeng match modes to serverSide ones
+ */
 const matchModes = new Map([
   [FilterMatchMode.STARTS_WITH, 'contains'],
   [FilterMatchMode.CONTAINS, 'contains'],
+  [FilterMatchMode.NOT_CONTAINS, 'notContains'],
   [FilterMatchMode.ENDS_WITH, 'contains'],
   [FilterMatchMode.EQUALS, 'equals'],
   [FilterMatchMode.NOT_EQUALS, 'notEquals'],
@@ -194,4 +244,8 @@ const matchModes = new Map([
   [FilterMatchMode.IS_NOT, 'notEquals'],
   [FilterMatchMode.BEFORE, 'lessThan'],
   [FilterMatchMode.AFTER, 'greaterThan'],
+  [FilterMatchMode.DATE_IS, 'equals'],
+  [FilterMatchMode.DATE_IS_NOT, 'notEquals'],
+  [FilterMatchMode.DATE_BEFORE, 'lessThan'],
+  [FilterMatchMode.DATE_AFTER, 'greaterThan'],
 ]);

@@ -43,7 +43,7 @@ export class NavBarPage {
     }
 
     async closeAllToasts(): Promise<void> {
-        await this.allToasts.each(e => e!.element(by.css('.ui-toast-close-icon')).click());
+        await this.allToasts.each(e => e!.element(by.css('.p-toast-close-icon')).click());
     }
 
     async clickOnEntityMenu(): Promise<void> {

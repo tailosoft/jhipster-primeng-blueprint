@@ -33,7 +33,7 @@
                     <input type="text" class="form-control" [(ngModel)]="currentSearch" id="currentSearch" name="currentSearch" placeholder="<% if (enableTranslation) { %>{{ '<%= i18nKeyPrefix %>.home.search' | translate }}<% } else { %>Query<% } %>">
                     <button pButton (click)="search(currentSearch)" icon="pi pi-search">
                     </button>
-                    <button pButton class="ui-button-danger" (click)="search('')" *ngIf="currentSearch" icon="pi pi-trash">
+                    <button pButton class="p-button-danger" (click)="search('')" *ngIf="currentSearch" icon="pi pi-trash">
                     </button>
                 </div>
             </form>
@@ -73,23 +73,27 @@
                 <%_ if (jpaMetamodelFiltering) { _%>
                         <%_ if (['byte[]', 'ByteBuffer'].includes(fieldType)) { _%>
                         <%_ } else if (fieldType === 'Boolean') { _%>
-                    <p-columnFilter type="date" field="<%= field.fieldName %>" display="menu" class="p-ml-auto"></p-columnFilter>
+                    <p-columnFilter type="boolean" matchMode="equals" field="<%= field.fieldName %>" display="menu" [showOperator]="false" class="p-ml-auto"></p-columnFilter>
                         <%_ } else if (field.fieldIsEnum) { _%>
-                    <p-columnFilter field="<%= field.fieldName %>" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false" class="p-ml-auto">
+                    <p-columnFilter field="<%= field.fieldName %>" matchMode="in" display="menu" [showOperator]="false" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false" class="p-ml-auto">
                         <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-                            <p-multiSelect [options]="<%= field.fieldName %>Options!" (onChange)="filter($event.value)">
+                            <p-multiSelect [ngModel]="value" [options]="<%= field.fieldName %>Options!" (onChange)="filter($event.value)">
                                 <ng-template let-<%= field.fieldName %> pTemplate="item">{{'<%= `${frontendAppName}.${field.fieldType}` %>.' + <%= field.fieldName %>.label | translate}}</ng-template>
                             </p-multiSelect>
                         </ng-template>
                     </p-columnFilter>
                         <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { /* TODO implementa better filter with minutes... */ _%>
-                    <p-columnFilter type="date" field="<%= field.fieldName %>" display="menu" class="p-ml-auto"></p-columnFilter>
+                    <p-columnFilter type="dateTime" field="<%= field.fieldName %>" display="menu" [showOperator]="false" class="p-ml-auto">
+                        <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                            <p-calendar [ngModel]="value" (ngModelChange)="filter($event)" [showTime]="true" ></p-calendar>
+                        </ng-template>
+                    </p-columnFilter>
                         <%_ } else if (fieldType === 'LocalDate') { _%>
-                    <p-columnFilter type="date" field="<%= field.fieldName %>" display="menu" class="p-ml-auto"></p-columnFilter>
+                    <p-columnFilter type="date" field="<%= field.fieldName %>" display="menu" [showOperator]="false" class="p-ml-auto"></p-columnFilter>
                         <%_ } else if (['Integer', 'Long', 'Float', 'Double', 'BigDecimal', 'Duration'].includes(fieldType)) { _%>
-                    <p-columnFilter type="numeric" field="<%= field.fieldName %>" display="menu" class="p-ml-auto"></p-columnFilter>
+                    <p-columnFilter type="numeric" field="<%= field.fieldName %>" display="menu" [showOperator]="false" class="p-ml-auto"></p-columnFilter>
                         <%_ } else { _%>
-                    <p-columnFilter type="text" field="<%= field.fieldName %>" display="menu" class="p-ml-auto"></p-columnFilter>
+                    <p-columnFilter type="text" matchMode="contains" field="<%= field.fieldName %>" display="menu" [showOperator]="false" class="p-ml-auto"></p-columnFilter>
                         <%_ } _%>
                     <%_ } _%>
                 </th>
@@ -99,7 +103,7 @@
         <%_ if (pagination === 'no' && !relationship.otherEntity.primaryKey.composite && relationship.otherEntity.entityClass !== 'User') { _%>
                 <th>
                     <span <%= jhiPrefix %>Translate="<%=`${i18nKeyPrefix}.${relationship.otherEntityField}` %>"><%= relationship.relationshipNameHumanized %></span>
-                    <p-columnFilter field="<%= relationship.relationshipName %>" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false" class="p-ml-auto">
+                    <p-columnFilter field="<%= relationship.relationshipName %>" matchMode="in" display="menu" [showOperator]="false" [showMatchModes]="false" [showAddButton]="false" class="p-ml-auto">
                         <ng-template pTemplate="filter" let-value let-filter="filterCallback">
                             <p-multiSelect [ngModel]="value" [options]="<%= relationship.relationshipName %>Options" (onChange)="filter($event.value)" optionLabel="<%= relationship.otherEntityField %>" optionValue="<%= relationship.otherEntity.primaryKey.name %>"<% if(relationship.otherEntity.pagination !== 'no') { %>
                                            [lazy]="true" [rows]="10" [lazySelectedOptions]="<%= relationship.relationshipName %>SelectedOptions!" (onLazyLoad)="on<%= _.upperFirst(pk.formName) %>LazyLoadEvent($event)"<% } %>></p-multiSelect>
@@ -115,7 +119,7 @@
             <%_ if (pagination !== 'no') { _%>
                     <p-sortIcon field="<%= relationship.relationshipName %>.<%= cf.relatedFieldPath.join('.') %>"></p-sortIcon>
             <%_ } _%>
-                    <p-columnFilter field="<%= cf.fullNameDotted %>" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false" class="p-ml-auto">
+                    <p-columnFilter field="<%= cf.fullNameDotted %>" matchMode="in" display="menu" [showOperator]="false" [showMatchModes]="false" [showAddButton]="false" class="p-ml-auto">
                         <ng-template pTemplate="filter" let-value let-filter="filterCallback">
                             <p-multiSelect [ngModel]="value" [options]="<%= cf.name %>Options!" (onChange)="filter($event.value)" optionLabel="<%= cf.lastRelationship.otherEntityField %>" optionValue="<%= cf.fieldName %>"<% if(cf.lastRelationship.otherEntity.pagination !== 'no') { %>
                                            [lazy]="true" [rows]="10" [lazySelectedOptions]="<%= cf.name %>SelectedOptions!" (onLazyLoad)="on<%= cf.nameCapitalized %>LazyLoadEvent($event)"<% } %>></p-multiSelect>
@@ -220,18 +224,18 @@
                     <div class="btn-group flex-btn-group-container">
 <%_ const idParam = entity.primaryKey.ids.length === 1 ? `${entityInstance}.${entity.primaryKey.name}!` : '{ '+ entity.primaryKey.ids.map(pk => `${pk.name}: ${entityInstance}!.${pk.nameDottedAsserted}`).join(', ') + ' }' _%>
                         <p-button type="submit" [routerLink]="['/<%= entityUrl %>', <%- idParam %>, 'view' ]"
-                                  icon="pi pi-eye" styleClass="ui-button-info">
+                                  icon="pi pi-eye" styleClass="p-button-info">
                         </p-button>
                         <%_ if (!readOnly) { _%>
                         <p-button type="submit" [routerLink]="['/<%= entityUrl %>', <%- idParam %>, 'edit' ]"
-                                  icon="pi pi-pencil" styleClass="ui-button-warning" data-cy="entityEditButton">
+                                  icon="pi pi-pencil" styleClass="p-button-warning" data-cy="entityEditButton">
                         </p-button>
                             <%_ if(entity.primaryKey.ids.length === 1) {_%>
                         <p-button type="submit" (click)="delete(<%= entityInstance %>.<%= entity.primaryKey.name %>)"
-                                          icon="pi pi-times" styleClass="ui-button-danger" data-cy="entityDeleteButton">
+                                          icon="pi pi-times" styleClass="p-button-danger" data-cy="entityDeleteButton">
                         </p-button> <%_ } else {_%>
                         <p-button type="submit" (click)="delete(<%= entity.primaryKey.ids.map(pk => `${entityInstance}!.${pk.nameDottedAsserted}`).join(', ') %>)"
-                                          icon="pi pi-times" styleClass="ui-button-danger" data-cy="entityDeleteButton">
+                                          icon="pi pi-times" styleClass="p-button-danger" data-cy="entityDeleteButton">
                         </p-button>
                             <%_ } _%>
                         <%_ } _%>

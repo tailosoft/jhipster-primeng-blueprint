@@ -27,7 +27,7 @@ _%>
 export class <%= entityClass %>ComponentsPage {
     <%_ if (!readOnly) { _%>
     createButton = element(by.id('jh-create-entity'));
-    deleteButtons = element.all(by.css('<%= jhiPrefixDashed %>-<%= entityFileName %> div table .ui-button-danger'));
+    deleteButtons = element.all(by.css('<%= jhiPrefixDashed %>-<%= entityFileName %> div table .p-button-danger'));
     <%_ } _%>
     title = element.all(by.css('<%= jhiPrefixDashed %>-<%= entityFileName %> div h2#page-heading span')).first();
 
@@ -114,24 +114,24 @@ _%>
     async <%=fieldName %>SelectLastOption(): Promise<void> {
         await this.<%= fieldName %>Select.click();
         await this.<%= fieldName %>Select
-          .all(by.tagName('.ui-dropdown-item'))
+          .all(by.tagName('.p-dropdown-item'))
           .last()
           .click();
     }
 
     async get<%=fieldNameCapitalized %>Select(): Promise<string> {
-        return await this.<%= fieldName %>Select.element(by.css('.ui-dropdown-label')).getText();
+        return await this.<%= fieldName %>Select.element(by.css('.p-dropdown-label')).getText();
     }
 
     <%_ } else if (['LocalDate', 'Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
     async set<%= fieldNameCapitalized %>Input(<%= fieldName %>: string): Promise<void> {
-        await this.<%= fieldName %>Input.element(by.css('.ui-inputtext')).sendKeys(protractor.Key.chord(protractor.Key.CONTROL, "a"));
-        await this.<%= fieldName %>Input.element(by.css('.ui-inputtext')).sendKeys(<%= fieldName %>);
-        await this.<%= fieldName %>Input.element(by.css('.ui-inputtext')).sendKeys(protractor.Key.ESCAPE);
+        await this.<%= fieldName %>Input.element(by.css('.p-inputtext')).sendKeys(protractor.Key.chord(protractor.Key.CONTROL, "a"));
+        await this.<%= fieldName %>Input.element(by.css('.p-inputtext')).sendKeys(<%= fieldName %>);
+        await this.<%= fieldName %>Input.element(by.css('.p-inputtext')).sendKeys(protractor.Key.ESCAPE);
     }
 
     async get<%= fieldNameCapitalized %>Input(): Promise<string> {
-        return await this.<%= fieldName %>Input.element(by.css('.ui-inputtext')).getAttribute('value');
+        return await this.<%= fieldName %>Input.element(by.css('.p-inputtext')).getAttribute('value');
     }
 
     <%_ } else if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent === 'text') { _%>
@@ -149,7 +149,7 @@ _%>
     }
 
     async get<%= fieldNameCapitalized %>Input(): Promise<string> {
-        return await this.<%= fieldName %>Input.all(by.css('.ui-fileupload-row > div')).get(1).getText();
+        return await this.<%= fieldName %>Input.all(by.css('.p-fileupload-row > div')).get(1).getText();
     }
 
     <%_ } else { _%>
@@ -175,7 +175,7 @@ _%>
     async <%=relationshipName %>SelectLastOption(): Promise<void> {
         await this.<%= relationshipName %>Select.click();
         await this.<%= relationshipName %>Select
-          .all(by.tagName('.ui-dropdown-item'))
+          .all(by.tagName('.p-dropdown-item'))
           .last()
           .click();
     }
@@ -185,17 +185,17 @@ _%>
     }
 
     async get<%=relationshipNameCapitalized %>SelectedOption(): Promise<string> {
-        return await this.<%= relationshipName %>Select.element(by.css('.ui-dropdown-label')).getText();
+        return await this.<%= relationshipName %>Select.element(by.css('.p-dropdown-label')).getText();
     }
 
     <%_ } else if (relationshipType === 'many-to-many' && ownerSide === true) {_%>
     async <%=relationshipName %>SelectLastOption(): Promise<void> {
         await this.<%= relationshipName %>Select.click();
         await this.<%= relationshipName %>Select
-          .all(by.tagName('.ui-multiselect-item'))
+          .all(by.tagName('.p-multiselect-item'))
           .last()
           .click();
-        await this.<%= relationshipName %>Select.element(by.css('.ui-multiselect-close')).click();
+        await this.<%= relationshipName %>Select.element(by.css('.p-multiselect-close')).click();
     }
 
     get<%= relationshipNameCapitalized %>Select(): ElementFinder {
@@ -203,7 +203,7 @@ _%>
     }
 
     async get<%= relationshipNameCapitalized %>SelectedOption(): Promise<string> {
-        return await this.<%= relationshipName %>Select.element(by.css('.ui-multiselect-label')).getText();
+        return await this.<%= relationshipName %>Select.element(by.css('.p-multiselect-label')).getText();
     }
     <%_ } _%>
 <%_ }); _%>
@@ -222,7 +222,7 @@ _%>
 }
 
 export class <%= entityClass %>DeleteDialog {
-    private confirmButton = element(by.css('p-confirmdialog .ui-dialog-footer button:first-of-type'));
+    private confirmButton = element(by.css('p-confirmdialog .p-dialog-footer button:first-of-type'));
 
     async clickOnConfirmButton(): Promise<void> {
         await this.confirmButton.click();

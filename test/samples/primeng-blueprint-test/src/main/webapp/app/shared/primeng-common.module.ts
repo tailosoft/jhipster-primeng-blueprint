@@ -14,6 +14,7 @@ import { MessageModule } from 'primeng/message';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
 import { FileUploadModule } from 'primeng/fileupload';
+import { FilterMatchMode, PrimeNGConfig } from 'primeng/api';
 
 @NgModule({
   imports: [
@@ -51,4 +52,23 @@ import { FileUploadModule } from 'primeng/fileupload';
     FileUploadModule
   ]
 })
-export class PrimeNGCommonModule {}
+export class PrimeNGCommonModule {
+  constructor(primeNGConfig: PrimeNGConfig) {
+    // override primengConfigs
+
+    // startsWith and EndsWith are not supported yet server side, so not showing them
+    primeNGConfig.filterMatchModeOptions.text = [
+      // FilterMatchMode.STARTS_WITH,
+      FilterMatchMode.CONTAINS,
+      FilterMatchMode.NOT_CONTAINS,
+      // FilterMatchMode.ENDS_WITH,
+      FilterMatchMode.EQUALS,
+      FilterMatchMode.NOT_EQUALS
+    ];
+
+    // adding new filters for dateTime
+    (primeNGConfig.filterMatchModeOptions as any).dateTime = [FilterMatchMode.DATE_BEFORE, FilterMatchMode.DATE_AFTER];
+
+    // TODO add translations here
+  }
+}
