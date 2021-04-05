@@ -42,7 +42,7 @@ export class <%= entityAngularName %> implements I<%= entityAngularName %> {
         public <%- variablesWithType %>,<% }); %>
     ) {}
 }
-<%_ if (primaryKey) { _%>
+<%_ if (primaryKey && !readOnly) { _%>
 
 export function get<%= entityAngularName %>Identifier(<%= entityInstance %>: I<%= entityAngularName %>): <%= primaryKey.tsType %> | undefined {
 <%_ if (primaryKey.ids.length === 1) { _%>

@@ -19,17 +19,12 @@
 <%_
 const tsKeyId = generateTestEntityId(primaryKey.type);
 const testEntity = _generateTestEntityPrimaryKey(primaryKey, 0);
-let datePipe = false;
-if (jpaMetamodelFiltering && fields.some(f => ['LocalDate', 'Instant', 'ZonedDateTime'].includes(f.fieldType))) {
-    datePipe = true;
-} else if (jpaMetamodelFiltering) {
-    for (const relationship of relationships) {
-        if(relationship.otherEntity.fields.some(f => ['LocalDate', 'Instant', 'ZonedDateTime'].includes(f.fieldType))) {
-            datePipe = true;
-            break;
-        }
-    }
+function checkDatePipe(entity, datePipeCheckedREntities) {
+  return entity.fieldsContainLocalDate || entity.relationships
+          .filter(r => r.ownerSide && !datePipeCheckedREntities.includes[r.otherEntity.name])
+          .some(r => checkDatePipe(r.otherEntity, [...datePipeCheckedREntities, r.otherEntity.name]))
 }
+let datePipe = checkDatePipe(entity, []);
 _%>
 jest.mock('@angular/router');
 

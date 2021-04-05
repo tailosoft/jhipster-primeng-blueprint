@@ -47,7 +47,7 @@ import { ComponentFixture, TestBed, fakeAsync<%_ if (pagination !== 'no') { _%>,
 import { of<%_ if (pagination !== 'no') { _%>, BehaviorSubject<%_ }_%> } from 'rxjs';
 import { HttpResponse } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ConfirmationService, MessageService, Confirmation } from 'primeng/api';
+import { <% if (!readOnly) { %>Confirmation, ConfirmationService, <% } %>MessageService } from 'primeng/api';
 <%_ if (pagination !== 'no') { _%>
 import { ActivatedRoute, Router } from '@angular/router';
 <%_ } else if (searchEngine !== false) { _%>
@@ -71,7 +71,9 @@ describe('Component Tests', () => {
         let comp: <%= entityAngularName %>Component;
         let fixture: ComponentFixture<<%= entityAngularName %>Component>;
         let service: <%= entityAngularName %>Service;
+<%_ if (!readOnly) { _%>
         let confirmationService: ConfirmationService;
+<%_ } _%>
 <%_ if (pagination !== 'no') { %>
         let activatedRoute: ActivatedRoute;
 <%_ } _%>
@@ -81,7 +83,9 @@ describe('Component Tests', () => {
                 imports: [HttpClientTestingModule],
                 declarations: [<%= entityAngularName %>Component],
                 providers: [
+<%_ if (!readOnly) { _%>
                     ConfirmationService,
+<%_ } _%>
                     MessageService,
                     <%_ if (enableTranslation) {_%>
                     TranslateService,
@@ -109,7 +113,9 @@ describe('Component Tests', () => {
             fixture = TestBed.createComponent(<%= entityAngularName %>Component);
             comp = fixture.componentInstance;
             service = TestBed.inject(<%= entityAngularName %>Service);
+<%_ if (!readOnly) { _%>
             confirmationService = fixture.debugElement.injector.get(ConfirmationService);
+<%_ } _%>
 <%_ if (pagination !== 'no') { _%>
             activatedRoute = fixture.debugElement.injector.get(ActivatedRoute);
 <%_ } _%>
@@ -133,7 +139,7 @@ describe('Component Tests', () => {
             expect(comp.<%= entityInstancePlural %><%= entityArrayOptionalChainSymbol %>[0]).toEqual(jasmine.objectContaining(<%- testEntity %>));
         }));
 
-    <%_ if (pagination !== 'no') { _%>
+<%_ if (pagination !== 'no') { _%>
 
         it('should load a page', fakeAsync(() => {
             // GIVEN
@@ -154,7 +160,8 @@ describe('Component Tests', () => {
             expect(service.query).toHaveBeenCalled();
             expect(comp.<%= entityInstancePlural %><%= entityArrayOptionalChainSymbol %>[0]).toEqual(jasmine.objectContaining(<%- testEntity %>));
         }));
-<% } %>
+<%_ } _%>
+<%_ if (!readOnly) { _%>
 
         it('should call delete service using confirmDialog', fakeAsync(() => {
             // GIVEN
@@ -172,5 +179,6 @@ describe('Component Tests', () => {
             expect(confirmationService.confirm).toHaveBeenCalled();
             expect(service.delete).toHaveBeenCalledWith(<%- tsKeyId %>);
         }));
+<%_ } _%>
     });
 });

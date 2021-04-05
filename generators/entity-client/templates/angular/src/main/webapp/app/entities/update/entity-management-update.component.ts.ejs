@@ -128,7 +128,7 @@ export class <%= entityAngularName %>UpdateComponent implements OnInit<% if (has
     <%_ } _%>
 <%_ function generateRelationshipForm(relationship) {
     return `${relationship.relationshipName}: this.fb.group({
-    ${relationship.otherEntity.fields.filter(f => f.id).map(f => `${f.fieldName}: [null, [Validators.required]],`).join('\n')}
+    ${relationship.otherEntity.fields.filter(f => f.id).map(f => `${f.fieldName}: ${(relationship.relationshipRequired  || relationship.id) ? '[null, [Validators.required]]' : '[]'},`).join('\n')}
     ${relationship.otherEntity.relationships.filter(r => r.id).map(r => generateRelationshipForm(r)).join('\n')}
     }),`;
 } _%>
@@ -240,7 +240,7 @@ _%>
                 fetch(`data:${<%= entityInstance %>.<%= fieldName %>ContentType!};base64,${<%= entityInstance %>.<%= fieldName %>}`)
                     .then((res: any) => res.blob() as string)
                     .then(blob => {
-                        this.<%= fieldName %>File = new File([blob], '', {type: <%= entityInstance %>.<%= fieldName %>ContentType});
+                        this.<%= fieldName %>File = new File([blob], '', {type: <%= entityInstance %>.<%= fieldName %>ContentType!});
                     });
             }
     <%_ } _%>

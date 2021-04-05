@@ -103,6 +103,7 @@
         <%_ if (pagination === 'no' && !relationship.otherEntity.primaryKey.composite && relationship.otherEntity.entityClass !== 'User') { _%>
                 <th>
                     <span <%= jhiPrefix %>Translate="<%=`${i18nKeyPrefix}.${relationship.otherEntityField}` %>"><%= relationship.relationshipNameHumanized %></span>
+            <%_ if (jpaMetamodelFiltering) { _%>
                     <p-columnFilter field="<%= relationship.relationshipName %>" matchMode="in" display="menu" [showOperator]="false" [showMatchModes]="false" [showAddButton]="false" class="p-ml-auto">
                         <ng-template pTemplate="filter" let-value let-filter="filterCallback">
                             <p-multiSelect [ngModel]="value" [options]="<%= relationship.relationshipName %>Options" (onChange)="filter($event.value)" optionLabel="<%= relationship.otherEntityField %>" optionValue="<%= relationship.otherEntity.primaryKey.name %>"<% if(relationship.otherEntity.pagination !== 'no') { %>
@@ -110,6 +111,7 @@
                             <%_ /* TODO add something like on label not found query and store in lazySelectedOptions */ _%>
                         </ng-template>
                     </p-columnFilter>
+            <%_ } _%>
                 </th>
         <%_ } _%>
     <%_ } else { _%>
@@ -119,6 +121,7 @@
             <%_ if (pagination !== 'no') { _%>
                     <p-sortIcon field="<%= relationship.relationshipName %>.<%= cf.relatedFieldPath.join('.') %>"></p-sortIcon>
             <%_ } _%>
+            <%_ if (jpaMetamodelFiltering) { _%>
                     <p-columnFilter field="<%= cf.fullNameDotted %>" matchMode="in" display="menu" [showOperator]="false" [showMatchModes]="false" [showAddButton]="false" class="p-ml-auto">
                         <ng-template pTemplate="filter" let-value let-filter="filterCallback">
                             <p-multiSelect [ngModel]="value" [options]="<%= cf.name %>Options!" (onChange)="filter($event.value)" optionLabel="<%= cf.lastRelationship.otherEntityField %>" optionValue="<%= cf.fieldName %>"<% if(cf.lastRelationship.otherEntity.pagination !== 'no') { %>
@@ -126,6 +129,7 @@
                             <%_ /* TODO add something like on label not found query and store in lazySelectedOptions */ _%>
                         </ng-template>
                     </p-columnFilter>
+            <%_ } _%>
                 </th>
         <%_ }) _%>
     <%_ } _%>

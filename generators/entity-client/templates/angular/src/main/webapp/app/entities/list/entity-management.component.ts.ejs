@@ -43,10 +43,12 @@ import { <%= entityAngularName %>Service } from '../service/<%= entityFileName %
 <%_ if (pagination !== 'no') { %>
 import { ITEMS_PER_PAGE } from 'app/config/pagination.constants';
 <%_ } _%>
-<%_ if (pagination !== 'no' || relationships.some(r => r.ownerSide && r.otherEntity.pagination !== 'no')) { _%>
+<%_ if (pagination !== 'no' || (jpaMetamodelFiltering && relationships.some(r => r.ownerSide && r.otherEntity.pagination !== 'no'))) { _%>
 import { lazyLoadEventToServerQueryParams<% if (pagination !== 'no') {%>, lazyLoadEventToRouterQueryParams, fillTableFromQueryParams<% } %> } from 'app/core/request/request-util';
 <%_ } _%>
-import { ConfirmationService<%_ if (pagination !== 'no' || relationships.some(r => r.ownerSide && r.otherEntity.pagination !== 'no')) { _%>, LazyLoadEvent<% } %> } from 'primeng/api';
+<%_ if (!readOnly || (pagination !== 'no' || (jpaMetamodelFiltering && relationships.some(r => r.ownerSide && r.otherEntity.pagination !== 'no')))) { _%>
+import { <% if (!readOnly) { %>ConfirmationService, <% } %><% if (pagination !== 'no' || (jpaMetamodelFiltering && relationships.some(r => r.ownerSide && r.otherEntity.pagination !== 'no'))) { %>LazyLoadEvent<% } %> } from 'primeng/api';
+<%_ } _%>
 import { TranslateService } from '@ngx-translate/core';
 <%_ if(jpaMetamodelFiltering) { _%>
     <%_ const alreadyImported = new Set([name]) _%>

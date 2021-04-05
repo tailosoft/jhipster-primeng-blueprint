@@ -29,7 +29,7 @@ import { DatePipe } from '@angular/common';
 <%_ enumImports.forEach( (importedPath, importedType) => { _%>
 import { <%- importedType %> } from '<%- importedPath %>';
 <%_ }); _%>
-import { I<%= entityAngularName %>, <%= entityAngularName %> } from '../<%= entityFileName %>.model';
+import { I<%= entityAngularName %><%= readOnly ? '' : `, ${entityAngularName}` %> } from '../<%= entityFileName %>.model';
 
 import { <%= entityAngularName %>Service } from './<%= entityFileName %>.service';
 
