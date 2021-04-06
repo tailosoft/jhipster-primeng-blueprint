@@ -52,26 +52,26 @@ _%>
                     <label <%= jhiPrefix %>Translate="<%= translationKey %>" for="field_<%= fieldName %>" class="p-col-12 p-md-2"<% if (field.javadoc) { if (enableTranslation) { %> [pTooltip]="'<%= i18nKeyPrefix %>.help.<%= fieldName %>' | translate"<% } else { %> pTooltip="<%= field.javadoc %>"<% } } %>><%= fieldNameHumanized %></label>
                     <div class="p-col-12 p-md-10">
     <%_ if (field.fieldIsEnum) { _%>
-                        <p-dropdown [options]="<%= field.fieldName %>Options!" name="<%= fieldName %>" formControlName="<%= fieldName %>" id="field_<%= fieldName %>" placeholder="Choose" <%_ if(!field.fieldValidateRules || !field.fieldValidateRules.includes('required')){ %> [showClear]="true"<%_ } _%><% if (id) { %> [readonly]="edit"<% } %>>
+                        <p-dropdown [options]="<%= field.fieldName %>Options!" name="<%= fieldName %>" formControlName="<%= fieldName %>" id="field_<%= fieldName %>" placeholder="Choose" <%_ if(!field.fieldValidateRules || !field.fieldValidateRules.includes('required')){ %> [showClear]="true"<%_ } _%><% if (id) { %> [readonly]="edit"<% } %> data-cy="<%= fieldName %>">
                             <ng-template let-<%= field.fieldName %> pTemplate="item">{{'<%= `${i18nKeyPrefix}.${field.fieldType}` %>.' + <%= field.fieldName %>.label | translate}}</ng-template>
                         </p-dropdown>
     <%_ } else { _%>
         <%_ if (fieldType === 'LocalDate') { _%>
-                        <p-calendar id="field_<%= fieldName %>" formControlName="<%= fieldName %>" [showIcon]="true"></p-calendar>
+                        <p-calendar id="field_<%= fieldName %>" formControlName="<%= fieldName %>" [showIcon]="true" data-cy="<%= fieldName %>"></p-calendar>
         <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
-                        <p-calendar id="field_<%= fieldName %>" formControlName="<%= fieldName %>" [showIcon]="true" [showTime]="true"></p-calendar>
+                        <p-calendar id="field_<%= fieldName %>" formControlName="<%= fieldName %>" [showIcon]="true" [showTime]="true" data-cy="<%= fieldName %>"></p-calendar>
         <%_ } else if (fieldTypeBlobContent === 'text') { _%>
                         <textarea pInputTextarea name="<%= fieldName %>" id="field_<%= fieldName %>"
-                                  formControlName="<%= fieldName %>"></textarea>
+                                  formControlName="<%= fieldName %>" data-cy="<%= fieldName %>"></textarea>
         <%_ } else if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent !== 'text') { _%>
                         <p-fileUpload name="<%= fieldName %>" id="field_<%= fieldName %>" [showUploadButton]="false" (onSelect)="onFileSelect($event, '<%= fieldName %>')"<% if (fieldTypeBlobContent === 'image') { %> accept="image/*"<% } %>
-                                      (onClear)="onFileRemove($event, '<%= fieldName %>')" (onRemove)="onFileRemove($event, '<%= fieldName %>')" [files]="<%= fieldName %>File?[<%= fieldName %>File]:[]"></p-fileUpload>
+                                      (onClear)="onFileRemove($event, '<%= fieldName %>')" (onRemove)="onFileRemove($event, '<%= fieldName %>')" [files]="<%= fieldName %>File?[<%= fieldName %>File]:[]" data-cy="<%= fieldName %>"></p-fileUpload>
         <%_ } else if (fieldType === 'Boolean') { _%>
-                        <p-inputSwitch name="<%= fieldName %>" id="field_<%= fieldName %>" formControlName="<%= fieldName %>"></p-inputSwitch>
+                        <p-inputSwitch name="<%= fieldName %>" id="field_<%= fieldName %>" formControlName="<%= fieldName %>" data-cy="<%= fieldName %>"></p-inputSwitch>
         <%_ } else if (id && autoGenerate) { _%>
-                        <input pInputText type="<%= fieldInputType %>" name="<%= fieldName %>" id="field_<%= fieldName %>" formControlName="<%= fieldName %>" readonly/>
+                        <input pInputText type="<%= fieldInputType %>" name="<%= fieldName %>" id="field_<%= fieldName %>" formControlName="<%= fieldName %>" readonly data-cy="<%= fieldName %>"/>
         <%_ } else { _%>
-                        <input pInputText type="<%= fieldInputType %>" name="<%= fieldName %>" id="field_<%= fieldName %>" formControlName="<%= fieldName %>"<% if (id) { %> [readonly]="edit"<% } %>/>
+                        <input pInputText type="<%= fieldInputType %>" name="<%= fieldName %>" id="field_<%= fieldName %>" formControlName="<%= fieldName %>"<% if (id) { %> [readonly]="edit"<% } %> data-cy="<%= fieldName %>"/>
         <%_ } _%>
     <%_ } _%>
     <%_ if (field.fieldValidate === true) { _%>
@@ -160,7 +160,7 @@ _%>
                     <div class="p-col-12 p-md-10">
                         <p-multiSelect id="field_<%= relationshipFieldNamePlural %>" name="<%= relationshipFieldNamePlural %>" formControlName="<%=relationshipFieldNamePlural %>" dataKey="<%= otherEntity.primaryKey.name %>"<% if(relationship.otherEntity.pagination !== 'no') { %>
                                        [lazySelectedOptions]="<%= relationshipName %>SelectedOptions!" [lazy]="true" [rows]="10" (onLazyLoad)="on<%= otherEntityNameCapitalized %>LazyLoadEvent($event)"<% } %>
-                                       [options]="<%= relationshipName %>Options!" optionLabel="<%=otherEntityField %>">
+                                       [options]="<%= relationshipName %>Options!" optionLabel="<%=otherEntityField %>" data-cy="<%= relationshipFieldNamePlural %>">
                         </p-multiSelect>
         <%_ if (relationshipRequired) { _%>
                         <div class="validation-messages">
@@ -179,7 +179,7 @@ _%>
 
             <div>
                 <button pButton type="button" id="cancel-save" icon="pi pi-ban" class="p-button-secondary" (click)="previousState()" [label]="'entity.action.cancel' | translate"></button>
-                <button pButton type="submit" id="save-entity" icon="pi pi-save" [disabled]="editForm.invalid || isSaving" [label]="'entity.action.save' | translate"></button>
+                <button pButton type="submit" id="save-entity" icon="pi pi-save" [disabled]="editForm.invalid || isSaving" [label]="'entity.action.save' | translate" data-cy="entityCreateSaveButton"></button>
             </div>
         </form>
     </div>

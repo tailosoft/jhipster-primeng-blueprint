@@ -97,7 +97,8 @@
 <%_ } _%>
 <%_ if (cypressTests) { _%>
     "cypress": "<%= dependabotPackageJson.devDependencies['cypress'] %>",
-<%_ if (authenticationType === 'oauth2') { _%>
+    "cypress-file-upload": "5.0.5",
+    <%_ if (authenticationType === 'oauth2') { _%>
     "puppeteer": "<%= dependabotPackageJson.devDependencies['puppeteer'] %>",
 <%_ } _%>
 <%_ } _%>

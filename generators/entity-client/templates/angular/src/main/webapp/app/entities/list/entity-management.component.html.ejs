@@ -21,7 +21,7 @@
         <span <%= jhiPrefix %>Translate="<%= i18nKeyPrefix %>.home.title"><%= entityClassPluralHumanized %></span>
         <%_ if (!readOnly) { _%>
         <p-button id="jh-create-entity" class="float-right jh-create-entity create-<%= entityUrl %>" [routerLink]="['/<%= entityUrl %>/new']"
-                  [label]="'<%= i18nKeyPrefix %>.home.createLabel' | translate" icon="pi pi-plus" iconPos="left">
+                  [label]="'<%= i18nKeyPrefix %>.home.createLabel' | translate" icon="pi pi-plus" iconPos="left" data-cy="entityCreateButton">
         </p-button>
         <%_ } _%>
     </h2>
@@ -138,7 +138,7 @@
             </tr>
         </ng-template>
         <ng-template pTemplate="body" let-<%= entityInstance %>>
-            <tr>
+            <tr data-cy="entityTable">
                 <%_
             const keys = entity.primaryKey.ids.length === 1 ? `${entityInstance}!.${entity.primaryKey.name}!` : `{ ${entity.primaryKey.ids.map(pk => `${pk.name}: ${entityInstance}!.${pk.nameDottedAsserted}`).join(', ')} }`;
             const routerLink = ` [routerLink]="['/${ entityUrl }', ${ keys }, 'view']"`;
@@ -228,7 +228,7 @@
                     <div class="btn-group flex-btn-group-container">
 <%_ const idParam = entity.primaryKey.ids.length === 1 ? `${entityInstance}.${entity.primaryKey.name}!` : '{ '+ entity.primaryKey.ids.map(pk => `${pk.name}: ${entityInstance}!.${pk.nameDottedAsserted}`).join(', ') + ' }' _%>
                         <p-button type="submit" [routerLink]="['/<%= entityUrl %>', <%- idParam %>, 'view' ]"
-                                  icon="pi pi-eye" styleClass="p-button-info">
+                                  icon="pi pi-eye" styleClass="p-button-info" data-cy="entityDetailsButton">
                         </p-button>
                         <%_ if (!readOnly) { _%>
                         <p-button type="submit" [routerLink]="['/<%= entityUrl %>', <%- idParam %>, 'edit' ]"

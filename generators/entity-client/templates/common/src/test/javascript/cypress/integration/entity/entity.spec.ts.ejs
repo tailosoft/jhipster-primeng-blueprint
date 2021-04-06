@@ -14,6 +14,7 @@ import {
 const baseApi = (applicationType === 'gateway' && locals.microserviceName) ? 'services/' + microserviceName.toLowerCase() + '/api/' : 'api/';
 let openBlockComment = ``;
 let closeBlockComment = ``;
+let deleteAfter = true;
 
 for (let relationship of relationships) {
   if (relationship.relationshipRequired || relationship.id) {
@@ -32,7 +33,37 @@ if (!openBlockComment) {
     closeBlockComment = `*/`;
   }
 }
+
 _%>
+<%_ function deleteTest() { _%>
+  it('should delete last instance of <%= entityClass %>', () => {
+    cy.intercept('GET', '/<%= baseApi + entityApiUrl %>*').as('entitiesRequest');
+    <%_ if (clientFramework === 'react') { _%>
+    cy.intercept('GET', '/<%= baseApi + entityApiUrl %>/*').as('dialogDeleteRequest');
+    <%_ } _%>
+    cy.intercept('DELETE', '/<%= baseApi + entityApiUrl %>/*').as('deleteEntityRequest');
+    cy.visit('/');
+    cy.clickOnEntityMenuItem('<%= entityStateName %>');
+    cy.wait('@entitiesRequest').then(({ request, response }) => {
+      startingEntitiesCount = response.body.length;
+      if (startingEntitiesCount > 0) {
+        cy.get(entityTableSelector).should('have.lengthOf', startingEntitiesCount);
+        cy.get(entityDeleteButtonSelector).last().click({force: true});
+        <%_ if (clientFramework === 'react') { _%>
+        cy.wait('@dialogDeleteRequest');
+        <%_ } _%>
+        cy.get(entityConfirmDeleteButtonSelector).click({force: true});
+        cy.wait('@deleteEntityRequest');
+        cy.intercept('GET', '/<%= baseApi + entityApiUrl %>*').as('entitiesRequestAfterDelete');
+        cy.visit('/');
+        cy.clickOnEntityMenuItem('<%= entityStateName %>');
+        cy.wait('@entitiesRequestAfterDelete');
+        cy.get(entityTableSelector).should('have.lengthOf', startingEntitiesCount - 1);
+      }
+      cy.visit('/');
+    });
+  });
+<%_ } _%>
 
 describe('<%= entityClass %> e2e test', () => {
   let startingEntitiesCount = 0;
@@ -126,22 +157,46 @@ describe('<%= entityClass %> e2e test', () => {
     cy.visit('/');
   });
 
-  <%= openBlockComment %>
+<%_ for (const relationship of relationships) { _%>
+  <%_ if (relationship.ownerSide) { _%>
+    <%_ if (relationship.relationshipType === 'one-to-one' && relationship.otherRelationship && !relationship.otherRelationship.ownerSide) {
+      deleteAfter = false;_%>
+        <%- deleteTest() -%>
+    <%_ } _%>
+  <%_ } _%>
+<%_ } _%>
+
   it('should create an instance of <%= entityClass %>', () => {
     cy.intercept('GET', '/<%= baseApi + entityApiUrl %>*').as('entitiesRequest');
     cy.visit('/');
     cy.clickOnEntityMenuItem('<%= entityStateName %>');
     cy.wait('@entitiesRequest')
-      .then(({ request, response }) => startingEntitiesCount = response.body.length);
-    cy.get(entityCreateButtonSelector).click({force: true});
-    cy.getEntityCreateUpdateHeading('<%= entityClass %>');
+      .then(({ request, response }) => {
+        startingEntitiesCount = response.body.length;
+        cy.get(entityCreateButtonSelector).click({force: true});
+        cy.getEntityCreateUpdateHeading('<%= entityClass %>');
+
+    <%_ for (f of fields) { _%>
+        <%_ if (['Instant', 'ZonedDateTime', 'LocalDate'].includes(f.fieldType)) { _%>
+        let today = new Date();
+        let dd = today.getDate() < 10 ? '0' + today.getDate() : today.getDate();
+        let mm = (today.getMonth()+ 1) < 10 ? '0' + (today.getMonth()+1) : today.getMonth()+1;
+        let yyyy = today.getFullYear();
+        const date = mm + '/' + dd + '/' + yyyy;
+        <%_ break; _%>
+      <%_ } _%>
+    <%_ } _%>
+
     <%_ fields.filter(field => (!field.id || !field.autoGenerate) && !field.hidden).forEach((field) => {
       const fieldName = field.fieldName;
       const fieldNameCapitalized = field.fieldNameCapitalized;
       const fieldType = field.fieldType;
       const fieldTypeBlobContent = field.fieldTypeBlobContent;
       const fieldIsEnum = field.fieldIsEnum;
-      const fieldValue = !entityFakeData ? field.generateFakeData('cypress') : entityFakeData[field.fieldName];
+      let fieldValue = !entityFakeData ? field.generateFakeData('cypress') : entityFakeData[field.fieldName];
+      if (field.id && fieldType === 'String') {
+        fieldValue = 'zzzzzzz';
+      }
       if (fieldValue === undefined) {
           warning(`Error generating a value for field ${fieldName}`);
           return;
@@ -149,91 +204,72 @@ describe('<%= entityClass %> e2e test', () => {
     _%>
 
     <%_ if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
-    cy.get(`[data-cy="<%= fieldName %>"]`).type('<%= fieldValue %>').invoke('val').should('equal', '<%= fieldValue %>');
+        cy.get(`[data-cy="<%= fieldName %>"]`).click().get(`[data-cy="<%= fieldName %>"] .p-datepicker-today`).click();
+        cy.get(`[data-cy="<%= fieldName %>"] .p-inputtext`).invoke('val').should('contains', date);
+
+   <%_ } else if (['LocalDate'].includes(fieldType)) { _%>
+        cy.get(`[data-cy="<%= fieldName %>"]`).click().get(`[data-cy="<%= fieldName %>"] .p-datepicker-today`).click();
+        cy.get(`[data-cy="<%= fieldName %>"] .p-inputtext`).should('have.value', date);
 
     <%_ } else if (fieldType === 'Duration' && clientFramework === 'react') { _%>
-    cy.get(`[data-cy="<%= fieldName %>"]`).type('PT12S').should('have.value', 'PT12S');
+        cy.get(`[data-cy="<%= fieldName %>"]`).type('PT12S').should('have.value', 'PT12S');
 
     <%_ } else if (fieldType === 'Duration' && clientFramework !== 'react') { _%>
-    cy.get(`[data-cy="<%= fieldName %>"]`).type('PT12S').should('have.value', 'PT12S');
+        cy.get(`[data-cy="<%= fieldName %>"]`).type('PT12S').should('have.value', 'PT12S');
 
     <%_ } else if (fieldType === 'Boolean') { _%>
-    cy.get(`[data-cy="<%= fieldName %>"]`).should('not.be.checked');
-    cy.get(`[data-cy="<%= fieldName %>"]`).click().should('be.checked');
+        cy.get(`[data-cy="<%= fieldName %>"]`).should('not.be.checked');
+        cy.get(`[data-cy="<%= fieldName %>"]`).click();
+        cy.get(`[data-cy="<%= fieldName %>"] > .p-inputswitch-checked`).should('exist');
     <%_ } else if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent === 'text') { _%>
-    cy.get(`[data-cy="<%= fieldName %>"]`).type('<%= fieldValue %>', { force: true }).invoke('val').should('match', new RegExp('<%= fieldValue %>'));
+        cy.get(`[data-cy="<%= fieldName %>"]`).type('<%= fieldValue %>', { force: true }).invoke('val').should('match', new RegExp('<%= fieldValue %>'));
 
     <%_ } else if (['byte[]', 'ByteBuffer'].includes(fieldType)) { _%>
-    cy.setFieldImageAsBytesOfEntity('<%= fieldName %>', 'integration-test.png', 'image/png');
+        cy.setFieldImageAsBytesOfEntity('<%= fieldName %>', 'integration-test.png', 'image/png');
 
     <%_ } else if (fieldIsEnum) { _%>
-    cy.get(`[data-cy="<%= fieldName %>"]`).select('<%= fieldValue %>');
+        cy.setFieldSelectToLastOfEntity('<%= fieldName %>');
 
     <%_ } else if (fieldType === 'UUID'){ _%>
-    cy.get(`[data-cy="<%= fieldName %>"]`).type('<%= fieldValue %>').invoke('val').should('match', new RegExp('<%= fieldValue %>'));
+        cy.get(`[data-cy="<%= fieldName %>"]`).type('<%= fieldValue %>').invoke('val').should('match', new RegExp('<%= fieldValue %>'));
 
-    <%_ } else if(['Integer', 'Long', 'Float', 'Double', 'BigDecimal', 'LocalDate', ].includes(fieldType)) { _%>
-    cy.get(`[data-cy="<%= fieldName %>"]`).type('<%= fieldValue %>').should('have.value', '<%= fieldValue %>');
+    <%_ } else if(['Integer', 'Long', 'Float', 'Double', 'BigDecimal', 'LocalDate'].includes(fieldType)) { _%>
+        cy.get(`[data-cy="<%= fieldName %>"]`).type('<%= fieldValue %>').should('have.value', '<%= fieldValue %>');
 
     <%_ } else { _%>
-    cy.get(`[data-cy="<%= fieldName %>"]`).type('<%= fieldValue %>', { force: true }).invoke('val').should('match', new RegExp('<%= fieldValue %>'));
+        cy.get(`[data-cy="<%= fieldName %>"]`).type('<%= fieldValue %>', { force: true }).invoke('val').should('match', new RegExp('<%= fieldValue %>'));
 
     <%_ } _%>
     <%_ }); _%>
-    <%_ relationships.forEach((relationship) => {
-      const relationshipType = relationship.relationshipType;
-      const ownerSide = relationship.ownerSide;
-      const relationshipName = relationship.relationshipName;
-      const relationshipNameCapitalized = relationship.relationshipNameCapitalized;_%>
-    <%_ if (relationshipType === 'many-to-one' || (relationshipType === 'one-to-one' && ownerSide === true)) { _%>
-    cy.setFieldSelectToLastOfEntity('<%= relationshipName %>');
-
-    <%_ } else if ((relationshipType === 'many-to-many' && ownerSide === true)) { _%>
-    cy.setFieldSelectToLastOfEntity('<%= relationshipName %>');
-
-    <%_ } _%>
-    <%_ }); _%>
-    cy.get(entityCreateSaveButtonSelector).click({force: true});
-    cy.scrollTo('top', {ensureScrollable: false});
-    cy.get(entityCreateSaveButtonSelector).should('not.exist');
-    cy.intercept('GET', '/<%= baseApi + entityApiUrl %>*').as('entitiesRequestAfterCreate');
-    cy.visit('/');
-    cy.clickOnEntityMenuItem('<%= entityStateName %>');
-    cy.wait('@entitiesRequestAfterCreate');
-    cy.get(entityTableSelector).should('have.lengthOf', startingEntitiesCount + 1);
-    cy.visit('/');
-  });
-  <%= closeBlockComment %>
-
-  <%= openBlockComment %>
-  it('should delete last instance of <%= entityClass %>', () => {
-    cy.intercept('GET', '/<%= baseApi + entityApiUrl %>*').as('entitiesRequest');
-    <%_ if (clientFramework === 'react') { _%>
-    cy.intercept('GET', '/<%= baseApi + entityApiUrl %>/*').as('dialogDeleteRequest');
-    <%_ } _%>
-    cy.intercept('DELETE', '/<%= baseApi + entityApiUrl %>/*').as('deleteEntityRequest');
-    cy.visit('/');
-    cy.clickOnEntityMenuItem('<%= entityStateName %>');
-    cy.wait('@entitiesRequest').then(({ request, response }) => {
-      startingEntitiesCount = response.body.length;
-      if (startingEntitiesCount > 0) {
-        cy.get(entityTableSelector).should('have.lengthOf', startingEntitiesCount);
-        cy.get(entityDeleteButtonSelector).last().click({force: true});
-        <%_ if (clientFramework === 'react') { _%>
-        cy.wait('@dialogDeleteRequest');
+<%_ for (const [i, relationship] of relationships.entries()) { _%>
+  <%_ if (relationship.ownerSide) { _%>
+    <%_ relationship.clientFields.forEach(cf => { _%>
+      <%_ if (relationship.relationshipType === 'many-to-one' || relationship.relationshipType === 'one-to-one') { _%>
+        <%_ if (primaryKey.composite && relationship.id) { _%>
+        cy.setFieldSelectToIndexOfEntity(<%= i %>, '<%= cf.fullPath[cf.fullPath.length -2] %>');
+        <%_ } else { _%>
+        cy.setFieldSelectToLastOfEntity('<%= cf.fullPath[cf.fullPath.length -2] %>');
         <%_ } _%>
-        cy.getEntityDeleteDialogHeading('<%= entityInstance %>').should('exist');
-        cy.get(entityConfirmDeleteButtonSelector).click({force: true});
-        cy.wait('@deleteEntityRequest');
-        cy.intercept('GET', '/<%= baseApi + entityApiUrl %>*').as('entitiesRequestAfterDelete');
+      <%_ } else if(relationship.relationshipType === 'many-to-many') { _%>
+        cy.setFieldSelectToLastOfEntity('<%= cf.fullPath[cf.fullPath.length -2] %>', true, ' ');
+      <%_ } _%>
+    <%_}) _%>
+  <%_ } _%>
+<%_ } _%>
+        cy.get(entityCreateSaveButtonSelector).click({force: true});
+        cy.scrollTo('top', {ensureScrollable: false});
+        cy.get(entityCreateSaveButtonSelector).should('not.exist');
+        cy.intercept('GET', '/<%= baseApi + entityApiUrl %>*').as('entitiesRequestAfterCreate');
         cy.visit('/');
         cy.clickOnEntityMenuItem('<%= entityStateName %>');
-        cy.wait('@entitiesRequestAfterDelete');
-        cy.get(entityTableSelector).should('have.lengthOf', startingEntitiesCount - 1);
-      }
-      cy.visit('/');
-    });
+        cy.wait('@entitiesRequestAfterCreate');
+        cy.get(entityTableSelector).should('have.lengthOf', startingEntitiesCount + 1);
+      });
+    cy.visit('/');
   });
-  <%= closeBlockComment %>
-  <%_ } _%>
+
+  <%_ if (deleteAfter) {
+    deleteTest()
+   } _%>
+<%_ } _%>
 });

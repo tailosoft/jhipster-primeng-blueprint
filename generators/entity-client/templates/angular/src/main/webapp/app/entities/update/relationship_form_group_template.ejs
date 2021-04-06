@@ -36,7 +36,7 @@ _%>
         <%_ /* this is the same (opposite) condition as relationship load template */ _%>
                         [rows]="10" [lazy]="true" (onLazyLoad)="on<%= nameCapitalized %>LazyLoadEvent($event)" <% if (first) { %>[lazyLoadOnInit]="true" <% } %>
                         [filter]="true" [filterValue]="<%= name %>FilterValue"<% } %>
-                        placeholder="Choose" optionLabel="<%= relationship.otherEntityField %>"<% if (relationship.otherEntity.primaryKey.composite) { %> optionValue="<%= idField.fieldName %>"<% } else { %> dataKey="<%= idField.fieldName %>"<% } %>></p-dropdown>
+                        placeholder="Choose" optionLabel="<%= relationship.otherEntityField %>"<% if (relationship.otherEntity.primaryKey.composite) { %> optionValue="<%= idField.fieldName %>"<% } else { %> dataKey="<%= idField.fieldName %>"<% } %> data-cy="<%= relationshipName %>"></p-dropdown>
             <div class="validation-messages">
                 <ng-container *ngIf="<%= formName %>.get('<%= controlName %>')!.invalid && (<%= formName %>.get('<%= controlName %>')!.dirty || <%= formName %>.get('<%= controlName %>')!.touched)">
                     <p-message severity="error"
