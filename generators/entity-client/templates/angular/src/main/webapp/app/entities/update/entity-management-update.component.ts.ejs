@@ -21,6 +21,7 @@ const hasRelationshipQuery = relationships && relationships.some(r => r.ownerSid
 const hasCompositeXToOneRelationshipQuery = relationships && relationships.some(r => r.ownerSide && r.otherEntity.primaryKey.composite && r.relationshipType !== 'many-to-many');
 const hasPaginationRelationship = relationships && relationships.some(r => r.ownerSide && r.otherEntity.pagination !== 'no');
 const hasMultiFieldRelationship = relationships && relationships.some(r => r.ownerSide && r.clientFields.length > 1 && r.relationshipType !== 'many-to-many');
+const hasMultiFieldIdRelationship = relationships && relationships.some(r => r.id && r.ownerSide && r.clientFields.length > 1 && r.relationshipType !== 'many-to-many');
 const hasValidationRule = fields.some(field =>
         field.fieldValidate && (
                 field.fieldValidateRules.includes('required') ||
@@ -40,7 +41,7 @@ import { FormBuilder<%_ if (hasCompositeXToOneRelationshipQuery) { _%> , FormGro
 import { ActivatedRoute } from '@angular/router';
 import { Observable<% if (hasMultiFieldRelationship) { %>, Subject<% } %> } from 'rxjs';
 <% if (hasMultiFieldRelationship) { %>
-import { filter, takeUntil } from 'rxjs/operators';
+import { <% if (hasMultiFieldIdRelationship) { %>filter, <% } %>takeUntil } from 'rxjs/operators';
 <%_ } _%>
 <%_ if (hasPaginationRelationship) { _%>
 import { lazyLoadEventToServerQueryParams } from 'app/core/request/request-util';
@@ -184,7 +185,9 @@ _%>
 
         this.<%= cf.parentFormName %>.get('<%= cf.lastRelationship.relationshipName %>')!.valueChanges.pipe(
             takeUntil(this.onDestroySubject),
+    <%_ if (relationship.id) { _%>
             filter(() => !this.edit)
+    <%_ } _%>
         ).subscribe(() => {
             this.on<%= nextCf.nameCapitalized %>LazyLoadEvent({});
         <%_ if (nextCf.needsFieldName) { _%>
@@ -237,7 +240,7 @@ _%>
 <%_ if (!primaryKey.autoGenerate || primaryKey.derived) {_%>
             this.edit = true;
 <%_ } _%>
-            this.editForm.reset({ ...<%= entityInstance %> });
+            this.editForm.reset({ ...<%= entityInstance %> }, { emitEvent: false, onlySelf: true });
 <%_ for (const field of fields) {
     const fieldName = field.fieldName;
     const fieldType = field.fieldType;
@@ -257,11 +260,18 @@ _%>
     <%_ if (relationship.ownerSide) { _%>
         <%_ relationship.clientFields.forEach(cf => { _%>
             <%_ if(cf.lastRelationship.relationshipType === 'many-to-many') { _%>
-                <%_ if (cf.lastRelationship.pagination !== 'no') { _%>
+                <%_ if (cf.lastRelationship.otherEntity.pagination !== 'no') { _%>
             this.<%= cf.name %>SelectedOptions = <%= entityInstance %>.<%= cf.fullPath.slice(0, -1).join('?.') %> ?? [];
                 <%_ } _%>
             <%_ } else { _%>
+                <%_ if (cf.lastRelationship.otherEntity.pagination !== 'no') { _%>
+            if (<%= entityInstance %>.<%= cf.fullPath.slice(0, -1).join('?.') %>) {
+                this.<%= cf.name %>Options = [<%= entityInstance %>.<%= cf.fullPath.slice(0, -1).join('.') %>];
+                this.<%= cf.name %>FilterValue = <%= entityInstance %>.<%= relationship.relationshipName %>.<%= cf.relatedFieldPath.join('.') %>;
+            }
+                <%_ } else { _%>
             this.<%= cf.name %>FilterValue = <%= entityInstance %>.<%= relationship.relationshipName %>?.<%= cf.relatedFieldPath.join('?.') %>;
+                <%_ } _%>
             <%_ } _%>
         <%_ }) _%>
     <%_ } _%>

@@ -153,7 +153,7 @@ _%>
     const translationKey = `${i18nKeyPrefix}.${relationshipName}`;
 _%>
     <%_ if (relationshipType === 'many-to-one' || relationshipType === 'one-to-one') { _%>
-        <%- include('./relationship_form_group_template', {relationship, frontendAppName, path: [], first: true, previousRelationship: null}); -%>
+        <%- include('./relationship_form_group_template', {relationship, frontendAppName, path: [], first: true, previousRelationship: null, id: relationship.id}); -%>
     <%_ } else if (relationshipType === 'many-to-many') { _%>
                 <div class="p-field p-grid">
                     <label jhiTranslate="<%= translationKey %>" for="field_<%= relationshipFieldNamePlural %>" class="p-col-12 p-md-2"><%= relationshipNameHumanized %></label>
