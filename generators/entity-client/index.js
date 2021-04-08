@@ -48,6 +48,15 @@ module.exports = class extends EntityClientGenerator {
                     relatedFieldMatchMode = 'contains';
                   }
                   const fullPath = [rel.relationshipType === 'many-to-many' ? rel.relationshipNamePlural : rel.relationshipName, ...(id.field.path)];
+                  let parentFormName;
+                  if (id.relationshipsPath.length === 0) {
+                    parentFormName = '';
+                  } else if (id.relationshipsPath.length === 1 && rel === lastRelationship) {
+                    parentFormName = 'editForm';
+                  } else {
+                    parentFormName = `${(id.relationshipsPath[id.relationshipsPath.length - 2] || rel).relationshipName}Form`;
+                  }
+                  const needsFieldName = lastRelationship.otherEntity.primaryKey.composite;
                   return {
                     name,
                     nameCapitalized: _.upperFirst(name),
@@ -57,6 +66,7 @@ module.exports = class extends EntityClientGenerator {
                     fieldName: id.field.path[id.field.path.length - 1],
                     id,
                     formName: `${lastRelationship.relationshipName}Form`,
+                    parentFormName,
                     entity: id.field.entity,
                     relatedFieldPath: [...id.field.path.slice(0, -1), lastRelationship.otherEntityField],
                     lastRelationship,
@@ -65,6 +75,7 @@ module.exports = class extends EntityClientGenerator {
                     //routerLinkValues: this.entity.primaryKey.ids.filter(pk => [rel, ...pk.relationshipsPath].includes(lastRelationship)).map(pk => ({fieldName: pk.name, nameDottedAsserted: [/* ...id.field.path.slice(0, -1) */ this.entity.entityInstance, rel.relationshipName, ...pk.field.path].join('!.') + '!'})),
                     // ${primaryKey.ids.filter(pk => pk.relationshipsPath.includes(cf.lastRelationship)).map(pk => `${pk.field.path.slice(-1)[0]} : ${entityInstance}!.${relationship.relationshipName}!.${pk.nameDottedAsserted}`).join(',')}
                     routerLinkValues: id.field.entity.primaryKey.ids.map(pk => ({fieldName: pk.name, nameDottedAsserted: [...(id.relationshipsPath.slice(0 ,id.relationshipsPath.indexOf(lastRelationship) + 1).map(r => r.relationshipName)), ...pk.field.path].join('!.') + '!'})),
+                    needsFieldName
                   }
                 })
               })

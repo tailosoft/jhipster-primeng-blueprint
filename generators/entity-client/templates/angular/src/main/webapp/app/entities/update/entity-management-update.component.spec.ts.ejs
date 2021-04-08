@@ -19,12 +19,12 @@
 <%_
 const tsKeyId = generateTestEntityId(primaryKey.type);
 const testEntity = _generateTestEntityPrimaryKey(primaryKey, 0);
-function checkDatePipe(entity, datePipeCheckedREntities) {
+function checkDatePipe(entity, datePipeCheckedEntities) {
   return entity.fieldsContainLocalDate || entity.relationships
-          .filter(r => r.ownerSide && !datePipeCheckedREntities.includes[r.otherEntity.name])
-          .some(r => checkDatePipe(r.otherEntity, [...datePipeCheckedREntities, r.otherEntity.name]))
+          .filter(r => r.ownerSide && !datePipeCheckedEntities.includes(r.otherEntity.name))
+          .some(r => checkDatePipe(r.otherEntity, [...datePipeCheckedEntities, r.otherEntity.name]))
 }
-let datePipe = checkDatePipe(entity, []);
+let datePipe = checkDatePipe(entity, [entity.name]);
 _%>
 jest.mock('@angular/router');
 

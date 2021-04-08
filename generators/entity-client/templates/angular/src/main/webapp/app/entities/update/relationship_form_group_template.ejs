@@ -6,32 +6,47 @@ const nameCapitalized = newPath.map(_.upperFirst).join('')
 const name = _.lowerFirst(nameCapitalized)
 const idField = relationship.otherEntity.fields.find(f => f.id)
 _%>
+<%_ if (relationship.otherEntity.primaryKey.composite) { _%>
 <ng-container formGroupName="<%= relationshipName %>">
-    <%_ relationship.otherEntity.relationships.filter(r => r.id).reverse().forEach((r, i) => { _%>
+<%_ } _%>
+<%_ relationship.otherEntity.relationships.filter(r => r.id).reverse().forEach((r, i) => { _%>
     <%_
         // recursive because form groups are nested we need to finish  using a relationship before moving to the next one
         // we sue relationships....".reverse()" to have the same order as client fields (which allows the first/last) to be non filterable
     _%>
-    <%- include('./relationship_form_group_template', {relationship: r, frontendAppName, path: newPath, first: (first && i === 0)}); %>
+    <%- include('./relationship_form_group_template', {relationship: r, frontendAppName, path: newPath, first: (first && i === 0), previousRelationship: relationship}); %>
     <%_ first = false _%>
     <%_ }) _%>
     <%_ if (idField) { _%>
+        <%_
+            let formName;
+            let controlName;
+            if (relationship.otherEntity.primaryKey.composite) {
+                controlName = idField.fieldName;
+                formName = relationshipName + 'Form';
+            } else {
+                controlName = relationshipName;
+                formName = previousRelationship ? previousRelationship.relationshipName + 'Form' : 'editForm';
+            }
+        _%>
     <div class="p-field p-grid" <% if (!first) { %>*ngIf="<%= name %>Options || edit"<% } %>>
         <label jhiTranslate="<%= `${frontendAppName}.${relationship.reference.entity.entityTranslationKey}.${relationshipName}`; %>" for="<%= dropdownId %>" class="p-col-12 p-md-2"><%= relationship.relationshipNameHumanized %></label>
         <div class="p-col-12 p-md-10">
-            <p-dropdown id="<%= dropdownId %>" [options]="<%= name %>Options!" formControlName="<%= idField.fieldName %>"<% if (relationship.id) { %> [readonly]="edit"<% } %><% if(!((first && relationship.otherEntity.pagination === 'no') || !relationship.otherEntity.jpaMetamodelFiltering)) { %>
+            <p-dropdown id="<%= dropdownId %>" [options]="<%= name %>Options!" formControlName="<%= controlName %>"<% if (relationship.id) { %> [readonly]="edit"<% } %><% if(!((first && relationship.otherEntity.pagination === 'no') || !relationship.otherEntity.jpaMetamodelFiltering)) { %>
         <%_ /* this is the same (opposite) condition as relationship load template */ _%>
-                        [rows]="10" [lazy]="true" (onLazyLoad)="on<%= nameCapitalized %>LazyLoadEvent($event)" [lazyLoadOnInit]="true"
+                        [rows]="10" [lazy]="true" (onLazyLoad)="on<%= nameCapitalized %>LazyLoadEvent($event)" <% if (first) { %>[lazyLoadOnInit]="true" <% } %>
                         [filter]="true" [filterValue]="<%= name %>FilterValue"<% } %>
-                        placeholder="Choose" optionLabel="<%= relationship.otherEntityField %>" optionValue="<%= idField.fieldName %>"></p-dropdown>
+                        placeholder="Choose" optionLabel="<%= relationship.otherEntityField %>"<% if (relationship.otherEntity.primaryKey.composite) { %> optionValue="<%= idField.fieldName %>"<% } %>></p-dropdown>
             <div class="validation-messages">
-                <ng-container *ngIf="<%= relationshipName %>Form.get('<%= idField.fieldName %>')!.invalid && (<%= relationshipName %>Form.get('<%= idField.fieldName %>')!.dirty || <%= relationshipName %>Form.get('<%= idField.fieldName %>')!.touched)">
+                <ng-container *ngIf="<%= formName %>.get('<%= controlName %>')!.invalid && (<%= formName %>.get('<%= controlName %>')!.dirty || <%= formName %>.get('<%= controlName %>')!.touched)">
                     <p-message severity="error"
-                               *ngIf="<%= relationshipName %>Form.get('<%= idField.fieldName %>')!.errors!.required" [text]="'entity.validation.required' | translate">
+                               *ngIf="<%= formName %>.get('<%= controlName %>')!.errors!.required" [text]="'entity.validation.required' | translate">
                     </p-message>
                 </ng-container>
             </div>
         </div>
     </div>
-    <%_ } _%>
+<%_ } _%>
+<%_ if (relationship.otherEntity.primaryKey.composite) { _%>
 </ng-container>
+<%_ } _%>

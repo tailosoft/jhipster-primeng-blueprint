@@ -18,7 +18,7 @@
 -%>
 <%_
 const hasRelationshipQuery = relationships && relationships.some(r => r.ownerSide);
-const hasXToOneRelationshipQuery = relationships && relationships.some(r => r.ownerSide && r.relationshipType !== 'many-to-many');
+const hasCompositeXToOneRelationshipQuery = relationships && relationships.some(r => r.ownerSide && r.otherEntity.primaryKey.composite && r.relationshipType !== 'many-to-many');
 const hasPaginationRelationship = relationships && relationships.some(r => r.ownerSide && r.otherEntity.pagination !== 'no');
 const hasMultiFieldRelationship = relationships && relationships.some(r => r.ownerSide && r.clientFields.length > 1 && r.relationshipType !== 'many-to-many');
 const hasValidationRule = fields.some(field =>
@@ -36,7 +36,7 @@ const isValidatorsRequired = hasValidationRule || hasRequiredRelationship || ent
 _%>
 import { Component, OnInit<% if (hasMultiFieldRelationship) { %>, OnDestroy<% } %> } from '@angular/core';
 import { HttpResponse<% if (relationships.filter(r => r.ownerSide).length) { %>, HttpErrorResponse<% } %> } from '@angular/common/http';
-import { FormBuilder<%_ if (hasXToOneRelationshipQuery) { _%> , FormGroup<%_ } _%><%_ if (isValidatorsRequired) { _%>, Validators<%_ } _%> } from '@angular/forms';
+import { FormBuilder<%_ if (hasCompositeXToOneRelationshipQuery) { _%> , FormGroup<%_ } _%><%_ if (isValidatorsRequired) { _%>, Validators<%_ } _%> } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable<% if (hasMultiFieldRelationship) { %>, Subject<% } %> } from 'rxjs';
 <% if (hasMultiFieldRelationship) { %>
@@ -127,10 +127,14 @@ export class <%= entityAngularName %>UpdateComponent implements OnInit<% if (has
         <%_ } _%>
     <%_ } _%>
 <%_ function generateRelationshipForm(relationship) {
-    return `${relationship.relationshipName}: this.fb.group({
-    ${relationship.otherEntity.fields.filter(f => f.id).map(f => `${f.fieldName}: ${(relationship.relationshipRequired  || relationship.id) ? '[null, [Validators.required]]' : '[]'},`).join('\n')}
+        if (relationship.otherEntity.primaryKey.composite) {
+            return `${relationship.relationshipName}: this.fb.group({
+    ${relationship.otherEntity.fields.filter(f => f.id).map(f => `${f.fieldName}: ${(relationship.relationshipRequired || relationship.id) ? '[null, [Validators.required]]' : '[]'},`).join('\n')}
     ${relationship.otherEntity.relationships.filter(r => r.id).map(r => generateRelationshipForm(r)).join('\n')}
     }),`;
+        } else {
+          return `${relationship.relationshipName}: ${(relationship.relationshipRequired || relationship.id) ? '[null, [Validators.required]]' : '[]'},`;
+        }
 } _%>
 <%_ relationships.filter(r => r.ownerSide).forEach(r => {
     if (r.relationshipType === 'many-to-many') { _%>
@@ -173,17 +177,21 @@ export class <%= entityAngularName %>UpdateComponent implements OnInit<% if (has
         this.isSaving = false;
 <%_
 relationships.filter(r => r.ownerSide && r.relationshipType !== 'many-to-many').forEach(relationship => {
-  for (let i = 0; i < relationship.clientFields.length - 1; i++) {
-      const cf = relationship.clientFields[i];
-      const nextCf = relationship.clientFields[i + 1];
+    for (let i = 0; i < relationship.clientFields.length - 1; i++) {
+        const cf = relationship.clientFields[i];
+        const nextCf = relationship.clientFields[i + 1];
 _%>
 
-        this.<%= cf.formName %>.get('<%= cf.fieldName %>')!.valueChanges.pipe(
+        this.<%= cf.parentFormName %>.get('<%= cf.lastRelationship.relationshipName %>')!.valueChanges.pipe(
             takeUntil(this.onDestroySubject),
             filter(() => !this.edit)
         ).subscribe(() => {
             this.on<%= nextCf.nameCapitalized %>LazyLoadEvent({});
+        <%_ if (nextCf.needsFieldName) { _%>
             this.<%= nextCf.formName %>.get('<%= nextCf.fieldName %>')!.reset();
+        <%_ } else { _%>
+            this.<%= nextCf.formName %>.reset();
+        <%_ } _%>
         });
 <%_
     }
@@ -216,7 +224,7 @@ _%>
 
     ${relationship.otherEntity.relationships.filter(r => r.id).map(r => generateForms(r, `${relationship.relationshipName}Form`)).join('')}`;
 } _%>
-<%_ relationships.filter(r => r.ownerSide).forEach(r => { _%>
+<%_ relationships.filter(r => r.ownerSide && r.otherEntity.primaryKey.composite).forEach(r => { _%>
     <%- generateForms(r, "editForm") -%>
 <%_ }) _%>
 

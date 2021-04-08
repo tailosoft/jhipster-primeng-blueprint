@@ -32,7 +32,7 @@ _%>
         // TODO change this to load only unspecified + add selected to options if on edit (not create)
         <%_ } _%>
         <%_ if (i > 0) { _%>
-        if (<%- relationship.clientFields.slice(0, i).map(previousCf => `this.${previousCf.formName}.get('${previousCf.fieldName}')!.value`).join(' && ') %>) {
+        if (<%- relationship.clientFields.slice(0, i).map(previousCf => previousCf.needsFieldName ? `this.${previousCf.formName}.get('${previousCf.fieldName}')!.value` : `this.${previousCf.parentFormName}.get('${previousCf.lastRelationship.relationshipName}')!.value`).join(' && ') %>) {
         <%_ } _%>
             this.<%= cf.entity.entityInstance %>Service.query(
         <%_ if (i > 0) { _%>
@@ -47,7 +47,7 @@ _%>
                   }
                 }
             _%>
-                    '<%= [...cf.id.relationshipsPath.slice(splitDepth).map(r => r.otherEntityRelationshipName).reverse(), ...previousCf.id.relationshipsPath.slice(splitDepth).map(r => r.relationshipName)].join('.') %>.<%= previousCf.fieldName %>.equals': this.<%= previousCf.formName %>.get('<%= previousCf.fieldName %>')!.value,
+                    '<%= [...cf.id.relationshipsPath.slice(splitDepth).map(r => r.otherEntityRelationshipName).reverse(), ...previousCf.id.relationshipsPath.slice(splitDepth).map(r => r.relationshipName)].join('.') %>.<%= previousCf.fieldName %>.equals': <%- previousCf.needsFieldName ? `this.${previousCf.formName}.get('${previousCf.fieldName}')!.value` : `this.${previousCf.parentFormName}.get('${previousCf.lastRelationship.relationshipName}')!.value.${previousCf.fieldName}` %>,
             <%_ }) _%>
                 }
         <%_ } else { _%>
