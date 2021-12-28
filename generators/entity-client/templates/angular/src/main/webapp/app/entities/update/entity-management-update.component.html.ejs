@@ -19,7 +19,8 @@
 <div class="row justify-content-center">
     <div class="col-8">
         <form name="editForm" role="form" novalidate (ngSubmit)="save()" [formGroup]="editForm">
-            <h2 id="<%= jhiPrefixDashed %>-<%= entityFileName %>-heading" data-cy="<%= entityClass %>CreateUpdateHeading" jhiTranslate="<%= i18nKeyPrefix %>.home.createOrEditLabel">Create or edit a <%= entityClassHumanized %></h2>
+            <h2 *ngIf="<% if (!primaryKey.autoGenerate || primaryKey.derived) { %>edit<% } else { %>editForm.value.<%= primaryKey.name %> !== null<% } %>" id="<%= jhiPrefixDashed %>-<%= entityFileName %>-heading" data-cy="<%= entityClass %>CreateUpdateHeading" jhiTranslate="<%= i18nKeyPrefix %>.home.editLabel">Edit a <%= entityClassHumanized %></h2>
+            <h2 *ngIf="<% if (!primaryKey.autoGenerate || primaryKey.derived) { %>!edit<% } else { %>editForm.value.<%= primaryKey.name %> === null<% } %>" id="<%= jhiPrefixDashed %>-<%= entityFileName %>-heading" data-cy="<%= entityClass %>CreateUpdateHeading" jhiTranslate="<%= i18nKeyPrefix %>.home.createLabel">Create a new <%= entityClassHumanized %></h2>
             <div class="form-grid p-fluid">
 <%_ for (const field of fields) {
     const fieldName = field.fieldName;
