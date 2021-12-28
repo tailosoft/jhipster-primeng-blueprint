@@ -43,10 +43,10 @@
     <br/>
     <p-table #<%= entityInstance %>Table [value]="<%= entityInstancePlural %>!" [rowTrackBy]="trackId" [responsive]="true"<%
     if (pagination !== 'no') {
-        %> [lazy]="true" [rows]="itemsPerPage" [totalRecords]="totalItems!" [loading]="loading" sortMode="multiple" [lazyLoadOnInit]="false"
-           [showCurrentPageReport]="true" [currentPageReportTemplate]="'list.tableReportTemplate' | translate: { first: '{first}', last: '{last}' , totalRecords: '{totalRecords}' }"<%
+        %> [lazy]="true" [rows]="itemsPerPage" [totalRecords]="totalItems!" [loading]="loading" sortMode="multiple" [lazyLoadOnInit]="false"<%
         if (pagination === 'infinite-scroll') {
-            %> [scrollable]="true" [virtualScroll]="true" (onLazyLoad)="onLazyLoadEvent($event)" scrollHeight="200px" [virtualRowHeight]="34" <%
+            %> [scrollable]="true" [virtualScroll]="true" (onLazyLoad)="onLazyLoadEvent($event)" scrollHeight="200px" [virtualRowHeight]="34"
+               [showCurrentPageReport]="true" [currentPageReportTemplate]="'list.tableReportTemplate' | translate: { first: '{first}', last: '{last}' , totalRecords: '{totalRecords}' }" <%
         } else if (pagination === 'pagination') {
             %> [paginator]="true" (onLazyLoad)="onLazyLoadEvent($event)" <%
         }
