@@ -22,7 +22,7 @@
             <h2 *ngIf="<% if (!primaryKey.autoGenerate || primaryKey.derived) { %>edit<% } else { %>editForm.value.<%= primaryKey.name %> !== null<% } %>" id="<%= jhiPrefixDashed %>-<%= entityFileName %>-heading" data-cy="<%= entityClass %>CreateUpdateHeading" jhiTranslate="<%= i18nKeyPrefix %>.home.editLabel">Edit a <%= entityClassHumanized %></h2>
             <h2 *ngIf="<% if (!primaryKey.autoGenerate || primaryKey.derived) { %>!edit<% } else { %>editForm.value.<%= primaryKey.name %> === null<% } %>" id="<%= jhiPrefixDashed %>-<%= entityFileName %>-heading" data-cy="<%= entityClass %>CreateUpdateHeading" jhiTranslate="<%= i18nKeyPrefix %>.home.createLabel">Create a new <%= entityClassHumanized %></h2>
             <div class="form-grid p-fluid">
-<%_ for (const field of fields) {
+<%_ for (const field of fields.filter(f => !(f.id && f.autoGenerate))) {
     const fieldName = field.fieldName;
     const fieldNameCapitalized = field.fieldNameCapitalized;
     const fieldNameHumanized = field.fieldNameHumanized;
@@ -47,9 +47,6 @@
     }
 _%>
                 <div class="p-field p-grid">
-    <%_ if (id && autoGenerate) { _%>
-                    <ng-container *ngIf="editForm.get('<%= fieldName %>')!.value">
-    <%_ } _%>
                     <label <%= jhiPrefix %>Translate="<%= translationKey %>" for="field_<%= fieldName %>" class="p-col-12 p-md-2<% if (field.fieldValidate === true) { %> label-asterisk<% } %>"<% if (field.javadoc) { if (enableTranslation) { %> [pTooltip]="'<%= i18nKeyPrefix %>.help.<%= fieldName %>' | translate"<% } else { %> pTooltip="<%= field.javadoc %>"<% } } %>><%= fieldNameHumanized %></label>
                     <div class="p-col-12 p-md-10">
     <%_ if (field.fieldIsEnum) { _%>
@@ -69,8 +66,6 @@ _%>
                                       (onClear)="onFileRemove($event, '<%= fieldName %>')" (onRemove)="onFileRemove($event, '<%= fieldName %>')" [files]="<%= fieldName %>File?[<%= fieldName %>File]:[]" data-cy="<%= fieldName %>"></p-fileUpload>
         <%_ } else if (fieldType === 'Boolean') { _%>
                         <p-inputSwitch name="<%= fieldName %>" id="field_<%= fieldName %>" formControlName="<%= fieldName %>" data-cy="<%= fieldName %>"></p-inputSwitch>
-        <%_ } else if (id && autoGenerate) { _%>
-                        <input pInputText type="<%= fieldInputType %>" name="<%= fieldName %>" id="field_<%= fieldName %>" formControlName="<%= fieldName %>" readonly data-cy="<%= fieldName %>"/>
         <%_ } else { _%>
                         <input pInputText type="<%= fieldInputType %>" name="<%= fieldName %>" id="field_<%= fieldName %>" formControlName="<%= fieldName %>"<% if (id) { %> [readonly]="edit"<% } %> data-cy="<%= fieldName %>"/>
         <%_ } _%>
@@ -132,9 +127,6 @@ _%>
                     </div>
     <%_ } _%>
                     </div>
-<%_ if (id && autoGenerate) { _%>
-                    </ng-container>
-<%_ } _%>
                 </div>
 <%_ } _%>
 <%_ for (const relationship of relationships.filter(rel => rel.ownerSide && rel.otherEntity.primaryKey)) {
