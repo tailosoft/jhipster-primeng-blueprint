@@ -316,18 +316,22 @@ _%>
     }
 
     save(): void {
-        this.isSaving = true;
-        const <%= entityInstance %> = this.editForm.value;
-    <%_ if (!primaryKey.autoGenerate || primaryKey.derived) {_%>
-        if (this.edit) {
+        if (this.editForm.valid) {
+            this.isSaving = true;
+            const <%= entityInstance %> = this.editForm.value;
+        <%_ if (!primaryKey.autoGenerate || primaryKey.derived) {_%>
+            if (this.edit) {
         <%_ } else { _%>
-        if (<%= entityInstance %>.<%= primaryKey.name %> !== null) {
+            if (<%= entityInstance %>.<%= primaryKey.name %> !== null) {
         <%_ } _%>
-            this.subscribeToSaveResponse(this.<%= entityInstance %>Service.update(<%= entityInstance %>));
+                this.subscribeToSaveResponse(this.<%= entityInstance %>Service.update(<%= entityInstance %>));
+            } else {
+                this.subscribeToSaveResponse(this.<%= entityInstance %>Service.create(<%= entityInstance %>));
+            }
         } else {
-            this.subscribeToSaveResponse(this.<%= entityInstance %>Service.create(<%= entityInstance %>));
-    }
+            this.editForm.markAllAsTouched();
         }
+    }
 
     protected subscribeToSaveResponse(result: Observable<HttpResponse<I<%= entityAngularName %>>>): void {
         result.subscribe(() => this.onSaveSuccess(), () => this.onSaveError());

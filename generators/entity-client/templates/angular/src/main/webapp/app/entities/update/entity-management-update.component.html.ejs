@@ -179,7 +179,7 @@ _%>
 
             <div>
                 <button pButton type="button" id="cancel-save" icon="pi pi-ban" class="p-button-secondary" (click)="previousState()" [label]="'entity.action.cancel' | translate"></button>
-                <button pButton type="submit" id="save-entity" icon="pi pi-save" [disabled]="editForm.invalid || isSaving" [label]="'entity.action.save' | translate" data-cy="entityCreateSaveButton"></button>
+                <button pButton type="submit" id="save-entity" icon="pi pi-save" [disabled]="isSaving" [label]="'entity.action.save' | translate" data-cy="entityCreateSaveButton"></button>
             </div>
         </form>
     </div>
