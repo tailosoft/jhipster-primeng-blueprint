@@ -17,8 +17,7 @@
  limitations under the License.
 -%>
 <div class="entity-update">
-    <h2 class="title" *ngIf="<% if (!primaryKey.autoGenerate || primaryKey.derived) { %>edit<% } else { %>editForm.value.<%= primaryKey.name %> !== null<% } %>" id="<%= jhiPrefixDashed %>-<%= entityFileName %>-heading" data-cy="<%= entityClass %>CreateUpdateHeading" jhiTranslate="<%= i18nKeyPrefix %>.home.editLabel">Edit a <%= entityClassHumanized %></h2>
-    <h2 class="title" *ngIf="<% if (!primaryKey.autoGenerate || primaryKey.derived) { %>!edit<% } else { %>editForm.value.<%= primaryKey.name %> === null<% } %>" id="<%= jhiPrefixDashed %>-<%= entityFileName %>-heading" data-cy="<%= entityClass %>CreateUpdateHeading" jhiTranslate="<%= i18nKeyPrefix %>.home.createLabel">Create a new <%= entityClassHumanized %></h2>
+    <h2 class="title" id="<%= jhiPrefixDashed %>-<%= entityFileName %>-heading" data-cy="<%= entityClass %>CreateUpdateHeading" jhiTranslate="<%= i18nKeyPrefix %>.home.{{ <% if (!primaryKey.autoGenerate || primaryKey.derived) { %>edit<% } else { %>editForm.value.<%= primaryKey.name %> !== null<% } %> ? 'editLabel' : 'createLabel'}}">Create or edit a <%= entityClassHumanized %></h2>
     <form name="editForm" role="form" novalidate (ngSubmit)="save()" [formGroup]="editForm">
         <div class="form-grid p-fluid update-content">
 <%_ for (const field of fields.filter(f => !(f.id && f.autoGenerate))) {
