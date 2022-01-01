@@ -66,6 +66,9 @@ describe('Component Tests', () => {
 
             fixture = TestBed.createComponent(<%= entityAngularName %>UpdateComponent);
             comp = fixture.componentInstance;
+            Object.defineProperty(comp.editForm, 'valid', {
+                get: () => true
+            });
             service = TestBed.inject(<%= entityAngularName %>Service);
         });
 
