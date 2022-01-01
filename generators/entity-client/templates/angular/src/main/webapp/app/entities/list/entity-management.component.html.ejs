@@ -22,7 +22,7 @@
     </h2>
     <div class="list-buttons">
     <%_ if (!readOnly) { _%>
-            <p-button id="jh-create-entity" class="float-right jh-create-entity create-<%= entityUrl %>" [routerLink]="['/<%= entityUrl %>/new']"
+            <p-button id="jh-create-entity" class="jh-create-entity create-<%= entityUrl %>" [routerLink]="['/<%= entityUrl %>/new']"
                   [label]="'<%= i18nKeyPrefix %>.home.createLabel' | translate" icon="pi pi-plus" iconPos="left" data-cy="entityCreateButton">
             </p-button>
     <%_ } _%>
