@@ -24,7 +24,7 @@
   "dependencies": {
     "ajv": "^7.2.4",
     "chalk": "2.4.1",
-    "generator-jhipster": "7.0.1",
+    "generator-jhipster": "7.8.1",
     "lodash": "4.17.10",
     "mkdirp": "0.5.1",
     "pluralize": "7.0.0"
