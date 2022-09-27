@@ -17,30 +17,33 @@
  limitations under the License.
 -%>
 <%_
-const tsKeyId = generateTestEntityId(primaryKey.type);
-const testEntity = _generateTestEntityPrimaryKey(primaryKey, 0);
-function checkDatePipe(entity, datePipeCheckedEntities) {
-  return entity.fieldsContainLocalDate || entity.relationships
-          .filter(r => r.ownerSide && !datePipeCheckedEntities.includes(r.otherEntity.name))
-          .some(r => checkDatePipe(r.otherEntity, [...datePipeCheckedEntities, r.otherEntity.name]))
-}
-let datePipe = checkDatePipe(entity, [entity.name]);
+const tsKeyId = this.generateTestEntityId(primaryKey.type);
+const allRelationshipsByEntityNeedingOptions = Object
+  .values(differentRelationships)
+  .map(relationships => relationships.filter(rel => rel.ownerSide))
+  .filter(relationships => relationships.length > 0);
+const testEntityPrimaryKey0 = this.generateTestEntityPrimaryKey(primaryKey, 0);
+const testEntityPrimaryKey1 = this.generateTestEntityPrimaryKey(primaryKey, 1);
 _%>
-jest.mock('@angular/router');
-
+import { sampleWithRequiredData } from '../<%= entityFileName %>.test-samples';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { HttpResponse } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { FormBuilder } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 import { MessageService } from 'primeng/api';
 import { of } from 'rxjs';
-<%_ if (datePipe) { _%>
 import { DatePipe } from '@angular/common';
-<%_ } _%>
 
 import { <%= entityAngularName %>UpdateComponent } from './<%= entityFileName %>-update.component';
 import { <%= entityAngularName %>Service } from '../service/<%= entityFileName %>.service';
+<%_ if (fields.some(f => f.fieldType === 'byte[]' && f.fieldTypeBlobContent !== 'text')) { _%>
+
+// eslint-disable-next-line no-labels, no-unused-labels
+global.fetch = jest.fn(() => Promise.resolve({
+  blob: () => Promise.resolve(new Blob())
+})) as any;
+<%_ } _%>
 
 describe('Component Tests', () => {
     describe('<%= entityAngularName %> Management Update Component', () => {
@@ -50,15 +53,12 @@ describe('Component Tests', () => {
 
         beforeEach(() => {
             TestBed.configureTestingModule({
-                imports: [HttpClientTestingModule],
+                imports: [HttpClientTestingModule, RouterTestingModule.withRoutes([])],
                 declarations: [<%= entityAngularName %>UpdateComponent],
                 providers: [
                     FormBuilder,
-                    ActivatedRoute,
                     MessageService,
-                    <%_ if (datePipe) { _%>
                     DatePipe,
-                    <%_ } _%>
                 ]
             })
             .overrideTemplate(<%= entityAngularName %>UpdateComponent, '')
@@ -76,15 +76,16 @@ describe('Component Tests', () => {
             it('Should call update service on save for existing entity',
                 fakeAsync(() => {
                 // GIVEN
-                const entity = <%- testEntity %>;
-                spyOn(service, 'update').and.returnValue(of(new HttpResponse({ body: entity })));
+                fixture.detectChanges();
+                const entity = sampleWithRequiredData ;
+                jest.spyOn(service, 'update').mockReturnValue(of(new HttpResponse({ body: entity }) as any));
                 comp.updateForm(entity);
                 // WHEN
                 comp.save();
                 tick(); // simulate async
 
                 // THEN
-                    expect(service.update).toHaveBeenCalledWith(jasmine.objectContaining(entity));
+                    expect(service.update).toHaveBeenCalledWith(expect.objectContaining(entity));
                 expect(comp.isSaving).toEqual(false);
                 })
             );
@@ -92,7 +93,7 @@ describe('Component Tests', () => {
             it('Should call create service on save for new entity',
                 fakeAsync(() => {
                 // GIVEN
-                spyOn(service, 'create').and.returnValue(of(new HttpResponse({ body: null })));
+                jest.spyOn(service, 'create').mockReturnValue(of(new HttpResponse({ body: sampleWithRequiredData })));
                 comp.updateForm(null);
                 // WHEN
                 comp.save();

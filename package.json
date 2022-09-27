@@ -1,17 +1,17 @@
 {
   "name": "generator-jhipster-primeng-blueprint",
-  "version": "7.0.4",
+  "version": "7.9.3",
   "description": "This blueprint generated code that uses primeng components instead of bootstrap ones",
   "keywords": [
     "yeoman-generator",
     "jhipster-blueprint",
     "jhipster-5"
   ],
-  "homepage": "https://github.com/elhoutico/jhipster-primeng-blueprint",
+  "homepage": "https://github.com/tailosoft/jhipster-primeng-blueprint",
   "author": {
     "name": "Youssef El Houti",
-    "email": "youssef.elhouti@elhouti.com",
-    "url": "https://elhouti.com"
+    "email": "youssef.elhouti@tailosoft.com",
+    "url": "https://tailosoft.com"
   },
   "files": [
     "generators"
@@ -19,15 +19,15 @@
   "main": "generators/app/index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/elhoutico/jhipster-primeng-blueprint.git"
+    "url": "git+https://github.com/tailosoft/jhipster-primeng-blueprint.git"
   },
   "dependencies": {
     "ajv": "^7.2.4",
     "chalk": "2.4.1",
-    "generator-jhipster": "7.0.1",
+    "generator-jhipster": "7.9.3",
     "lodash": "4.17.10",
     "mkdirp": "0.5.1",
-    "pluralize": "7.0.0"
+    "pluralize": "8.0.0"
   },
   "devDependencies": {
     "chai": "4.1.2",

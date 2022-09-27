@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2021 the original author or authors from the JHipster project.
+ Copyright 2013-2022 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -17,9 +17,9 @@
  limitations under the License.
 -%>
 <div *ngIf="allBeans">
-  <h2 id="configuration-page-heading" <%= jhiPrefix %>Translate="configuration.title" data-cy="configurationPageHeading">Configuration</h2>
+  <h2 id="configuration-page-heading" <%= jhiPrefix %>Translate="configuration.title" data-cy="configurationPageHeading"><%- this._getClientTranslation('configuration.title') %></h2>
 
-  <span <%= jhiPrefix %>Translate="configuration.filter">Filter (by prefix)</span>
+  <span <%= jhiPrefix %>Translate="configuration.filter"><%- this._getClientTranslation('configuration.filter') %></span>
   <input type="text" [(ngModel)]="beansFilter" (ngModelChange)="filterAndSortBeans()" class="form-control" />
 
   <h3 id="spring-configuration">Spring configuration</h3>
@@ -28,9 +28,9 @@
     <thead>
       <tr <%= jhiPrefix %>Sort predicate="prefix">
         <th <%= jhiPrefix %>SortBy="prefix" scope="col" class="w-40">
-          <span <%= jhiPrefix %>Translate="configuration.table.prefix">Prefix</span> <fa-icon icon="sort"></fa-icon>
+          <span <%= jhiPrefix %>Translate="configuration.table.prefix"><%- this._getClientTranslation('configuration.table.prefix') %></span> <fa-icon icon="sort"></fa-icon>
         </th>
-        <th scope="col" class="w-60"><span <%= jhiPrefix %>Translate="configuration.table.properties">Properties</span></th>
+        <th scope="col" class="w-60"><span <%= jhiPrefix %>Translate="configuration.table.properties"><%- this._getClientTranslation('configuration.table.properties') %></span></th>
       </tr>
     </thead>
     <tbody>
@@ -42,7 +42,7 @@
           <div class="row" *ngFor="let property of bean.properties | keyvalue">
             <div class="col-md-4">{{ property.key }}</div>
             <div class="col-md-8">
-              <span class="float-right badge-secondary break">{{ property.value | json }}</span>
+              <span class="float-end bg-secondary break">{{ property.value | json }}</span>
             </div>
           </div>
         </td>
@@ -66,7 +66,7 @@
         <tr *ngFor="let property of propertySource.properties | keyvalue">
           <td class="break">{{ property.key }}</td>
           <td class="break">
-            <span class="float-right badge-secondary break">{{ property.value.value }}</span>
+            <span class="float-end bg-secondary break">{{ property.value.value }}</span>
           </td>
         </tr>
       </tbody>

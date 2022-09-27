@@ -17,19 +17,16 @@
  limitations under the License.
 -%>
 <%_
-const tsKeyId = primaryKey.fields.map(field => generateTestEntityId(field.fieldType)).join(', ');
-const testEntity = _generateTestEntityPrimaryKey(primaryKey, 0);
+const tsKeyId = primaryKey.fields.map(field => this.generateTestEntityId(field.fieldType)).join(', ');
+const testEntity = this._generateTestEntityPrimaryKey(primaryKey, 0);
 _%>
-jest.mock('@angular/router');
-
 import { TestBed } from '@angular/core/testing';
 import { HttpResponse } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ActivatedRouteSnapshot, Router } from '@angular/router';
-import { of } from 'rxjs';
-<%_ if (fieldsContainLocalDate) { _%>
+import { ActivatedRoute, ActivatedRouteSnapshot, convertToParamMap, Router } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 import { DatePipe } from '@angular/common';
-<%_ } _%>
+import { of } from 'rxjs';
 
 import { I<%= entityAngularName %> } from '../<%= entityFileName %>.model';
 import { <%= entityAngularName %>Service } from '../service/<%= entityFileName %>.service';
@@ -43,14 +40,24 @@ describe('Service Tests', () => {
     let routingResolveService: <%= entityAngularName %>RoutingResolveService;
     let service: <%= entityAngularName %>Service;
     let result<%= entityAngularName %>: I<%= entityAngularName %> | null;
-
     beforeEach(() => {
       TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule],
-        providers: [Router, ActivatedRouteSnapshot<% if (fieldsContainLocalDate) { %>, DatePipe<% } %>],
+        imports: [HttpClientTestingModule, RouterTestingModule.withRoutes([])],
+        providers: [
+          {
+            provide: ActivatedRoute,
+            useValue: {
+              snapshot: {
+                paramMap: convertToParamMap({})
+              },
+            },
+          },
+          DatePipe,
+        ],
       });
       mockRouter = TestBed.inject(Router);
-      mockActivatedRouteSnapshot = TestBed.inject(ActivatedRouteSnapshot);
+      jest.spyOn(mockRouter, 'navigate').mockImplementation(() => Promise.resolve(true));
+      mockActivatedRouteSnapshot = TestBed.inject(ActivatedRoute).snapshot;
       routingResolveService = TestBed.inject(<%= entityAngularName %>RoutingResolveService);
       service = TestBed.inject(<%= entityAngularName %>Service);
       result<%= entityAngularName %> = null;
@@ -59,8 +66,8 @@ describe('Service Tests', () => {
     describe('resolve', () => {
       it('should return I<%= entityAngularName %> returned by find', () => {
         // GIVEN
-        service.find = jest.fn(() %> => of(new HttpResponse({ body: <%- testEntity %> })));
-        mockActivatedRouteSnapshot.params = { <%- primaryKey.ids.map(id => `${id.name}: ${generateTestEntityId(id.field.fieldType, 0, true)}`).join(', ') %> };
+        service.find = jest.fn(() %> => of(new HttpResponse({ body: <%- testEntity %> }) as any));
+        mockActivatedRouteSnapshot.params = { <%- primaryKey.fields.map(field => `${field.fieldName}: ${this.generateTestEntityId(field.fieldType, 0, true)}`).join(', ') %> };
 
         // WHEN
         routingResolveService.resolve(mockActivatedRouteSnapshot).subscribe(result => {
@@ -89,8 +96,8 @@ describe('Service Tests', () => {
 
       it('should route to 404 page if data not found in server', () => {
         // GIVEN
-        spyOn(service, 'find').and.returnValue(of(new HttpResponse({ body: null })));
-        mockActivatedRouteSnapshot.params = { <%- primaryKey.ids.map(id => `${id.name}: ${generateTestEntityId(id.field.fieldType, 0, true)}`).join(', ') %> };
+        jest.spyOn(service, 'find').mockReturnValue(of(new HttpResponse({ body: null }) as any));
+        mockActivatedRouteSnapshot.params = { <%- primaryKey.fields.map(field => `${field.fieldName}: ${this.generateTestEntityId(field.fieldType, 0, true)}`).join(', ') %> };
 
         // WHEN
         routingResolveService.resolve(mockActivatedRouteSnapshot).subscribe(result => {

@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2021 the original author or authors from the JHipster project.
+ Copyright 2013-2022 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -17,57 +17,43 @@
  limitations under the License.
 -%>
 <%
-const variablesWithTypes = generateEntityClientFields(primaryKey, fields, relationships, dto, 'Date', embedded);
-const typeImports = generateEntityClientImports(relationships, dto);
-const defaultVariablesValues = generateEntityClientFieldDefaultValues(fields);
-const enumImports = generateEntityClientEnumImports(fields);
+const enumImports = this.generateEntityClientEnumImports(fields, clientFramework);
 %>
-<%_ typeImports.forEach((importedPath, importedType) => { _%>
-    <%_ if (importedType !== `I${entityAngularName}`) { _%>
-import { <%- importedType %> } from '<%- importedPath %>';
-    <%_ } _%>
-<%_ }); _%>
+<%_ for (const relationshipsByType of Object.values(differentRelationships).filter(relationshipsByType => relationshipsByType.some(relationship => (relationship.ownerSide || relationship.relationshipManyToMany) && relationship.otherEntity.entityAngularName !== entityAngularName))) {
+      const { otherEntity } = relationshipsByType[0];
+_%>
+import { I<%- otherEntity.entityAngularName %> } from 'app/entities/<%= otherEntity.entityClientRootFolder %><%= otherEntity.entityFolderName %>/<%= otherEntity.entityFileName %>.model';
+<%_ } _%>
 <%_ enumImports.forEach((importedPath, importedType) => { _%>
 import { <%- importedType %> } from '<%- importedPath %>';
 <%_ }); _%>
 
 export interface I<%= entityAngularName %> {
-    <%_ variablesWithTypes.forEach(variablesWithType => { _%>
-    <%- variablesWithType %>;
-    <%_ }); _%>
-}
-
-export class <%= entityAngularName %> implements I<%= entityAngularName %> {
-    constructor(<% variablesWithTypes.forEach(variablesWithType => { %>
-        public <%- variablesWithType %>,<% }); %>
-    ) {}
-}
-<%_ if (primaryKey && !readOnly) { _%>
-
-export function get<%= entityAngularName %>Identifier(<%= entityInstance %>: I<%= entityAngularName %>): <%= primaryKey.tsType %> | undefined {
-<%_ if (primaryKey.ids.length === 1) { _%>
-  return <%= entityInstance %>.<%= primaryKey.name %>;
-<%_ } else {
-    // this complicated code ensures that the optional chaining operator '?.' is not called twice in the same relationship casing an error.
-    let usedRelationships = new Set();
-    values = [];
-    primaryKey.fields.forEach(field => {
-        let value = `!${entityInstance}.`;
-        field.path && field.path.forEach((p, i) => {
-            if (i === field.path.length -1) {
-                value += `${p}`;
-            } else if (usedRelationships.has(p)) {
-                value += `${p}.`;
-            } else {
-                value += `${p}?.`;
-            }
-            usedRelationships.add(p);
-        });
-        values.push(value);
-    });
+<%_ for (const field of fields) {
+      const { fieldName, fieldValidationRequired, tsType, id } = field;
 _%>
-  return (<%- values.join(' || ') %>) ? undefined : `<%- primaryKey.ids.map(pk => `${pk.name}=\${${entityInstance}.${pk.nameDotted}}`).join(';') %>`;
+  <%= fieldName %><% if (!id /* && !fieldValidationRequired */) { %>?<% } %>: <%= tsType %><% if (!id /* && !fieldValidationRequired */) { %> | null<% } %>;
+  <%_ if (field.fieldTypeBinary && !field.blobContentTypeText) { _%>
+  <%= fieldName %>ContentType<% if (!id /* && !fieldValidationRequired */) { %>?<% } %>: string<% if (!id /* && !fieldValidationRequired */) { %> | null<% } %>,
+  <%_ } _%>
+<%_ } _%>
+<%_ for (const relationship of relationships.filter(relationship => relationship.ownerSide || relationship.relationshipManyToMany)) {
+      const { propertyName, relationshipRequired, otherEntity, id, collection, otherEntityField } = relationship;
+      const toPick = [...otherEntity.fields.filter(f => f.id).map(f => f.fieldName), ...otherEntity.relationships.filter(r => r.id).map(r => r.relationshipName)];
+      if (otherEntity.primaryKey.name !== otherEntityField && !toPick.includes(otherEntityField)) {
+        toPick.push(otherEntityField);
+      }
+_%>
+  <%= propertyName %><% if (!id /* && !relationshipRequired */) { %>?<% } %>: Pick<I<%= otherEntity.entityAngularName %>, <%- toPick.map(name => `'${name}'`).join(' | ') %>><% if (collection) { %>[]<% } %><% if (!id /* && !relationshipRequired */) { %> | null<% } %>;
+<%_ } _%>
+}
+<%_ if (primaryKey) { _%>
+
+export function get<%= entityAngularName %>Identifier(<%= entityInstance %>: I<%= entityAngularName %>): <%= primaryKey.tsType %> {
+<%_ if (primaryKey.fields.length === 1) { _%>
+  return <%= entityInstance %>.<%= primaryKey.name %>;
+<%_ } else { _%>
+  return `<%- primaryKey.fields.map(field => `${field.fieldName}=\${${entityInstance}.${field.fieldNameDotted}}`).join(';') %>`;
 <%_ } _%>
 }
 <%_ } _%>
-

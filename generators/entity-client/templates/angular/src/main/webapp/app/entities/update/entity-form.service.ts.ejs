@@ -1,0 +1,187 @@
+<%#
+ Copyright 2013-2022 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+<%_
+  const formDefaultProperties = [
+    ...fields.filter(field => (field.fieldTypeTimed && field.fieldValidationRequired) || field.fieldTypeBoolean).map(field => field.fieldName),
+    ...relationships.filter(relationship => relationship.collection && (relationship.relationshipManyToMany || relationship.ownerSide)).map(relationship => relationship.propertyName)
+  ];
+  const containDefaultProperties = formDefaultProperties.length > 0;
+  const noPropertyEntity = fields.filter(field => !field.id).length === 0 && relationships.filter(relationship => relationship.ownerSide || relationship.relationshipManyToMany).length === 0;
+  const otherEntitiesToImport = this._.uniqBy(primaryKey.fields.flatMap(f => f.relationshipsPath.map(r => r.otherEntity).filter(e => e.primaryKey.composite)), 'entityAngularName');
+
+_%>
+import { Injectable } from '@angular/core';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
+
+<%_ if (containDefaultProperties) { _%>
+import { PartialNullable } from '../../../shared/types';
+<%_ } _%>
+<%_ for (otherEntity of otherEntitiesToImport) {_%>
+import { I<%= otherEntity.entityAngularName %> } from '../../<%= otherEntity.entityFileName %>/<%= otherEntity.entityFileName %>.model';
+<%_ } _%>
+import { I<%= entityAngularName %> } from '../<%= entityFileName %>.model';
+
+<%_ function generatePrimaryKeyFormGroup(entity) { _%>
+    <%_ entity.fields.filter(f => f.id).forEach(f => { _%>
+    <%= f.fieldName %>: FormControl<I<%= entity.entityAngularName %>['<%= f.fieldName %>'] | null | undefined>;
+    <%_ }) _%>
+    <%_ entity.relationships.filter(f => f.id).forEach(r => { _%>
+        <%_ if (r.otherEntity.primaryKey.composite) { _%>
+    <%= r.relationshipName %>: FormGroup<{
+        <%- generatePrimaryKeyFormGroup(r.otherEntity) %>
+    }>;
+        <%_ } else { _%>
+    <%= r.relationshipName %>: FormControl<I<%= entity.entityAngularName %>['<%= r.relationshipName %>'] | null | undefined>;
+        <%_ } _%>
+    <%_ }) _%>
+<%_ } _%>
+type <%= entityAngularName %>FormGroupContent = {
+<%- generatePrimaryKeyFormGroup(entity) %>
+<%_ for (field of fields.filter(f => !f.id)) {
+      const { fieldName, fieldType, fieldTypeBlobContent, fieldValidationRequired, tsType, fieldIsEnum } = field;
+_%>
+  <%= fieldName %>: FormControl<I<%= entityAngularName %>['<%= fieldName %>'] | null | undefined>;
+  <%_ if (field.fieldTypeBinary && !field.blobContentTypeText) { _%>
+  <%= fieldName %>ContentType: FormControl<I<%= entityAngularName %>['<%= fieldName %>ContentType'] | null | undefined>;
+  <%_ } _%>
+<%_ } _%>
+<%_ for (const relationship of relationships.filter(relationship => !relationship.id && (relationship.ownerSide || relationship.relationshipManyToMany))) {
+      const { propertyName, otherEntity } = relationship;
+_%>
+  <%= propertyName %>: FormControl<I<%= entityAngularName %>['<%= propertyName %>'] | null | undefined>;
+<%_ } _%>
+};
+
+export type <%= entityAngularName %>FormGroup = FormGroup<<%= entityAngularName %>FormGroupContent>;
+
+@Injectable({ providedIn: 'root' })
+export class <%= entityAngularName %>FormService {
+  create<%= entityAngularName %>FormGroup(<%= entityInstance %>: Partial<I<%= entityAngularName %>> = {}): <%= entityAngularName %>FormGroup {
+    const <%= entityInstance %>RawValue =
+<%_ if (containDefaultProperties) { _%>
+        {...this.getFormDefaults(), ...<%= entityInstance %> }
+<%_ } else { _%>
+        <%= entityInstance %>;
+<%_ } _%>
+<%_ function generatePrimaryKeyForm(entity, valuePrefix, firstIteration = true) { _%>
+    <%_ entity.fields.filter(f => f.id).forEach(f => { _%>
+    <%= f.fieldName %>: new FormControl(<%= valuePrefix%><%= f.fieldName %><% if (!(f.autoGenerate && firstIteration)) { %>, {
+        validators: [Validators.required],
+    }<% } %>),
+    <%_ }) _%>
+    <%_ entity.relationships.filter(f => f.id).forEach(r => { _%>
+        <%_ if (r.otherEntity.primaryKey.composite) { _%>
+    <%= r.relationshipName %>: new FormGroup({
+        <%- generatePrimaryKeyForm(r.otherEntity, `${valuePrefix}${r.relationshipName}${firstIteration ? '?' : ''}.`, false) %>
+    }),
+        <%_ } else { _%>
+    <%= r.relationshipName %>: new FormControl(<%= valuePrefix%><%= r.relationshipName %>, {
+        validators: [Validators.required],
+    }),
+        <%_ } _%>
+    <%_ }) _%>
+<%_ } _%>
+    return new FormGroup<<%= entityAngularName %>FormGroupContent>({
+        <%- generatePrimaryKeyForm(entity, `${entityInstance}RawValue.`) %>
+<%_ for (const field of fields.filter(f => !f.id)) {
+      const { fieldName, fieldType, fieldTypeBlobContent, fieldValidateRules, fieldTypeTemporal, fieldValidationRequired, fieldValidationMinLength, fieldValidationMaxLength, fieldValidationMin, fieldValidationMax, fieldValidationPattern } = field;
+      const usesValidators = fieldValidationRequired || fieldValidationMinLength || fieldValidationMaxLength || fieldValidationMin || fieldValidationMax || fieldValidationPattern || field.id;
+_%>
+      <%= fieldName %>: new FormControl(
+        <%= entityInstance %>RawValue.<%= fieldName %>,
+  <%_ if (usesValidators) { _%>
+        {
+          validators: [
+    <%_ if (field.fieldValidationRequired) { _%>
+            Validators.required,
+    <%_ } _%>
+    <%_ if (field.fieldValidationMinLength) { _%>
+            Validators.minLength(<%= field.fieldValidateRulesMinlength %>),
+    <%_ } _%>
+    <%_ if (field.fieldValidationMaxLength) { _%>
+            Validators.maxLength(<%= field.fieldValidateRulesMaxlength %>),
+    <%_ } _%>
+    <%_ if (field.fieldValidationMin) { _%>
+            Validators.min(<%= field.fieldValidateRulesMin %>),
+    <%_ } _%>
+    <%_ if (field.fieldValidationMax) { _%>
+            Validators.max(<%= field.fieldValidateRulesMax %>),
+    <%_ } _%>
+    <%_ if (field.fieldValidationPattern) { _%>
+            Validators.pattern('<%= field.fieldValidateRulesPattern.replace(/\\/g, '\\\\') %>'),
+    <%_ } _%>
+          ],
+        }
+  <%_ } _%>
+      ),
+  <%_ if (field.fieldTypeBinary && !field.blobContentTypeText) { _%>
+      <%= fieldName %>ContentType: new FormControl(<%= entityInstance %>RawValue.<%= fieldName %>ContentType),
+  <%_ } _%>
+<%_ } _%>
+<%_ for (const relationship of relationships.filter(relationship => !relationship.id && (relationship.ownerSide || relationship.relationshipManyToMany))) {
+      const { relationshipRequired, propertyName, relationshipName, collection, otherEntity } = relationship;
+_%>
+      <%= propertyName %>: new FormControl(
+        <%= entityInstance %>RawValue.<%= propertyName %><% if (collection) { %> ?? []<% } %>
+  <%_ if (!collection && relationshipRequired) { _%>
+        , {
+          validators: [Validators.required],
+        }
+  <%_ } _%>
+      ),
+<%_ } _%>
+    });
+  }
+
+  resetForm(form: <%= entityAngularName %>FormGroup, <%= entityInstance %>: Partial<I<%= entityAngularName %>> = {}): void {
+<%_ if (containDefaultProperties) { _%>
+        form.reset({...this.getFormDefaults(), ...<%= entityInstance %>});
+<%_ } else { _%>
+        form.reset(<%= entityInstance %>);
+<%_ } _%>
+  }
+<%_ if (containDefaultProperties) { _%>
+<%# I would rather store not call this here, but %>
+
+  private getFormDefaults(): PartialNullable<I<%= entityAngularName %>> {
+  <%_ if (fields.some(field => field.fieldTypeTimed)) { _%>
+      const currentTime = new Date();
+  <%_ } _%>
+
+    return {
+  <%_ for (field of fields) {
+        const { fieldName, fieldTypeBoolean, fieldTypeTimed, fieldTypeLocalDate } = field;
+  _%>
+    <%_ if (fieldTypeBoolean) { _%>
+      <%= fieldName %>: false,
+    <%_ } else if (fieldTypeTimed) { _%>
+      <%= fieldName %>: currentTime,
+    <%_ } _%>
+  <%_ } _%>
+  <%_ for (const relationship of relationships.filter(({ ownerSide, relationshipManyToMany }) => ownerSide || relationshipManyToMany)) {
+        const { relationshipRequired, propertyName, collection, otherEntity, relationshipName } = relationship;
+  _%>
+    <%_ if (collection) { _%>
+      <%= propertyName %>: [],
+    <%_ } _%>
+  <%_ } _%>
+    };
+  }
+<%_ } _%>
+}

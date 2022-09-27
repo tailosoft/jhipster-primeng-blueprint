@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2021 the original author or authors from the JHipster project.
+ Copyright 2013-2022 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -33,12 +33,15 @@ export class TranslateDirective implements OnChanges, OnInit, OnDestroy {
   @Input() <%= jhiPrefix %>Translate!: string;
   @Input() translateValues?: { [key: string]: unknown };
 
-  private readonly directiveDestroyed = new Subject<never>();
+  private readonly directiveDestroyed = new Subject();
 
   constructor(private el: ElementRef, private translateService: TranslateService) {}
 
   ngOnInit(): void {
     this.translateService.onLangChange.pipe(takeUntil(this.directiveDestroyed)).subscribe(() => {
+      this.getTranslation();
+    });
+    this.translateService.onTranslationChange.pipe(takeUntil(this.directiveDestroyed)).subscribe(() => {
       this.getTranslation();
     });
   }
@@ -48,7 +51,7 @@ export class TranslateDirective implements OnChanges, OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.directiveDestroyed.next();
+    this.directiveDestroyed.next(null);
     this.directiveDestroyed.complete();
   }
 
@@ -56,11 +59,11 @@ export class TranslateDirective implements OnChanges, OnInit, OnDestroy {
     this.translateService
       .get(this.<%= jhiPrefix %>Translate, this.translateValues)
       .pipe(takeUntil(this.directiveDestroyed))
-      .subscribe(
-        value => {
+      .subscribe({
+        next: value => {
           this.el.nativeElement.innerHTML = value;
         },
-        () => `${translationNotFoundMessage}[${this.<%= jhiPrefix %>Translate}]`
-      );
+        error: () => `${translationNotFoundMessage}[${this.<%= jhiPrefix %>Translate}]`
+      });
   }
 }

@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2021 the original author or authors from the JHipster project.
+ Copyright 2013-2022 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -27,14 +27,14 @@ import { <%= entityAngularName %>Service } from '../service/<%= entityFileName %
 
 @Injectable({ providedIn: 'root' })
 export class <%= entityAngularName %>RoutingResolveService implements Resolve<I<%= entityAngularName %> | null> {
-    constructor(private service: <%= entityAngularName %>Service, private router: Router) {}
+    constructor(protected service: <%= entityAngularName %>Service, protected router: Router) {}
 
     resolve(route: ActivatedRouteSnapshot): Observable<I<%= entityAngularName %> | null> | Observable<never> {
-            <%_ entity.primaryKey.ids.forEach(pk => { _%>
-                const <%= pk.name %> = route.params['<%= pk.name %>'] ? route.params['<%= pk.name %>'] : null;
+            <%_ primaryKey.fields.forEach(field => { _%>
+                const <%= field.fieldName %> = route.params['<%= field.fieldName %>'] ? route.params['<%= field.fieldName %>'] : null;
             <%_ }) _%>
-        if (<%- entity.primaryKey.ids.map(pk => pk.name).join(' && ') %>) {
-            return this.service.find(<%- entity.primaryKey.ids.map(pk => pk.name).join(', ') %>).pipe(
+        if (<%- primaryKey.fields.map(field => field.fieldName).join(' && ') %>) {
+            return this.service.find(<%- primaryKey.fields.map(field => field.fieldName).join(', ') %>).pipe(
                 mergeMap((<%= entityInstance %>: HttpResponse<I<%= entityAngularName %>>) => {
                     if (<%= entityInstance %>.body) {
                         return of(<%= entityInstance %>.body);

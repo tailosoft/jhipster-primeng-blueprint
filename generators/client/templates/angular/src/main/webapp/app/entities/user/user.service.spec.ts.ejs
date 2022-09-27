@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2021 the original author or authors from the JHipster project.
+ Copyright 2013-2022 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -17,9 +17,9 @@
  limitations under the License.
 -%>
 <%_
-const tsKeyId = generateTestEntityId(user.primaryKey.type);
-const testEntityPrimaryKey0 = generateTestEntityPrimaryKey(user.primaryKey, 0);
-const testEntityPrimaryKey1 = generateTestEntityPrimaryKey(user.primaryKey, 1);
+const tsKeyId =  this.generateTestEntityId(user.primaryKey.type);
+const testEntityPrimaryKey0 = this.generateTestEntityPrimaryKey(user.primaryKey, 0);
+const testEntityPrimaryKey1 = this.generateTestEntityPrimaryKey(user.primaryKey, 1);
 _%>
 import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -29,48 +29,46 @@ import { User, IUser } from './user.model';
 
 import { UserService } from './user.service';
 
-describe('Service Tests', () => {
-  describe('User Service', () => {
-    let service: UserService;
-    let httpMock: HttpTestingController;
-    let expectedResult: IUser | IUser[] | boolean | number | null;
+describe('User Service', () => {
+  let service: UserService;
+  let httpMock: HttpTestingController;
+  let expectedResult: IUser | IUser[] | boolean | number | null;
 
-    beforeEach(() => {
-      TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule],
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+    });
+    expectedResult = null;
+    service = TestBed.inject(UserService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
+  });
+
+  describe('Service methods', () => {
+    it('should return Users', () => {
+      service.query().subscribe(received => {
+        expectedResult = received.body;
       });
-      expectedResult = null;
-      service = TestBed.inject(UserService);
-      httpMock = TestBed.inject(HttpTestingController);
+
+      const req = httpMock.expectOne({ method: 'GET' });
+      req.flush([new User(<%- tsKeyId %>, 'user')]);
+      expect(expectedResult).toEqual([{ id: <%- tsKeyId %>, login: 'user' }]);
     });
 
-    afterEach(() => {
-      httpMock.verify();
-    });
-
-    describe('Service methods', () => {
-      it('should return Users', () => {
-        service.query().subscribe(received => {
-          expectedResult = received.body;
-        });
-
-        const req = httpMock.expectOne({ method: 'GET' });
-        req.flush([new User(<%- tsKeyId %>, 'user')]);
-        expect(expectedResult).toEqual([{ id: <%- tsKeyId %>, login: 'user' }]);
+    it('should propagate not found response', () => {
+      service.query().subscribe({
+        error: (error: HttpErrorResponse) => expectedResult = error.status
       });
 
-      it('should propagate not found response', () => {
-        service.query().subscribe({
-          error: (error: HttpErrorResponse) => expectedResult = error.status
-        });
-
-        const req = httpMock.expectOne({ method: 'GET' });
-        req.flush('Internal Server Error', {
-          status: 500,
-          statusText: 'Inernal Server Error',
-        });
-        expect(expectedResult).toEqual(500);
+      const req = httpMock.expectOne({ method: 'GET' });
+      req.flush('Internal Server Error', {
+        status: 500,
+        statusText: 'Inernal Server Error',
       });
+      expect(expectedResult).toEqual(500);
     });
   });
 });

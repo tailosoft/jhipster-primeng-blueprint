@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2021 the original author or authors from the JHipster project.
+ Copyright 2013-2022 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -25,9 +25,9 @@ import { Authority } from 'app/config/authority.constants';
 export const settingsRoute: Route = {
   path: 'settings',
   component: SettingsComponent,
+  title: 'global.menu.account.settings',
   data: {
     authorities: [Authority.USER],
-    pageTitle: 'global.menu.account.settings',
   },
   canActivate: [UserRouteAccessService],
 };

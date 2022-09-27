@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2021 the original author or authors from the JHipster project.
+ Copyright 2013-2022 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -35,10 +35,20 @@
   "parserOptions": {
     "ecmaVersion": 2018,
     "sourceType": "module",
-    "project": "./tsconfig.json"
+    "project": [
+      "./tsconfig.app.json",
+<%_ if (cypressTests) { _%>
+      "./<%= this.CLIENT_TEST_SRC_DIR %>cypress/tsconfig.json",
+<%_ } _%>
+<%_ if (protractorTests) { _%>
+      "./tsconfig.e2e.json",
+<%_ } _%>
+      "./tsconfig.spec.json"
+    ]
   },
   "root": true,
   "rules": {
+    "@typescript-eslint/no-unused-vars": ["warn", { "ignoreRestSiblings": true, "destructuredArrayIgnorePattern": "^_" }],
     "@angular-eslint/component-selector": [
       "error",
       {
@@ -93,6 +103,7 @@
     "@typescript-eslint/no-parameter-properties": ["warn", { "allows": ["public", "private", "protected"] }],
     "@typescript-eslint/no-shadow": ["error"],
     "@typescript-eslint/no-unnecessary-condition": "error",
+    "@typescript-eslint/no-unsafe-argument": "off",
     "@typescript-eslint/no-unsafe-assignment": "off",
     "@typescript-eslint/no-unsafe-call": "off",
     "@typescript-eslint/no-unsafe-member-access": "off",

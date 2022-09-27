@@ -1,0 +1,67 @@
+import { HttpResponse } from '@angular/common/http';
+import { catchError, debounceTime, EMPTY, filter, map, Observable, pairwise, startWith, Subject, switchMap, takeUntil, tap } from 'rxjs';
+
+export type DropdownFilterEvent = {
+  first?: number;
+  last?: number;
+  filter?: string;
+};
+
+type DropdownFilterWithExtras = {
+  first: number;
+  last: number;
+  [_: string]: string | number | undefined;
+};
+
+export class LazySubscriber<T> {
+  options: (T | undefined)[] | null = null;
+  filterSubject = new Subject<{}>();
+
+  constructor(query: (_: Partial<DropdownFilterWithExtras>) => Observable<HttpResponse<T[]>>, destroy$: Observable<unknown>) {
+    this.filterSubject
+      .pipe(
+        takeUntil(destroy$),
+        debounceTime(100),
+        startWith({}),
+        map((event: Partial<DropdownFilterWithExtras>) => ({ ...event, first: event.first ?? 0, last: event.last ?? 20 })),
+        pairwise(),
+        tap(([previousEvent, newEvent]: DropdownFilterWithExtras[]) => {
+          const { first: pf, last: pl, ...previousFilters } = previousEvent;
+          const { first, last, ...filters } = newEvent;
+          const keys = Object.keys(filters);
+          // because dropdown filter sometimes return null and other undefined
+          if (
+            Object.keys(previousFilters).length !== keys.length ||
+            keys.some(k => (previousFilters[k] ?? undefined) !== (filters[k] ?? undefined))
+          ) {
+            this.options = null;
+          }
+        }),
+        map(([_, newEvent]) => newEvent),
+        // load only if option is missing
+        filter(event => !this.options || this.options.slice(event.first, event.last).some(i => i === undefined)),
+        switchMap(event =>
+          query(event).pipe(
+            catchError(() => {
+              this.options = null;
+              return EMPTY;
+            }),
+            map(res => ({ event, res }))
+          )
+        )
+      )
+      .subscribe({
+        next: ({ event, res }) => {
+          const options = this.options
+            ? this.options
+            : (Array.from({ length: Number(res.headers.get('X-Total-Count')) }) as [T | undefined]);
+          options.splice(event.first, res.body!.length, ...res.body!);
+          this.options = options;
+        },
+      });
+  }
+
+  filter(event: any): void {
+    this.filterSubject.next(event);
+  }
+}
