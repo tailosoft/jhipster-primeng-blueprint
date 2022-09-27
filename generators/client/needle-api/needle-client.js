@@ -1,5 +1,5 @@
 /**
- * Copyright 2013-2021 the original author or authors from the JHipster project.
+ * Copyright 2013-2022 the original author or authors from the JHipster project.
  *
  * This file is part of the JHipster project, see https://www.jhipster.tech/
  * for more information.
@@ -16,14 +16,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const needleBase = require('generator-jhipster/generators/needle-base');
+const needleBase = require('generator-jhipster/generators/needle-base.js');
 
 module.exports = class extends needleBase {
   constructor(generator) {
     super(generator);
 
     this.CLIENT_MAIN_SRC_DIR = generator.CLIENT_MAIN_SRC_DIR;
-    this.clientFramework = generator.clientFramework;
+    this.clientFramework = generator.clientFramework || generator.jhipsterConfig.clientFramework;
 
     if (!this.CLIENT_MAIN_SRC_DIR) {
       generator.error('Client destination folder is missing');

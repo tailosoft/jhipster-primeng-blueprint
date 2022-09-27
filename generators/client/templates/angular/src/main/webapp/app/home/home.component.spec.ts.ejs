@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2021 the original author or authors from the JHipster project.
+ Copyright 2013-2022 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -17,78 +17,118 @@
  limitations under the License.
 -%>
 jest.mock('app/core/auth/account.service');
-<%_ if (!authenticationTypeOauth2) { _%>
-jest.mock('@angular/router');
-<% } else { %>
+<%_ if (authenticationTypeOauth2) { _%>
 jest.mock('app/login/login.service');
 <%_ } _%>
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 <%_ if (!authenticationTypeOauth2) { _%>
 import { Router } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 <%_ } _%>
-import { of } from 'rxjs';
+import { of<% if (!authenticationTypeOauth2) { %>, Subject<% } %> } from 'rxjs';
 
 import { AccountService } from 'app/core/auth/account.service';
+import { Account } from 'app/core/auth/account.model';
 <%_ if (authenticationTypeOauth2) { _%>
 import { LoginService } from 'app/login/login.service';
 <%_ } _%>
 
 import { HomeComponent } from './home.component';
 
-describe('Component Tests', () => {
-  describe('Home Component', () => {
-    let comp: HomeComponent;
-    let fixture: ComponentFixture<HomeComponent>;
-    let mockAccountService: AccountService;
+describe('Home Component', () => {
+  let comp: HomeComponent;
+  let fixture: ComponentFixture<HomeComponent>;
+  let mockAccountService: AccountService;
 <%_ if (!authenticationTypeOauth2) { _%>
-    let mockRouter: Router;
+  let mockRouter: Router;
 <%_ } else { _%>
-    let mockLoginService: LoginService;
+  let mockLoginService: LoginService;
 <%_ } _%>
+  const account: Account = {
+    activated: true,
+    authorities: [],
+    email: '',
+    firstName: null,
+    langKey: '',
+    lastName: null,
+    login: 'login',
+    imageUrl: null,
+  };
 
-    beforeEach(
-      waitForAsync(() => {
-        TestBed.configureTestingModule({
-          declarations: [HomeComponent],
-          providers: [AccountService, <% if (!authenticationTypeOauth2) { %>Router<% } else { %>LoginService<% } %>],
-        })
-          .overrideTemplate(HomeComponent, '')
-          .compileComponents();
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+<%_ if (!authenticationTypeOauth2) { _%>
+        imports: [RouterTestingModule.withRoutes([])],
+<%_ } _%>
+        declarations: [HomeComponent],
+        providers: [
+          AccountService,
+<%_ if (authenticationTypeOauth2) { _%>
+          LoginService
+<%_ } _%>
+        ],
       })
-    );
+        .overrideTemplate(HomeComponent, '')
+        .compileComponents();
+    })
+  );
 
-    beforeEach(() => {
-      fixture = TestBed.createComponent(HomeComponent);
-      comp = fixture.componentInstance;
-      mockAccountService = TestBed.inject(AccountService);
-      mockAccountService.identity = jest.fn(() => of(null));
-      mockAccountService.getAuthenticationState = jest.fn(() => of(null));
+  beforeEach(() => {
+    fixture = TestBed.createComponent(HomeComponent);
+    comp = fixture.componentInstance;
+    mockAccountService = TestBed.inject(AccountService);
+    mockAccountService.identity = jest.fn(() => of(null));
+    mockAccountService.getAuthenticationState = jest.fn(() => of(null));
 <%_ if (!authenticationTypeOauth2) { _%>
-      mockRouter = TestBed.inject(Router);
+
+    mockRouter = TestBed.inject(Router);
+    jest.spyOn(mockRouter, 'navigate').mockImplementation(() => Promise.resolve(true));
+
 <%_ } else { _%>
-      mockLoginService = TestBed.inject(LoginService);
+    mockLoginService = TestBed.inject(LoginService);
 <%_ } _%>
-    });
+  });
 
+  describe('ngOnInit', () => {
+    it('Should synchronize account variable with current account', () => {
 <%_ if (!authenticationTypeOauth2) { _%>
-    it('Should call accountService.getAuthenticationState on init', () => {
+      // GIVEN
+      const authenticationState = new Subject<Account | null>();
+      mockAccountService.getAuthenticationState = jest.fn(() => authenticationState.asObservable());
+
       // WHEN
       comp.ngOnInit();
 
       // THEN
-      expect(mockAccountService.getAuthenticationState).toHaveBeenCalled();
-    });
-<%_ } _%>
+      expect(comp.account).toBeNull();
 
-    it('Should call accountService.isAuthenticated when it checks authentication', () => {
       // WHEN
-      comp.isAuthenticated();
+      authenticationState.next(account);
 
       // THEN
-      expect(mockAccountService.isAuthenticated).toHaveBeenCalled();
-    });
+      expect(comp.account).toEqual(account);
 
+      // WHEN
+      authenticationState.next(null);
+
+      // THEN
+      expect(comp.account).toBeNull();
+<%_ } else { _%>
+      // GIVEN
+      mockAccountService.identity = jest.fn(() => of(account));
+
+      // WHEN
+      comp.ngOnInit();
+
+      // THEN
+      expect(comp.account).toEqual(account);
+<%_ } _%>
+    });
+  });
+
+  describe('login', () => {
 <%_ if (!authenticationTypeOauth2) { _%>
     it('Should navigate to /login on login', () => {
       // WHEN
@@ -107,4 +147,33 @@ describe('Component Tests', () => {
     });
 <%_ } _%>
   });
+
+<%_ if (!authenticationTypeOauth2) { _%>
+  describe('ngOnDestroy', () => {
+    it('Should destroy authentication state subscription on component destroy', () => {
+      // GIVEN
+      const authenticationState = new Subject<Account | null>();
+      mockAccountService.getAuthenticationState = jest.fn(() => authenticationState.asObservable());
+
+      // WHEN
+      comp.ngOnInit();
+
+      // THEN
+      expect(comp.account).toBeNull();
+
+      // WHEN
+      authenticationState.next(account);
+
+      // THEN
+      expect(comp.account).toEqual(account);
+
+      // WHEN
+      comp.ngOnDestroy();
+      authenticationState.next(null);
+
+      // THEN
+      expect(comp.account).toEqual(account);
+    });
+  });
+<%_ } _%>
 });

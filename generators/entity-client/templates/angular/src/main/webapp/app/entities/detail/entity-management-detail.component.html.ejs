@@ -17,7 +17,7 @@
  limitations under the License.
 -%>
 <div class="entity-detail" *ngIf="<%= entityInstance %>">
-    <h2 class="title" data-cy="<%= entityInstance %>DetailsHeading"><span <%= jhiPrefix %>Translate="<%= i18nKeyPrefix %>.detail.title"><%= entityClassHumanized %></span> <%= primaryKey.ids.map(pk => `{{${entityInstance}.${pk.nameDottedAsserted}}}`).join(' / ') %></h2>
+    <h2 class="title" data-cy="<%= entityInstance %>DetailsHeading"><span <%= jhiPrefix %>Translate="<%= i18nKeyPrefix %>.detail.title"><%= entityClassHumanized %></span> <%= primaryKey.fields.map(field => `{{${entityInstance}.${field.fieldNameDottedAsserted}}}`).join(' / ') %></h2>
 
     <dl class="detail-content jh-entity-details">
                 <%_ for (const field of fields.filter(field => !field.hidden)) {
@@ -61,36 +61,36 @@
                     const otherEntityName = relationship.otherEntityName;
                     const otherEntityStateName = relationship.otherEntityStateName;
                     const otherEntity = relationship.otherEntity;
-                    const instance = relationshipType === 'many-to-many' ? relationshipFieldName : `${entityInstance}!.${relationshipFieldName}`;
-                    const relationshipKeys = otherEntity.primaryKey.ids.length === 1 ? `${instance}!.${otherEntity.primaryKey.name}!` : `{ ${otherEntity.primaryKey.ids.map(pk => `${pk.name}: ${instance}!.${pk.nameDottedAsserted}`).join(', ')} }`;
+                    const instance = relationship.relationshipManyToMany ? relationshipFieldName : `${entityInstance}.${relationshipFieldName}`;
+                    const relationshipKeys = otherEntity.primaryKey.fields.length === 1 ? `${instance}.${otherEntity.primaryKey.name}!` : `{ ${otherEntity.primaryKey.fields.map(field => `${field.fieldName}: ${instance}.${field.fieldNameDottedAsserted}`).join(', ')} }`;
                     const routerLink = `[routerLink]="['/${ otherEntityStateName }', ${ relationshipKeys }, 'view']"`;
             _%>
                     <%_ if (otherEntityName === 'user') { _%>
         <dt><span <%= jhiPrefix %>Translate="<%= i18nKeyPrefix %>.<%= relationship.relationshipName %>"><%= relationship.relationshipNameHumanized %></span></dt>
-                <%_ if (relationshipType === 'many-to-many') { _%>
+                <%_ if (relationship.relationshipManyToMany) { _%>
         <dd>
             <span *ngFor="let <%= relationshipFieldName %> of <%= entityInstance %>.<%= relationshipFieldNamePlural %>; let last = last">
-                        {{ <%- instance %>!.<%- relationship.otherEntityField -%> }}{{ last ? '' : ', ' }}
+                        {{ <%- instance %>.<%- relationship.otherEntityField -%> }}{{ last ? '' : ', ' }}
             </span>
         </dd>
                         <%_ } else { _%>
         <dd>
             <div *ngIf="<%= entityInstance + "." + relationshipFieldName %>">
-                        {{ <%- instance %>!.<%- relationship.otherEntityField -%> }}
+                        {{ <%- instance %>.<%- relationship.otherEntityField -%> }}
             </div>
         </dd>
                         <%_ } _%>
                     <%_ } else { _%>
-                        <%_ if (relationshipType === 'many-to-many') { _%>
+                        <%_ if (relationship.relationshipManyToMany) { _%>
         <dt><span <%= jhiPrefix %>Translate="<%=`${i18nKeyPrefix}.${relationship.relationshipName}` %>"><%= relationship.relationshipNameHumanized %></span></dt>
         <dd>
             <span *ngFor="let <%= relationshipFieldName %> of <%= entityInstance %>.<%= relationshipFieldNamePlural %>; let last = last">
-                <a <%- routerLink %>>{{ <%- instance %>!.<%- relationship.otherEntityField -%> }}</a>{{ last ? '' : ', ' }}
+                <a <%- routerLink %>>{{ <%- instance %>.<%- relationship.otherEntityField -%> }}</a>{{ last ? '' : ', ' }}
             </span>
         </dd>
                         <%_ } else { _%>
                             <%_ if (relationship.otherEntity.primaryKey.ownFields.length === 0) {
-                                const routerLink = relationship.otherEntity.primaryKey.ids.length === 1 ? `${entityInstance}.${relationship.otherEntity.primaryKey.name}!` : '{ '+ relationship.otherEntity.primaryKey.ids.map(pk => `${pk.name}: ${entityInstance}!.${relationship.relationshipName}!.${pk.nameDottedAsserted}`).join(', ') + ' }' _%>
+                                const routerLink = relationship.otherEntity.primaryKey.fields.length === 1 ? `${entityInstance}.${relationship.otherEntity.primaryKey.name}!` : '{ '+ relationship.otherEntity.primaryKey.fields.map(field => `${field.fieldName}: ${entityInstance}.${relationship.relationshipName}.${field.fieldNameDotted}`).join(', ') + ' }' _%>
         <dt><span <%= jhiPrefix %>Translate="<%=`${i18nKeyPrefix}.${relationship.relationshipName}` %>"><%= relationship.relationshipNameHumanized %></span></dt>
         <dd>
             <div *ngIf="<%= entityInstance + "." + relationship.relationshipName %>">
@@ -101,14 +101,14 @@
         </dd>
                             <%_ } _%>
                             <%_ relationship.clientFields.forEach(cf => {
-                                const relationshipKeys = cf.entity.primaryKey.composite ?
-                                    `{ ${cf.routerLinkValues.map(v => `${v.fieldName} : ${entityInstance}!.${relationship.relationshipName}!.${v.nameDottedAsserted}`).join(' ,') } }`:
-                                    `${cf.routerLinkValues.map(v => `${entityInstance}!.${relationship.relationshipName}!.${v.nameDottedAsserted}`).join('')}`;
+                                const relationshipKeys = cf.entity.primaryKey && cf.entity.primaryKey.composite ?
+                                    `{ ${cf.routerLinkValues.map(v => `${v.fieldName} : ${entityInstance}.${relationship.relationshipName}.${v.nameDotted}`).join(' ,') } }`:
+                                    `${cf.routerLinkValues.map(v => `${entityInstance}.${relationship.relationshipName}.${v.nameDotted}`).join('')}`;
                                 const routerLink = `[routerLink]="['/${ cf.entity.entityStateName }', ${ relationshipKeys }, 'view']"`;_%>
         <dt><span <%= jhiPrefix %>Translate="<%= cf.translationKey %>"><%= cf.lastRelationship.relationshipNameHumanized %></span></dt>
         <dd>
             <div *ngIf="<%= entityInstance + "." + relationship.relationshipName %>">
-                <a <%- routerLink %>>{{ <%- instance %>!.<%- cf.relatedFieldPath.join('!.') -%> }}</a>
+                <a <%- routerLink %>>{{ <%- instance %>.<%- cf.relatedFieldPath.join('.') -%> }}</a>
             </div>
         </dd>
                             <%_ }) _%>
@@ -120,7 +120,7 @@
     <div class="detail-buttons">
         <button pButton type="submit" (click)="previousState()" class="p-button-info" icon="pi pi-arrow-left" [label]="'entity.action.back' | translate" data-cy="entityDetailsBackButton"></button>
                 <%_ if (!readOnly) { _%>
-        <button pButton type="button" icon="pi pi-pencil" [label]="'entity.action.edit' | translate" [routerLink]="['/<%= entityUrl %>', <%= entity.primaryKey.ids.length === 1 ? `${entityInstance}!.${entity.primaryKey.name}` : '{ '+ entity.primaryKey.ids.map(pk => `${pk.name}: ${entityInstance}!.${pk.nameDottedAsserted}`).join(', ') + ' }' %>, 'edit']"></button>
+        <button pButton type="button" icon="pi pi-pencil" [label]="'entity.action.edit' | translate" [routerLink]="['/<%= entityUrl %>', <%= primaryKey.fields.length === 1 ? `${entityInstance}.${primaryKey.name}` : '{ '+ primaryKey.fields.map(field => `${field.fieldName}: ${entityInstance}.${field.fieldNameDottedAsserted}`).join(', ') + ' }' %>, 'edit']"></button>
                 <%_ } _%>
     </div>
 </div>

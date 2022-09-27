@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2021 the original author or authors from the JHipster project.
+ Copyright 2013-2022 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -17,38 +17,34 @@
  limitations under the License.
 -%>
 <%_
-  const localeId = getLocaleId(nativeLanguage);
+  const localeId = this.getLocaleId(nativeLanguage);
 _%>
 import { NgModule, LOCALE_ID } from '@angular/core';
 import { DatePipe, registerLocaleData } from '@angular/common';
-import { <% if (enableTranslation) { %>HttpClient, <% } %>HttpClientModule } from '@angular/common/http';
+import { HttpClientModule } from '@angular/common/http';
 import locale from '@angular/common/locales/<%= localeId %>';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { BrowserModule, Title } from '@angular/platform-browser';
+import { TitleStrategy } from '@angular/router';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
 <%_ if (authenticationTypeSession && communicationSpringWebsocket) { _%>
 import { CookieService } from 'ngx-cookie-service';
 <%_ } _%>
-<%_ if (enableTranslation) { _%>
-import { TranslateModule, TranslateService, TranslateLoader, MissingTranslationHandler } from '@ngx-translate/core';
-<%_ } _%>
 import { NgxWebstorageModule } from 'ngx-webstorage';
 
-import { SERVER_API_URL } from './app.constants';
 import { ApplicationConfigService } from 'app/core/config/application-config.service';
 import { SharedModule } from 'app/shared/shared.module';
+<%_ if (enableTranslation) { _%>
+import { TranslationModule } from 'app/shared/language/translation.module';
+<%_ } _%>
 import { AppRoutingModule } from './app-routing.module';
 import { HomeModule } from './home/home.module';
-import { EntityRoutingModule } from './entities/entity-routing.module';
 // jhipster-needle-angular-add-module-import JHipster will add new module here
 import { fontAwesomeIcons } from './config/font-awesome-icons';
 import { httpInterceptorProviders } from 'app/core/interceptor/index';
 <%_ if (enableI18nRTL) { _%>
 import { FindLanguageFromKeyPipe } from 'app/shared/language/find-language-from-key.pipe';
-<%_ } _%>
-<%_ if (enableTranslation) { _%>
-import { translatePartialLoader, missingTranslationHandler } from './config/translation.config';
 <%_ } _%>
 import { MainComponent } from './layouts/main/main.component';
 import { NavbarComponent } from './layouts/navbar/navbar.component';
@@ -58,6 +54,7 @@ import { PageRibbonComponent } from './layouts/profiles/page-ribbon.component';
 import { ActiveMenuDirective } from './layouts/navbar/active-menu.directive';
 <%_ } _%>
 import { ErrorComponent } from './layouts/error/error.component';
+import { AppPageTitleStrategy } from './app-page-title-strategy';
 import { MessageService, ConfirmationService } from 'primeng/api';
 
 @NgModule({
@@ -67,24 +64,13 @@ import { MessageService, ConfirmationService } from 'primeng/api';
     SharedModule,
     HomeModule,
     // jhipster-needle-angular-add-module JHipster will add new module here
-    EntityRoutingModule,
     AppRoutingModule,
     // Set this to true to enable service worker (PWA)
     ServiceWorkerModule.register('ngsw-worker.js', { enabled: false }),
     HttpClientModule,
-    NgxWebstorageModule.forRoot({ prefix: '<%= jhiPrefixDashed %>', separator: '-' }),
+    NgxWebstorageModule.forRoot({ prefix: '<%= jhiPrefixDashed %>', separator: '-', caseSensitive: true }),
 <%_ if (enableTranslation) { _%>
-    TranslateModule.forRoot({
-      loader: {
-        provide: TranslateLoader,
-        useFactory: translatePartialLoader,
-        deps: [HttpClient],
-      },
-      missingTranslationHandler: {
-        provide: MissingTranslationHandler,
-        useFactory: missingTranslationHandler,
-      },
-    }),
+    TranslationModule,
 <%_ } _%>
   ],
   providers: [
@@ -92,11 +78,12 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 <%_ if (authenticationTypeSession && communicationSpringWebsocket) { _%>
     CookieService,
 <%_ } _%>
-    { provide: LOCALE_ID, useValue: '<%= skipLanguageForLocale(nativeLanguage) ? 'en' : localeId %>' },
+    { provide: LOCALE_ID, useValue: '<%= this.skipLanguageForLocale(nativeLanguage) ? 'en' : localeId %>' },
 <%_ if (enableI18nRTL) { _%>
     FindLanguageFromKeyPipe,
 <%_ } _%>
     httpInterceptorProviders,
+    { provide: TitleStrategy, useClass: AppPageTitleStrategy },
     MessageService,
     ConfirmationService,
     DatePipe
@@ -114,13 +101,12 @@ import { MessageService, ConfirmationService } from 'primeng/api';
   bootstrap: [MainComponent],
 })
 export class AppModule {
-  constructor(applicationConfigService: ApplicationConfigService, iconLibrary: FaIconLibrary <% if (enableTranslation) { %>, translateService: TranslateService<% } %>) {
+  constructor(applicationConfigService: ApplicationConfigService, iconLibrary: FaIconLibrary) {
+<%_ if (applicationTypeMicroservice) { _%>
+    applicationConfigService.setMicrofrontend();
+<%_ } _%>
     applicationConfigService.setEndpointPrefix(SERVER_API_URL);
     registerLocaleData(locale);
     iconLibrary.addIcons(...fontAwesomeIcons);
-<%_ if (enableTranslation) { _%>
-    translateService.setDefaultLang('<%= nativeLanguage %>');
-    translateService.use('<%= nativeLanguage %>');
-<%_ } _%>
   }
 }

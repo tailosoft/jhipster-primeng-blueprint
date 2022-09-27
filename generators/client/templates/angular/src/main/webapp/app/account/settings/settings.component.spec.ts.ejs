@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2021 the original author or authors from the JHipster project.
+ Copyright 2013-2022 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,9 +16,6 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-<%_ if (enableTranslation) { _%>
-jest.mock('@ngx-translate/core');
-<%_ } _%>
 jest.mock('app/core/auth/account.service');
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
@@ -26,7 +23,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { FormBuilder } from '@angular/forms';
 import { throwError, of } from 'rxjs';
 <%_ if (enableTranslation) { _%>
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 <%_ } _%>
 
 import { AccountService } from 'app/core/auth/account.service';
@@ -34,87 +31,90 @@ import { Account } from 'app/core/auth/account.model';
 
 import { SettingsComponent } from './settings.component';
 
-describe('Component Tests', () => {
-  describe('SettingsComponent', () => {
-    let comp: SettingsComponent;
-    let fixture: ComponentFixture<SettingsComponent>;
-    let mockAccountService: AccountService;
-    const account: Account = {
+describe('SettingsComponent', () => {
+  let comp: SettingsComponent;
+  let fixture: ComponentFixture<SettingsComponent>;
+  let mockAccountService: AccountService;
+  const account: Account = {
+    firstName: 'John',
+    lastName: 'Doe',
+    activated: true,
+    email: 'john.doe@mail.com',
+    langKey: '<%= nativeLanguage %>',
+    login: 'john',
+    authorities: [],
+    imageUrl: '',
+  };
+
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        imports: [
+<%_ if (enableTranslation) { _%>
+          TranslateModule.forRoot(),
+<%_ } _%>
+          HttpClientTestingModule
+        ],
+        declarations: [SettingsComponent],
+        providers: [FormBuilder, AccountService],
+      })
+        .overrideTemplate(SettingsComponent, '')
+        .compileComponents();
+    })
+  );
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(SettingsComponent);
+    comp = fixture.componentInstance;
+    mockAccountService = TestBed.inject(AccountService);
+    mockAccountService.identity = jest.fn(() => of(account));
+    mockAccountService.getAuthenticationState = jest.fn(() => of(account));
+  });
+
+  it('should send the current identity upon save', () => {
+    // GIVEN
+    mockAccountService.save = jest.fn(() => of({}));
+    const settingsFormValues = {
       firstName: 'John',
       lastName: 'Doe',
-      activated: true,
       email: 'john.doe@mail.com',
+<%_ if (enableTranslation) { _%>
       langKey: '<%= nativeLanguage %>',
-      login: 'john',
-      authorities: [],
-      imageUrl: '',
+<%_ } _%>
     };
 
-    beforeEach(
-      waitForAsync(() => {
-        TestBed.configureTestingModule({
-          imports: [HttpClientTestingModule],
-          declarations: [SettingsComponent],
-          providers: [FormBuilder<% if (enableTranslation) { %>, TranslateService<% } %>, AccountService],
-        })
-          .overrideTemplate(SettingsComponent, '')
-          .compileComponents();
-      })
-    );
+    // WHEN
+    comp.ngOnInit();
+    comp.save();
 
-    beforeEach(() => {
-      fixture = TestBed.createComponent(SettingsComponent);
-      comp = fixture.componentInstance;
-      mockAccountService = TestBed.inject(AccountService);
-      mockAccountService.identity = jest.fn(() => of(account));
-      mockAccountService.getAuthenticationState = jest.fn(() => of(account));
-    });
+    // THEN
+    expect(mockAccountService.identity).toHaveBeenCalled();
+    expect(mockAccountService.save).toHaveBeenCalledWith(account);
+    expect(mockAccountService.authenticate).toHaveBeenCalledWith(account);
+    expect(comp.settingsForm.value).toMatchObject(expect.objectContaining(settingsFormValues));
+  });
 
-    it('should send the current identity upon save', () => {
-      // GIVEN
-      mockAccountService.save = jest.fn(() => of({}));
-      const settingsFormValues = {
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john.doe@mail.com',
-        <%_ if (enableTranslation) { _%>
-        langKey: '<%= nativeLanguage %>',
-        <%_ } _%>
-      };
+  it('should notify of success upon successful save', () => {
+    // GIVEN
+    mockAccountService.save = jest.fn(() => of({}));
 
-      // WHEN
-      comp.ngOnInit();
-      comp.save();
+    // WHEN
+    comp.ngOnInit();
+    comp.save();
 
-      // THEN
-      expect(mockAccountService.identity).toHaveBeenCalled();
-      expect(mockAccountService.save).toHaveBeenCalledWith(account);
-      expect(mockAccountService.authenticate).toHaveBeenCalledWith(account);
-      expect(comp.settingsForm.value).toEqual(settingsFormValues);
-    });
+    // THEN
+    expect(comp.success).toBe(true);
+  });
 
-    it('should notify of success upon successful save', () => {
-      // GIVEN
-      mockAccountService.save = jest.fn(() => of({}));
+  it('should notify of error upon failed save', () => {
+    // GIVEN
+    mockAccountService.save = jest.fn(() => throwError('ERROR'));
 
-      // WHEN
-      comp.ngOnInit();
-      comp.save();
+    // WHEN
+    comp.ngOnInit();
+    comp.save();
 
-      // THEN
-      expect(comp.success).toBe(true);
-    });
-
-    it('should notify of error upon failed save', () => {
-      // GIVEN
-      mockAccountService.save = jest.fn(() => throwError('ERROR'));
-
-      // WHEN
-      comp.ngOnInit();
-      comp.save();
-
-      // THEN
-      expect(comp.success).toBe(false);
-    });
+    // THEN
+    expect(comp.success).toBe(false);
   });
 });

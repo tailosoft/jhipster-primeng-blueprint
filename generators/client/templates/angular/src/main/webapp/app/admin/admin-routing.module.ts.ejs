@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2021 the original author or authors from the JHipster project.
+ Copyright 2013-2022 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -28,9 +28,7 @@ import { RouterModule } from '@angular/router';
       {
         path: 'user-management',
         loadChildren: () => import('./user-management/user-management.module').then(m => m.UserManagementModule),
-        data: {
-          pageTitle: 'userManagement.home.title',
-        },
+        title: 'userManagement.home.title',
       },
       <%_ } _%>
       {
@@ -55,7 +53,7 @@ import { RouterModule } from '@angular/router';
         loadChildren: () => import('./metrics/metrics.module').then(m => m.MetricsModule),
       },
       <%_ } _%>
-      <%_ if (applicationTypeGateway && serviceDiscoveryType) { _%>
+      <%_ if (applicationTypeGateway && serviceDiscoveryAny) { _%>
       {
         path: 'gateway',
         loadChildren: () => import('./gateway/gateway.module').then(m => m.GatewayModule),

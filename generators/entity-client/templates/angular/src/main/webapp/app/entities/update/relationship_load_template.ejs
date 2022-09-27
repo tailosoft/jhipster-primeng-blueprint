@@ -2,7 +2,7 @@
 // the dropdowns can be seen as the nodes of a tree, where the root is the entity we are trying to create the dropdown for
 // the nodes are the primaryKey.fields of that entity (some do not contain fields)
 // and the edges are the id relationships that lead to building the primaryKey
-// To query each dropdown based on the previously selected ones, we do a depth first tree traversal using relationship.clientFields that have a reverse order of primaryKey.ids
+// To query each dropdown based on the previously selected ones, we do a depth first tree traversal using relationship.clientFields that have a reverse order of primaryKey.fields
 //
 _%>
 
@@ -20,43 +20,47 @@ _%>
     _%>
     <%_ if ((i === 0 && cf.entity.pagination === 'no') || !cf.entity.jpaMetamodelFiltering) { _%>
     loadAll<%= cf.nameCapitalizedPlural %>(): void {
-            <%_ if (cf.lastRelationship.relationshipType === 'one-to-one') { _%>
+            <%_ if (cf.lastRelationship.relationshipOneToOne) { _%>
         // TODO change this to load only unspecified + add selected to options if on edit (not create)
             <%_ } _%>
         this.<%= cf.entity.entityInstance %>Service.query()
-            .subscribe((res: HttpResponse<I<%= cf.entity.entityAngularName %>[]>) => this.<%= cf.name %>Options = res.body, (res: HttpErrorResponse) => this.onError(res.message));
+            .subscribe((res: HttpResponse<I<%= cf.entity.entityAngularName %>[]>) => this.<%= cf.name %>Options = res.body);
     }
     <%_ } else { _%>
-    on<%= cf.nameCapitalized %>LazyLoadEvent(event: LazyLoadEvent): void {
-        <%_ if (cf.lastRelationship.relationshipType === 'one-to-one') { _%>
+    on<%= cf.nameCapitalized %>LazyLoadEvent(event: DropdownFilterEvent): void {
+        <%_ if (cf.lastRelationship.relationshipOneToOne) { _%>
         // TODO change this to load only unspecified + add selected to options if on edit (not create)
         <%_ } _%>
         <%_ if (i > 0) { _%>
-        if (<%- relationship.clientFields.slice(0, i).map(previousCf => previousCf.needsFieldName ? `this.${previousCf.formName}.get('${previousCf.fieldName}')!.value` : `this.${previousCf.parentFormName}.get('${previousCf.lastRelationship.relationshipName}')!.value`).join(' && ') %>) {
+        if (<%- relationship.clientFields.slice(0, i).map(previousCf => previousCf.needsFieldName ? `this.${previousCf.formName}.controls.${previousCf.fieldName}.value` : `this.${previousCf.parentFormName}.controls.${previousCf.lastRelationship.relationshipName}.value`).join(' && ') %>) {
         <%_ } _%>
-            this.<%= cf.entity.entityInstance %>Service.query(
+            this.<%= cf.name %>OptionsSubscriber!.filter({ first: event.first, last: event.last, '<%= cf.lastRelationship.relatedField.fieldName %>.<%= cf.relatedFieldMatchMode %>': event.filter,
         <%_ if (i > 0) { _%>
-                {
-                    ...lazyLoadEventToServerQueryParams(event, '<%= cf.lastRelationship.relatedField.fieldName %>.<%= cf.relatedFieldMatchMode %>'),
-            <%_
+        <%_
             relationship.clientFields.slice(0, i).forEach(previousCf => {
-                let splitDepth;
-                for(splitDepth = 0; splitDepth < cf.id.relationshipsPath.length; splitDepth ++) {
-                  if (cf.id.relationshipsPath[splitDepth].relationshipName !== previousCf.id.relationshipsPath[splitDepth].relationshipName) {
-                    break;
-                  }
+                let commonDepth = 0;
+                for (let j = 0; j < cf.id.relationshipsPath.length; j++) {
+                    if (cf.id.relationshipsPath[j].relationshipName !== previousCf.id.relationshipsPath[j].relationshipName) {
+                        break;
+                    } else {
+                        commonDepth = j + 1;
+                    }
+                }
+                let stepsBack = cf.id.relationshipsPath.length - commonDepth;
+                let criteria = '';
+                if (!stepsBack) {
+                  criteria = this._.lowerFirst([...previousCf.id.relationshipsPath.slice(commonDepth).map(r => r.relationshipNameCapitalized), previousCf.id.originalField.fieldNameCapitalized].join(''))
+                } else {
+                  criteria = this._.lowerFirst([...cf.id.relationshipsPath.slice(0, stepsBack).map(r => r.otherEntityRelationshipNameCapitalized).reverse(), ...previousCf.id.relationshipsPath.slice(commonDepth, previousCf.id.relationshipsPath.length).map(r => r.relationshipNameCapitalized), previousCf.id.originalField.fieldNameCapitalized].join(''))
                 }
             _%>
-                    '<%= [...cf.id.relationshipsPath.slice(splitDepth).map(r => r.otherEntityRelationshipName).reverse(), ...previousCf.id.relationshipsPath.slice(splitDepth).map(r => r.relationshipName)].join('.') %>.<%= previousCf.fieldName %>.equals': <%- previousCf.needsFieldName ? `this.${previousCf.formName}.get('${previousCf.fieldName}')!.value` : `this.${previousCf.parentFormName}.get('${previousCf.lastRelationship.relationshipName}')!.value.${previousCf.fieldName}` %>,
+                    '<%= criteria %>.equals': <%- previousCf.needsFieldName ? `this.${previousCf.formName}.controls.${previousCf.fieldName}.value` : `this.${previousCf.parentFormName}.controls.${previousCf.lastRelationship.relationshipName}.value.${previousCf.fieldName}` %>,
             <%_ }) _%>
-                }
-        <%_ } else { _%>
-                lazyLoadEventToServerQueryParams(event, '<%= cf.lastRelationship.relatedField.fieldName %>.<%= cf.relatedFieldMatchMode %>')
         <%_ } _%>
-            ).subscribe((res: HttpResponse<I<%= cf.entity.entityAngularName %>[]>) => this.<%= cf.name %>Options = res.body, (res: HttpErrorResponse) => this.onError(res.message));
+            });
         <%_ if (i > 0) { _%>
         } else {
-            this.<%= cf.name %>Options = null;
+            this.<%= cf.name %>OptionsSubscriber!.options = null;
         }
         <%_ } _%>
     }

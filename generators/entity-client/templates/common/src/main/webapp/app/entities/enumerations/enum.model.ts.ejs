@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2021 the original author or authors from the JHipster project.
+ Copyright 2013-2022 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,18 +16,8 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-export const enum <%= enumName %> {
-<%_ enumValues.forEach((enumValue) => { _%>
-    <%_ if (!enumValue.value) { _%>
-        <%= enumValue.name %> = '<%= enumValue.name %>',
-    <%_ } else { _%>
-        <%= enumValue.name %> = '<%= enumValue.value %>',
-    <%_ } _%>
-<%_ }); _%>
+export enum <%= enumName %> {
+<% enumValues.forEach((enumValue, index) => { %>
+  <%= enumValue.name %> = '<%= enumValue.value %>'<% if (index < enumValues.length - 1) { %>,<% } %>
+<% }); %>
 }
-
-export const <%= _.snakeCase(enumName).toUpperCase() %>_ARRAY = [
-<%_ enumValues.forEach((enumValue) => { _%>
-    <%= enumName %>.<%= enumValue.name %>,
-<%_ }); _%>
-];
