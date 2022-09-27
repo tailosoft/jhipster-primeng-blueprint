@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2021 the original author or authors from the JHipster project.
+ Copyright 2013-2022 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,16 +16,13 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-function setupProxy() {
-  const tls = process.env.TLS;
+function setupProxy({ tls }) {
   const conf = [
     {
       context: [
         '/api',
         '/services',
         '/management',
-        '/swagger-resources',
-        '/v2/api-docs',
         '/v3/api-docs',
         '/h2-console',
 <%_ if (authenticationTypeOauth2) { _%>
@@ -35,14 +32,14 @@ function setupProxy() {
         '/auth',
         '/health',
       ],
-      target: `http${tls ? 's' : ''}://localhost:<%= serverPort %>`,
+      target: `http${tls ? 's' : ''}://localhost:<%= applicationTypeMicroservice ? gatewayServerPort : serverPort %>`,
       secure: false,
       changeOrigin: tls,
     },
 <%_ if (communicationSpringWebsocket) { _%>
     {
       context: ['/websocket'],
-      target: 'ws://127.0.0.1:<%= serverPort %>',
+      target: 'ws://127.0.0.1:<%= applicationTypeMicroservice ? gatewayServerPort : serverPort %>',
       ws: true,
     },
 <%_ } _%>
@@ -50,4 +47,4 @@ function setupProxy() {
   return conf;
 }
 
-module.exports = setupProxy();
+module.exports = setupProxy;

@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2021 the original author or authors from the JHipster project.
+ Copyright 2013-2022 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -17,11 +17,10 @@
  limitations under the License.
 -%>
 <%_
-const tsKeyId = generateTestEntityId(user.primaryKey.type);
+const tsKeyId = this.generateTestEntityId(user.primaryKey.type);
 _%>
 import { ComponentFixture, TestBed, waitForAsync, inject, fakeAsync, tick } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { HttpResponse } from '@angular/common/http';
 import { FormBuilder } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
@@ -32,96 +31,86 @@ import { User } from '../user-management.model';
 
 import { UserManagementUpdateComponent } from './user-management-update.component';
 
-describe('Component Tests', () => {
-  describe('User Management Update Component', () => {
-    let comp: UserManagementUpdateComponent;
-    let fixture: ComponentFixture<UserManagementUpdateComponent>;
-    let service: UserManagementService;
+describe('User Management Update Component', () => {
+  let comp: UserManagementUpdateComponent;
+  let fixture: ComponentFixture<UserManagementUpdateComponent>;
+  let service: UserManagementService;
 
-    beforeEach(
-      waitForAsync(() => {
-        TestBed.configureTestingModule({
-          imports: [HttpClientTestingModule],
-          declarations: [UserManagementUpdateComponent],
-          providers: [
-            FormBuilder,
-            {
-              provide: ActivatedRoute,
-              useValue: {
-                data: of({ user: new User(<%- tsKeyId %>, 'user', 'first', 'last', 'first@last.com', true, 'en', [Authority.USER], 'admin') }),
-              },
-            },
-          ],
-        })
-          .overrideTemplate(UserManagementUpdateComponent, '')
-          .compileComponents();
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+      declarations: [UserManagementUpdateComponent],
+      providers: [
+        FormBuilder,
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            data: of({ user: new User(<%- tsKeyId %>, 'user', 'first', 'last', 'first@last.com', true, 'en', [Authority.USER], 'admin') }),
+          },
+        },
+      ],
+    })
+      .overrideTemplate(UserManagementUpdateComponent, '')
+      .compileComponents();
+  }));
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(UserManagementUpdateComponent);
+    comp = fixture.componentInstance;
+    service = TestBed.inject(UserManagementService);
+  });
+
+  describe('OnInit', () => {
+    it('Should load authorities and language on init', inject(
+      [],
+      fakeAsync(() => {
+        // GIVEN
+        jest.spyOn(service, 'authorities').mockReturnValue(of(['USER']));
+
+        // WHEN
+        comp.ngOnInit();
+
+        // THEN
+        expect(service.authorities).toHaveBeenCalled();
+        expect(comp.authorities).toEqual(['USER']);
       })
-    );
+    ));
+  });
 
-    beforeEach(() => {
-      fixture = TestBed.createComponent(UserManagementUpdateComponent);
-      comp = fixture.componentInstance;
-      service = TestBed.inject(UserManagementService);
-    });
+  describe('save', () => {
+    it('Should call update service on save for existing user', inject(
+      [],
+      fakeAsync(() => {
+        // GIVEN
+        const entity = { id: <%- tsKeyId %> };
+        jest.spyOn(service, 'update').mockReturnValue(of(entity));
+        comp.editForm.patchValue(entity);
+        // WHEN
+        comp.save();
+        tick(); // simulate async
 
-    describe('OnInit', () => {
-      it('Should load authorities and language on init', inject(
-        [],
-        fakeAsync(() => {
-          // GIVEN
-          spyOn(service, 'authorities').and.returnValue(of(['USER']));
+        // THEN
+        expect(service.update).toHaveBeenCalledWith(expect.objectContaining(entity));
+        expect(comp.isSaving).toEqual(false);
+      })
+    ));
 
-          // WHEN
-          comp.ngOnInit();
+    it('Should call create service on save for new user', inject(
+      [],
+      fakeAsync(() => {
+        // GIVEN
+        const entity = { login: 'foo' } as User;
+        jest.spyOn(service, 'create').mockReturnValue(of(entity));
+        comp.editForm.patchValue(entity);
+        // WHEN
+        comp.save();
+        tick(); // simulate async
 
-          // THEN
-          expect(service.authorities).toHaveBeenCalled();
-          expect(comp.authorities).toEqual(['USER']);
-        })
-      ));
-    });
-
-    describe('save', () => {
-      it('Should call update service on save for existing user', inject(
-        [],
-        fakeAsync(() => {
-          // GIVEN
-          const entity = new User(<%- tsKeyId %>);
-          spyOn(service, 'update').and.returnValue(
-            of(
-              new HttpResponse({
-                body: entity,
-              })
-            )
-          );
-          comp.user = entity;
-          comp.editForm.patchValue({ id: entity.id });
-          // WHEN
-          comp.save();
-          tick(); // simulate async
-
-          // THEN
-          expect(service.update).toHaveBeenCalledWith(entity);
-          expect(comp.isSaving).toEqual(false);
-        })
-      ));
-
-      it('Should call create service on save for new user', inject(
-        [],
-        fakeAsync(() => {
-          // GIVEN
-          const entity = new User();
-          spyOn(service, 'create').and.returnValue(of(new HttpResponse({ body: entity })));
-          comp.user = entity;
-          // WHEN
-          comp.save();
-          tick(); // simulate async
-
-          // THEN
-          expect(service.create).toHaveBeenCalledWith(entity);
-          expect(comp.isSaving).toEqual(false);
-        })
-      ));
-    });
+        // THEN
+        expect(comp.editForm.getRawValue().id).toBeNull();
+        expect(service.create).toHaveBeenCalledWith(expect.objectContaining(entity));
+        expect(comp.isSaving).toEqual(false);
+      })
+    ));
   });
 });

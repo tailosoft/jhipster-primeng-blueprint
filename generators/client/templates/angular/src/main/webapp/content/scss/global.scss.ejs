@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2021 the original author or authors from the JHipster project.
+ Copyright 2013-2022 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -17,11 +17,11 @@
  limitations under the License.
 -%>
 @import 'bootstrap-variables';
-@import '~bootstrap/scss/functions';
+@import 'bootstrap/scss/functions';
 <%_ if (!clientThemeNone) { _%>
 @import "~bootswatch/dist/<%= clientTheme %>/variables";
 <%_ } _%>
-@import '~bootstrap/scss/variables';
+@import 'bootstrap/scss/variables';
 
 /* ==============================================================
 Bootstrap tweaks
@@ -122,6 +122,10 @@ Generic styles
   word-break: break-all;
 }
 
+.form-control {
+  background-color: #fff;
+}
+
 .readonly {
   background-color: #eee;
   opacity: 1;
@@ -179,6 +183,14 @@ Custom alerts for notification
 }
 
 /* ==========================================================================
+entity list page css
+========================================================================== */
+
+.table-entities thead th .d-flex > * {
+  margin: auto 0;
+}
+
+/* ==========================================================================
 entity detail page css
 ========================================================================== */
 .row-md.jh-entity-details {
@@ -224,4 +236,29 @@ ui bootstrap tweaks
   white-space: nowrap;
 }
 
+.dropdown-menu {
+  padding-left: 0px;
+}
+
+/* ==========================================================================
+angular-cli removes postcss-rtl processed inline css, processed rules must be added here instead
+========================================================================== */
+/* page-ribbon.component.scss */
+.ribbon {
+  left: -3.5em;
+  -moz-transform: rotate(-45deg);
+  -ms-transform: rotate(-45deg);
+  -o-transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+}
+
+/* navbar.component.scss */
+.navbar {
+  ul.navbar-nav {
+    .nav-item {
+      margin-left: 0.5em;
+    }
+  }
+}
 /* jhipster-needle-scss-add-main JHipster will add new css style */

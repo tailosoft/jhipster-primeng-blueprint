@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2021 the original author or authors from the JHipster project.
+ Copyright 2013-2022 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -17,11 +17,12 @@
  limitations under the License.
 -%>
 <%_
-const tsKeyId = generateTestEntityId(primaryKey.type);
+const tsKeyId = this.generateTestEntityId(primaryKey.type);
 _%>
 jest.mock('@ng-bootstrap/ng-bootstrap');
 
 import { ComponentFixture, TestBed, inject, fakeAsync, tick } from '@angular/core/testing';
+import { HttpResponse } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { of } from 'rxjs';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -30,57 +31,55 @@ import { <%= entityAngularName %>Service } from '../service/<%= entityFileName %
 
 import { <%= entityAngularName %>DeleteDialogComponent } from './<%= entityFileName %>-delete-dialog.component';
 
-describe('Component Tests', () => {
-    describe('<%= entityAngularName %> Management Delete Component', () => {
-        let comp: <%= entityAngularName %>DeleteDialogComponent;
-        let fixture: ComponentFixture<<%= entityAngularName %>DeleteDialogComponent>;
-        let service: <%= entityAngularName %>Service;
-        let mockActiveModal: NgbActiveModal;
+describe('<%= entityAngularName %> Management Delete Component', () => {
+    let comp: <%= entityAngularName %>DeleteDialogComponent;
+    let fixture: ComponentFixture<<%= entityAngularName %>DeleteDialogComponent>;
+    let service: <%= entityAngularName %>Service;
+    let mockActiveModal: NgbActiveModal;
 
-        beforeEach(() => {
-            TestBed.configureTestingModule({
-                imports: [HttpClientTestingModule],
-                declarations: [<%= entityAngularName %>DeleteDialogComponent],
-                providers: [NgbActiveModal]
-            })
-            .overrideTemplate(<%= entityAngularName %>DeleteDialogComponent, '')
-            .compileComponents();
-            fixture = TestBed.createComponent(<%= entityAngularName %>DeleteDialogComponent);
-            comp = fixture.componentInstance;
-            service = TestBed.inject(<%= entityAngularName %>Service);
-            mockActiveModal = TestBed.inject(NgbActiveModal);
-        });
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            imports: [HttpClientTestingModule],
+            declarations: [<%= entityAngularName %>DeleteDialogComponent],
+            providers: [NgbActiveModal]
+        })
+        .overrideTemplate(<%= entityAngularName %>DeleteDialogComponent, '')
+        .compileComponents();
+        fixture = TestBed.createComponent(<%= entityAngularName %>DeleteDialogComponent);
+        comp = fixture.componentInstance;
+        service = TestBed.inject(<%= entityAngularName %>Service);
+        mockActiveModal = TestBed.inject(NgbActiveModal);
+    });
 
-        describe('confirmDelete', () => {
-            it('Should call delete service on confirmDelete',
-                inject([],
-                    fakeAsync(() => {
-                        // GIVEN
-                        spyOn(service, 'delete').and.returnValue(of({}));
+    describe('confirmDelete', () => {
+        it('Should call delete service on confirmDelete',
+            inject([],
+                fakeAsync(() => {
+                    // GIVEN
+                    jest.spyOn(service, 'delete').mockReturnValue(of(new HttpResponse({ body: {} })));
 
-                        // WHEN
-                        comp.confirmDelete(<%- tsKeyId %>);
-                        tick();
+                    // WHEN
+                    comp.confirmDelete(<%- tsKeyId %>);
+                    tick();
 
-                        // THEN
-                        expect(service.delete).toHaveBeenCalledWith(<%- tsKeyId %>);
-                        expect(mockActiveModal.close).toHaveBeenCalledWith('deleted');
-                    })
-                )
-            );
+                    // THEN
+                    expect(service.delete).toHaveBeenCalledWith(<%- tsKeyId %>);
+                    expect(mockActiveModal.close).toHaveBeenCalledWith('deleted');
+                })
+            )
+        );
 
-            it('Should not call delete service on clear', () => {
-                // GIVEN
-                spyOn(service, 'delete');
+        it('Should not call delete service on clear', () => {
+            // GIVEN
+            jest.spyOn(service, 'delete');
 
-                // WHEN
-                comp.cancel();
+            // WHEN
+            comp.cancel();
 
-                // THEN
-                expect(service.delete).not.toHaveBeenCalled();
-                expect(mockActiveModal.close).not.toHaveBeenCalled();
-                expect(mockActiveModal.dismiss).toHaveBeenCalled();
-            });
+            // THEN
+            expect(service.delete).not.toHaveBeenCalled();
+            expect(mockActiveModal.close).not.toHaveBeenCalled();
+            expect(mockActiveModal.dismiss).toHaveBeenCalled();
         });
     });
 });

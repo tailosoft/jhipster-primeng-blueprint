@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2021 the original author or authors from the JHipster project.
+ Copyright 2013-2022 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -21,6 +21,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { I<%= entityAngularName %> } from '../<%= entityFileName %>.model';
 import { <%= entityAngularName %>Service } from '../service/<%= entityFileName %>.service';
+import { ITEM_DELETED_EVENT } from 'app/config/navigation.constants';
 
 @Component({
     templateUrl: './<%= entityFileName %>-delete-dialog.component.html'
@@ -28,7 +29,7 @@ import { <%= entityAngularName %>Service } from '../service/<%= entityFileName %
 export class <%= entityAngularName %>DeleteDialogComponent {
     <%= entityInstance %>?: I<%= entityAngularName %>;
 
-    constructor(protected <%= entityInstance %>Service: <%= entityAngularName %>Service, public activeModal: NgbActiveModal) {}
+    constructor(protected <%= entityInstance %>Service: <%= entityAngularName %>Service, protected activeModal: NgbActiveModal) {}
 
     cancel(): void {
         this.activeModal.dismiss();
@@ -36,7 +37,7 @@ export class <%= entityAngularName %>DeleteDialogComponent {
 
     confirmDelete(id: <%= tsKeyType %>): void {
         this.<%= entityInstance %>Service.delete(id).subscribe(() => {
-            this.activeModal.close('deleted');
+            this.activeModal.close(ITEM_DELETED_EVENT);
         });
     }
 }

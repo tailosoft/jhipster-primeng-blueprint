@@ -1,5 +1,5 @@
 /**
- * Copyright 2013-2021 the original author or authors from the JHipster project.
+ * Copyright 2013-2022 the original author or authors from the JHipster project.
  *
  * This file is part of the JHipster project, see https://www.jhipster.tech/
  * for more information.
@@ -20,24 +20,24 @@ const chalk = require('chalk');
 const needleClient = require('./needle-client');
 
 module.exports = class extends needleClient {
-  addElementTranslationKey(key, value, language) {
+  addElementTranslationKey(key, value, language, webappSrcDir) {
     const errorMessage = ' not added as a new entity in the menu.';
-    this._addTranslationKey(key, value, language, errorMessage, 'jhipster-needle-menu-add-element');
+    this._addTranslationKey(key, value, language, errorMessage, 'jhipster-needle-menu-add-element', webappSrcDir);
   }
 
-  addAdminElementTranslationKey(key, value, language) {
+  addAdminElementTranslationKey(key, value, language, webappSrcDir) {
     const errorMessage = ' not added as a new entry in the admin menu.';
-    this._addTranslationKey(key, value, language, errorMessage, 'jhipster-needle-menu-add-admin-element');
+    this._addTranslationKey(key, value, language, errorMessage, 'jhipster-needle-menu-add-admin-element', webappSrcDir);
   }
 
-  addEntityTranslationKey(key, value, language) {
+  addEntityTranslationKey(key, value, language, webappSrcDir) {
     const errorMessage = ' not added as a new entity in the menu.';
-    this._addTranslationKey(key, value, language, errorMessage, 'jhipster-needle-menu-add-entry');
+    this._addTranslationKey(key, value, language, errorMessage, 'jhipster-needle-menu-add-entry', webappSrcDir);
   }
 
-  _addTranslationKey(key, value, language, errorMessage, needle) {
+  _addTranslationKey(key, value, language, errorMessage, needle, webappSrcDir = this.CLIENT_MAIN_SRC_DIR) {
     const fullErrorMessage = `${chalk.yellow(' Reference to ') + language} ${chalk.yellow(errorMessage)}`;
-    const fullPath = `${this.CLIENT_MAIN_SRC_DIR}i18n/${language}/global.json`;
+    const fullPath = `${webappSrcDir}i18n/${language}/global.json`;
     const rewriteFileModel = this.generateFileModel(fullPath, needle, `"${key}": "${value}",`);
 
     this.addBlockContentToFile(rewriteFileModel, fullErrorMessage);

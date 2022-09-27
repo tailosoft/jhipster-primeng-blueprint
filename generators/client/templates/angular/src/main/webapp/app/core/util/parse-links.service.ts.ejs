@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2021 the original author or authors from the JHipster project.
+ Copyright 2013-2022 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -45,12 +45,12 @@ export class ParseLinks {
         throw new Error('section could not be split on ";"');
       }
 
-      const url: string = section[0].replace(/<(.*)>/, '$1').trim();
+      const url: string = section[0].replace(/<(.*)>/, '$1').trim(); // NOSONAR
       const queryString: { [key: string]: string | undefined } = {};
 
       url.replace(
-        new RegExp('([^?=&]+)(=([^&]*))?', 'g'),
-        ($0: string, $1: string | undefined, $2: string | undefined, $3: string | undefined) => {
+        /([^?=&]+)(=([^&]*))?/g,
+        (_$0: string, $1: string | undefined, _$2: string | undefined, $3: string | undefined) => {
           if ($1 !== undefined) {
             queryString[$1] = $3;
           }

@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2021 the original author or authors from the JHipster project.
+ Copyright 2013-2022 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -49,7 +49,7 @@ describe('account', () => {
 <%_ } else { _%>
     const expect1 = 'Welcome, <%= backendName %> Hipster!';
 <%_ } _%>
-    const value1 = await element(by.css('h1')).<%- elementGetter %>;
+    const value1 = await element(by.css('h1 > span')).<%- elementGetter %>;
     expect(value1).to.eq(expect1);
 <%_ if (!authenticationTypeOauth2) { _%>
     signInPage = await navBarPage.getSignInPage();

@@ -1,5 +1,5 @@
 /**
- * Copyright 2013-2021 the original author or authors from the JHipster project.
+ * Copyright 2013-2022 the original author or authors from the JHipster project.
  *
  * This file is part of the JHipster project, see https://www.jhipster.tech/
  * for more information.
@@ -16,49 +16,86 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const { startCase } = require('lodash');
 const utils = require('../utils');
 
 /**
  * The default is to use a file path string. It implies use of the template method.
  * For any other config an object { file:.., method:.., template:.. } can be used
  */
+const entityClientI18nFiles = {
+  entityBaseFiles: [
+    {
+      templates: [
+        {
+          sourceFile: context => `i18n/entity_${context.lang}.json.ejs`,
+          destinationFile: context => `${context.clientSrcDir}i18n/${context.lang}/${context.entityTranslationKey}.json`,
+        },
+      ],
+    },
+  ],
+};
+
+const enumClientI18nFiles = {
+  enumBaseFiles: [
+    {
+      templates: [
+        {
+          sourceFile: 'i18n/enum.json.ejs',
+          destinationFile: context => `${context.clientSrcDir}i18n/${context.lang}/${context.clientRootFolder}${context.enumInstance}.json`,
+        },
+      ],
+    },
+  ],
+};
 
 module.exports = {
+  entityClientI18nFiles,
+  enumClientI18nFiles,
   writeFiles,
 };
 
 function writeFiles() {
   return {
-    writeEnumFiles() {
-      this.fields.forEach(field => {
-        if (field.fieldIsEnum === true) {
-          const enumInfo = {
-            ...utils.getEnumInfo(field, this.clientRootFolder),
-            frontendAppName: this.frontendAppName,
-            packageName: this.packageName,
-          };
-
-          // Copy for each
-          if (!this.skipClient && this.enableTranslation) {
-            const languages = this.languages || this.getAllInstalledLanguages();
-            languages.forEach(language => {
-              this.copyEnumI18n(language, enumInfo, this.fetchFromInstalledJHipster('entity-i18n/templates'));
-            });
-          }
-        }
-      });
+    async writeEnumFiles() {
+      const { application, entity } = this;
+      if (entity.skipClient || !application.enableTranslation) return;
+      const { clientSrcDir, packageName, frontendAppName } = application;
+      await Promise.all(
+        entity.fields
+          .map(field => {
+            if (!field.fieldIsEnum) return undefined;
+            // Copy for each
+            const languages = application.languages || this.getAllInstalledLanguages();
+            return languages.map(lang =>
+              this.writeFiles({
+                sections: enumClientI18nFiles,
+                context: {
+                  ...utils.getEnumInfo(field, entity.clientRootFolder),
+                  lang,
+                  frontendAppName,
+                  packageName,
+                  clientSrcDir,
+                },
+              })
+            );
+          })
+          .flat()
+      );
     },
 
-    writeClientFiles() {
-      if (this.skipClient) return;
+    async writeClientFiles() {
+      const { application, entity } = this;
+      if (entity.skipClient || !application.enableTranslation) return;
 
-      // Copy for each
-      if (this.enableTranslation) {
-        const languages = this.languages || this.getAllInstalledLanguages();
-        languages.forEach(language => {
-          this.copyI18n(language, this.fetchFromInstalledJHipster('entity-i18n/templates'));
-        });
-      }
+      // Copy each
+      const { clientSrcDir, frontendAppName, languages = this.getAllInstalledLanguages() } = application;
+      await Promise.all(
+        languages.map(async lang => {
+          await this.writeFiles({ sections: entityClientI18nFiles, context: { ...entity, clientSrcDir, frontendAppName, lang } });
+          this.addEntityTranslationKey(entity.entityTranslationKeyMenu, entity.entityClassHumanized || startCase(entity.entityClass), lang);
+        })
+      );
     },
   };
 }

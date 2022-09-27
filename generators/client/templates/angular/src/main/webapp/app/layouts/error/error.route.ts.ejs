@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2021 the original author or authors from the JHipster project.
+ Copyright 2013-2022 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -24,25 +24,23 @@ export const errorRoute: Routes = [
   {
     path: 'error',
     component: ErrorComponent,
-    data: {
-      pageTitle: 'error.title',
-    },
+    title: 'error.title',
   },
   {
     path: 'accessdenied',
     component: ErrorComponent,
     data: {
-      pageTitle: 'error.title',
       errorMessage: 'error.http.403',
     },
+    title: 'error.title',
   },
   {
     path: '404',
     component: ErrorComponent,
     data: {
-      pageTitle: 'error.title',
       errorMessage: 'error.http.404',
     },
+    title: 'error.title',
   },
   {
     path: '**',
