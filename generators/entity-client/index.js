@@ -44,7 +44,7 @@ module.exports = class extends EntityClientGenerator {
                   const name = rel.relationshipName + id.field.path.slice(0, -1).map(_.upperFirst).join('');
                   const lastRelationship = id.relationshipsPath[id.relationshipsPath.length - 1] || rel;
                   let relatedFieldMatchMode = 'equals';
-                  if (['String', 'UUID'].includes(lastRelationship.relatedField.fieldType)) {
+                  if (['String', 'UUID'].includes(lastRelationship.relatedField && lastRelationship.relatedField.fieldType)) {
                     relatedFieldMatchMode = 'contains';
                   }
                   const fullPath = [rel.relationshipType === 'many-to-many' ? rel.relationshipNamePlural : rel.relationshipName, ...(id.field.path)];
