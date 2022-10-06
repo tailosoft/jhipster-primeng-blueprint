@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import EntityI18NGenerator from 'generator-jhipster/generators/entity-i18n';
+import EntityI18NGenerator from 'generator-jhipster/generators/entity-i18n/index.js';
 import { writeFiles } from './files.js';
 
 export default class extends EntityI18NGenerator {

@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import CypressGenerator from 'generator-jhipster/generators/cypress';
+import CypressGenerator from 'generator-jhipster/generators/cypress/index.js';
 
 export default class extends CypressGenerator {
   constructor(args, opts, features) {

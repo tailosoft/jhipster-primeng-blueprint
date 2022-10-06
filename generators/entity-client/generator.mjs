@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import EntityClientGenerator from 'generator-jhipster/generators/entity-client';
+import EntityClientGenerator from 'generator-jhipster/generators/entity-client/index.js';
 import { writeAngularFiles } from './files-angular.js';
 import { writeCypressEntityFiles } from './files-cypress.cjs';
 import pluralize from 'pluralize';

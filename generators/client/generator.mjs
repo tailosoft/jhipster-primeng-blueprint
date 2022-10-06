@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import ClientGenerator from 'generator-jhipster/generators/client';
+import ClientGenerator from 'generator-jhipster/generators/client/index.js';
 import { writeFiles as writeAngularFiles } from './files-angular.js';
 import _ from 'lodash';
 import path from 'path';
