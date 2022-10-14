@@ -52,7 +52,7 @@ Cypress.Commands.add('getEntityDetailsHeading', (entityInstanceName: string) => 
   return cy.get(`[data-cy="${entityInstanceName}DetailsHeading"]`);
 });
 
-Cypress.Commands.add('getEntityDeleteDialogHeading', (entityInstanceName: string) => {
+Cypress.Commands.add('getEntityDeleteDialogHeading', () => {
   return cy.get(`p-confirmdialog .p-dialog-title`).contains('Confirm delete operation');
 });
 
@@ -91,7 +91,7 @@ Cypress.Commands.add('setFieldSelectToIndexOfEntity', (index: number, fieldName:
 
 declare global {
   namespace Cypress {
-    interface Chainable<Subject> {
+    interface Chainable<> {
       getEntityHeading(entityName: string): Cypress.Chainable;
       getEntityCreateUpdateHeading(entityName: string): Cypress.Chainable;
       getEntityDetailsHeading(entityInstanceName: string): Cypress.Chainable;

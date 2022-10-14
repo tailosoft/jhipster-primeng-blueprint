@@ -24,7 +24,7 @@ do {
   requiredOtherEntities.unshift(...newEntities);
 } while (newEntities.length > 0);
 const otherEntities = this._.uniq(Object.values(differentRelationships).filter(rels => rels.length > 0).map(rels => rels[0].otherEntity));
-const importUser = relationships.filter(r => (r.relationshipRequired || r.id) && r.otherEntity.name === 'User') || otherEntities.some(e => e.relationships.some(r => r.otherEntity.name === 'User'));
+const importUser = otherEntities.some(e =>  e.name === 'User');
 // We cannot generate a required entity with relationship with required relationships.
 const skipCreateTest =
   // (
