@@ -1,0 +1,164 @@
+<%#
+ Copyright 2013-2023 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+
+{
+  "name": "<%= dasherizedBaseName %>",
+  "version": "0.0.1-SNAPSHOT",
+  "description": "<%= projectDescription %>",
+  "private": true,
+  "license": "UNLICENSED",
+  "cacheDirectories": [
+    "node_modules"
+  ],
+  "dependencies": {
+    "@angular/common": "<%= nodeDependencies['@angular/common'] %>",
+    "@angular/compiler": "<%= nodeDependencies['@angular/common'] %>",
+    "@angular/core": "<%= nodeDependencies['@angular/common'] %>",
+    "@angular/forms": "<%= nodeDependencies['@angular/common'] %>",
+    "@angular/localize": "<%= nodeDependencies['@angular/common'] %>",
+    "@angular/platform-browser": "<%= nodeDependencies['@angular/common'] %>",
+    "@angular/platform-browser-dynamic": "<%= nodeDependencies['@angular/common'] %>",
+    "@angular/router": "<%= nodeDependencies['@angular/common'] %>",
+    "@fortawesome/angular-fontawesome": "<%= nodeDependencies['@fortawesome/angular-fontawesome'] %>",
+    "@fortawesome/fontawesome-svg-core": "<%= nodeDependencies['@fortawesome/fontawesome-svg-core'] %>",
+    "@fortawesome/free-solid-svg-icons": "<%= nodeDependencies['@fortawesome/free-solid-svg-icons'] %>",
+    "@ng-bootstrap/ng-bootstrap": "<%= nodeDependencies['@ng-bootstrap/ng-bootstrap'] %>",
+<%_ if (enableTranslation) { _%>
+    "@ngx-translate/core": "<%= nodeDependencies['@ngx-translate/core'] %>",
+    "@ngx-translate/http-loader": "<%= nodeDependencies['@ngx-translate/http-loader'] %>",
+<%_ } _%>
+    "bootstrap": "<%= nodeDependencies.bootstrap %>",
+    <%_ if (!clientThemeNone) { _%>
+    "bootswatch": "<%= nodeDependencies.bootswatch %>",
+    <%_ } _%>
+    "dayjs": "<%= nodeDependencies['dayjs'] %>",
+    <%_ if (authenticationTypeSession && communicationSpringWebsocket) { _%>
+    "ngx-cookie-service": "<%= nodeDependencies['ngx-cookie-service'] %>",
+    <%_ } _%>
+    "ngx-infinite-scroll": "<%= nodeDependencies['ngx-infinite-scroll'] %>",
+    "@popperjs/core": "<%= nodeDependencies['@popperjs/core'] %>",
+    "rxjs": "<%= nodeDependencies['rxjs'] %>",
+<%_ if (communicationSpringWebsocket) { _%>
+    "sockjs-client": "1.6.1",
+    "@stomp/rx-stomp": "1.2.0",
+<%_ } _%>
+<%_ if (skipServer) { _%>
+    "sonar-scanner": "3.1.0",
+<%_ } _%>
+    "tslib": "<%= nodeDependencies['tslib'] %>",
+    "zone.js": "<%= nodeDependencies['zone.js'] %>"
+  },
+  "devDependencies": {
+<%_ if (microfrontend && applicationTypeGateway) { _%>
+    "@angular-architects/module-federation-runtime": "<%= nodeDependencies['@angular-architects/module-federation-runtime'] %>",
+<%_ } _%>
+<%_ if (communicationSpringWebsocket) { _%>
+    "@types/sockjs-client": "1.5.1",
+<%_ } _%>
+<%_ if (cypressTests) { _%>
+    "cypress": "<%= nodeDependencies['cypress'] %>",
+<%_ } _%>
+<%_ if (enableTranslation) { _%>
+    "folder-hash": "<%= nodeDependencies['folder-hash'] %>",
+    "merge-jsons-webpack-plugin": "<%= nodeDependencies['merge-jsons-webpack-plugin'] %>",
+<%_ } _%>
+<%_ if (!skipServer) { _%>
+    "prettier-plugin-java": "<%= nodeDependencies['prettier-plugin-java'] %>",
+<%_ } _%>
+    "@angular/cli": "<%= nodeDependencies['@angular/cli'] %>",
+    "@angular/compiler-cli": "<%= nodeDependencies['@angular/common'] %>",
+    "@angular/service-worker": "<%= nodeDependencies['@angular/common'] %>",
+    "@angular-builders/custom-webpack": "<%= nodeDependencies['@angular-builders/custom-webpack'] %>",
+    "@angular-builders/jest": "<%= nodeDependencies['@angular-builders/jest'] %>",
+    "@angular-devkit/build-angular": "<%= nodeDependencies['@angular/cli'] %>",
+    "@angular-eslint/eslint-plugin": "<%= nodeDependencies['@angular-eslint/eslint-plugin'] %>",
+    "@types/jest": "<%= nodeDependencies['@types/jest'] %>",
+    "@types/node": "<%= nodeDependencies['@types/node'] %>",
+    "@typescript-eslint/eslint-plugin": "<%= nodeDependencies['@typescript-eslint/eslint-plugin'] %>",
+    "@typescript-eslint/parser": "<%= nodeDependencies['@typescript-eslint/eslint-plugin'] %>",
+    "browser-sync": "<%= nodeDependencies['browser-sync'] %>",
+    "browser-sync-webpack-plugin": "<%= nodeDependencies['browser-sync-webpack-plugin'] %>",
+    "copy-webpack-plugin": "<%= nodeDependencies['copy-webpack-plugin'] %>",
+    "eslint": "<%= nodeDependencies['eslint'] %>",
+    "eslint-config-prettier": "<%= nodeDependencies['eslint-config-prettier'] %>",
+    "eslint-webpack-plugin": "<%= nodeDependencies['eslint-webpack-plugin'] %>",
+<%_ if (!skipJhipsterDependencies) { _%>
+    "generator-jhipster": "<%= jhipsterVersion %>",
+  <%_ blueprints.forEach(blueprint => { _%>
+    "<%= blueprint.name %>": "<%= blueprint.version %>",
+  <%_ }); _%>
+<%_ } _%>
+    "jest": "<%= nodeDependencies['jest'] %>",
+    "jest-environment-jsdom": "<%= nodeDependencies['jest'] %>",
+    "jest-preset-angular": "<%= nodeDependencies['jest-preset-angular'] %>",
+    "jest-date-mock": "<%= nodeDependencies['jest-date-mock'] %>",
+    "jest-junit": "<%= nodeDependencies['jest-junit'] %>",
+    "jest-sonar": "<%= nodeDependencies['jest-sonar'] %>",
+    "prettier": "<%= nodeDependencies['prettier'] %>",
+    "prettier-plugin-packagejson": "<%= nodeDependencies['prettier-plugin-packagejson'] %>",
+<%_ if (enableI18nRTL) { _%>
+    "postcss-rtlcss": "<%= nodeDependencies['postcss-rtlcss'] %>",
+<%_ } _%>
+    "rimraf": "<%= nodeDependencies['rimraf'] %>",
+    "swagger-ui-dist": "<%= nodeDependencies['swagger-ui-dist'] %>",
+    "ts-jest": "<%= nodeDependencies['ts-jest'] %>",
+    "typescript": "<%= nodeDependencies['typescript'] %>",
+    "webpack-bundle-analyzer": "<%= nodeDependencies['webpack-bundle-analyzer'] %>",
+    "webpack-merge": "<%= nodeDependencies['webpack-merge'] %>",
+    "webpack-notifier": "<%= nodeDependencies['webpack-notifier'] %>"
+  },
+  "overrides": {
+    "webpack": "<%= nodeDependencies['webpack'] %>"
+  },
+  "engines": {
+    "node": ">=<%= nodeVersion %>"
+  },
+  "config": {
+    "default_environment": "prod"
+  },
+  "scripts": {
+    "prettier:check": "prettier --check \"{,src/**/,webpack/,.blueprint/**/}*.{<%= prettierExtensions %>}\"",
+    "prettier:format": "prettier --write \"{,src/**/,webpack/,.blueprint/**/}*.{<%= prettierExtensions %>}\"",
+    "lint": "eslint . --ext .js,.ts",
+    "lint:fix": "<%= clientPackageManager %> run lint -- --fix",
+    "cleanup": "rimraf <%= clientDistDir %>",
+    "clean-www": "rimraf <%= clientDistDir %>app/{src,<%= temporaryDir %>}",
+    "jest": "jest --coverage --logHeapUsage --maxWorkers=2 --config jest.conf.js",
+    "start": "ng serve<% if (!microfrontend) { %> --hmr<% } %>",
+    "start-tls": "<%= clientPackageManager %> run webapp:dev-ssl",
+<%_ if (skipServer) { _%>
+    "sonar": "sonar-scanner",
+<%_ } _%>
+    "serve": "<%= clientPackageManager %> run start --",
+    "build": "<%= clientPackageManager %> run webapp:prod --",
+    "pretest": "<%= clientPackageManager %> run lint",
+    "test": "ng test --coverage --log-heap-usage -w=2",
+    "test:watch": "<%= clientPackageManager %> run test -- --watch",
+    "watch": "concurrently npm:start<% if(!skipServer) { %> npm:backend:start<% } %>",
+    "build-watch": "concurrently 'npm run webapp:build:dev -- --watch'<% if(!skipServer) { %> npm:backend:start<% } %>",
+    "webapp:build": "<%= clientPackageManager %> run clean-www && <%= clientPackageManager %> run webapp:build:dev",
+    "webapp:build:dev": "ng build --configuration development",
+    "webapp:build:prod": "ng build --configuration production",
+    "webapp:dev": "ng serve",
+    "webapp:dev-verbose": "ng serve --verbose",
+    "webapp:dev-ssl": "ng serve --ssl",
+    "webapp:prod": "<%= clientPackageManager %> run clean-www && <%= clientPackageManager %> run webapp:build:prod",
+    "webapp:test": "<%= clientPackageManager %> run test --"
+  }
+}
