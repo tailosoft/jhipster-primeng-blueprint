@@ -2,6 +2,15 @@
 [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url]
 > JHipster blueprint, This blueprint generated code that uses primeng components instead of bootstrap ones
 
+# IMPORTANT
+The latest release require using this fork with npm link:
+https://github.com/yelhouti/generator-jhipster/tree/composite-key
+
+or this one for jhipster 7
+https://github.com/yelhouti/generator-jhipster/tree/composite-key-7
+
+If you use this project and/or use composite keys in you project please upvote this PR: https://github.com/jhipster/generator-jhipster/pull/19849 so npm link is not need anymore
+
 # Introduction
 
 This is a [JHipster](https://www.jhipster.tech/) blueprint, that is meant to be used in a JHipster application.
