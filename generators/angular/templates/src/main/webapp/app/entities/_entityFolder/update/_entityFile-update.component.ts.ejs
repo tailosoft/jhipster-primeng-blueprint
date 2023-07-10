@@ -1,0 +1,345 @@
+<%#
+ Copyright 2013-2021 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+<%_
+const hasRelationshipQuery = relationships && relationships.some(r => r.ownerSide);
+const hasCompositeXToOneRelationshipQuery = relationships && relationships.some(r => r.ownerSide && r.otherEntity.primaryKey.composite && r.relationshipType !== 'many-to-many');
+const hasPaginationRelationship = relationships && relationships.some(r => r.ownerSide && r.otherEntity.pagination !== 'no');
+const hasMultiFieldRelationship = relationships && relationships.some(r => r.ownerSide && r.clientFields.length > 1 && r.relationshipType !== 'many-to-many');
+const hasMultiFieldIdRelationship = relationships && relationships.some(r => r.id && r.ownerSide && r.clientFields.length > 1 && r.relationshipType !== 'many-to-many');
+const hasValidationRule = fields.some(field =>
+        field.fieldValidate && (
+                field.fieldValidateRules.includes('required') ||
+                field.fieldValidateRules.includes('minlength') ||
+                field.fieldValidateRules.includes('maxlength') ||
+                field.fieldValidateRules.includes('min') ||
+                field.fieldValidateRules.includes('max') ||
+                field.fieldValidateRules.includes('pattern')
+        )
+);
+const hasRequiredRelationship = relationships.some(relationship => relationship.relationshipRequired);
+_%>
+import { Component, OnInit<% if (hasMultiFieldRelationship || hasPaginationRelationship) { %>, OnDestroy<% } %> } from '@angular/core';
+import { HttpResponse } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
+import SharedModule from 'app/shared/shared.module';
+import { ReactiveFormsModule } from '@angular/forms';
+import { finalize, Observable<% if (hasMultiFieldRelationship || hasPaginationRelationship) { %>, ReplaySubject<% } %> } from 'rxjs';
+<% if (hasMultiFieldRelationship) { %>
+import { <% if (hasMultiFieldIdRelationship) { %>filter, <% } %>takeUntil } from 'rxjs/operators';
+<%_ } _%>
+<%_ if (hasPaginationRelationship) { _%>
+import { LazySubscriber } from 'app/core/request/lazy-subscriber';
+import { DropdownLazyLoadEvent } from 'primeng/dropdown';
+<%_ } _%>
+
+import { <%= entityAngularName %>FormService, <%= entityAngularName %>FormGroup } from './<%= entityFileName %>-form.service';
+import { I<%= entityAngularName %> } from '../<%= entityFileName %>.model';
+import { <%= entityAngularName %>Service } from '../service/<%= entityFileName %>.service';
+<%_ if (hasRelationshipQuery || anyFieldIsBlobDerived) { _%>
+import { MessageService } from 'primeng/api';
+<%_ } _%>
+<%_ if (anyFieldIsBlobDerived) { _%>
+import { FileSelectEvent } from 'primeng/fileupload';
+import { DataUtils } from 'app/core/util/data-util.service';
+<%_ } _%>
+<%_
+let shouldImportFormGroupType = false;
+const alreadyImported = new Set([name]) _%>
+<%_ for (const relationship of relationships) { _%>
+    <%_
+        if (!shouldImportFormGroupType && relationship.id && relationship.otherEntity.primaryKey.composite) {
+            shouldImportFormGroupType = true;
+        }
+    _%>
+    <%_ if (relationship.ownerSide) { _%>
+        <%_ relationship.otherEntity.primaryKey.fields.forEach(field => { _%>
+            <%_ if(!alreadyImported.has(field.entity.name)) { _%>
+                <%_ alreadyImported.add(field.entity.name); _%>
+import { I<%= field.entity.entityAngularName %> } from 'app/entities/<%= field.entity.entityFolderName %>/<%= field.entity.entityFileName %>.model';
+                <%_ if(relationship.otherEntity.name === 'User') { _%>
+import { UserService } from 'app/entities/user/user.service';
+                <%_ } else {_%>
+    import { <%= field.entity.entityAngularName%>Service } from 'app/entities/<%= field.entity.entityFolderName %>/service/<%= field.entity.entityFileName %>.service';
+                <%_ } _%>
+            <%_ } _%>
+        <%_ }) _%>
+    <%_ } _%>
+<%_ } _%>
+<%_ if (shouldImportFormGroupType) { _%>
+import { FormGroupType } from '../../../shared/types';
+<%_ } _%>
+<%_ const enumImports = this.generateEntityClientEnumImports(fields, clientFramework); _%>
+<%_ enumImports.forEach( (importedPath, importedType) => { _%>
+import { <%- importedType %> } from '<%- importedPath %>';
+<%_ }); _%>
+
+@Component({
+    standalone: true,
+    selector: '<%= jhiPrefixDashed %>-<%= entityFileName %>-update',
+    templateUrl: './<%= entityFileName %>-update.component.html',
+    imports: [SharedModule, ReactiveFormsModule],
+})
+
+export class <%= entityAngularName %>UpdateComponent implements OnInit<% if (hasMultiFieldRelationship || hasPaginationRelationship) { %>, OnDestroy<% } %> {
+<%_ if (!primaryKey.autoGenerate || primaryKey.derived) { _%>
+    edit = false;
+<%_ } _%>
+    isSaving = false;
+<%_ for (const relationship of relationships) { _%>
+    <%_ if (relationship.ownerSide) { _%>
+        <%_ relationship.clientFields.forEach((cf, i) => { _%>
+            <%_ if (cf.lastRelationship.otherEntity.pagination !== 'no' || i > 0) { _%>
+    <%= cf.name %>OptionsSubscriber?: LazySubscriber<I<%= cf.entity.name %>>;
+    <%= cf.name %>SelectedOptions: I<%= cf.entity.name %>[] | null = null;
+            <%_ } else { _%>
+    <%= cf.name %>Options: I<%= cf.entity.name %>[] | null = null;
+    <%= cf.name %>SelectedOptions: I<%= cf.entity.name %>[] | null = null;
+            <%_ } _%>
+            <%_ if (relationship.relationshipType !== 'many-to-many') { _%>
+    <%= cf.name %>FilterValue?: any;
+            <%_ } _%>
+        <%_ }) _%>
+    <%_ } _%>
+<%_ } _%>
+<%_ for (const field of fields) { _%>
+    <%_ if(field.fieldIsEnum) {_%>
+    <%= field.fieldName %>Options = Object.entries(<%= field.fieldType %>).map(([k]) => ({ label: k, value: k }));
+    <%_ } else if (['byte[]', 'ByteBuffer'].includes(field.fieldType) && field.fieldTypeBlobContent !== 'text') { _%>
+    <%= field.fieldName %>File?: File;
+    <%_ } _%>
+<%_ } _%>
+
+    editForm: <%= entityAngularName %>FormGroup = this.<%= entityInstance %>FormService.create<%= entityAngularName %>FormGroup();
+
+<%_ if (hasMultiFieldRelationship || hasPaginationRelationship) { _%>
+    private onDestroySubject = new ReplaySubject(1);
+<%_ } _%>
+
+    constructor(
+        <%_ if (anyFieldIsBlobDerived) { _%>
+        protected dataUtils: DataUtils,
+<%_ } _%>
+<%_ if (anyFieldIsBlobDerived || hasRelationshipQuery) { _%>
+        protected messageService: MessageService,
+        <%_ } _%>
+        protected <%= entityInstance %>Service: <%= entityAngularName %>Service,
+        protected <%= entityInstance %>FormService: <%= entityAngularName %>FormService,
+<%_ const alreadyInConstructor = new Set([name]) _%>
+<%_ for (const relationship of relationships) { _%>
+    <%_ if (relationship.ownerSide) { _%>
+        <%_ relationship.clientFields.forEach(cf => { _%>
+            <%_ if(!alreadyInConstructor.has(cf.entity.name)) { _%>
+                <%_ alreadyInConstructor.add(cf.entity.name); _%>
+        protected <%= this._.lowerFirst(cf.entity.name) %>Service: <%= cf.entity.entityAngularName %>Service,
+            <%_ } _%>
+        <%_ }) _%>
+    <%_ } _%>
+<%_ } _%>
+        protected activatedRoute: ActivatedRoute,
+    ) {
+    }
+
+    ngOnInit(): void {
+        this.isSaving = false;
+<%_
+relationships.filter(r => r.ownerSide && r.relationshipType !== 'many-to-many').forEach(relationship => {
+    for (let i = 0; i < relationship.clientFields.length - 1; i++) {
+        const cf = relationship.clientFields[i];
+        const nextCf = relationship.clientFields[i + 1];
+_%>
+
+        this.<%= cf.parentFormName %>.controls.<%= cf.lastRelationship.relationshipName %>.valueChanges.pipe(
+            takeUntil(this.onDestroySubject),
+    <%_ if (relationship.id) { _%>
+            filter(() => !this.edit)
+    <%_ } _%>
+        ).subscribe(() => {
+            this.on<%= nextCf.nameCapitalized %>LazyLoadEvent({});
+        <%_ if (nextCf.needsFieldName) { _%>
+            this.<%= nextCf.formName %>.controls.<%= nextCf.fieldName %>.reset();
+        <%_ } else { _%>
+            this.<%= nextCf.formName %>.reset();
+        <%_ } _%>
+        });
+<%_
+    }
+}) _%>
+
+<%_ for (const relationship of relationships) { _%>
+    <%_ if (relationship.ownerSide) { _%>
+        <%_ relationship.clientFields.forEach((cf, i) => { _%>
+            <%_ if (cf.lastRelationship.otherEntity.pagination !== 'no' || i > 0) { _%>
+    this.<%= cf.name %>OptionsSubscriber = new LazySubscriber(req => this.<%= this._.lowerFirst(cf.entity.name) %>Service.query(req), this.onDestroySubject);;
+            <%_ } _%>
+        <%_ }) _%>
+    <%_ } _%>
+<%_ } _%>
+
+        this.activatedRoute.data.subscribe(({ <%= entityInstance %> }) => {
+            this.updateForm(<%= entityInstance %>);
+        });
+<%_ for (const relationship of relationships.filter(r => r.ownerSide)) { _%>
+    <%_ /* same condition and explanation as in relationship_load_emplate*/ _%>
+    <%_ relationship.clientFields.forEach((cf, i) => { _%>
+        <%_ if ((i === 0 && cf.entity.pagination === 'no') || !cf.entity.jpaMetamodelFiltering) { _%>
+        this.loadAll<%= cf.nameCapitalizedPlural %>()
+        <%_ } _%>
+    <%_ }) _%>
+<%_ } _%>
+    }
+
+<%_ if (hasMultiFieldRelationship || hasPaginationRelationship) { _%>
+    ngOnDestroy(): void {
+        this.onDestroySubject.next(undefined);
+        this.onDestroySubject.complete();
+    }
+<%_ } _%>
+
+<%_ function generateForms(relationship, formName, type) {
+    return `get ${relationship.relationshipName}Form(): ${type} {
+    return this.${formName}.controls.${relationship.relationshipName};
+    }
+
+    ${relationship.otherEntity.relationships.filter(r => r.id).map(r => generateForms(r, `${relationship.relationshipName}Form`, `FormGroupType<${type}>['${r.relationshipName}']`)).join('')}`;
+} _%>
+<%_ relationships.filter(r => r.ownerSide && r.otherEntity.primaryKey.composite).forEach(r => { _%>
+    <%- generateForms(r, "editForm", `FormGroupType<${entityAngularName}FormGroup>['${r.relationshipName}']`) -%>
+<%_ }) _%>
+
+<%_ for (relationship of relationships.filter(r => r.ownerSide)) { _%>
+    <%- include('./relationship_load_template', {relationship}) %>
+<%_ } _%>
+
+    updateForm(<%= entityInstance %>: I<%= entityAngularName %> | null): void {
+        if (<%= entityInstance %>) {
+<%_ if (!primaryKey.autoGenerate || primaryKey.derived) {_%>
+            this.edit = true;
+<%_ } _%>
+            this.editForm.reset({ ...<%= entityInstance %> }, { emitEvent: false, onlySelf: true });
+<%_ for (const field of fields) {
+    const fieldName = field.fieldName;
+    const fieldType = field.fieldType;
+    const fieldTypeBlobContent = field.fieldTypeBlobContent;
+            _%>
+    <%_ if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent !== 'text') { _%>
+            if (<%= entityInstance %>.<%= fieldName %>) {
+                fetch(`data:${<%= entityInstance %>.<%= fieldName %>ContentType!};base64,${<%= entityInstance %>.<%= fieldName %>}`)
+                    .then((res: any) => res.blob() as string)
+                    .then(blob => {
+                        this.<%= fieldName %>File = new File([blob], '', {type: <%= entityInstance %>.<%= fieldName %>ContentType!});
+                    });
+            }
+    <%_ } _%>
+<%_ } _%>
+<%_ for (const relationship of relationships) { _%>
+    <%_ if (relationship.ownerSide) { _%>
+        <%_ relationship.clientFields.forEach(cf => { _%>
+            <%_ if(cf.lastRelationship.relationshipManyToMany) { _%>
+                <%_ if (cf.lastRelationship.otherEntity.pagination !== 'no') { _%>
+            this.<%= cf.name %>SelectedOptions = <%= entityInstance %>.<%= cf.fullPath.slice(0, -1).join('?.') %> ?? [];
+                <%_ } _%>
+            <%_ } else { _%>
+                <%_ if (cf.lastRelationship.otherEntity.pagination !== 'no') { _%>
+                    <%_ if (!cf.lastRelationship.id) { _%>
+            if (<%= entityInstance %>.<%= cf.fullPath.slice(0, -1).join('?.') %>) {
+                this.<%= cf.name %>OptionsSubscriber!.options = [<%= entityInstance %>.<%= cf.fullPath.slice(0, -1).join('.') %>];
+                this.<%= cf.name %>FilterValue = <%= entityInstance %>.<%= relationship.relationshipName %>.<%= cf.relatedFieldPath.join('.') %>;
+            }
+                    <%_ } else { _%>
+            this.<%= cf.name %>OptionsSubscriber!.options = [<%= entityInstance %>.<%= cf.fullPath.slice(0, -1).join('.') %>];
+            this.<%= cf.name %>FilterValue = <%= entityInstance %>.<%= relationship.relationshipName %>.<%= cf.relatedFieldPath.join('.') %>;
+                    <%_ } _%>
+                <%_ } else { _%>
+            this.<%= cf.name %>FilterValue = <%= entityInstance %>.<%= relationship.relationshipName %><%= relationship.id ? '.' : '?.' %><%= cf.relatedFieldPath.join('.') %>;
+                <%_ } _%>
+            <%_ } _%>
+        <%_ }) _%>
+    <%_ } _%>
+<%_ } _%>
+        } else {
+<%_ if (!primaryKey.autoGenerate || primaryKey.derived) { _%>
+            this.edit = false;
+        <%_ } _%>
+            this.editForm.reset({
+<%_ for (const field of fields) { _%>
+    <%_ if (field.fieldType === 'Boolean') { _%>
+                <%= field.fieldName %>: false,
+    <%_ } else if ( ['Instant', 'ZonedDateTime', 'LocalDate'].includes(field.fieldType) ) { _%>
+                <%= field.fieldName %>: new Date(),
+        <%_ } _%>
+<%_ } _%>
+        });
+    }
+    }
+
+<%_ if (anyFieldIsBlobDerived) { _%>
+    onFileSelect(event: FileSelectEvent, field: string): void {
+        const file = event.files[0];
+        this.dataUtils.toBase64(file, (base64Data: string) => {
+            this.editForm.patchValue({
+                [field]: base64Data,
+                [field + 'ContentType']: file.type
+            });
+        });
+    }
+
+    onFileRemove(field: string): void {
+         this.editForm.patchValue({
+            [field]: null,
+            [field + 'ContentType']: null,
+        });
+        }
+
+    <%_ } _%>
+    previousState(): void {
+        window.history.back();
+    }
+
+    save(): void {
+        if (this.editForm.valid) {
+            this.isSaving = true;
+            const <%= entityInstance %> = this.editForm.value;
+        <%_ if (!primaryKey.autoGenerate || primaryKey.derived) {_%>
+            if (this.edit) {
+        <%_ } else { _%>
+            if (<%= entityInstance %>.<%= primaryKey.name %>) {
+        <%_ } _%>
+                this.subscribeToSaveResponse(this.<%= entityInstance %>Service.update(<%= entityInstance %> as I<%= entityAngularName %>));
+            } else {
+                this.subscribeToSaveResponse(this.<%= entityInstance %>Service.create(<%= entityInstance %> as I<%= entityAngularName %>));
+            }
+        } else {
+            this.editForm.markAllAsTouched();
+        }
+    }
+
+    protected subscribeToSaveResponse(result: Observable<HttpResponse<I<%= entityAngularName %>>>): void {
+        result.pipe(finalize(() => this.onSaveFinalize())).subscribe({
+            next: () => this.onSaveSuccess()
+        });
+    }
+
+    protected onSaveSuccess(): void {
+        this.previousState();
+    }
+
+    protected onSaveFinalize(): void {
+        this.isSaving = false;
+    }
+}

@@ -1,0 +1,258 @@
+<%#
+ Copyright 2013-2023 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+<div class="entity-list">
+    <h2 class="title" id="page-heading" data-cy="<%= entityClass %>Heading">
+        <span <%= jhiPrefix %>Translate="<%= i18nKeyPrefix %>.home.title"><%= entityClassPluralHumanized %></span>
+    </h2>
+    <div class="list-buttons">
+    <%_ if (!readOnly) { _%>
+            <p-button id="jh-create-entity" class="jh-create-entity create-<%= entityUrl %>" [routerLink]="['/<%= entityUrl %>/new']"
+                  [label]="'<%= i18nKeyPrefix %>.home.createLabel' | translate" icon="pi pi-plus" iconPos="left" data-cy="entityCreateButton">
+            </p-button>
+    <%_ } _%>
+    </div>
+    <div class="list-content">
+    <%_ if (searchEngineAny) { _%>
+        <div class="row">
+            <div class="col-sm-12">
+                <form name="searchForm" class="form-inline">
+                    <div class="input-group w-100 mt-3">
+                        <input type="text" class="form-control" [(ngModel)]="currentSearch" id="currentSearch" name="currentSearch" placeholder="<% if (enableTranslation) { %>{{ '<%= i18nKeyPrefix %>.home.search' | translate }}<% } else { %>Query<% } %>">
+                        <button pButton (click)="search(currentSearch)" icon="pi pi-search">
+                        </button>
+                        <button pButton class="p-button-danger" (click)="search('')" *ngIf="currentSearch" icon="pi pi-trash">
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    <%_ } _%>
+        <p-table #<%= entityInstance %>Table [value]="<%= entityInstancePlural %>!" [rowTrackBy]="trackId" [responsive]="true"<%
+    if (pagination !== 'no') {
+        %> [lazy]="true" [rows]="itemsPerPage" [totalRecords]="totalItems!" [loading]="loading" sortMode="multiple"<%
+        if (pagination === 'infinite-scroll') {
+            %> [scrollable]="true" [virtualScroll]="true" (onLazyLoad)="onLazyLoadEvent($event)" scrollHeight="200px" [virtualRowHeight]="34"
+               [showCurrentPageReport]="true" [currentPageReportTemplate]="'list.tableReportTemplate' | translate: { first: '{first}', last: '{last}' , totalRecords: '{totalRecords}' }" <%
+        } else if (pagination === 'pagination') {
+            %> [paginator]="true" (onLazyLoad)="onLazyLoadEvent($event)" <%
+        }
+    }
+    %>>
+        <%_ if (searchEngine === 'elasticsearch') { _%>
+            <ng-template pTemplate="caption">
+                <div style="text-align: right">
+                    <i class="pi pi-search" style="margin:4px 4px 0 0"></i>
+<!--    FIXME                <input pInputText type="text" placeholder="Global Filter" [ngModel]="filters.global?.value"-->
+<!--                       (ngModelChange)="filter($event, 'global')" style="width:auto">-->
+                </div>
+            </ng-template>
+        <%_ } _%>
+            <ng-template pTemplate="header">
+                <tr>
+                <%_ for (const field of fields) {
+                    fieldType = field.fieldType;
+                _%>
+                    <th<% if (pagination !== 'no') { %> pSortableColumn="<%= field.fieldName %>"<% } %>>
+                        <span <%= jhiPrefix %>Translate="<%=`${i18nKeyPrefix}.${field.fieldName}` %>"><%= field.fieldNameHumanized %></span>
+                <%_ if (pagination !== 'no') { _%>
+                        <p-sortIcon field="<%= field.fieldName %>"></p-sortIcon>
+                <%_ } _%>
+                <%_ if (jpaMetamodelFiltering) { _%>
+                        <%_ if (['byte[]', 'ByteBuffer'].includes(fieldType)) { _%>
+                        <%_ } else if (fieldType === 'Boolean') { _%>
+                        <p-columnFilter type="boolean" matchMode="equals" field="<%= field.fieldName %>" display="menu" [showOperator]="false" class="p-ml-auto"></p-columnFilter>
+                        <%_ } else if (field.fieldIsEnum) { _%>
+                        <p-columnFilter field="<%= field.fieldName %>" matchMode="in" display="menu" [showOperator]="false" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false" class="p-ml-auto">
+                            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                                <p-multiSelect [ngModel]="value" [options]="<%= field.fieldName %>Options!" (onChange)="filter($event.value)">
+                                    <ng-template let-<%= field.fieldName %> pTemplate="item">{{'<%= `${frontendAppName}.${field.fieldType}` %>.' + <%= field.fieldName %>.label | translate}}</ng-template>
+                                </p-multiSelect>
+                            </ng-template>
+                        </p-columnFilter>
+                        <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { /* TODO implementa better filter with minutes... */ _%>
+                        <p-columnFilter type="dateTime" field="<%= field.fieldName %>" display="menu" [showOperator]="false" class="p-ml-auto">
+                            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                                <p-calendar [ngModel]="value" (ngModelChange)="filter($event)" [showTime]="true" ></p-calendar>
+                            </ng-template>
+                        </p-columnFilter>
+                        <%_ } else if (fieldType === 'LocalDate') { _%>
+                        <p-columnFilter type="date" field="<%= field.fieldName %>" display="menu" [showOperator]="false" class="p-ml-auto"></p-columnFilter>
+                        <%_ } else if (['Integer', 'Long', 'Float', 'Double', 'BigDecimal', 'Duration'].includes(fieldType)) { _%>
+                        <p-columnFilter type="numeric" field="<%= field.fieldName %>" display="menu" [showOperator]="false" class="p-ml-auto"></p-columnFilter>
+                        <%_ } else { _%>
+                        <p-columnFilter type="text" matchMode="contains" field="<%= field.fieldName %>" display="menu" [showOperator]="false" class="p-ml-auto"></p-columnFilter>
+                        <%_ } _%>
+                    <%_ } _%>
+                    </th>
+                <%_ } _%>
+<%_ for (const relationship of relationships.filter(r => r.ownerSide)) { _%>
+    <%_ if (relationship.relationshipManyToMany) { _%>
+        <%_ if (pagination === 'no' && relationship.otherEntity.entityClass !== 'User' && !relationship.otherEntity.primaryKey.composite) { _%>
+                    <th>
+                        <span <%= jhiPrefix %>Translate="<%=`${i18nKeyPrefix}.${relationship.otherEntityField}` %>"><%= relationship.relationshipNameHumanized %></span>
+            <%_ if (jpaMetamodelFiltering) { _%>
+                        <p-columnFilter field="<%= relationship.relationshipName %>" matchMode="in" display="menu" [showOperator]="false" [showMatchModes]="false" [showAddButton]="false" class="p-ml-auto">
+                            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                                <p-multiSelect [ngModel]="value" [options]="<%= relationship.relationshipName %>Options" (onChange)="filter($event.value)" optionLabel="<%= relationship.otherEntityField %>" optionValue="<%= relationship.otherEntity.primaryKey.name %>"<% if(relationship.otherEntity.pagination !== 'no') { %>
+                                           [lazy]="true" [virtualScroll]="true" [virtualScrollItemSize]="38" [lazySelectedOptions]="<%= relationship.relationshipName %>SelectedOptions!" (onLazyLoad)="on<%= _.upperFirst(field.formName) %>LazyLoadEvent($event)"<% } %>></p-multiSelect>
+                            </ng-template>
+                        </p-columnFilter>
+            <%_ } _%>
+                    </th>
+        <%_ } _%>
+    <%_ } else { _%>
+        <%_ relationship.clientFields.forEach(cf => { _%>
+                    <th <% if (pagination !== 'no') { %> pSortableColumn="<%= relationship.relationshipName %>.<%= cf.relatedFieldPath.join('.') %>"<% } %>>
+                        <span <%= jhiPrefix %>Translate="<%= cf.translationKey %>"><%= cf.lastRelationship.relationshipNameHumanized %></span>
+            <%_ if (pagination !== 'no') { _%>
+                        <p-sortIcon field="<%= relationship.relationshipName %>.<%= cf.relatedFieldPath.join('.') %>"></p-sortIcon>
+            <%_ } _%>
+            <%_ if (jpaMetamodelFiltering) { _%>
+                        <p-columnFilter field="<%= relationship.relationshipFieldName + cf.id.fieldNameCapitalized %>" matchMode="in" display="menu" [showOperator]="false" [showMatchModes]="false" [showAddButton]="false" class="p-ml-auto">
+                            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                                <p-multiSelect [ngModel]="value" (onChange)="filter($event.value)" optionLabel="<%= cf.lastRelationship.otherEntityField %>" optionValue="<%= cf.fieldName %>"
+                                <%_ if(cf.lastRelationship.otherEntity.pagination !== 'no') { _%>
+                                           [options]="<%= cf.name %>OptionsSubscriber!.options" [lazy]="true" [virtualScroll]="true" [virtualScrollItemSize]="38" [lazySelectedOptions]="<%= cf.name %>SelectedOptions!" (onLazyLoad)="on<%= cf.nameCapitalized %>LazyLoadEvent($event)"
+                                <%_ } else { _%>
+                                           [options]="<%= cf.name %>Options!"
+                                <%_ } _%>
+                                ></p-multiSelect>
+                            </ng-template>
+                        </p-columnFilter>
+            <%_ } _%>
+                    </th>
+        <%_ }) _%>
+    <%_ } _%>
+<%_ } _%>
+                    <th style="width: 124px"></th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-<%= entityInstance %>>
+                <tr data-cy="entityTable">
+                <%_
+            const keys = primaryKey.fields.length === 1 ? `${entityInstance}.${primaryKey.name}` : `{ ${primaryKey.fields.map(field => `${field.fieldName}: ${entityInstance}.${field.fieldNameDottedAsserted}`).join(', ')} }`;
+            const routerLink = ` [routerLink]="['/${ entityUrl }', ${ keys }, 'view']"`;
+            for ([idx, field] of fields.filter(field => !field.hidden).entries()) {
+                const fieldName = field.fieldName;style="width: 124px"
+                const fieldNameCapitalized = field.fieldNameCapitalized;
+                const fieldType = field.fieldType;
+                const fieldTypeBlobContent = field.fieldTypeBlobContent;
+            _%>
+                <%_ if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent === 'image') { _%>
+                        <td>
+                            <a *ngIf="<%= entityInstance %>.<%= fieldName %>" (click)="openFile(<%= entityInstance %>.<%= fieldName %>, <%= entityInstance %>.<%= fieldName %>ContentType)">
+                            <img [src]="'data:' + <%=entityInstance %>.<%=fieldName%>ContentType + ';base64,' + <%=entityInstance %>.<%=fieldName%>" style="max-height: 30px;" alt="<%=entityInstance %> image"/>
+                            </a>
+                            <span *ngIf="<%= entityInstance %>.<%= fieldName %>">{{<%= entityInstance %>.<%= fieldName %>ContentType}}, {{byteSize(<%= entityInstance %>.<%= fieldName %>)}}</span>
+                        </td>
+                <%_ } else if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent === 'any') { _%>
+                        <td>
+                            <a *ngIf="<%= entityInstance %>.<%= fieldName %>" (click)="openFile(<%= entityInstance %>.<%= fieldName %>, <%= entityInstance %>.<%= fieldName %>ContentType)" <%= jhiPrefix %>Translate="entity.action.open">open</a>
+                            <span *ngIf="<%= entityInstance %>.<%= fieldName %>">{{<%= entityInstance %>.<%= fieldName %>ContentType}}, {{byteSize(<%= entityInstance %>.<%= fieldName %>)}}</span>
+                        </td>
+                    <%_ } else if (field.fieldIsEnum) { _%>
+                        <td<% if (field.id) { %>><a<%- routerLink %><% } %> <%= jhiPrefix %>Translate="{{ '<%= frontendAppName %>.<%= fieldType %>.' + <%= entityInstance %>.<%= fieldName %> }}">{{ <%= entityInstance %>.<%= fieldName %> }}<% if (field.id) { %></a><% } %></td>
+                    <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
+                        <td>{{ <%= entityInstance %>.<%= fieldName %> | date:'medium' }}</td>
+                <%_ } else if (fieldType === 'LocalDate') { _%>
+                        <td>{{ <%= entityInstance %>.<%= fieldName %> | date:'mediumDate' }}</td>
+                    <%_ } else if (fieldType === 'Duration') { _%>
+                        <td title="{{ <%= entityInstance %>.<%= fieldName %> }}">{{ <%= entityInstance %>.<%= fieldName %> | duration }}</td>
+                <%_ } else { _%>
+                        <td<% if (field.id) { %>><a<%- routerLink %><% } %>>{{ <%= entityInstance %>.<%= fieldName %> }}<% if (field.id) { %></a><% } %></td>
+                <%_ } _%>
+            <%_ } _%>
+            <%_ for (const relationship of relationships) {
+                const relationshipType = relationship.relationshipType;
+                const ownerSide = relationship.ownerSide;
+                if (ownerSide) {
+                    const relationshipFieldName = relationship.relationshipFieldName;
+                    const relationshipFieldNamePlural = relationship.relationshipFieldNamePlural;
+                    const otherEntityName = relationship.otherEntityName;
+                    const otherEntityStateName = relationship.otherEntityStateName;
+                    const otherEntity = relationship.otherEntity;
+                    const instance = relationship.relationshipManyToMany ? relationshipFieldName : `${entityInstance}.${relationshipFieldName}`;
+                    const relationshipKeys =  otherEntity.primaryKey.fields.length === 1 ? `${instance}.${ otherEntity.primaryKey.name}!` : `{ ${ otherEntity.primaryKey.fields.map(field => `${field.fieldName}: ${instance}.${field.fieldNameDottedAsserted}`).join(', ')} }`;
+                    const routerLink = `[routerLink]="['/${ otherEntityStateName }', ${ relationshipKeys }, 'view']"`;
+            _%>
+                    <%_ if (otherEntityName === 'user') { _%>
+                        <%_ if (relationship.relationshipManyToMany) { _%>
+                    <td>
+                        <span *ngFor="let <%= relationshipFieldName %> of <%= entityInstance %>.<%= relationshipFieldNamePlural %>; let last = last">
+                        {{ <%- instance %>.<%- relationship.otherEntityField -%> }}{{ last ? '' : ', ' }}
+                        </span>
+                    </td>
+                        <%_ } else { _%>
+                    <td>
+                        <div *ngIf="<%= entityInstance + "." + relationshipFieldName %>">
+                        {{ <%- instance %>.<%- relationship.otherEntityField -%> }}
+                        </div>
+                    </td>
+                        <%_ } _%>
+                    <%_ } else { _%>
+                        <%_ if (relationship.relationshipManyToMany) { _%>
+                                <%_ if (pagination === 'no' && relationship.otherEntity.entityClass !== 'User' && !relationship.otherEntity.primaryKey.composite) { _%>
+                    <td>
+                        <span *ngFor="let <%= relationshipFieldName %> of <%= entityInstance %>.<%= relationshipFieldNamePlural %>; let last = last">
+                            <a class="form-control-static" <%- routerLink %>>{{ <%- instance %>.<%- relationship.otherEntityField -%> }}</a>{{ last ? '' : ', ' }}
+                        </span>
+                    </td>
+                                <%_ } _%>
+                        <%_ } else { _%>
+                            <%_ relationship.clientFields.forEach(cf => {
+                                const relationshipKeys = cf.entity.primaryKey && cf.entity.primaryKey.composite ?
+                                    `{ ${cf.routerLinkValues.map(v => `${v.fieldName} : ${entityInstance}.${relationship.relationshipName}.${v.nameDotted}`).join(' ,') } }`:
+                                    `${cf.routerLinkValues.map(v => `${entityInstance}.${relationship.relationshipName}.${v.nameDotted}`).join('')}`;
+                                const routerLink = `[routerLink]="['/${ cf.entity.entityStateName }', ${ relationshipKeys }, 'view']"`;_%>
+                    <td>
+                        <div *ngIf="<%= entityInstance + "." + relationship.relationshipName %>">
+                            <a <%- routerLink %>>{{ <%- instance %>.<%- cf.relatedFieldPath.join('.') -%> }}</a>
+                        </div>
+                    </td>
+                            <%_ }) _%>
+                        <%_ } _%>
+                    <%_ } _%>
+                <%_ } _%>
+            <%_ } _%>
+                    <td>
+                        <div class="btn-group flex-btn-group-container">
+<%_ const idParam = primaryKey.fields.length === 1 ? `${entityInstance}.${primaryKey.name}!` : '{ '+ primaryKey.fields.map(field => `${field.fieldName}: ${entityInstance}.${field.fieldNameDottedAsserted}`).join(', ') + ' }' _%>
+                            <p-button type="submit" [routerLink]="['/<%= entityUrl %>', <%- idParam %>, 'view' ]"
+                                  icon="pi pi-eye" styleClass="p-button-info" data-cy="entityDetailsButton">
+                            </p-button>
+                        <%_ if (!readOnly) { _%>
+                            <p-button type="submit" [routerLink]="['/<%= entityUrl %>', <%- idParam %>, 'edit' ]"
+                                  icon="pi pi-pencil" styleClass="p-button-warning" data-cy="entityEditButton">
+                            </p-button>
+                            <%_ if(primaryKey.fields.length === 1) {_%>
+                            <p-button type="submit" (click)="delete(<%= entityInstance %>.<%= primaryKey.name %>)"
+                                          icon="pi pi-times" styleClass="p-button-danger" data-cy="entityDeleteButton">
+                            </p-button> <%_ } else {_%>
+                            <p-button type="submit" (click)="delete(<%= primaryKey.fields.map(field => `${entityInstance}.${field.fieldNameDottedAsserted}`).join(', ') %>)"
+                                          icon="pi pi-times" styleClass="p-button-danger" data-cy="entityDeleteButton">
+                            </p-button>
+                            <%_ } _%>
+                        <%_ } _%>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</div>

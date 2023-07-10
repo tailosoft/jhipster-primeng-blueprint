@@ -1,12 +1,17 @@
 {
   "name": "generator-jhipster-primeng-blueprint",
-  "version": "7.9.4",
+  "version": "8.0.0",
   "description": "This blueprint generated code that uses primeng components instead of bootstrap ones",
   "keywords": [
     "yeoman-generator",
     "jhipster-blueprint",
-    "jhipster-5"
+    "jhipster-8"
   ],
+  "license": "Apache-2.0",
+  "type": "module",
+  "imports": {
+    "#test-utils": "./test/utils.mjs"
+  },
   "homepage": "https://github.com/tailosoft/jhipster-primeng-blueprint",
   "author": {
     "name": "Youssef El Houti",
@@ -16,51 +21,40 @@
   "files": [
     "generators"
   ],
-  "main": "generators/app/index.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/tailosoft/jhipster-primeng-blueprint.git"
+  "scripts": {
+    "ejslint": "ejslint generators/**/*.ejs && ejslint generators/**/*.ejs -d '&'",
+    "esmocha": "esmocha generators --no-insight --forbid-only",
+    "lint": "eslint .",
+    "lint-fix": "npm run ejslint && npm run lint -- --fix",
+    "prettier:check": "prettier --check \"{,src/**/}*.{md,json,yml,html,js,ts,tsx,css,scss,vue,java}\"",
+    "prettier:format": "prettier --write \"{,src/**/}*.{md,json,yml,html,js,ts,tsx,css,scss,vue,java}\"",
+    "pretest": "npm run prettier:check && npm run lint",
+    "test": "npm run esmocha",
+    "update-snapshot": "npm run esmocha -- --update-snapshot"
   },
   "dependencies": {
-    "ajv": "^7.2.4",
-    "chalk": "2.4.1",
-    "generator-jhipster": "7.9.3",
-    "lodash": "4.17.10",
-    "mkdirp": "0.5.1",
-    "pluralize": "8.0.0"
+    "chalk": "4.1.2",
+    "generator-jhipster": "8.0.0-beta.1",
+    "lodash": "^4.17.21",
+    "pluralize": "^8.0.0"
   },
   "devDependencies": {
-    "chai": "4.1.2",
-    "ejs-lint": "0.3.0",
-    "eslint": "5.0.0",
-    "eslint-config-airbnb-base": "13.0.0",
-    "eslint-config-prettier": "3.1.0",
-    "eslint-plugin-import": "2.12.0",
-    "eslint-plugin-prettier": "3.0.0",
-    "fs-extra": "6.0.1",
-    "jsdoc": "3.5.5",
-    "mocha": "5.2.0",
-    "prettier": "1.14.3",
-    "rimraf": "^3.0.0",
-    "sinon": "6.0.0",
-    "yeoman-assert": "3.1.1",
-    "yeoman-environment": "3.2.0",
-    "yeoman-test": "5.1.0"
+    "ejs-lint": "2.0.0",
+    "eslint": "8.44.0",
+    "eslint-config-airbnb-base": "15.0.0",
+    "eslint-config-prettier": "8.8.0",
+    "eslint-plugin-import": "2.27.5",
+    "eslint-plugin-prettier": "4.2.1",
+    "esmocha": "1.0.1",
+    "prettier": "2.8.8",
+    "prettier-plugin-java": "",
+    "prettier-plugin-packagejson": "",
+    "yeoman-test": "8.0.0-rc.1"
   },
-  "scripts": {
-    "lint": "eslint .",
-    "lint-fix": "npm run lint -- --fix",
-    "pretest": "npm run lint",
-    "test": "npm run test:unit -- test/*.spec.js",
-    "test:unit": "mocha --timeout 20000 --slow 0 --reporter spec",
-    "jsdoc": "jsdoc --configure jsdoc-conf.json",
-    "release": "git push && git push --tags && npm publish",
-    "release:patch": "npm version patch -a -m \"Update to %s\" && npm run release",
-    "release:minor": "npm version minor -a -m \"Update to %s\" && npm run release",
-    "release:major": "npm version major -a -m \"Update to %s\" && npm run release"
+  "engines": {
+    "node": ">=^18.13.0 || >= 20.2.0"
   },
-  "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/yelhouti/generator-jhipster-primeng-blueprint/issues"
-  }
+  "cacheDirectories": [
+    "node_modules"
+  ]
 }

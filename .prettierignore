@@ -1,9 +1,6 @@
 node_modules
-docs
+package-lock.json
 .git
-test/jdl/**/.jhipster/**
-.vscode
+
+# blueprint rules:
 **/templates/**/
-**/jdl-core.min.js
-**/generated-serialized-grammar.js
-test/fixtures/**

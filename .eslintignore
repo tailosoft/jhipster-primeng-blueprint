@@ -1,7 +1,0 @@
-coverage
-generators/**/templates
-node_modules
-travis
-docs
-# samples are linted with there respective eslint files
-test/samples

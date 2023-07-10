@@ -7,8 +7,10 @@ export default class extends CypressGenerator {
 
     if (this.options.help) return;
 
-    if (!this.options.jhipsterContext) {
-      throw new Error(`This is a JHipster blueprint and should be used only like ${chalk.yellow('jhipster --blueprints test-blueprint')}`);
+    if (!this.jhipsterContext) {
+      throw new Error(
+        `This is a JHipster blueprint and should be used only like ${chalk.yellow('jhipster --blueprints primeng-blueprint')}`
+      );
     }
   }
 
@@ -54,6 +56,48 @@ export default class extends CypressGenerator {
     };
   }
 
+  get [CypressGenerator.CONFIGURING_EACH_ENTITY]() {
+    return {
+      ...super.configuringEachEntity,
+      async configuringEachEntityTemplateTask() {},
+    };
+  }
+
+  get [CypressGenerator.LOADING_ENTITIES]() {
+    return {
+      ...super.loadingEntities,
+      async loadingEntitiesTemplateTask() {},
+    };
+  }
+
+  get [CypressGenerator.PREPARING_EACH_ENTITY]() {
+    return {
+      ...super.preparingEachEntity,
+      async preparingEachEntityTemplateTask() {},
+    };
+  }
+
+  get [CypressGenerator.PREPARING_EACH_ENTITY_FIELD]() {
+    return {
+      ...super.preparingEachEntityField,
+      async preparingEachEntityFieldTemplateTask() {},
+    };
+  }
+
+  get [CypressGenerator.PREPARING_EACH_ENTITY_RELATIONSHIP]() {
+    return {
+      ...super.preparingEachEntityRelationship,
+      async preparingEachEntityRelationshipTemplateTask() {},
+    };
+  }
+
+  get [CypressGenerator.POST_PREPARING_EACH_ENTITY]() {
+    return {
+      ...super.postPreparingEachEntity,
+      async postPreparingEachEntityTemplateTask() {},
+    };
+  }
+
   get [CypressGenerator.DEFAULT]() {
     return {
       ...super.default,
@@ -68,10 +112,24 @@ export default class extends CypressGenerator {
     };
   }
 
+  get [CypressGenerator.WRITING_ENTITIES]() {
+    return {
+      ...super.writingEntities,
+      async writingEntitiesTemplateTask() {},
+    };
+  }
+
   get [CypressGenerator.POST_WRITING]() {
     return {
       ...super.postWriting,
       async postWritingTemplateTask() {},
+    };
+  }
+
+  get [CypressGenerator.POST_WRITING_ENTITIES]() {
+    return {
+      ...super.postWritingEntities,
+      async postWritingEntitiesTemplateTask() {},
     };
   }
 

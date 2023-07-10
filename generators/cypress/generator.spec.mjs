@@ -1,11 +1,11 @@
-import { expect } from 'expect';
+import { expect } from 'esmocha';
 
 import { helpers, lookups } from '#test-utils';
 
 const SUB_GENERATOR = 'cypress';
 const BLUEPRINT_NAMESPACE = `jhipster:${SUB_GENERATOR}`;
 
-describe('SubGenerator cypress of test-blueprint JHipster blueprint', () => {
+describe('SubGenerator cypress of primeng-blueprint JHipster blueprint', () => {
   describe('run', () => {
     let result;
     before(async function () {
@@ -15,7 +15,8 @@ describe('SubGenerator cypress of test-blueprint JHipster blueprint', () => {
           reproducible: true,
           defaults: true,
           baseName: 'jhipster',
-          blueprint: 'test-blueprint',
+          ignoreNeedlesError: true,
+          blueprint: 'primeng-blueprint',
         })
         .withLookups(lookups)
         .run();
