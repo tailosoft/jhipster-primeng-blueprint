@@ -1,0 +1,14 @@
+import { NgModule } from '@angular/core';
+
+import { SharedModule } from 'app/shared/shared.module';
+import { RoleComponent } from './list/role.component';
+import { RoleUpdateComponent } from './update/role-update.component';
+import { RoleRoutingModule } from './route/role-routing.module';
+import { TreeModule } from 'primeng/tree';
+import { TooltipModule } from 'primeng/tooltip';
+
+@NgModule({
+  imports: [SharedModule, RoleRoutingModule, TreeModule, TooltipModule],
+  declarations: [RoleComponent, RoleUpdateComponent],
+})
+export class RoleModule {}

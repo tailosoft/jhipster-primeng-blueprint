@@ -29,6 +29,7 @@ import { shareReplay, tap, catchError } from 'rxjs/operators';
 import { StateStorageService } from 'app/core/auth/state-storage.service';
 import { ApplicationConfigService } from '../config/application-config.service';
 import { Account } from 'app/core/auth/account.model';
+import { Authority } from 'app/config/authority.constants';
 <%_ if (communicationSpringWebsocket) { _%>
 import { TrackerService } from '../tracker/tracker.service';
 <%_ } _%>
@@ -77,6 +78,9 @@ export class AccountService {
   hasAnyAuthority(authorities: string[] | string): boolean {
     if (!this.userIdentity) {
       return false;
+    }
+    if (this.userIdentity.authorities.includes(Authority.ADMIN)) {
+      return true;
     }
     if (!Array.isArray(authorities)) {
       authorities = [authorities];

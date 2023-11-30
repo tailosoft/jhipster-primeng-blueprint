@@ -1,0 +1,92 @@
+import { TestBed } from '@angular/core/testing';
+import { HttpResponse } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { ActivatedRoute, ActivatedRouteSnapshot, convertToParamMap, Router } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
+import { DatePipe } from '@angular/common';
+import { of } from 'rxjs';
+
+import { IRole } from '../role.model';
+import { RoleService } from '../service/role.service';
+
+import { RoleRoutingResolveService } from './role-routing-resolve.service';
+
+describe('Service Tests', () => {
+  describe('Role routing resolve service', () => {
+    let mockRouter: Router;
+    let mockActivatedRouteSnapshot: ActivatedRouteSnapshot;
+    let routingResolveService: RoleRoutingResolveService;
+    let service: RoleService;
+    let resultRole: IRole | null;
+    beforeEach(() => {
+      TestBed.configureTestingModule({
+        imports: [HttpClientTestingModule, RouterTestingModule.withRoutes([])],
+        providers: [
+          {
+            provide: ActivatedRoute,
+            useValue: {
+              snapshot: {
+                paramMap: convertToParamMap({}),
+              },
+            },
+          },
+          DatePipe,
+        ],
+      });
+      mockRouter = TestBed.inject(Router);
+      jest.spyOn(mockRouter, 'navigate').mockImplementation(() => Promise.resolve(true));
+      mockActivatedRouteSnapshot = TestBed.inject(ActivatedRoute).snapshot;
+      routingResolveService = TestBed.inject(RoleRoutingResolveService);
+      service = TestBed.inject(RoleService);
+      resultRole = null;
+    });
+
+    describe('resolve', () => {
+      it('should return IRole returned by find', () => {
+        // GIVEN
+        service.find = jest.fn(() => of(new HttpResponse({ body: { name: 'ABC' } }) as any));
+        mockActivatedRouteSnapshot.params = { name: 'ABC' };
+
+        // WHEN
+        routingResolveService.resolve(mockActivatedRouteSnapshot).subscribe(result => {
+          resultRole = result;
+        });
+
+        // THEN
+        expect(service.find).toBeCalledWith('ABC');
+        expect(resultRole).toEqual({ name: 'ABC' });
+      });
+
+      it('should return null if id is not provided', () => {
+        // GIVEN
+        service.find = jest.fn();
+        mockActivatedRouteSnapshot.params = {};
+
+        // WHEN
+        routingResolveService.resolve(mockActivatedRouteSnapshot).subscribe(result => {
+          resultRole = result;
+        });
+
+        // THEN
+        expect(service.find).not.toBeCalled();
+        expect(resultRole).toEqual(null);
+      });
+
+      it('should route to 404 page if data not found in server', () => {
+        // GIVEN
+        jest.spyOn(service, 'find').mockReturnValue(of(new HttpResponse({ body: null }) as any));
+        mockActivatedRouteSnapshot.params = { name: 'ABC' };
+
+        // WHEN
+        routingResolveService.resolve(mockActivatedRouteSnapshot).subscribe(result => {
+          resultRole = result;
+        });
+
+        // THEN
+        expect(service.find).toBeCalledWith('ABC');
+        expect(resultRole).toEqual(null);
+        expect(mockRouter.navigate).toHaveBeenCalledWith(['404']);
+      });
+    });
+  });
+});

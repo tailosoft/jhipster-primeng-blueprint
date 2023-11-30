@@ -25,6 +25,9 @@ import { LANGUAGES } from 'app/config/language.constants';
 <%_ } _%>
 import { IUser } from '../user-management.model';
 import { UserManagementService } from '../service/user-management.service';
+<%_ if (fineGrainedPermissions) { _%>
+import { RoleService } from '../../role/service/role.service';
+<%_ } _%>
 
 const userTemplate = {} as IUser;
 
@@ -43,7 +46,7 @@ export class UserManagementUpdateComponent implements OnInit {
 <%_ if (enableTranslation) { _%>
   languages = LANGUAGES;
 <%_ } _%>
-  authorities: string[] = [];
+  <%= fineGrainedPermissions ? 'roles' : 'authorities' %>: string[] = [];
   isSaving = false;
 
   editForm = new FormGroup({
@@ -67,10 +70,10 @@ export class UserManagementUpdateComponent implements OnInit {
 <%_ if (enableTranslation) { _%>
     langKey: new FormControl(userTemplate.langKey, { nonNullable: true }),
 <%_ } _%>
-    authorities: new FormControl(userTemplate.authorities, { nonNullable: true }),
+    <%= fineGrainedPermissions ? 'roles' : 'authorities' %>: new FormControl(userTemplate.<%= fineGrainedPermissions ? 'roles' : 'authorities' %>, { nonNullable: true }),
   });
 
-  constructor(private userService: UserManagementService, private route: ActivatedRoute) {}
+  constructor(private userService: UserManagementService, <% if (fineGrainedPermissions) { %>private roleService: RoleService, <% } %>private route: ActivatedRoute) {}
 
   ngOnInit(): void {
     this.route.data.subscribe(({ user }) => {
@@ -80,7 +83,11 @@ export class UserManagementUpdateComponent implements OnInit {
         this.editForm.reset(newUser);
       }
     });
+<%_ if (fineGrainedPermissions) { _%>
+    this.roleService.query().subscribe(res => (this.roles = res.body!.map(r => r.name!)));
+<%_ } else { _%>
     this.userService.authorities().subscribe(authorities => (this.authorities = authorities));
+<%_ } _%>
   }
 
   previousState(): void {

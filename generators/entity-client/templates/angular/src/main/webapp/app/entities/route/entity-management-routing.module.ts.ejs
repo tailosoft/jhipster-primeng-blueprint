@@ -19,7 +19,9 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
+<%_ if (!fineGrainedPermissions) { _%>
 import { Authority } from 'app/config/authority.constants';
+<%_ } _%>
 import { UserRouteAccessService } from 'app/core/auth/user-route-access.service';
 import { <%= entityAngularName %>Component } from '../list/<%= entityFileName %>.component';
 import { <%= entityAngularName %>DetailComponent } from '../detail/<%= entityFileName %>-detail.component';
@@ -33,7 +35,7 @@ const <%= entityInstance %>Route: Routes = [
         path: '',
         component: <%= entityAngularName %>Component,
         data: {
-            authorities: [Authority.USER],
+            authorities: [<% if (fineGrainedPermissions) { %> '<%= entityStateName %>.read'<% } else { %>Authority.USER<% } %>],
             <%_ if (pagination !== 'no') { _%>
             defaultSort: '<% if (primaryKey.fields.length === 1) { %><%= primaryKey.name %>,asc<% } %>',
         <%_ } _%>
@@ -48,7 +50,7 @@ const <%= entityInstance %>Route: Routes = [
             <%= entityInstance %>: <%= entityAngularName %>RoutingResolveService
         },
         data: {
-            authorities: [Authority.USER],
+            authorities: [<% if (fineGrainedPermissions) { %> '<%= entityStateName %>.read'<% } else { %>Authority.USER<% } %>],
             pageTitle: <% if (enableTranslation) { %>'<%= i18nKeyPrefix %>.home.title'<% } else { %>'<%= entityClassPlural %>'<% } %>
         },
         canActivate: [UserRouteAccessService]
@@ -61,7 +63,7 @@ const <%= entityInstance %>Route: Routes = [
             <%= entityInstance %>: <%= entityAngularName %>RoutingResolveService
         },
         data: {
-            authorities: [Authority.USER],
+            authorities: [<% if (fineGrainedPermissions) { %> '<%= entityStateName %>.create'<% } else { %>Authority.USER<% } %>],
             pageTitle: <% if (enableTranslation) { %>'<%= i18nKeyPrefix %>.home.title'<% } else { %>'<%= entityClassPlural %>'<% } %>
         },
         canActivate: [UserRouteAccessService]
@@ -73,7 +75,7 @@ const <%= entityInstance %>Route: Routes = [
             <%= entityInstance %>: <%= entityAngularName %>RoutingResolveService
         },
         data: {
-            authorities: [Authority.USER],
+            authorities: [<% if (fineGrainedPermissions) { %> '<%= entityStateName %>.update'<% } else { %>Authority.USER<% } %>],
             pageTitle: <% if (enableTranslation) { %>'<%= i18nKeyPrefix %>.home.title'<% } else { %>'<%= entityClassPlural %>'<% } %>
         },
         canActivate: [UserRouteAccessService]

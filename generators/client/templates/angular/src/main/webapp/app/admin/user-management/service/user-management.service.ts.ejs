@@ -56,13 +56,14 @@ export class UserManagementService {
   delete(login: string): Observable<{}> {
     return this.http.delete(`${this.resourceUrl}/${login}`);
   }
-
+  <%_ if (!fineGrainedPermissions) { _%>
   authorities(): Observable<string[]> {
-  <%_ if (databaseTypeSql || databaseTypeMongodb || databaseTypeCouchbase) { _%>
+    <%_ if (databaseTypeSql || databaseTypeMongodb || databaseTypeCouchbase) { _%>
     return this.http.get<string[]>(this.applicationConfigService.getEndpointFor('api/authorities'));
-  <%_ } else { _%>
+    <%_ } else { _%>
     return of([Authority.ADMIN, Authority.USER]);
-  <%_ } _%>
+    <%_ } _%>
   }
+  <%_ } _%>
 <%_ } _%>
 }

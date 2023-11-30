@@ -1,0 +1,92 @@
+import { TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { DatePipe } from '@angular/common';
+import { IRole } from '../role.model';
+import { sampleWithRequiredData, sampleWithNewData } from '../role.test-samples';
+
+import { RoleService } from './role.service';
+
+const requireRestSample: IRole = {
+  ...sampleWithRequiredData,
+};
+
+describe('Role Service', () => {
+  let service: RoleService;
+  let httpMock: HttpTestingController;
+  let expectedResult: IRole | IRole[] | boolean | null;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+      providers: [DatePipe],
+    });
+    expectedResult = null;
+    service = TestBed.inject(RoleService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  describe('Service methods', () => {
+    it('should find an element', () => {
+      const returnedFromService = { ...requireRestSample };
+      const expected = { ...sampleWithRequiredData };
+
+      service.find('ABC').subscribe(resp => (expectedResult = resp.body));
+
+      const req = httpMock.expectOne({ method: 'GET' });
+      req.flush(returnedFromService);
+      expect(expectedResult).toMatchObject(expected);
+    });
+
+    it('should create a Role', () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const role = { ...sampleWithNewData };
+      const returnedFromService = { ...requireRestSample };
+      const expected = { ...sampleWithRequiredData };
+
+      service.create(role).subscribe(resp => (expectedResult = resp.body));
+
+      const req = httpMock.expectOne({ method: 'POST' });
+      req.flush(returnedFromService);
+      expect(expectedResult).toMatchObject(expected);
+    });
+
+    it('should update a Role', () => {
+      const role = { ...sampleWithRequiredData };
+      const returnedFromService = { ...requireRestSample };
+      const expected = { ...sampleWithRequiredData };
+
+      service.update(role).subscribe(resp => (expectedResult = resp.body));
+
+      const req = httpMock.expectOne({ method: 'PUT' });
+      req.flush(returnedFromService);
+      expect(expectedResult).toMatchObject(expected);
+    });
+
+    it('should return a list of Role', () => {
+      const returnedFromService = { ...requireRestSample };
+
+      const expected = { ...sampleWithRequiredData };
+
+      service.query().subscribe(resp => (expectedResult = resp.body));
+
+      const req = httpMock.expectOne({ method: 'GET' });
+      req.flush([returnedFromService]);
+      httpMock.verify();
+      expect(expectedResult).toMatchObject([expected]);
+    });
+
+    it('should delete a Role', () => {
+      const expected = true;
+
+      service.delete('ABC').subscribe(resp => (expectedResult = resp.ok));
+
+      const req = httpMock.expectOne({ method: 'DELETE' });
+      req.flush({ status: 200 });
+      expect(expectedResult).toBe(expected);
+    });
+
+    afterEach(() => {
+      httpMock.verify();
+    });
+  });
+});

@@ -22,9 +22,9 @@
     </h2>
     <div class="list-buttons">
     <%_ if (!readOnly) { _%>
-            <p-button id="jh-create-entity" class="jh-create-entity create-<%= entityUrl %>" [routerLink]="['/<%= entityUrl %>/new']"
+            <button<% if (fineGrainedPermissions) { %> *jhiHasAnyAuthority="'<%= entityStateName %>.create'"<% } %> pButton type="button" class="jh-create-entity create-<%= entityUrl %>" [routerLink]="['/<%= entityUrl %>/new']"
                   [label]="'<%= i18nKeyPrefix %>.home.createLabel' | translate" icon="pi pi-plus" iconPos="left" data-cy="entityCreateButton">
-            </p-button>
+            </button>
     <%_ } _%>
     </div>
     <div class="list-content">
@@ -104,7 +104,7 @@
 <%_ for (const relationship of relationships.filter(r => r.ownerSide)) { _%>
     <%_ if (relationship.relationshipManyToMany) { _%>
         <%_ if (pagination === 'no' && relationship.otherEntity.entityClass !== 'User' && !relationship.otherEntity.primaryKey.composite) { _%>
-                    <th>
+                    <th<% if (fineGrainedPermissions) { %> *jhiHasAnyAuthority="'<%= relationship.otherEntityStateName %>.read'"<% } %>>
                         <span <%= jhiPrefix %>Translate="<%=`${i18nKeyPrefix}.${relationship.otherEntityField}` %>"><%= relationship.relationshipNameHumanized %></span>
             <%_ if (jpaMetamodelFiltering) { _%>
                         <p-columnFilter field="<%= relationship.relationshipName %>" matchMode="in" display="menu" [showOperator]="false" [showMatchModes]="false" [showAddButton]="false" class="p-ml-auto">
@@ -118,7 +118,7 @@
         <%_ } _%>
     <%_ } else { _%>
         <%_ relationship.clientFields.forEach(cf => { _%>
-                    <th <% if (pagination !== 'no') { %> pSortableColumn="<%= relationship.relationshipName %>.<%= cf.relatedFieldPath.join('.') %>"<% } %>>
+                    <th<% if (fineGrainedPermissions) { %> *jhiHasAnyAuthority="'<%= cf.entity.entityStateName %>.read'"<% } %><% if (pagination !== 'no') { %> pSortableColumn="<%= relationship.relationshipName %>.<%= cf.relatedFieldPath.join('.') %>"<% } %>>
                         <span <%= jhiPrefix %>Translate="<%= cf.translationKey %>"><%= cf.lastRelationship.relationshipNameHumanized %></span>
             <%_ if (pagination !== 'no') { _%>
                         <p-sortIcon field="<%= relationship.relationshipName %>.<%= cf.relatedFieldPath.join('.') %>"></p-sortIcon>
@@ -166,13 +166,13 @@
                             <a *ngIf="<%= entityInstance %>.<%= fieldName %>" (click)="openFile(<%= entityInstance %>.<%= fieldName %>, <%= entityInstance %>.<%= fieldName %>ContentType)" <%= jhiPrefix %>Translate="entity.action.open">open</a>
                             <span *ngIf="<%= entityInstance %>.<%= fieldName %>">{{<%= entityInstance %>.<%= fieldName %>ContentType}}, {{byteSize(<%= entityInstance %>.<%= fieldName %>)}}</span>
                         </td>
-                    <%_ } else if (field.fieldIsEnum) { _%>
+                <%_ } else if (field.fieldIsEnum) { _%>
                         <td<% if (field.id) { %>><a<%- routerLink %><% } %> <%= jhiPrefix %>Translate="{{ '<%= frontendAppName %>.<%= fieldType %>.' + <%= entityInstance %>.<%= fieldName %> }}">{{ <%= entityInstance %>.<%= fieldName %> }}<% if (field.id) { %></a><% } %></td>
-                    <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
+                <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
                         <td>{{ <%= entityInstance %>.<%= fieldName %> | date:'medium' }}</td>
                 <%_ } else if (fieldType === 'LocalDate') { _%>
                         <td>{{ <%= entityInstance %>.<%= fieldName %> | date:'mediumDate' }}</td>
-                    <%_ } else if (fieldType === 'Duration') { _%>
+                <%_ } else if (fieldType === 'Duration') { _%>
                         <td title="{{ <%= entityInstance %>.<%= fieldName %> }}">{{ <%= entityInstance %>.<%= fieldName %> | duration }}</td>
                 <%_ } else { _%>
                         <td<% if (field.id) { %>><a<%- routerLink %><% } %>>{{ <%= entityInstance %>.<%= fieldName %> }}<% if (field.id) { %></a><% } %></td>
@@ -193,13 +193,13 @@
             _%>
                     <%_ if (otherEntityName === 'user') { _%>
                         <%_ if (relationship.relationshipManyToMany) { _%>
-                    <td>
+                    <td<% if (fineGrainedPermissions) { %> *jhiHasAnyAuthority="'<%= otherEntityStateName %>.read'"<% } %>>
                         <span *ngFor="let <%= relationshipFieldName %> of <%= entityInstance %>.<%= relationshipFieldNamePlural %>; let last = last">
                         {{ <%- instance %>.<%- relationship.otherEntityField -%> }}{{ last ? '' : ', ' }}
                         </span>
                     </td>
                         <%_ } else { _%>
-                    <td>
+                    <td<% if (fineGrainedPermissions) { %> *jhiHasAnyAuthority="'<%= otherEntityStateName %>.read'"<% } %>>
                         <div *ngIf="<%= entityInstance + "." + relationshipFieldName %>">
                         {{ <%- instance %>.<%- relationship.otherEntityField -%> }}
                         </div>
@@ -208,7 +208,7 @@
                     <%_ } else { _%>
                         <%_ if (relationship.relationshipManyToMany) { _%>
                                 <%_ if (pagination === 'no' && relationship.otherEntity.entityClass !== 'User' && !relationship.otherEntity.primaryKey.composite) { _%>
-                    <td>
+                    <td<% if (fineGrainedPermissions) { %> *jhiHasAnyAuthority="'<%= otherEntityStateName %>.read'"<% } %>>
                         <span *ngFor="let <%= relationshipFieldName %> of <%= entityInstance %>.<%= relationshipFieldNamePlural %>; let last = last">
                             <a class="form-control-static" <%- routerLink %>>{{ <%- instance %>.<%- relationship.otherEntityField -%> }}</a>{{ last ? '' : ', ' }}
                         </span>
@@ -220,7 +220,7 @@
                                     `{ ${cf.routerLinkValues.map(v => `${v.fieldName} : ${entityInstance}.${relationship.relationshipName}.${v.nameDotted}`).join(' ,') } }`:
                                     `${cf.routerLinkValues.map(v => `${entityInstance}.${relationship.relationshipName}.${v.nameDotted}`).join('')}`;
                                 const routerLink = `[routerLink]="['/${ cf.entity.entityStateName }', ${ relationshipKeys }, 'view']"`;_%>
-                    <td>
+                    <td<% if (fineGrainedPermissions) { %> *jhiHasAnyAuthority="'<%= cf.entity.entityStateName %>.read'"<% } %>>
                         <div *ngIf="<%= entityInstance + "." + relationship.relationshipName %>">
                             <a <%- routerLink %>>{{ <%- instance %>.<%- cf.relatedFieldPath.join('.') -%> }}</a>
                         </div>
@@ -233,20 +233,20 @@
                     <td>
                         <div class="btn-group flex-btn-group-container">
 <%_ const idParam = primaryKey.fields.length === 1 ? `${entityInstance}.${primaryKey.name}!` : '{ '+ primaryKey.fields.map(field => `${field.fieldName}: ${entityInstance}.${field.fieldNameDottedAsserted}`).join(', ') + ' }' _%>
-                            <p-button type="submit" [routerLink]="['/<%= entityUrl %>', <%- idParam %>, 'view' ]"
-                                  icon="pi pi-eye" styleClass="p-button-info" data-cy="entityDetailsButton">
-                            </p-button>
+                            <button pButton type="button" [routerLink]="['/<%= entityUrl %>', <%- idParam %>, 'view' ]"
+                                  icon="pi pi-eye" class="p-button-info" data-cy="entityDetailsButton">
+                            </button>
                         <%_ if (!readOnly) { _%>
-                            <p-button type="submit" [routerLink]="['/<%= entityUrl %>', <%- idParam %>, 'edit' ]"
-                                  icon="pi pi-pencil" styleClass="p-button-warning" data-cy="entityEditButton">
-                            </p-button>
+                            <button<% if (fineGrainedPermissions) { %> *jhiHasAnyAuthority="'<%= entityStateName %>.update'"<% } %> pButton type="button" [routerLink]="['/<%= entityUrl %>', <%- idParam %>, 'edit' ]"
+                                  icon="pi pi-pencil" class="p-button-warning" data-cy="entityEditButton">
+                            </button>
                             <%_ if(primaryKey.fields.length === 1) {_%>
-                            <p-button type="submit" (click)="delete(<%= entityInstance %>.<%= primaryKey.name %>)"
-                                          icon="pi pi-times" styleClass="p-button-danger" data-cy="entityDeleteButton">
-                            </p-button> <%_ } else {_%>
-                            <p-button type="submit" (click)="delete(<%= primaryKey.fields.map(field => `${entityInstance}.${field.fieldNameDottedAsserted}`).join(', ') %>)"
-                                          icon="pi pi-times" styleClass="p-button-danger" data-cy="entityDeleteButton">
-                            </p-button>
+                            <button<% if (fineGrainedPermissions) { %> *jhiHasAnyAuthority="'<%= entityStateName %>.delete'"<% } %> pButton type="button" (click)="delete(<%= entityInstance %>.<%= primaryKey.name %>)"
+                                          icon="pi pi-times" class="p-button-danger" data-cy="entityDeleteButton">
+                            </button> <%_ } else {_%>
+                            <button<% if (fineGrainedPermissions) { %> *jhiHasAnyAuthority="'<%= entityStateName %>.delete'"<% } %> pButton type="button" (click)="delete(<%= primaryKey.fields.map(field => `${entityInstance}.${field.fieldNameDottedAsserted}`).join(', ') %>)"
+                                          icon="pi pi-times" class="p-button-danger" data-cy="entityDeleteButton">
+                            </button>
                             <%_ } _%>
                         <%_ } _%>
                         </div>

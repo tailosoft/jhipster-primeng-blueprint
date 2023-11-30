@@ -82,8 +82,8 @@
                         <%_ } _%>
                     <%_ } else { _%>
                         <%_ if (relationship.relationshipManyToMany) { _%>
-        <dt><span <%= jhiPrefix %>Translate="<%=`${i18nKeyPrefix}.${relationship.relationshipName}` %>"><%= relationship.relationshipNameHumanized %></span></dt>
-        <dd>
+        <dt<% if (fineGrainedPermissions) { %> *jhiHasAnyAuthority="'<%= otherEntityStateName %>.read'"<% } %>><span <%= jhiPrefix %>Translate="<%=`${i18nKeyPrefix}.${relationship.relationshipName}` %>"><%= relationship.relationshipNameHumanized %></span></dt>
+        <dd<% if (fineGrainedPermissions) { %>  *jhiHasAnyAuthority="'<%= otherEntityStateName %>.read'"<% } %>>
             <span *ngFor="let <%= relationshipFieldName %> of <%= entityInstance %>.<%= relationshipFieldNamePlural %>; let last = last">
                 <a <%- routerLink %>>{{ <%- instance %>.<%- relationship.otherEntityField -%> }}</a>{{ last ? '' : ', ' }}
             </span>
@@ -91,8 +91,8 @@
                         <%_ } else { _%>
                             <%_ if (relationship.otherEntity.primaryKey.ownFields.length === 0) {
                                 const routerLink = relationship.otherEntity.primaryKey.fields.length === 1 ? `${entityInstance}.${relationship.otherEntity.primaryKey.name}!` : '{ '+ relationship.otherEntity.primaryKey.fields.map(field => `${field.fieldName}: ${entityInstance}.${relationship.relationshipName}.${field.fieldNameDotted}`).join(', ') + ' }' _%>
-        <dt><span <%= jhiPrefix %>Translate="<%=`${i18nKeyPrefix}.${relationship.relationshipName}` %>"><%= relationship.relationshipNameHumanized %></span></dt>
-        <dd>
+        <dt<% if (fineGrainedPermissions) { %>  *jhiHasAnyAuthority="'<%= otherEntityStateName %>.read'"<% } %>><span <%= jhiPrefix %>Translate="<%=`${i18nKeyPrefix}.${relationship.relationshipName}` %>"><%= relationship.relationshipNameHumanized %></span></dt>
+        <dd<% if (fineGrainedPermissions) { %>  *jhiHasAnyAuthority="'<%= otherEntityStateName %>.read'"<% } %>>
             <div *ngIf="<%= entityInstance + "." + relationship.relationshipName %>">
                 <p-button type="submit" [routerLink]="['/<%= relationship.otherEntity.entityStateName %>', <%- routerLink %>, 'view' ]"
                                   icon="pi pi-eye" styleClass="p-button-info">
@@ -105,8 +105,8 @@
                                     `{ ${cf.routerLinkValues.map(v => `${v.fieldName} : ${entityInstance}.${relationship.relationshipName}.${v.nameDotted}`).join(' ,') } }`:
                                     `${cf.routerLinkValues.map(v => `${entityInstance}.${relationship.relationshipName}.${v.nameDotted}`).join('')}`;
                                 const routerLink = `[routerLink]="['/${ cf.entity.entityStateName }', ${ relationshipKeys }, 'view']"`;_%>
-        <dt><span <%= jhiPrefix %>Translate="<%= cf.translationKey %>"><%= cf.lastRelationship.relationshipNameHumanized %></span></dt>
-        <dd>
+        <dt<% if (fineGrainedPermissions) { %>  *jhiHasAnyAuthority="'<%= otherEntityStateName %>.read'"<% } %>><span <%= jhiPrefix %>Translate="<%= cf.translationKey %>"><%= cf.lastRelationship.relationshipNameHumanized %></span></dt>
+        <dd<% if (fineGrainedPermissions) { %>  *jhiHasAnyAuthority="'<%= otherEntityStateName %>.read'"<% } %>>
             <div *ngIf="<%= entityInstance + "." + relationship.relationshipName %>">
                 <a <%- routerLink %>>{{ <%- instance %>.<%- cf.relatedFieldPath.join('.') -%> }}</a>
             </div>
@@ -118,9 +118,9 @@
             <%_ } _%>
     </dl>
     <div class="detail-buttons">
-        <button pButton type="submit" (click)="previousState()" class="p-button-info" icon="pi pi-arrow-left" [label]="'entity.action.back' | translate" data-cy="entityDetailsBackButton"></button>
+        <button pButton type="button" (click)="previousState()" class="p-button-info" icon="pi pi-arrow-left" [label]="'entity.action.back' | translate" data-cy="entityDetailsBackButton"></button>
                 <%_ if (!readOnly) { _%>
-        <button pButton type="button" icon="pi pi-pencil" [label]="'entity.action.edit' | translate" [routerLink]="['/<%= entityUrl %>', <%= primaryKey.fields.length === 1 ? `${entityInstance}.${primaryKey.name}` : '{ '+ primaryKey.fields.map(field => `${field.fieldName}: ${entityInstance}.${field.fieldNameDottedAsserted}`).join(', ') + ' }' %>, 'edit']"></button>
+        <button<% if (fineGrainedPermissions) { %> *jhiHasAnyAuthority="'<%= entityStateName %>.update'"<% } %> pButton type="button" icon="pi pi-pencil" [label]="'entity.action.edit' | translate" [routerLink]="['/<%= entityUrl %>', <%= primaryKey.fields.length === 1 ? `${entityInstance}.${primaryKey.name}` : '{ '+ primaryKey.fields.map(field => `${field.fieldName}: ${entityInstance}.${field.fieldNameDottedAsserted}`).join(', ') + ' }' %>, 'edit']"></button>
                 <%_ } _%>
     </div>
 </div>

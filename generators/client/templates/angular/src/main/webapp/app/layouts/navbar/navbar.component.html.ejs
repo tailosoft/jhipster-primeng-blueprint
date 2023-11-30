@@ -99,6 +99,14 @@
                             <span jhiTranslate="global.menu.admin.userManagement"><%- this._getClientTranslation('global.menu.admin.userManagement') %></span>
                         </a>
                     </li>
+                        <%_ if (fineGrainedPermissions) { _%>
+                    <li>
+                        <a class="dropdown-item" routerLink="admin/role" routerLinkActive="active" (click)="collapseNavbar()">
+                            <i class="fa fa-user"></i>
+                            <span jhiTranslate="global.menu.admin.roles">Roles</span>
+                        </a>
+                    </li>
+                        <%_ } _%>
                     <%_ } _%>
                     <%_ if (communicationSpringWebsocket) { _%>
                     <li>

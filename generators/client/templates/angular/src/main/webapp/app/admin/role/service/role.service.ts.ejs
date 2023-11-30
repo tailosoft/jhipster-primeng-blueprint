@@ -1,0 +1,40 @@
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpResponse } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { ApplicationConfigService } from 'app/core/config/application-config.service';
+import { IRole, getRoleIdentifier } from '../role.model';
+
+export type EntityResponseType = HttpResponse<IRole>;
+export type EntityArrayResponseType = HttpResponse<IRole[]>;
+
+@Injectable({ providedIn: 'root' })
+export class RoleService {
+  protected permissionTreeResourceUrl = this.applicationConfigService.getEndpointFor('api/admin/permission-tree');
+  protected resourceUrl = this.applicationConfigService.getEndpointFor('api/admin/roles');
+
+  constructor(protected http: HttpClient, protected applicationConfigService: ApplicationConfigService) {}
+
+  create(role: IRole): Observable<EntityResponseType> {
+    return this.http.post<IRole>(this.resourceUrl, role, { observe: 'response' });
+  }
+
+  update(role: IRole): Observable<EntityResponseType> {
+    return this.http.put<IRole>(`${this.resourceUrl}/${getRoleIdentifier(role)}`, role, { observe: 'response' });
+  }
+
+  find(name: string): Observable<EntityResponseType> {
+    return this.http.get<IRole>(`${this.resourceUrl}/${name}`, { observe: 'response' });
+  }
+
+  query(): Observable<EntityArrayResponseType> {
+    return this.http.get<IRole[]>(this.resourceUrl, { observe: 'response' });
+  }
+
+  delete(name: string): Observable<HttpResponse<{}>> {
+    return this.http.delete(`${this.resourceUrl}/${name}`, { observe: 'response' });
+  }
+
+  permissionTree(): Observable<HttpResponse<{ [_: string]: string[] }>> {
+    return this.http.get<{ [_: string]: string[] }>(this.permissionTreeResourceUrl, { observe: 'response' });
+  }
+}

@@ -4,6 +4,7 @@ import { writeFiles as writeAngularFiles } from './files-angular.js';
 import _ from 'lodash';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { prepareFineGrainedPermissions } from "../utils.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -72,7 +73,9 @@ export default class extends ClientGenerator {
   get [ClientGenerator.PREPARING]() {
     return {
       ...super.preparing,
-      async preparingTemplateTask() {},
+      async preparingTemplateTask() {
+        prepareFineGrainedPermissions(this);
+      },
     };
   }
 

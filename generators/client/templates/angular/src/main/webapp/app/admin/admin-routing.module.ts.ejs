@@ -30,6 +30,13 @@ import { RouterModule } from '@angular/router';
         loadChildren: () => import('./user-management/user-management.module').then(m => m.UserManagementModule),
         title: 'userManagement.home.title',
       },
+        <%_ if (fineGrainedPermissions) { _%>
+      {
+        path: 'role',
+        loadChildren: () => import('./role/role.module').then(m => m.RoleModule),
+        title: 'role.home.title',
+      },
+        <%_ } _%>
       <%_ } _%>
       {
         path: 'docs',

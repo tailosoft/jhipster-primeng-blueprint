@@ -1,0 +1,60 @@
+<div class="entity-update">
+  <h2
+    class="title"
+    id="<%= jhiPrefix %>-role-heading"
+    data-cy="RoleCreateUpdateHeading"
+    <%= jhiPrefix %>Translate="<%= frontendAppName %>.role.home.{{ edit ? 'editLabel' : 'createLabel' }}"
+  >
+    Create or edit a Role
+  </h2>
+  <form name="editForm" role="form" novalidate (ngSubmit)="save()" [formGroup]="editForm">
+    <div class="card form-grid p-fluid update-content">
+      <div class="p-field p-grid">
+        <label <%= jhiPrefix %>Translate="<%= frontendAppName %>.role.name" for="field_name" class="p-col-12 p-md-2 label-asterisk">Name</label>
+        <div class="p-col-12 p-md-10">
+          <input pInputText type="text" name="name" id="field_name" formControlName="name" [readonly]="edit" data-cy="name" />
+          <div class="validation-messages">
+            <ng-container *ngIf="editForm.controls.name.errors && (editForm.controls.name.dirty || editForm.controls.name.touched)">
+              <p-message severity="error" *ngIf="editForm.controls.name.errors.required" [text]="'entity.validation.required' | translate">
+              </p-message>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+      <p-tree #tree [value]="treeNodes"
+            selectionMode="checkbox"
+            (onNodeSelect)="nodeSelect($event.node, true)"
+            (onNodeUnselect)="nodeSelect($event.node, false)"
+            [propagateSelectionDown]="false"
+            [propagateSelectionUp]="true"
+            [(selection)]="selectedNodes">
+        <ng-template let-node pTemplate="default">
+            <!-- p-disabled because of https://github.com/primefaces/primeng/issues/14251 -->
+            <span [class.p-disabled]="node.selectable === false" pTooltip="{{permissionCurrentDependents[node.data]}}">{{node.label}}</span>
+        </ng-template>
+    </p-tree>
+    </div>
+
+    <div class="update-buttons">
+      <button
+        pButton
+        type="button"
+        id="cancel-save"
+        icon="pi pi-ban"
+        class="p-button-secondary"
+        (click)="previousState()"
+        [label]="'entity.action.cancel' | translate"
+        data-cy="entityCreateCancelButton"
+      ></button>
+      <button
+        pButton
+        type="submit"
+        id="save-entity"
+        icon="pi pi-save"
+        [disabled]="isSaving"
+        [label]="'entity.action.save' | translate"
+        data-cy="entityCreateSaveButton"
+      ></button>
+    </div>
+  </form>
+</div>

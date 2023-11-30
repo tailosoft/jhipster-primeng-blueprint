@@ -1,0 +1,8 @@
+export interface IRole {
+  name?: string;
+  permissions?: string[];
+}
+
+export function getRoleIdentifier(role: IRole): string {
+  return role.name!;
+}

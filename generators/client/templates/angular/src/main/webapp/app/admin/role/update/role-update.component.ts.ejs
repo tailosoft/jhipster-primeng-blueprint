@@ -1,0 +1,178 @@
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { HttpResponse } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
+import { finalize, Observable } from 'rxjs';
+
+import { RoleFormService, RoleFormGroup } from './role-form.service';
+import { IRole } from '../role.model';
+import { RoleService } from '../service/role.service';
+import { TreeNode } from 'primeng/api';
+import { Tree } from 'primeng/tree';
+
+@Component({
+  selector: '<%= jhiPrefix %>-role-update',
+  templateUrl: './role-update.component.html',
+})
+export class RoleUpdateComponent implements OnInit {
+  permissionTree: { [_: string]: string[] } = {};
+  permissionToNode: { [_: string]: TreeNode<string> | undefined } = {};
+  permissionCurrentDependents: { [_: string]: string[] | undefined } = {};
+  treeNodes: TreeNode<string>[] = [];
+  selectedNodes: TreeNode<string>[] = [];
+  wasSelectedBeforeDisabled: { [_: string]: boolean | undefined } = {};
+
+  edit = false;
+  isSaving = false;
+
+  editForm: RoleFormGroup = this.roleFormService.createRoleFormGroup();
+
+  @ViewChild('tree', { static: true })
+  tree!: Tree;
+
+  constructor(protected roleService: RoleService, protected roleFormService: RoleFormService, protected activatedRoute: ActivatedRoute) {}
+
+  ngOnInit(): void {
+    this.isSaving = false;
+
+    this.activatedRoute.data.subscribe(({ role }) => {
+      this.updateForm(role);
+      this.loadAuthoritiesTree(role.permissions);
+    });
+  }
+
+  loadAuthoritiesTree(selectedPermissions: string[]): void {
+    this.roleService.permissionTree().subscribe(res => {
+      this.permissionTree = res.body!;
+      const keys = Object.keys(this.permissionTree).sort();
+      this.permissionToNode[''] = { children: this.treeNodes };
+      keys.forEach((key: any) => {
+        this.createTreeUpDown(key);
+      });
+      this.populateTree(selectedPermissions);
+    });
+  }
+
+  /**
+   * !!! NEVER call directly expect from tree to avoid adding dependent twice (for dependency),
+   * use clickIfDifferent instead
+   */
+  nodeSelect(node: TreeNode, selected: boolean): void {
+    // node is not added to selection since already done by tree component (onCheck is called after)
+    if (node.children === undefined) {
+      if (this.permissionTree[node.data].length > 0) {
+        for (const dependencyAuth of this.permissionTree[node.data]) {
+          const dependency = this.permissionToNode[dependencyAuth]!;
+          if (selected) {
+            this.wasSelectedBeforeDisabled[dependencyAuth] =
+              this.wasSelectedBeforeDisabled[dependencyAuth] !== undefined
+                ? this.wasSelectedBeforeDisabled[dependencyAuth]
+                : this.selectedNodes.includes(dependency);
+          }
+          this.clickIfDifferent(dependency, selected);
+          if (selected) {
+            this.addDependent(dependencyAuth, node.data);
+            dependency.selectable = false;
+          } else {
+            this.removeDependent(dependencyAuth, node.data);
+            dependency.selectable = !this.permissionCurrentDependents[dependencyAuth]?.length;
+            if (dependency.selectable) {
+              if (!this.wasSelectedBeforeDisabled[dependencyAuth]) {
+                this.clickIfDifferent(dependency, false);
+              }
+              delete this.wasSelectedBeforeDisabled[dependencyAuth];
+            }
+          }
+        }
+      }
+    } else {
+      node.children.forEach(child => this.clickIfDifferent(child, selected));
+    }
+  }
+  updateForm(role: IRole | null): void {
+    if (role) {
+      this.edit = true;
+      this.editForm.reset({ ...role }, { emitEvent: false, onlySelf: true });
+    } else {
+      this.edit = false;
+      this.editForm.reset({});
+    }
+  }
+
+  previousState(): void {
+    window.history.back();
+  }
+
+  save(): void {
+    if (this.editForm.valid) {
+      this.isSaving = true;
+      const role = this.editForm.value;
+      role.permissions = this.selectedNodes.map(n => n.data!);
+      if (this.edit) {
+        this.subscribeToSaveResponse(this.roleService.update(role as IRole));
+      } else {
+        this.subscribeToSaveResponse(this.roleService.create(role as IRole));
+      }
+    } else {
+      this.editForm.markAllAsTouched();
+    }
+  }
+
+  protected subscribeToSaveResponse(result: Observable<HttpResponse<IRole>>): void {
+    result.pipe(finalize(() => this.onSaveFinalize())).subscribe({
+      next: () => this.onSaveSuccess(),
+    });
+  }
+
+  protected onSaveSuccess(): void {
+    this.previousState();
+  }
+
+  protected onSaveFinalize(): void {
+    this.isSaving = false;
+  }
+
+  private createTreeUpDown(key: string): void {
+    if (!this.permissionToNode[key] && key.length) {
+      const parts = key.split('.');
+      const label = parts[parts.length - 1];
+      const parent = parts.slice(0, -1).join('.');
+      this.createTreeUpDown(parent);
+      // not creating children array on init to avoid having it for leaves
+      const node: TreeNode = { label, data: key };
+      this.permissionToNode[key] = node;
+      if (!this.permissionToNode[parent]!.children) {
+        this.permissionToNode[parent]!.children = [node];
+      } else {
+        this.permissionToNode[parent]!.children!.push(node);
+      }
+      this.permissionToNode[node.data]!.parent = this.permissionToNode[parent];
+    }
+  }
+
+  private populateTree(authorities: string[]): void {
+    authorities
+      .filter(x => this.permissionToNode[x])
+      .map(a => this.permissionToNode[a]!)
+      // we check if not selected since it might have been selected due to dependency on previous permission
+      .forEach(node => this.clickIfDifferent(node, true));
+  }
+
+  private clickIfDifferent(node: TreeNode, selected: boolean): void {
+    if ((selected && !this.selectedNodes.includes(node)) || (!selected && this.selectedNodes.includes(node))) {
+      // this triggers onNodeSelect with propagate up...
+      this.tree.onNodeClick({ target: this.tree.el }, node);
+    }
+  }
+
+  private addDependent(dependencyLabel: string, dependentLabel: string): void {
+    if (this.permissionCurrentDependents[dependencyLabel] === undefined) {
+      this.permissionCurrentDependents[dependencyLabel] = [dependentLabel];
+    } else {
+      this.permissionCurrentDependents[dependencyLabel]!.push(dependentLabel);
+    }
+  }
+
+  private removeDependent(dependencyLabel: string, dependentLabel: string): void {
+    this.permissionCurrentDependents[dependencyLabel] = this.permissionCurrentDependents[dependencyLabel]?.filter(p => p !== dependentLabel);
+  }
+}

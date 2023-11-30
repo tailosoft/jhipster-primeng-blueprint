@@ -1,0 +1,69 @@
+import { ComponentFixture, TestBed, fakeAsync } from '@angular/core/testing';
+import { of } from 'rxjs';
+import { HttpResponse } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { Confirmation, ConfirmationService, MessageService } from 'primeng/api';
+import { TranslateModule } from '@ngx-translate/core';
+
+import { RoleComponent } from './role.component';
+import { RoleService } from '../service/role.service';
+
+describe('Component Tests', () => {
+  describe('Role Management Component', () => {
+    let comp: RoleComponent;
+    let fixture: ComponentFixture<RoleComponent>;
+    let service: RoleService;
+    let confirmationService: ConfirmationService;
+
+    beforeEach(() => {
+      TestBed.configureTestingModule({
+        imports: [HttpClientTestingModule, TranslateModule.forRoot()],
+        declarations: [RoleComponent],
+        providers: [ConfirmationService, MessageService],
+      })
+        .overrideTemplate(RoleComponent, '')
+        .compileComponents();
+
+      fixture = TestBed.createComponent(RoleComponent);
+      comp = fixture.componentInstance;
+      service = TestBed.inject(RoleService);
+      confirmationService = TestBed.inject(ConfirmationService);
+    });
+
+    it('Should call load all on init', fakeAsync(() => {
+      // GIVEN
+      jest.spyOn(service, 'query').mockReturnValue(
+        of(
+          new HttpResponse({
+            body: [{ name: 'ABC' }],
+          }) as any
+        )
+      );
+
+      // WHEN
+      fixture.detectChanges();
+
+      // THEN
+      expect(service.query).toHaveBeenCalled();
+      expect(comp.roles?.[0]).toEqual(expect.objectContaining({ name: 'ABC' }));
+    }));
+
+    it('should call delete service using confirmDialog', fakeAsync(() => {
+      // GIVEN
+      jest.spyOn(service, 'delete').mockReturnValue(of({} as any));
+      jest.spyOn(confirmationService, 'confirm').mockImplementation((confirmation: Confirmation) => {
+        if (confirmation.accept) {
+          confirmation.accept();
+        }
+        return confirmationService;
+      });
+
+      // WHEN
+      comp.delete('ABC');
+
+      // THEN
+      expect(confirmationService.confirm).toHaveBeenCalled();
+      expect(service.delete).toHaveBeenCalledWith('ABC');
+    }));
+  });
+});

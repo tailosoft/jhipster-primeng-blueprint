@@ -60,6 +60,7 @@ describe('User Management Update Component', () => {
     service = TestBed.inject(UserManagementService);
   });
 
+<%_ if (!fineGrainedPermissions) { _%>
   describe('OnInit', () => {
     it('Should load authorities and language on init', inject(
       [],
@@ -76,6 +77,7 @@ describe('User Management Update Component', () => {
       })
     ));
   });
+<% } %>
 
   describe('save', () => {
     it('Should call update service on save for existing user', inject(

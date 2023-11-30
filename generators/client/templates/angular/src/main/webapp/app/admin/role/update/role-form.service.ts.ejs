@@ -1,0 +1,36 @@
+import { Injectable } from '@angular/core';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
+
+import { IRole } from '../role.model';
+
+type RoleFormGroupContent = {
+  name: FormControl<IRole['name'] | null | undefined>;
+
+  permissions: FormControl<IRole['permissions'] | null | undefined>;
+};
+
+export type RoleFormGroup = FormGroup<RoleFormGroupContent>;
+
+@Injectable({ providedIn: 'root' })
+export class RoleFormService {
+  createRoleFormGroup(role: Partial<IRole> = {}): RoleFormGroup {
+    const roleRawValue = { ...this.getFormDefaults(), ...role };
+    return new FormGroup<RoleFormGroupContent>({
+      name: new FormControl(roleRawValue.name, {
+        validators: [Validators.required],
+      }),
+
+      permissions: new FormControl(roleRawValue.permissions),
+    });
+  }
+
+  resetForm(form: RoleFormGroup, role: Partial<IRole> = {}): void {
+    form.reset({ ...this.getFormDefaults(), ...role });
+  }
+
+  private getFormDefaults(): Partial<IRole> {
+    return {
+      permissions: [],
+    };
+  }
+}

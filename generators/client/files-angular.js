@@ -254,6 +254,27 @@ const files = {
       ],
     },
     {
+      condition: generator => !generator.skipUserManagement && generator.fineGrainedPermissions,
+      path: ANGULAR_DIR,
+      templates: [
+        'admin/role/role.module.ts',
+        'admin/role/role.model.ts',
+        'admin/role/role.test-samples.ts',
+        'admin/role/list/role.component.ts',
+        'admin/role/list/role.component.spec.ts',
+        'admin/role/list/role.component.html',
+        'admin/role/route/role-routing.module.ts',
+        'admin/role/route/role-routing-resolve.service.ts',
+        'admin/role/route/role-routing-resolve.service.spec.ts',
+        'admin/role/service/role.service.ts',
+        'admin/role/service/role.service.spec.ts',
+        'admin/role/update/role-form.service.ts',
+        'admin/role/update/role-form.service.spec.ts',
+        'admin/role/update/role-update.component.ts',
+        'admin/role/update/role-update.component.html',
+      ],
+    },
+    {
       condition: generator => !generator.skipUserManagement,
       path: ANGULAR_DIR,
       templates: [

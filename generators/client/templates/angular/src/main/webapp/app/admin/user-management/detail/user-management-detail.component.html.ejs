@@ -60,8 +60,8 @@
         <dt><span <%= jhiPrefix %>Translate="userManagement.profiles">Profiles</span></dt>
         <dd>
           <ul class="list-unstyled">
-            <li *ngFor="let authority of user.authorities">
-              <span class="badge badge-info">{{ authority }}</span>
+            <li *ngFor="let <%= fineGrainedPermissions ? 'role' : 'authority' %> of user.<%= fineGrainedPermissions ? 'roles' : 'authorities' %>">
+              <span class="badge badge-info">{{ <%= fineGrainedPermissions ? 'role' : 'authority' %> }}</span>
             </li>
           </ul>
         </dd>

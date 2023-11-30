@@ -1,0 +1,76 @@
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
+import { Subscription } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
+import { FilterMetadata, MessageService } from 'primeng/api';
+import { IRole } from '../role.model';
+import { RoleService } from '../service/role.service';
+import { ConfirmationService } from 'primeng/api';
+import { TranslateService } from '@ngx-translate/core';
+import { Table } from 'primeng/table';
+
+@Component({
+  selector: '<%= jhiPrefix %>-role',
+  templateUrl: './role.component.html',
+})
+export class RoleComponent implements OnInit {
+  roles?: IRole[];
+  eventSubscriber?: Subscription;
+  @ViewChild('roleTable', { static: true })
+  roleTable!: Table;
+
+  private filtersDetails: { [_: string]: { type: string } } = {
+    name: { type: 'string' },
+    exchangeRate: { type: 'number' },
+  };
+
+  constructor(
+    protected roleService: RoleService,
+    protected messageService: MessageService,
+    protected confirmationService: ConfirmationService,
+    protected translateService: TranslateService
+  ) {}
+
+  ngOnInit(): void {
+    this.loadAll();
+  }
+
+  get filters(): { [s: string]: FilterMetadata } {
+    return this.roleTable.filters as { [s: string]: FilterMetadata };
+  }
+
+  loadAll(): void {
+    this.roleService
+      .query()
+      .pipe(
+        filter((res: HttpResponse<IRole[]>) => res.ok),
+        map((res: HttpResponse<IRole[]>) => res.body!)
+      )
+      .subscribe(
+        (roles: IRole[]) => {
+          this.roles = roles;
+        },
+        (res: HttpErrorResponse) => this.onError(res.message)
+      );
+  }
+
+  delete(name: string): void {
+    this.confirmationService.confirm({
+      header: this.translateService.instant('entity.delete.title'),
+      message: this.translateService.instant('<%= frontendAppName %>.role.delete.question', { id: `${name}` }),
+      accept: () => {
+        this.roleService.delete(name).subscribe(() => {
+          this.loadAll();
+        });
+      },
+    });
+  }
+
+  trackId(index: number, item: IRole): string {
+    return item.name!;
+  }
+
+  protected onError(errorMessage: string): void {
+    this.messageService.add({ severity: 'error', summary: errorMessage });
+  }
+}

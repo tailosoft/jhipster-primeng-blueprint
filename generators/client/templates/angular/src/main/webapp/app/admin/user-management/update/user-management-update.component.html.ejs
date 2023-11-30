@@ -157,8 +157,8 @@
 
         <div class="form-group">
           <label <%= jhiPrefix %>Translate="userManagement.profiles">Profiles</label>
-          <select class="form-control" multiple name="authority" formControlName="authorities">
-            <option *ngFor="let authority of authorities" [value]="authority">{{ authority }}</option>
+          <select class="form-control" multiple name="<%= fineGrainedPermissions ? 'role' : 'authority' %>" formControlName="<%= fineGrainedPermissions ? 'roles' : 'authorities' %>">
+            <option *ngFor="let <%= fineGrainedPermissions ? 'role' : 'authority' %> of <%= fineGrainedPermissions ? 'roles' : 'authorities' %>" [value]="<%= fineGrainedPermissions ? 'role' : 'authority' %>">{{ <%= fineGrainedPermissions ? 'role' : 'authority' %> }}</option>
           </select>
         </div>
       </div>

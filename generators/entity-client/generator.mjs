@@ -3,6 +3,7 @@ import EntityClientGenerator from 'generator-jhipster/generators/entity-client';
 import { writeAngularFiles } from './files-angular.js';
 import { writeCypressEntityFiles } from './files-cypress.cjs';
 import pluralize from 'pluralize';
+import { prepareFineGrainedPermissions } from "../utils.js";
 
 export default class extends EntityClientGenerator {
   constructor(args, opts, features) {
@@ -46,7 +47,9 @@ export default class extends EntityClientGenerator {
   get [EntityClientGenerator.PREPARING]() {
     return {
       ...super.preparing,
-      async preparingTemplateTask() {},
+      async preparingTemplateTask() {
+        prepareFineGrainedPermissions(this);
+      },
     };
   }
 

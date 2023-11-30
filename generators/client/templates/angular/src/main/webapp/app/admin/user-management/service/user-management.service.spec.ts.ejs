@@ -60,7 +60,7 @@ describe('User Service', () => {
       expect(expectedResult).toEqual('user');
     });
 
-<%_ if (databaseTypeSql || databaseTypeMongodb || databaseTypeCouchbase) { _%>
+<%_ if ((databaseTypeSql || databaseTypeMongodb || databaseTypeCouchbase) && !fineGrainedPermissions) { _%>
     it('should return Authorities', () => {
       let expectedResult: string[] = [];
 

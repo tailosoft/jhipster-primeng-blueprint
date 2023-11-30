@@ -1,0 +1,26 @@
+import { IRole } from './role.model';
+
+export const sampleWithRequiredData: IRole = {
+  name: '1fe45c3e-dacb-4668-a675-9d43284678eb',
+  permissions: [],
+};
+
+export const sampleWithPartialData: IRole = {
+  name: '1bfbf718-db6f-4c92-bea9-47dcad4e3679',
+  permissions: [],
+} as any as IRole;
+
+export const sampleWithFullData: IRole = {
+  name: 'b6735653-2b3d-4302-855a-9015c1a8f13b',
+  permissions: [],
+};
+
+export const sampleWithNewData: IRole = {
+  name: 'a27b4613-c15c-4609-81f9-bdde5becfed5',
+  permissions: [],
+} as any as IRole;
+
+Object.freeze(sampleWithNewData);
+Object.freeze(sampleWithRequiredData);
+Object.freeze(sampleWithPartialData);
+Object.freeze(sampleWithFullData);
