@@ -254,7 +254,7 @@ const files = {
       ],
     },
     {
-      condition: generator => !generator.skipUserManagement && generator.fineGrainedPermissions,
+      condition: generator => generator.fineGrainedPermissions,
       path: ANGULAR_DIR,
       templates: [
         'admin/role/role.module.ts',
