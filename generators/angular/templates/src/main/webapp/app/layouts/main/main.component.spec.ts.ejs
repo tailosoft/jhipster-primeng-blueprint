@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -21,12 +21,11 @@ jest.mock('app/core/auth/account.service');
 import { waitForAsync, ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Router, TitleStrategy } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { RouterTestingModule } from '@angular/router/testing';
 import { DOCUMENT } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { of } from 'rxjs';
 <%_ if (enableTranslation) { _%>
-import { TranslateModule, TranslateService, LangChangeEvent } from '@ngx-translate/core';
+import { InterpolatableTranslationObject, TranslateModule, TranslateService, LangChangeEvent } from '@ngx-translate/core';
 <%_ } _%>
 
 import { AccountService } from 'app/core/auth/account.service';
@@ -48,17 +47,22 @@ describe('MainComponent', () => {
   <%_ } _%>
 <%_ } _%>
   let mockAccountService: AccountService;
+  let ngZone: NgZone;
   const routerState: any = { snapshot: { root: { data: {} } } };
   let router: Router;
   let document: Document;
 
+  const navigateByUrlFn = (url: string) => () => router.navigateByUrl(url);
+
   beforeEach(
     waitForAsync(() => {
       TestBed.configureTestingModule({
+        imports: [
 <%_ if (enableTranslation) { _%>
-        imports: [TranslateModule.forRoot(), RouterTestingModule],
+          TranslateModule.forRoot(),
 <%_ } _%>
-        declarations: [MainComponent],
+          MainComponent,
+        ],
         providers: [
           Title,
 <%_ if (enableI18nRTL) { _%>
@@ -86,6 +90,7 @@ describe('MainComponent', () => {
     mockAccountService = TestBed.inject(AccountService);
     mockAccountService.identity = jest.fn(() => of(null));
     mockAccountService.getAuthenticationState = jest.fn(() => of(null));
+    ngZone = TestBed.inject(NgZone);
     router = TestBed.inject(Router);
     document = TestBed.inject(DOCUMENT);
   });
@@ -95,7 +100,7 @@ describe('MainComponent', () => {
     const parentRoutePageTitle = 'parentTitle';
     const childRoutePageTitle = 'childTitle';
 <%_ if (enableTranslation) { _%>
-    const langChangeEvent: LangChangeEvent = { lang: '<%= nativeLanguage %>', translations: null };
+    const langChangeEvent: LangChangeEvent = { lang: '<%= nativeLanguage %>', translations: {} as InterpolatableTranslationObject };
 <%_ } _%>
 
     beforeEach(() => {
@@ -111,7 +116,7 @@ describe('MainComponent', () => {
     describe('navigation end', () => {
       it('should set page title to default title if pageTitle is missing on routes', fakeAsync(() => {
         // WHEN
-        router.navigateByUrl('');
+        ngZone.run(navigateByUrlFn(''));
         tick();
 
         // THEN
@@ -123,7 +128,7 @@ describe('MainComponent', () => {
         router.resetConfig([{ path: '', title: parentRoutePageTitle, component: BlankComponent }]);
 
         // WHEN
-        router.navigateByUrl('');
+        ngZone.run(navigateByUrlFn(''));
         tick();
 
         // THEN
@@ -136,14 +141,12 @@ describe('MainComponent', () => {
           {
             path: 'home',
             title: parentRoutePageTitle,
-            children: [
-              { path: '', title: childRoutePageTitle, component: BlankComponent },
-            ],
+            children: [{ path: '', title: childRoutePageTitle, component: BlankComponent }],
           },
         ]);
 
         // WHEN
-        router.navigateByUrl('home');
+        ngZone.run(navigateByUrlFn('home'));
         tick();
 
         // THEN
@@ -156,36 +159,27 @@ describe('MainComponent', () => {
           {
             path: 'home',
             title: parentRoutePageTitle,
-            children: [
-              { path: '', component: BlankComponent },
-            ],
+            children: [{ path: '', component: BlankComponent }],
           },
         ]);
 
         // WHEN
-        router.navigateByUrl('home');
+        ngZone.run(navigateByUrlFn('home'));
         tick();
 
         // THEN
         expect(document.title).toBe(parentRoutePageTitle<% if (enableTranslation) { %> + ' translated'<% } %>);
       }));
     });
-
-
-
-
-
-
-
-
 <%_ if (enableTranslation) { _%>
+
     describe('language change', () => {
       it('should set page title to default title if pageTitle is missing on routes', () => {
         // WHEN
         translateService.onLangChange.emit(langChangeEvent);
 
         // THEN
-        expect(document.title).toBe(defaultPageTitle + ' translated');
+        expect(document.title).toBe(`${defaultPageTitle} translated`);
       });
 
       it('should set page title to root route pageTitle if there is no child routes', fakeAsync(() => {
@@ -194,11 +188,11 @@ describe('MainComponent', () => {
         router.resetConfig([{ path: '', title: parentRoutePageTitle, component: BlankComponent }]);
 
         // WHEN
-        router.navigateByUrl('');
+        ngZone.run(navigateByUrlFn(''));
         tick();
 
         // THEN
-        expect(document.title).toBe(parentRoutePageTitle + ' translated');
+        expect(document.title).toBe(`${parentRoutePageTitle} translated`);
 
         // GIVEN
         document.title = 'other title';
@@ -207,7 +201,7 @@ describe('MainComponent', () => {
         translateService.onLangChange.emit(langChangeEvent);
 
         // THEN
-        expect(document.title).toBe(parentRoutePageTitle + ' translated');
+        expect(document.title).toBe(`${parentRoutePageTitle} translated`);
       }));
 
       it('should set page title to child route pageTitle if child routes exist and pageTitle is set for child route', fakeAsync(() => {
@@ -216,18 +210,16 @@ describe('MainComponent', () => {
           {
             path: 'home',
             title: parentRoutePageTitle,
-            children: [
-              { path: '', title: childRoutePageTitle, component: BlankComponent },
-            ],
+            children: [{ path: '', title: childRoutePageTitle, component: BlankComponent }],
           },
         ]);
 
         // WHEN
-        router.navigateByUrl('home');
+        ngZone.run(navigateByUrlFn('home'));
         tick();
 
         // THEN
-        expect(document.title).toBe(childRoutePageTitle + ' translated');
+        expect(document.title).toBe(`${childRoutePageTitle} translated`);
 
         // GIVEN
         document.title = 'other title';
@@ -236,7 +228,7 @@ describe('MainComponent', () => {
         translateService.onLangChange.emit(langChangeEvent);
 
         // THEN
-        expect(document.title).toBe(childRoutePageTitle + ' translated');
+        expect(document.title).toBe(`${childRoutePageTitle} translated`);
       }));
 
       it('should set page title to parent route pageTitle if child routes exists but pageTitle is not set for child route data', fakeAsync(() => {
@@ -245,18 +237,16 @@ describe('MainComponent', () => {
           {
             path: 'home',
             title: parentRoutePageTitle,
-            children: [
-              { path: '', component: BlankComponent },
-            ],
+            children: [{ path: '', component: BlankComponent }],
           },
         ]);
 
         // WHEN
-        router.navigateByUrl('home');
+        ngZone.run(navigateByUrlFn('home'));
         tick();
 
         // THEN
-        expect(document.title).toBe(parentRoutePageTitle + ' translated');
+        expect(document.title).toBe(`${parentRoutePageTitle} translated`);
 
         // GIVEN
         document.title = 'other title';
@@ -265,7 +255,7 @@ describe('MainComponent', () => {
         translateService.onLangChange.emit(langChangeEvent);
 
         // THEN
-        expect(document.title).toBe(parentRoutePageTitle + ' translated');
+        expect(document.title).toBe(`${parentRoutePageTitle} translated`);
       }));
     });
 <%_ } _%>
@@ -281,7 +271,7 @@ describe('MainComponent', () => {
   <%_ if (enableI18nRTL) { _%>
       findLanguageFromKeyPipe.isRTL = jest.fn(() => false);
   <%_ } _%>
-      translateService.onLangChange.emit({ lang: 'lang1', translations: null });
+      translateService.onLangChange.emit({ lang: 'lang1', translations: {} as InterpolatableTranslationObject });
 
       // THEN
       expect(document.querySelector('html')?.getAttribute('lang')).toEqual('lang1');
@@ -293,7 +283,7 @@ describe('MainComponent', () => {
   <%_ if (enableI18nRTL) { _%>
       findLanguageFromKeyPipe.isRTL = jest.fn(() => true);
   <%_ } _%>
-      translateService.onLangChange.emit({ lang: 'lang2', translations: null });
+      translateService.onLangChange.emit({ lang: 'lang2', translations: {} as InterpolatableTranslationObject });
 
       // THEN
       expect(document.querySelector('html')?.getAttribute('lang')).toEqual('lang2');
@@ -305,6 +295,7 @@ describe('MainComponent', () => {
 <%_ } _%>
 });
 
-@Component({template: ''})
-export class BlankComponent {
-}
+@Component({
+  template: '',
+})
+export class BlankComponent {}

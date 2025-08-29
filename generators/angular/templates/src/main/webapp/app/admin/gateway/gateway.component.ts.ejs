@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,14 +16,13 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 
 import SharedModule from 'app/shared/shared.module';
 import { GatewayRoutesService } from './gateway-routes.service';
 import { GatewayRoute } from './gateway-route.model';
 
 @Component({
-  standalone: true,
   selector: '<%= jhiPrefixDashed %>-gateway',
   templateUrl: './gateway.component.html',
   providers: [GatewayRoutesService],
@@ -33,7 +32,7 @@ export default class GatewayComponent implements OnInit {
   gatewayRoutes: GatewayRoute[] = [];
   updatingRoutes = false;
 
-  constructor(private gatewayRoutesService: GatewayRoutesService) {}
+  private readonly gatewayRoutesService = inject(GatewayRoutesService);
 
   ngOnInit(): void {
     this.refresh();
@@ -52,7 +51,7 @@ export default class GatewayComponent implements OnInit {
             ) {
               serviceInstance.instanceInfo = { status: 'UP' };
             } else {
-              serviceInstance.instanceInfo = { status: 'DOWN'} ;
+              serviceInstance.instanceInfo = { status: 'DOWN' };
             }
           }
           return serviceInstance as object;

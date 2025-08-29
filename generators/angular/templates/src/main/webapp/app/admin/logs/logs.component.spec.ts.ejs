@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -17,13 +17,14 @@
  limitations under the License.
 -%>
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 
 import LogsComponent from './logs.component';
 import { LogsService } from './logs.service';
 import { Log, LoggersResponse } from './log.model';
-<%_ if (applicationTypeGateway && serviceDiscoveryAny) { _%>
+<%_ if (applicationTypeGateway && gatewayServicesApiAvailable) { _%>
 import { GatewayRoutesService } from '../gateway/gateway-routes.service';
 <%_ } _%>
 
@@ -35,8 +36,8 @@ describe('LogsComponent', () => {
   beforeEach(
     waitForAsync(() => {
       TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule, LogsComponent],
-        providers: [LogsService<%= applicationTypeGateway && serviceDiscoveryAny ? ', GatewayRoutesService' : '' %>],
+        imports: [LogsComponent],
+        providers: [provideHttpClient(), provideHttpClientTesting(), LogsService<%= applicationTypeGateway && gatewayServicesApiAvailable ? ', GatewayRoutesService' : '' %>],
       })
         .overrideTemplate(LogsComponent, '')
         .compileComponents();
@@ -51,12 +52,12 @@ describe('LogsComponent', () => {
 
   describe('OnInit', () => {
     it('should set all default values correctly', () => {
-      expect(comp.filter).toBe('');
-      expect(comp.orderProp).toBe('name');
-      expect(comp.ascending).toBe(true);
+      expect(comp.filter()).toBe('');
+      expect(comp.sortState().predicate).toBe('name');
+      expect(comp.sortState().order).toBe('asc');
     });
 
-    it('Should call load all on init', () => {
+    it('should call load all on init', () => {
       // GIVEN
       const log = new Log('main', 'WARN');
       jest.spyOn(service, 'findAll').mockReturnValue(
@@ -66,7 +67,7 @@ describe('LogsComponent', () => {
               effectiveLevel: 'WARN',
             },
           },
-        } as unknown as LoggersResponse)
+        } as unknown as LoggersResponse),
       );
 
       // WHEN
@@ -74,7 +75,7 @@ describe('LogsComponent', () => {
 
       // THEN
       expect(service.findAll).toHaveBeenCalled();
-      expect(comp.loggers?.[0]).toEqual(expect.objectContaining(log));
+      expect(comp.loggers()?.[0]).toEqual(expect.objectContaining(log));
     });
   });
 
@@ -90,7 +91,7 @@ describe('LogsComponent', () => {
               effectiveLevel: 'ERROR',
             },
           },
-        } as unknown as LoggersResponse)
+        } as unknown as LoggersResponse),
       );
 
       // WHEN
@@ -99,7 +100,7 @@ describe('LogsComponent', () => {
       // THEN
       expect(service.changeLevel).toHaveBeenCalled();
       expect(service.findAll).toHaveBeenCalled();
-      expect(comp.loggers?.[0]).toEqual(expect.objectContaining(log));
+      expect(comp.loggers()?.[0]).toEqual(expect.objectContaining(log));
     });
   });
 });

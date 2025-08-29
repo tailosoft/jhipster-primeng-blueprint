@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,28 +16,27 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AlertService, Alert } from 'app/core/util/alert.service';
 
 @Component({
-  standalone: true,
   selector: '<%= jhiPrefixDashed %>-alert',
   templateUrl: './alert.component.html',
   imports: [CommonModule, NgbModule],
 })
 export class AlertComponent implements OnInit, OnDestroy {
-  alerts: Alert[] = [];
+  alerts = signal<Alert[]>([]);
 
-  constructor(private alertService: AlertService) {}
+  private readonly alertService = inject(AlertService);
 
   ngOnInit(): void {
-    this.alerts = this.alertService.get();
+    this.alerts.set(this.alertService.get());
   }
 
-  setClasses(alert: Alert): { [key: string]: boolean } {
+  setClasses(alert: Alert): Record<string, boolean> {
     const classes = { 'jhi-toast': Boolean(alert.toast) };
     if (alert.position) {
       return { ...classes, [alert.position]: true };
@@ -50,6 +49,6 @@ export class AlertComponent implements OnInit, OnDestroy {
   }
 
   close(alert: Alert): void {
-    alert.close?.(this.alerts);
+    alert.close?.(this.alerts());
   }
 }

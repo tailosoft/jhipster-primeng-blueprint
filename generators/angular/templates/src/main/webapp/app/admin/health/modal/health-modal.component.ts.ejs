@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,14 +16,13 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import SharedModule from 'app/shared/shared.module';
 import { HealthKey, HealthDetails } from '../health.model';
 
 @Component({
-  standalone: true,
   selector: '<%= jhiPrefixDashed %>-health-modal',
   templateUrl: './health-modal.component.html',
   imports: [SharedModule],
@@ -31,11 +30,11 @@ import { HealthKey, HealthDetails } from '../health.model';
 export default class HealthModalComponent {
   health?: { key: HealthKey; value: HealthDetails };
 
-  constructor(private activeModal: NgbActiveModal) {}
+  private readonly activeModal = inject(NgbActiveModal);
 
   readableValue(value: any): string {
     if (this.health?.key === 'diskSpace') {
-      // Should display storage space in an human readable unit
+      // should display storage space in a human readable unit
       const val = value / 1073741824;
       if (val > 1) {
         return `${val.toFixed(2)} GB`;

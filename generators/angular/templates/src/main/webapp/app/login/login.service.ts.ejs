@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,7 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 <%_ if (authenticationTypeOauth2) { _%>
 import { Location } from '@angular/common';
 
@@ -43,17 +43,15 @@ import { Login } from './login.model';
 
 @Injectable({ providedIn: 'root' })
 export class LoginService {
-  constructor(
 <%_ if (authenticationTypeSession) { _%>
-    private applicationConfigService: ApplicationConfigService,
+  private readonly applicationConfigService = inject(ApplicationConfigService);
 <%_ } _%>
 <%_ if (authenticationTypeOauth2) { _%>
-    private location: Location,
+  private readonly location = inject(Location);
 <%_ } else { _%>
-    private accountService: AccountService,
+  private readonly accountService = inject(AccountService);
 <%_ } _%>
-    private authServerProvider: AuthServerProvider
-  ) {}
+  private readonly authServerProvider = inject(AuthServerProvider);
 
 <%_ if (authenticationTypeOauth2) { _%>
   login(): void {

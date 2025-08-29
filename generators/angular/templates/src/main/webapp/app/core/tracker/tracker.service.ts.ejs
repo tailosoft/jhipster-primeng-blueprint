@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,7 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Location } from '@angular/common';
 import { Router, NavigationEnd, Event } from '@angular/router';
 import { Subscription, Observer } from 'rxjs';
@@ -43,16 +43,14 @@ export class TrackerService {
   private rxStomp?: RxStomp;
   private routerSubscription: Subscription | null = null;
 
-  constructor(
-    private router: Router,
-    private accountService: AccountService,
+  private readonly router = inject(Router);
+  private readonly accountService = inject(AccountService);
 <%_ if (authenticationTypeSession) { _%>
-    private csrfService: CSRFService,
+  private readonly csrfService = inject(CSRFService);
 <%_ } else if (authenticationTypeJwt) { _%>
-    private authServerProvider: AuthServerProvider,
+  private readonly authServerProvider = inject(AuthServerProvider);
 <%_ } _%>
-    private location: Location
-  ) {}
+  private readonly location = inject(Location);
 
   setup(): void {
     this.rxStomp = new RxStomp();
@@ -87,7 +85,7 @@ export class TrackerService {
     return this.rxStomp;
   }
 
-  public subscribe(observer: Partial<Observer<TrackerActivity>>): Subscription {
+  subscribe(observer: Partial<Observer<TrackerActivity>>): Subscription {
     return (
       this.stomp
         .watch(DESTINATION_TRACKER)
@@ -95,6 +93,13 @@ export class TrackerService {
         .pipe(map(imessage => JSON.parse(imessage.body)))
         .subscribe(observer)
     );
+  }
+
+  sendActivity(): void {
+    this.stomp.publish({
+      destination: DESTINATION_ACTIVITY,
+      body: JSON.stringify({ page: this.router.routerState.snapshot.url }),
+    });
   }
 
   private connect(): void {
@@ -131,13 +136,6 @@ export class TrackerService {
         ['X-XSRF-TOKEN']: this.csrfService.getCSRF('XSRF-TOKEN'),
       }
 <%_ } _%>
-    });
-  }
-
-  private sendActivity(): void {
-    this.stomp.publish({
-      destination: DESTINATION_ACTIVITY,
-      body: JSON.stringify({ page: this.router.routerState.snapshot.url }),
     });
   }
 }

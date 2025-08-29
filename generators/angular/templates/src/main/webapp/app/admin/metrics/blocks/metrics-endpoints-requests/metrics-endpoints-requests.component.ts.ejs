@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,13 +16,12 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 
 import SharedModule from 'app/shared/shared.module';
 import { Services } from 'app/admin/metrics/metrics.model';
 
 @Component({
-  standalone: true,
   selector: '<%= jhiPrefixDashed %>-metrics-endpoints-requests',
   templateUrl: './metrics-endpoints-requests.component.html',
   imports: [SharedModule],
@@ -31,10 +30,10 @@ export class MetricsEndpointsRequestsComponent {
   /**
    * object containing service related metrics
    */
-  @Input() endpointsRequestsMetrics?: Services;
+  endpointsRequestsMetrics = input<Services>();
 
   /**
    * boolean field saying if the metrics are in the process of being updated
    */
-  @Input() updating?: boolean;
+  updating = input<boolean>();
 }

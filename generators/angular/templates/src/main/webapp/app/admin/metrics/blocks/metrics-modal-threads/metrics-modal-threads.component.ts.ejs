@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,14 +16,13 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import SharedModule from 'app/shared/shared.module';
 import { Thread, ThreadState } from 'app/admin/metrics/metrics.model';
 
 @Component({
-  standalone: true,
   selector: '<%= jhiPrefixDashed %>-thread-modal',
   templateUrl: './metrics-modal-threads.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -39,7 +38,7 @@ export class MetricsModalThreadsComponent implements OnInit {
   threadDumpTimedWaiting = 0;
   threadDumpWaiting = 0;
 
-  constructor(private activeModal: NgbActiveModal) {}
+  private readonly activeModal = inject(NgbActiveModal);
 
   ngOnInit(): void {
     this.threads?.forEach(thread => {

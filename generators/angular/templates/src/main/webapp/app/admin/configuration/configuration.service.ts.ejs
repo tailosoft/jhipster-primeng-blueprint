@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,7 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -26,7 +26,8 @@ import { Bean, Beans, ConfigProps, Env, PropertySource } from './configuration.m
 
 @Injectable({ providedIn: 'root' })
 export class ConfigurationService {
-  constructor(private http: HttpClient, private applicationConfigService: ApplicationConfigService) {}
+  private readonly http = inject(HttpClient);
+  private readonly applicationConfigService = inject(ApplicationConfigService);
 
   getBeans(): Observable<Bean[]> {
     return this.http.get<ConfigProps>(this.applicationConfigService.getEndpointFor('management/configprops')).pipe(
@@ -34,9 +35,9 @@ export class ConfigurationService {
         Object.values(
           Object.values(configProps.contexts)
             .map(context => context.beans)
-            .reduce((allBeans: Beans, contextBeans: Beans) => ({ ...allBeans, ...contextBeans }))
-        )
-      )
+            .reduce((allBeans: Beans, contextBeans: Beans) => ({ ...allBeans, ...contextBeans }), {}),
+        ),
+      ),
     );
   }
 

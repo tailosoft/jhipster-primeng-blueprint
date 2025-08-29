@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,17 +16,18 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Directive, OnInit, ElementRef, Renderer2, Input } from '@angular/core';
+import { Directive, OnInit, ElementRef, Renderer2, inject, input } from '@angular/core';
 import { TranslateService, LangChangeEvent } from '@ngx-translate/core';
 
 @Directive({
-  standalone: true,
   selector: '[<%= jhiPrefix %>ActiveMenu]',
 })
 export default class ActiveMenuDirective implements OnInit {
-  @Input() <%= jhiPrefix %>ActiveMenu?: string;
+  <%= jhiPrefix %>ActiveMenu = input();
 
-  constructor(private el: ElementRef, private renderer: Renderer2, private translateService: TranslateService) {}
+  private readonly el = inject(ElementRef);
+  private readonly renderer = inject(Renderer2);
+  private readonly translateService = inject(TranslateService);
 
   ngOnInit(): void {
     this.translateService.onLangChange.subscribe((event: LangChangeEvent) => {
@@ -37,7 +38,7 @@ export default class ActiveMenuDirective implements OnInit {
   }
 
   updateActiveFlag(selectedLanguage: string): void {
-    if (this.<%= jhiPrefix %>ActiveMenu === selectedLanguage) {
+    if (this.<%= jhiPrefix %>ActiveMenu() === selectedLanguage) {
       this.renderer.addClass(this.el.nativeElement, 'active');
     } else {
       this.renderer.removeClass(this.el.nativeElement, 'active');

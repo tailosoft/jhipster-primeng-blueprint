@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -21,11 +21,14 @@ import { Observable, Observer, Subscription } from 'rxjs';
 import { filter, share } from 'rxjs/operators';
 
 export class EventWithContent<T> {
-  constructor(public name: string, public content: T) {}
+  constructor(
+    public name: string,
+    public content: T,
+  ) {}
 }
 
 /**
- * An utility class to manage RX events
+ * A utility class to manage RX events
  */
 @Injectable({
   providedIn: 'root',
@@ -67,7 +70,7 @@ export class EventManager {
             }
           }
           return false;
-        })
+        }),
       )
       .subscribe(callback);
   }

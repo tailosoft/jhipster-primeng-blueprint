@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -17,8 +17,7 @@
  limitations under the License.
 -%>
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { HttpErrorResponse } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClient, HttpErrorResponse } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 
 import HealthComponent from './health.component';
@@ -30,15 +29,14 @@ describe('HealthComponent', () => {
   let fixture: ComponentFixture<HealthComponent>;
   let service: HealthService;
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule, HealthComponent],
-      })
-        .overrideTemplate(HealthComponent, '')
-        .compileComponents();
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      imports: [HealthComponent],
+      providers: [provideHttpClient()],
     })
-  );
+      .overrideTemplate(HealthComponent, '')
+      .compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(HealthComponent);
@@ -72,7 +70,7 @@ describe('HealthComponent', () => {
     it('should handle a 503 on refreshing health data', () => {
       // GIVEN
       const health: Health = { status: 'DOWN', components: { mail: { status: 'DOWN' } } };
-      jest.spyOn(service, 'checkHealth').mockReturnValue(throwError(new HttpErrorResponse({ status: 503, error: health })));
+      jest.spyOn(service, 'checkHealth').mockReturnValue(throwError(() => new HttpErrorResponse({ status: 503, error: health })));
 
       // WHEN
       comp.refresh();

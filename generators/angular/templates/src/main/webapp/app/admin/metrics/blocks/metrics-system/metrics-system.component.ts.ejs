@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,13 +16,12 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 import SharedModule from 'app/shared/shared.module';
 import { ProcessMetrics } from 'app/admin/metrics/metrics.model';
 
 @Component({
-  standalone: true,
   selector: '<%= jhiPrefixDashed %>-metrics-system',
   templateUrl: './metrics-system.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,12 +31,12 @@ export class MetricsSystemComponent {
   /**
    * object containing thread related metrics
    */
-  @Input() systemMetrics?: ProcessMetrics;
+  systemMetrics = input<ProcessMetrics>();
 
   /**
    * boolean field saying if the metrics are in the process of being updated
    */
-  @Input() updating?: boolean;
+  updating = input<boolean>();
 
   convertMillisecondsToDuration(ms: number): string {
     const times = {

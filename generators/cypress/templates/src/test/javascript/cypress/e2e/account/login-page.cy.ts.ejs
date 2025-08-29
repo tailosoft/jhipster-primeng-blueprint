@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -24,7 +24,7 @@ import {
   submitLoginSelector,
 } from '../../support/commands';
 
-describe('login modal', () => {
+describe('login page', () => {
   const username = Cypress.env('E2E_USERNAME') ?? '<%= skipUserManagement && (applicationTypeMonolith || applicationTypeGateway) ? 'admin' : 'user' %>';
   const password = Cypress.env('E2E_PASSWORD') ?? '<%= skipUserManagement && (applicationTypeMonolith || applicationTypeGateway) ? 'admin' : 'user' %>';
 
@@ -40,12 +40,19 @@ describe('login modal', () => {
   it('greets with signin', () => {
     cy.get(titleLoginSelector).should('be.visible');
   });
+<%_ if (clientFrameworkAngular) { _%>
+
+  it('greets visiting /login directly', () => {
+    cy.visit('/login');
+    cy.get(titleLoginSelector).should('be.visible');
+  });
+<%_ } _%>
 
   it('requires username', () => {
     cy.get(passwordLoginSelector).type('a-password');
     cy.get(submitLoginSelector).click();
 <%_ if (!clientFrameworkReact) { _%>
-    cy.wait('@authenticate').then(({ response }) => expect(response.statusCode).to.equal(<% if (authenticationTypeSession) { %>401<% } else { %>400<% } %>));
+    cy.wait('@authenticate').then(({ response }) => expect(response?.statusCode).to.equal(<% if (authenticationTypeSession) { %>401<% } else { %>400<% } %>));
 <%_ } _%>
     // login page should stay open when login fails
     cy.get(titleLoginSelector).should('be.visible');
@@ -55,7 +62,7 @@ describe('login modal', () => {
     cy.get(usernameLoginSelector).type('a-login');
     cy.get(submitLoginSelector).click();
 <%_ if (!clientFrameworkReact) { _%>
-    cy.wait('@authenticate').then(({ response }) => expect(response.statusCode).to.equal(<% if (authenticationTypeSession) { %>401<% } else { %>400<% } %>));
+    cy.wait('@authenticate').then(({ response }) => expect(response?.statusCode).to.equal(<% if (authenticationTypeSession) { %>401<% } else { %>400<% } %>));
     cy.get(errorLoginSelector).should('be.visible');
 <%_ } else { _%>
     // login page should stay open when login fails
@@ -67,15 +74,15 @@ describe('login modal', () => {
     cy.get(usernameLoginSelector).type(username);
     cy.get(passwordLoginSelector).type('bad-password');
     cy.get(submitLoginSelector).click();
-    cy.wait('@authenticate').then(({ response }) => expect(response.statusCode).to.equal(401));
+    cy.wait('@authenticate').then(({ response }) => expect(response?.statusCode).to.equal(401));
     cy.get(errorLoginSelector).should('be.visible');
   });
 
-  it('go to login page when successfully logs in', () => {
+  it('go to home page when successfully logs in', () => {
     cy.get(usernameLoginSelector).type(username);
     cy.get(passwordLoginSelector).type(password);
     cy.get(submitLoginSelector).click();
-    cy.wait('@authenticate').then(({ response }) => expect(response.statusCode).to.equal(200));
+    cy.wait('@authenticate').then(({ response }) => expect(response?.statusCode).to.equal(200));
     cy.hash().should('eq', '');
   });
 });

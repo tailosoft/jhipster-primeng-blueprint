@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -19,7 +19,7 @@
 jest.mock('@ng-bootstrap/ng-bootstrap');
 
 import { ComponentFixture, TestBed, waitForAsync, inject, fakeAsync, tick } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { of } from 'rxjs';
 
@@ -33,16 +33,14 @@ describe('User Management Delete Component', () => {
   let service: UserManagementService;
   let mockActiveModal: NgbActiveModal;
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule, UserManagementDeleteDialogComponent],
-        providers: [NgbActiveModal],
-      })
-        .overrideTemplate(UserManagementDeleteDialogComponent, '')
-        .compileComponents();
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      imports: [UserManagementDeleteDialogComponent],
+      providers: [provideHttpClient(), NgbActiveModal],
     })
-  );
+      .overrideTemplate(UserManagementDeleteDialogComponent, '')
+      .compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(UserManagementDeleteDialogComponent);
@@ -52,7 +50,7 @@ describe('User Management Delete Component', () => {
   });
 
   describe('confirmDelete', () => {
-    it('Should call delete service on confirmDelete', inject(
+    it('should call delete service on confirmDelete', inject(
       [],
       fakeAsync(() => {
         // GIVEN
@@ -65,7 +63,7 @@ describe('User Management Delete Component', () => {
         // THEN
         expect(service.delete).toHaveBeenCalledWith('user');
         expect(mockActiveModal.close).toHaveBeenCalledWith('deleted');
-      })
+      }),
     ));
   });
 });

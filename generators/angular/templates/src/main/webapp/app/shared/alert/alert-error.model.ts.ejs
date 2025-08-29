@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -21,7 +21,7 @@ export class AlertError {
     public message: string,
     <%_ if (enableTranslation) { _%>
     public key?: string,
-    public params?: { [key: string]: unknown }
+    public params?: Record<string, unknown>
     <%_ } _%>
   ) {}
 }

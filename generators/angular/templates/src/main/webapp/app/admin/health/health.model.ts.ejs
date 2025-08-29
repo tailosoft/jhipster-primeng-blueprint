@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -39,25 +39,27 @@ export type HealthKey =
   <%_ if (searchEngineElasticsearch) { _%>
   | 'elasticsearch'
   <%_ } _%>
-  <%_ if (databaseTypeSql) { _%>
+<%_ if (databaseTypeSql) { _%>
+  <%_ if (reactive) { _%>
+  | 'r2dbc'
+  <%_ } else { _%>
   | 'db'
-  <%_ } else if (databaseTypeMongodb) { _%>
-  | 'mongo'
-  <%_ } else if (databaseTypeCassandra) { _%>
-  | 'cassandra'
-  <%_ } else if (databaseTypeCouchbase) { _%>
-  | 'couchbase'
   <%_ } _%>
+<%_ } else if (databaseTypeMongodb) { _%>
+  | 'mongo'
+<%_ } else if (databaseTypeCassandra) { _%>
+  | 'cassandra'
+<%_ } else if (databaseTypeCouchbase) { _%>
+  | 'couchbase'
+<%_ } _%>
   ;
 
 export interface Health {
   status: HealthStatus;
-  components: {
-    [key in HealthKey]?: HealthDetails;
-  };
+  components?: Partial<Record<HealthKey, HealthDetails>>;
 }
 
 export interface HealthDetails {
   status: HealthStatus;
-  details?: { [key: string]: unknown };
+  details?: Record<string, unknown>;
 }

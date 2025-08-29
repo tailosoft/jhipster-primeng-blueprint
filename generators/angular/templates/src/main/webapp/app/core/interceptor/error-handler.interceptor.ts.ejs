@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,7 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpInterceptor, HttpRequest, HttpErrorResponse, HttpHandler, HttpEvent } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -25,7 +25,7 @@ import { EventManager, EventWithContent } from 'app/core/util/event-manager.serv
 
 @Injectable()
 export class ErrorHandlerInterceptor implements HttpInterceptor {
-  constructor(private eventManager: EventManager) {}
+  private readonly eventManager = inject(EventManager);
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(
@@ -35,7 +35,7 @@ export class ErrorHandlerInterceptor implements HttpInterceptor {
             this.eventManager.broadcast(new EventWithContent('<%= frontendAppName %>.httpError', err));
           }
         },
-      })
+      }),
     );
   }
 }

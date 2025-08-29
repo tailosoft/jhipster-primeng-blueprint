@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -19,7 +19,7 @@
 jest.mock('app/core/auth/account.service');
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
 import { FormBuilder } from '@angular/forms';
 import { throwError, of } from 'rxjs';
 <%_ if (enableTranslation) { _%>
@@ -53,10 +53,9 @@ describe('SettingsComponent', () => {
 <%_ if (enableTranslation) { _%>
           TranslateModule.forRoot(),
 <%_ } _%>
-          HttpClientTestingModule,
           SettingsComponent,
         ],
-        providers: [FormBuilder, AccountService],
+        providers: [provideHttpClient(), FormBuilder, AccountService],
       })
         .overrideTemplate(SettingsComponent, '')
         .compileComponents();
@@ -103,18 +102,18 @@ describe('SettingsComponent', () => {
     comp.save();
 
     // THEN
-    expect(comp.success).toBe(true);
+    expect(comp.success()).toBe(true);
   });
 
   it('should notify of error upon failed save', () => {
     // GIVEN
-    mockAccountService.save = jest.fn(() => throwError('ERROR'));
+    mockAccountService.save = jest.fn(() => throwError(Error));
 
     // WHEN
     comp.ngOnInit();
     comp.save();
 
     // THEN
-    expect(comp.success).toBe(false);
+    expect(comp.success()).toBe(false);
   });
 });

@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,30 +16,33 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Component, OnInit } from '@angular/core';
+import { Component, Injector, OnInit, Signal, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import SharedModule from 'app/shared/shared.module';
 import { ProfileService } from './profile.service';
 
 @Component({
-  standalone: true,
   selector: '<%= jhiPrefixDashed %>-page-ribbon',
   template: `
-    <div class="ribbon" *ngIf="ribbonEnv$ | async as ribbonEnv">
-      <a href=""<% if (enableTranslation) { %> <%= jhiPrefix %>Translate="global.ribbon.{{ ribbonEnv }}"<% } %>>{{ <%- JSON.stringify(getWebappTranslation('global.ribbon')) %>[ribbonEnv] || '' }}</a>
-    </div>
+    @if (ribbonEnvSignal; as ribbonEnv) {
+      <div class="ribbon">
+        <a href="">__jhiTranslateTagEnum__('global.ribbon', { "value": "ribbonEnv() ?? ''" })</a>
+      </div>
+    }
   `,
-  styleUrls: ['./page-ribbon.component.scss'],
+  styleUrl: './page-ribbon.component.scss',
   imports: [SharedModule],
 })
 export default class PageRibbonComponent implements OnInit {
-  ribbonEnv$?: Observable<string | undefined>;
-
-  constructor(private profileService: ProfileService) {}
+  ribbonEnvSignal?: Signal<string | undefined>;
+  private readonly injector = inject(Injector);
+  private readonly profileService = inject(ProfileService);
 
   ngOnInit(): void {
-    this.ribbonEnv$ = this.profileService.getProfileInfo().pipe(map(profileInfo => profileInfo.ribbonEnv));
+    const ribbonEnv$: Observable<string | undefined> = this.profileService.getProfileInfo().pipe(map(profileInfo => profileInfo.ribbonEnv));
+    this.ribbonEnvSignal = toSignal(ribbonEnv$, { injector: this.injector });
   }
 }

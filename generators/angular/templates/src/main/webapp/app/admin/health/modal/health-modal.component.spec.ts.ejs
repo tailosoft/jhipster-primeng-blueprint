@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import HealthModalComponent from './health-modal.component';
@@ -9,16 +9,14 @@ describe('HealthModalComponent', () => {
   let fixture: ComponentFixture<HealthModalComponent>;
   let mockActiveModal: NgbActiveModal;
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule, HealthModalComponent],
-        providers: [NgbActiveModal],
-      })
-        .overrideTemplate(HealthModalComponent, '')
-        .compileComponents();
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      imports: [HealthModalComponent],
+      providers: [provideHttpClient(), NgbActiveModal],
     })
-  );
+      .overrideTemplate(HealthModalComponent, '')
+      .compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(HealthModalComponent);
@@ -32,7 +30,7 @@ describe('HealthModalComponent', () => {
       comp.health = undefined;
 
       // WHEN
-      const result = comp.readableValue({ 'name': 'jhipster' });
+      const result = comp.readableValue({ name: 'jhipster' });
 
       // THEN
       expect(result).toEqual('{"name":"jhipster"}');
@@ -49,13 +47,13 @@ describe('HealthModalComponent', () => {
       expect(result).toEqual('jhipster');
     });
 
-    it('should return storage space in an human readable unit (GB)', () => {
+    it('should return storage space in a human readable unit (GB)', () => {
       // GIVEN
       comp.health = {
         key: 'diskSpace',
         value: {
-          status: 'UP'
-        }
+          status: 'UP',
+        },
       };
 
       // WHEN
@@ -65,13 +63,13 @@ describe('HealthModalComponent', () => {
       expect(result).toEqual('1.00 GB');
     });
 
-    it('should return storage space in an human readable unit (MB)', () => {
+    it('should return storage space in a human readable unit (MB)', () => {
       // GIVEN
       comp.health = {
         key: 'diskSpace',
         value: {
-          status: 'UP'
-        }
+          status: 'UP',
+        },
       };
 
       // WHEN
@@ -86,8 +84,8 @@ describe('HealthModalComponent', () => {
       comp.health = {
         key: 'mail',
         value: {
-          status: 'UP'
-        }
+          status: 'UP',
+        },
       };
 
       // WHEN

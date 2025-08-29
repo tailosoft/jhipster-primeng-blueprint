@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -57,7 +57,7 @@ describe('Alert service test', () => {
           timeout: 3000,
           toast: true,
           position: 'top left',
-        })
+        }),
       ).toEqual(
         expect.objectContaining({
           type: 'success',
@@ -66,7 +66,7 @@ describe('Alert service test', () => {
           timeout: 3000,
           toast: true,
           position: 'top left',
-        } as Alert)
+        } as Alert),
       );
 
       expect(service.get().length).toBe(1);
@@ -78,7 +78,7 @@ describe('Alert service test', () => {
           timeout: 3000,
           toast: true,
           position: 'top left',
-        } as Alert)
+        } as Alert),
       );
     }));
 
@@ -94,8 +94,8 @@ describe('Alert service test', () => {
               toast: true,
               position: 'top left',
             },
-            extAlerts
-          )
+            extAlerts,
+          ),
         ).toEqual(
           expect.objectContaining({
             type: 'success',
@@ -104,7 +104,7 @@ describe('Alert service test', () => {
             timeout: 3000,
             toast: true,
             position: 'top left',
-          } as Alert)
+          } as Alert),
         );
 
         expect(extAlerts.length).toBe(1);
@@ -116,41 +116,41 @@ describe('Alert service test', () => {
             timeout: 3000,
             toast: true,
             position: 'top left',
-          } as Alert)
+          } as Alert),
         );
-      }
+      },
     ));
 
     it('should produce an alert object with correct id', inject([AlertService], (service: AlertService) => {
       service.addAlert({ type: 'info', message: 'Hello Jhipster info' });
-      expect(service.addAlert({ type: 'success', message: 'Hello Jhipster success' })).toEqual(
+      expect(service.addAlert({ type: 'success', message: 'Hello JHipster success' })).toEqual(
         expect.objectContaining({
           type: 'success',
-          message: 'Hello Jhipster success',
+          message: 'Hello JHipster success',
           id: 1,
-        } as Alert)
+        } as Alert),
       );
 
       expect(service.get().length).toBe(2);
       expect(service.get()[1]).toEqual(
         expect.objectContaining({
           type: 'success',
-          message: 'Hello Jhipster success',
+          message: 'Hello JHipster success',
           id: 1,
-        } as Alert)
+        } as Alert),
       );
     }));
 
     it('should close an alert correctly', inject([AlertService], (service: AlertService) => {
       const alert0 = service.addAlert({ type: 'info', message: 'Hello Jhipster info' });
       const alert1 = service.addAlert({ type: 'info', message: 'Hello Jhipster info 2' });
-      const alert2 = service.addAlert({ type: 'success', message: 'Hello Jhipster success' });
+      const alert2 = service.addAlert({ type: 'success', message: 'Hello JHipster success' });
       expect(alert2).toEqual(
         expect.objectContaining({
           type: 'success',
-          message: 'Hello Jhipster success',
+          message: 'Hello JHipster success',
           id: 2,
-        } as Alert)
+        } as Alert),
       );
 
       expect(service.get().length).toBe(3);
@@ -161,16 +161,16 @@ describe('Alert service test', () => {
           type: 'info',
           message: 'Hello Jhipster info 2',
           id: 1,
-        } as Alert)
+        } as Alert),
       );
       alert2.close?.(service.get());
       expect(service.get().length).toBe(1);
       expect(service.get()[0]).not.toEqual(
         expect.objectContaining({
           type: 'success',
-          message: 'Hello Jhipster success',
+          message: 'Hello JHipster success',
           id: 2,
-        } as Alert)
+        } as Alert),
       );
       alert0.close?.(service.get());
       expect(service.get().length).toBe(0);
@@ -205,8 +205,8 @@ describe('Alert service test', () => {
             toast: true,
             position: 'top left',
           },
-          []
-        )
+          [],
+        ),
       ).toEqual(
         expect.objectContaining({
           type: 'success',
@@ -215,7 +215,7 @@ describe('Alert service test', () => {
           timeout: 3000,
           toast: true,
           position: 'top left',
-        } as Alert)
+        } as Alert),
       );
 
       expect(service.get().length).toBe(0);
@@ -226,7 +226,7 @@ describe('Alert service test', () => {
         expect.objectContaining({
           type: 'success',
           message: 'Hello Jhipster',
-        } as Alert)
+        } as Alert),
       );
     }));
 
@@ -236,7 +236,7 @@ describe('Alert service test', () => {
           type: 'success',
           message: 'Hello Jhipster',
           position: 'bottom left',
-        } as Alert)
+        } as Alert),
       );
     }));
 
@@ -245,7 +245,7 @@ describe('Alert service test', () => {
         expect.objectContaining({
           type: 'danger',
           message: 'Hello Jhipster',
-        } as Alert)
+        } as Alert),
       );
     }));
 
@@ -254,7 +254,7 @@ describe('Alert service test', () => {
         expect.objectContaining({
           type: 'warning',
           message: 'Hello Jhipster',
-        } as Alert)
+        } as Alert),
       );
     }));
 
@@ -263,7 +263,7 @@ describe('Alert service test', () => {
         expect.objectContaining({
           type: 'info',
           message: 'Hello Jhipster',
-        } as Alert)
+        } as Alert),
       );
     }));
 
@@ -279,9 +279,9 @@ describe('Alert service test', () => {
           expect.objectContaining({
             type: 'info',
             message: 'Translated message',
-          } as Alert)
+          } as Alert),
         );
-      }
+      },
     ));
 
     it('should produce a info message with provided message if key does not exists', inject(
@@ -291,12 +291,12 @@ describe('Alert service test', () => {
           expect.objectContaining({
             type: 'info',
             message: 'Hello Jhipster',
-          } as Alert)
+          } as Alert),
         );
-      }
+      },
     ));
 
-    it('should produce a info message with provided key if transltion key does not exist in translations and message is not provided', inject(
+    it('should produce a info message with provided key if translation key does not exist in translations and message is not provided', inject(
       [AlertService, TranslateService],
       (service: AlertService) => {
         expect(service.addAlert({ type: 'info', translationKey: 'hello.jhipster' })).toEqual(

@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,7 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 <%_ if (enableTranslation) { _%>
 import { TranslateService } from '@ngx-translate/core';
@@ -33,12 +33,11 @@ const initialAccount: Account = {} as Account;
 
 @Component({
   selector: '<%= jhiPrefixDashed %>-settings',
-  standalone: true,
   imports: [SharedModule, FormsModule, ReactiveFormsModule],
   templateUrl: './settings.component.html',
 })
 export default class SettingsComponent implements OnInit {
-  success = false;
+  success = signal(false);
 <%_ if (enableTranslation) { _%>
   languages = LANGUAGES;
 <%_ } _%>
@@ -64,12 +63,10 @@ export default class SettingsComponent implements OnInit {
     login: new FormControl(initialAccount.login, { nonNullable: true }),
   });
 
-  constructor(
-    private accountService: AccountService,
+  private readonly accountService = inject(AccountService);
 <%_ if (enableTranslation) { _%>
-    private translateService: TranslateService,
+  private readonly translateService = inject(TranslateService);
 <%_ } _%>
-  ) {}
 
   ngOnInit(): void {
     this.accountService.identity().subscribe(account => {
@@ -80,11 +77,11 @@ export default class SettingsComponent implements OnInit {
   }
 
   save(): void {
-    this.success = false;
+    this.success.set(false);
 
     const account = this.settingsForm.getRawValue();
     this.accountService.save(account).subscribe(() => {
-      this.success = true;
+      this.success.set(true);
 
       this.accountService.authenticate(account);
 
