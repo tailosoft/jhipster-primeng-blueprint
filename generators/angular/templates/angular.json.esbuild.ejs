@@ -40,9 +40,9 @@
           "options": {
             "plugins": [
 <%_ if (enableTranslation) { _%>
-              "build-plugins/i18n-esbuild.mjs",
+              "build-plugins/i18n-esbuild.ts",
 <%_ } _%>
-              "build-plugins/define-esbuild.mjs"
+              "build-plugins/define-esbuild.ts"
             ],
             "outputPath": {
               "base": "<%= this.relativeDir(clientRootDir, clientDistDir) %>",
@@ -56,7 +56,7 @@
 <%_ if (communicationSpringWebsocket) { _%>
               "./<%= this.relativeDir(clientRootDir, clientSrcDir) %>sockjs-client.polyfill",
 <%_ } _%>
-              "zone.js"
+              "@angular/localize/init"
             ],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
@@ -140,9 +140,16 @@
           "defaultConfiguration": "development"
         },
         "test": {
-          "builder": "@angular-builders/jest:run",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "configPath": "jest.conf.js",
+            "runner": "vitest",
+            "buildTarget": "::development",
+            "runnerConfig": true,
+            "coverageReporters": ["text", "lcov"],
+            "reporters": [
+              "default",
+              ["vitest-sonar-reporter", { "outputFile": "./<%= this.relativeDir(clientRootDir, temporaryDir) %>test-results/TESTS-results-sonar-vitest.xml" }]
+            ],
             "tsConfig": "tsconfig.spec.json"
           }
         }
@@ -155,6 +162,6 @@
       "path": "./<%= this.relativeDir(clientRootDir, temporaryDir) %>angular/",
       "environment": "all"
     },
-    "packageManager": "<%= clientPackageManager %>"
+    "packageManager": "<%- nodePackageManager %>"
   }
 }

@@ -23,9 +23,7 @@
   "description": "<%= projectDescription %>",
   "private": true,
   "license": "UNLICENSED",
-  "cacheDirectories": [
-    "node_modules"
-  ],
+  "type": "module",
   "dependencies": {
     "@angular/common": "<%= nodeDependencies['@angular/common'] %>",
     "@angular/compiler": "<%= nodeDependencies['@angular/common'] %>",
@@ -36,22 +34,20 @@
     "@angular/platform-browser-dynamic": "<%= nodeDependencies['@angular/common'] %>",
     "@angular/router": "<%= nodeDependencies['@angular/common'] %>",
     "@fortawesome/angular-fontawesome": "<%= nodeDependencies['@fortawesome/angular-fontawesome'] %>",
-    "@fortawesome/fontawesome-svg-core": "<%= nodeDependencies['@fortawesome/fontawesome-svg-core'] %>",
     "@fortawesome/free-solid-svg-icons": "<%= nodeDependencies['@fortawesome/free-solid-svg-icons'] %>",
     "@ng-bootstrap/ng-bootstrap": "<%= nodeDependencies['@ng-bootstrap/ng-bootstrap'] %>",
 <%_ if (enableTranslation) { _%>
     "@ngx-translate/core": "<%= nodeDependencies['@ngx-translate/core'] %>",
+    "@ngx-translate/http-loader": "<%= nodeDependencies['@ngx-translate/http-loader'] %>",
 <%_ } _%>
     "bootstrap": "<%= nodeDependencies.bootstrap %>",
-    <%_ if (!clientThemeNone) { _%>
+<%_ if (!clientThemeNone) { _%>
     "bootswatch": "<%= nodeDependencies.bootswatch %>",
-    <%_ } _%>
+<%_ } _%>
     "dayjs": "<%= nodeDependencies['dayjs'] %>",
     "ngx-infinite-scroll": "<%= nodeDependencies['ngx-infinite-scroll'] %>",
-    "@popperjs/core": "<%= nodeDependencies['@popperjs/core'] %>",
     "rxjs": "<%= nodeDependencies['rxjs'] %>",
-    "tslib": "<%= nodeDependencies['tslib'] %>",
-    "zone.js": "<%= nodeDependencies['zone.js'] %>"
+    "tslib": "<%= nodeDependencies['tslib'] %>"
   },
   "devDependencies": {
 <%_ if (skipServer) { _%>
@@ -63,16 +59,12 @@
   <%_ } _%>
     "@angular-architects/module-federation": "<%= nodeDependencies['@angular-architects/module-federation'] %>",
 <%_ } _%>
-<%_ if (cypressTests) { _%>
-    "cypress": "<%= nodeDependencies['cypress'] %>",
-<%_ } _%>
+    "@vitest/coverage-v8": "<%= nodeDependencies.vitest %>",
+    "@angular/build": "<%= nodeDependencies['@angular/cli'] %>",
     "@angular/cli": "<%= nodeDependencies['@angular/cli'] %>",
     "@angular/compiler-cli": "<%= nodeDependencies['@angular/common'] %>",
     "@angular/service-worker": "<%= nodeDependencies['@angular/common'] %>",
-    "@angular-builders/jest": "<%= nodeDependencies['@angular-builders/jest'] %>",
-    "@angular-devkit/build-angular": "<%= nodeDependencies['@angular/cli'] %>",
     "@eslint/js": null,
-    "@types/jest": "<%= nodeDependencies['@types/jest'] %>",
     "@types/node": "<%= nodeDependencies['@types/node'] %>",
     "angular-eslint": "<%= nodeDependencies['angular-eslint'] %>",
     "browser-sync": "<%= nodeDependencies['browser-sync'] %>",
@@ -81,20 +73,17 @@
     "eslint-config-prettier": "<%= nodeDependencies['eslint-config-prettier'] %>",
     "eslint-plugin-prettier": "<%= nodeDependencies['eslint-plugin-prettier'] %>",
     "globals": "<%= nodeDependencies.globals %>",
-    "jest": "<%= nodeDependencies['jest'] %>",
-    "jest-environment-jsdom": "<%= nodeDependencies['jest'] %>",
-    "jest-preset-angular": "<%= nodeDependencies['jest-preset-angular'] %>",
-    "jest-date-mock": "<%= nodeDependencies['jest-date-mock'] %>",
-    "jest-junit": "<%= nodeDependencies['jest-junit'] %>",
-    "jest-sonar": "<%= nodeDependencies['jest-sonar'] %>",
+    "jiti": null,
+    "jsdom": null,
 <%_ if (enableI18nRTL) { _%>
     "postcss-rtlcss": "<%= nodeDependencies['postcss-rtlcss'] %>",
 <%_ } _%>
     "rimraf": "<%= nodeDependencies['rimraf'] %>",
     "swagger-ui-dist": "<%= nodeDependencies['swagger-ui-dist'] %>",
-    "ts-jest": "<%= nodeDependencies['ts-jest'] %>",
     "typescript": "<%= nodeDependencies['typescript'] %>",
-    "typescript-eslint": "<%= nodeDependencies['typescript-eslint'] %>"
+    "typescript-eslint": "<%= nodeDependencies['typescript-eslint'] %>",
+    "vitest": null,
+    "vitest-sonar-reporter": null
   },
   "engines": {
     "node": ">=<%= nodeVersion %>"
@@ -104,29 +93,28 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "lint:fix": "<%= clientPackageManager %> run lint -- --fix",
+    "lint:fix": "<%- nodePackageManager %> run lint -- --fix",
     "cleanup": "rimraf <%= this.relativeDir(clientRootDir, temporaryDir) %>",
     "clean-www": "rimraf <%= this.relativeDir(clientRootDir, clientDistDir) %>",
-    "jest": "jest --coverage --logHeapUsage --maxWorkers=2 --config jest.conf.js",
     "start": "ng serve<% if (!microfrontend) { %> --hmr<% } %>",
-    "start-tls": "<%= clientPackageManager %> run webapp:dev-ssl",
+    "start-tls": "<%- nodePackageManager %> run webapp:dev-ssl",
 <%_ if (skipServer) { _%>
     "sonar": "sonar-scanner",
 <%_ } _%>
-    "serve": "<%= clientPackageManager %> run start --",
-    "build": "<%= clientPackageManager %> run webapp:prod --",
-    "pretest": "<%= clientPackageManager %> run lint",
-    "test": "ng test --coverage --log-heap-usage -w=2",
-    "test:watch": "<%= clientPackageManager %> run test -- --watch",
+    "serve": "<%- nodePackageManager %> run start --",
+    "build": "<%- nodePackageManager %> run webapp:prod --",
+    "pretest": "<%- nodePackageManager %> run lint",
+    "test": "ng test --coverage",
+    "test:watch": "<%- nodePackageManager %> run test -- --watch",
     "watch": "concurrently npm:start<% if(!skipServer) { %> npm:backend:start<% } %>",
     "build-watch": "concurrently 'npm run webapp:build:dev -- --watch'<% if(!skipServer) { %> npm:backend:start<% } %>",
-    "webapp:build": "<%= clientPackageManager %> run clean-www && <%= clientPackageManager %> run webapp:build:dev",
+    "webapp:build": "<%- nodePackageManager %> run clean-www && <%- nodePackageManager %> run webapp:build:dev",
     "webapp:build:dev": "ng build --configuration development",
     "webapp:build:prod": "ng build --configuration production",
     "webapp:dev": "ng serve",
     "webapp:dev-verbose": "ng serve --verbose",
     "webapp:dev-ssl": "ng serve --ssl",
-    "webapp:prod": "<%= clientPackageManager %> run clean-www && <%= clientPackageManager %> run webapp:build:prod",
-    "webapp:test": "<%= clientPackageManager %> run test --"
+    "webapp:prod": "<%- nodePackageManager %> run clean-www && <%- nodePackageManager %> run webapp:build:prod",
+    "webapp:test": "<%- nodePackageManager %> run test --"
   }
 }

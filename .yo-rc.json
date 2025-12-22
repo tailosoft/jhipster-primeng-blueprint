@@ -1,7 +1,7 @@
 {
   "generator-jhipster": {
     "additionalSubGenerators": "",
-    "baseName": "primeng-blueprint",
+    "baseName": "generator-jhipster-primeng-blueprint",
     "cli": false,
     "entities": [],
     "generators": {
@@ -12,6 +12,8 @@
           "prompting",
           "configuring",
           "composing",
+          "composingComponent",
+          "bootstrapApplication",
           "loading",
           "preparing",
           "configuringEachEntity",
@@ -25,6 +27,37 @@
           "writingEntities",
           "postWriting",
           "postWritingEntities",
+          "loadingTranslations",
+          "install",
+          "postInstall",
+          "end"
+        ],
+        "sbs": false,
+        "written": true
+      },
+      "client": {
+        "command": false,
+        "priorities": [
+          "initializing",
+          "prompting",
+          "configuring",
+          "composing",
+          "composingComponent",
+          "bootstrapApplication",
+          "loading",
+          "preparing",
+          "configuringEachEntity",
+          "loadingEntities",
+          "preparingEachEntity",
+          "preparingEachEntityField",
+          "preparingEachEntityRelationship",
+          "postPreparingEachEntity",
+          "default",
+          "writing",
+          "writingEntities",
+          "postWriting",
+          "postWritingEntities",
+          "loadingTranslations",
           "install",
           "postInstall",
           "end"
@@ -39,6 +72,8 @@
           "prompting",
           "configuring",
           "composing",
+          "composingComponent",
+          "bootstrapApplication",
           "loading",
           "preparing",
           "configuringEachEntity",
@@ -52,33 +87,7 @@
           "writingEntities",
           "postWriting",
           "postWritingEntities",
-          "install",
-          "postInstall",
-          "end"
-        ],
-        "sbs": false,
-        "written": true
-      },
-      "languages": {
-        "command": false,
-        "priorities": [
-          "initializing",
-          "prompting",
-          "configuring",
-          "composing",
-          "loading",
-          "preparing",
-          "configuringEachEntity",
-          "loadingEntities",
-          "preparingEachEntity",
-          "preparingEachEntityField",
-          "preparingEachEntityRelationship",
-          "postPreparingEachEntity",
-          "default",
-          "writing",
-          "writingEntities",
-          "postWriting",
-          "postWritingEntities",
+          "loadingTranslations",
           "install",
           "postInstall",
           "end"
@@ -87,9 +96,9 @@
         "written": true
       }
     },
-    "jhipsterVersion": "8.0.0-beta.1",
+    "jhipsterVersion": "9.0.0-beta.0",
     "localBlueprint": false,
-    "skipCommitHook": true,
-    "subGenerators": ["angular", "cypress", "languages"]
+    "sampleWritten": true,
+    "subGenerators": ["angular", "cypress", "client"]
   }
 }

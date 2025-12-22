@@ -16,25 +16,26 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-jest.mock('app/core/auth/account.service');
-
+<%_ if (clientTestFrameworkVitest) { _%>
+import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
+<%_ } _%>
 import { Component, ElementRef, WritableSignal, signal, viewChild } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
-import { TestBed, waitForAsync } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
+
 <%_ if (enableTranslation) { _%>
 import { TranslateModule } from '@ngx-translate/core';
 <%_ } _%>
 
-import { AccountService } from 'app/core/auth/account.service';
 import { Account } from 'app/core/auth/account.model';
+import { AccountService } from 'app/core/auth/account.service';
 
 import HasAnyAuthorityDirective from './has-any-authority.directive';
 
 @Component({
   imports: [HasAnyAuthorityDirective],
-  template: ` <div *<%= jhiPrefix %>HasAnyAuthority="'ROLE_ADMIN'" #content></div> `,
+  template: `<div *<%= jhiPrefix %>HasAnyAuthority="'ROLE_ADMIN'" #content></div>`,
 })
-class TestHasAnyAuthorityDirectiveComponent {
+class TestHasAnyAuthorityDirective {
   content = viewChild<ElementRef>('content');
 }
 
@@ -42,24 +43,33 @@ describe('HasAnyAuthorityDirective tests', () => {
   let mockAccountService: AccountService;
   let currentAccount: WritableSignal<Account | null>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [TestHasAnyAuthorityDirectiveComponent<%_ if (enableTranslation) { _%>, TranslateModule.forRoot()<%_ } _%>],
-      providers: [provideHttpClient(), AccountService],
+<%_ if (enableTranslation) { _%>
+      imports: [TranslateModule.forRoot()],
+<%_ } _%>
+      providers: [
+        {
+          provide: AccountService,
+          useValue: {
+            isAuthenticated: <%= clientTestFramework %>.fn(),
+          },
+        },
+      ],
     });
-  }));
+  });
 
   beforeEach(() => {
     mockAccountService = TestBed.inject(AccountService);
     currentAccount = signal<Account | null>({ activated: true, authorities: [] } as any);
-    mockAccountService.trackCurrentAccount = jest.fn(() => currentAccount);
+    mockAccountService.trackCurrentAccount = <%= clientTestFramework %>.fn(() => currentAccount);
   });
 
   describe('set <%= jhiPrefix %>HasAnyAuthority', () => {
     it('should show restricted content to user if user has required role', () => {
       // GIVEN
-      mockAccountService.hasAnyAuthority = jest.fn(() => true);
-      const fixture = TestBed.createComponent(TestHasAnyAuthorityDirectiveComponent);
+      mockAccountService.hasAnyAuthority = <%= clientTestFramework %>.fn(() => true);
+      const fixture = TestBed.createComponent(TestHasAnyAuthorityDirective);
       const comp = fixture.componentInstance;
 
       // WHEN
@@ -71,8 +81,8 @@ describe('HasAnyAuthorityDirective tests', () => {
 
     it('should not show restricted content to user if user has not required role', () => {
       // GIVEN
-      mockAccountService.hasAnyAuthority = jest.fn(() => false);
-      const fixture = TestBed.createComponent(TestHasAnyAuthorityDirectiveComponent);
+      mockAccountService.hasAnyAuthority = <%= clientTestFramework %>.fn(() => false);
+      const fixture = TestBed.createComponent(TestHasAnyAuthorityDirective);
       const comp = fixture.componentInstance;
 
       // WHEN
@@ -86,8 +96,8 @@ describe('HasAnyAuthorityDirective tests', () => {
   describe('change authorities', () => {
     it('should show or not show restricted content correctly if user authorities are changing', () => {
       // GIVEN
-      mockAccountService.hasAnyAuthority = jest.fn((): boolean => Boolean(currentAccount()));
-      const fixture = TestBed.createComponent(TestHasAnyAuthorityDirectiveComponent);
+      mockAccountService.hasAnyAuthority = <%= clientTestFramework %>.fn((): boolean => Boolean(currentAccount()));
+      const fixture = TestBed.createComponent(TestHasAnyAuthorityDirective);
       const comp = fixture.componentInstance;
 
       // WHEN

@@ -16,19 +16,19 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-jest.mock('app/core/auth/state-storage.service');
-
-import { Router } from '@angular/router';
-import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
-import { provideHttpClient } from '@angular/common/http';
+<%_ if (clientTestFrameworkVitest) { _%>
+import { Mock, afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
+<%_ } _%>
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
+
 <%_ if (enableTranslation) { _%>
-import { InterpolatableTranslationObject, TranslateModule, TranslateService } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 <%_ } _%>
 
-import { Account } from 'app/core/auth/account.model';
 import { Authority } from 'app/config/authority.constants';
+import { Account } from 'app/core/auth/account.model';
 import { StateStorageService } from 'app/core/auth/state-storage.service';
 <%_ if (generateUserManagement) { _%>
 import { ApplicationConfigService } from 'app/core/config/application-config.service';
@@ -49,7 +49,7 @@ function accountWithAuthorities(authorities: string[]): Account {
   };
 }
 
-const mockFn = (value: string | null): jest.Mock<string | null> => jest.fn(() => value);
+const mockFn = (value: string | null): Mock => <%= clientTestFramework %>.fn(() => value);
 
 describe('Account Service', () => {
   let service: AccountService;
@@ -71,9 +71,14 @@ describe('Account Service', () => {
       ],
       <%_ } _%>
       providers: [
-        provideHttpClient(),
         provideHttpClientTesting(),
-        StateStorageService,
+        {
+          provide: StateStorageService,
+          useValue: {
+            clearUrl: <%= clientTestFramework %>.fn(),
+            getUrl: <%= clientTestFramework %>.fn(),
+          },
+        },
       ],
     });
 
@@ -84,11 +89,11 @@ describe('Account Service', () => {
     httpMock = TestBed.inject(HttpTestingController);
     mockStorageService = TestBed.inject(StateStorageService);
     mockRouter = TestBed.inject(Router);
-    jest.spyOn(mockRouter, 'navigateByUrl').mockImplementation(() => Promise.resolve(true));
+    <%= clientTestFramework %>.spyOn(mockRouter, 'navigateByUrl');
 <%_ if (enableTranslation) { _%>
 
     mockTranslateService = TestBed.inject(TranslateService);
-    jest.spyOn(mockTranslateService, 'use').mockImplementation(() => of({} as InterpolatableTranslationObject));
+    <%= clientTestFramework %>.spyOn(mockTranslateService, 'use');
 <%_ } _%>
   });
 
@@ -97,20 +102,20 @@ describe('Account Service', () => {
   });
 
 <%_ if (generateUserManagement) { _%>
-describe('save', () => {
-  it('should call account saving endpoint with correct values', () => {
-    // GIVEN
-    const account = accountWithAuthorities([]);
+  describe('save', () => {
+    it('should call account saving endpoint with correct values', () => {
+      // GIVEN
+      const account = accountWithAuthorities([]);
 
-    // WHEN
-    service.save(account).subscribe();
-    const testRequest = httpMock.expectOne({ method: 'POST', url: applicationConfigService.getEndpointFor('api/account') });
-    testRequest.flush({});
+      // WHEN
+      service.save(account).subscribe();
+      const testRequest = httpMock.expectOne({ method: 'POST', url: applicationConfigService.getEndpointFor('api/account') });
+      testRequest.flush({});
 
-    // THEN
-    expect(testRequest.request.body).toEqual(account);
+      // THEN
+      expect(testRequest.request.body).toEqual(account);
+    });
   });
-});
 
 <%_ } _%>
   describe('authenticate', () => {
@@ -149,7 +154,8 @@ describe('save', () => {
       // Once more
       service.identity().subscribe();
       // Then there is only request
-      httpMock.expectOne({ method: 'GET' });
+      const requests = httpMock.match({ method: 'GET' });
+      expect(requests.length).toBe(1);
     });
 
     it('should call /account only once if not logged out after first authentication and should call /account again if user has logged out', () => {
@@ -169,7 +175,8 @@ describe('save', () => {
       service.identity().subscribe();
 
       // Then there is a new request
-      httpMock.expectOne({ method: 'GET' });
+      const requests = httpMock.match({ method: 'GET' });
+      expect(requests.length).toBe(1);
     });
 
 <%_ if (enableTranslation) { _%>

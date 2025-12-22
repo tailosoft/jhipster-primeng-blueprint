@@ -1,0 +1,24 @@
+import { Component, input } from '@angular/core';
+import { IFilterOptions } from './filter.model';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+<%_ if (enableTranslation) { _%>
+import { TranslateDirective } from 'app/shared/language';
+import { TranslateModule } from '@ngx-translate/core';
+<%_ } _%>
+
+@Component({
+  selector: '<%= jhiPrefixDashed %>-filter',
+  imports: [<%_ if (enableTranslation) { _%>TranslateDirective, TranslateModule, <%_ } _%>FontAwesomeModule],
+  templateUrl: './filter.html',
+})
+export default class Filter {
+  readonly filters = input.required<IFilterOptions>();
+
+  clearAllFilters(): void {
+    this.filters().clear();
+  }
+
+  clearFilter(filterName: string, value: string): void {
+    this.filters().removeFilter(filterName, value);
+  }
+}
