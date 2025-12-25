@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,11 +16,12 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-jest.mock('app/login/login.service');
-
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { RouterTestingModule } from '@angular/router/testing';
+<%_ if (clientTestFrameworkVitest) { _%>
+import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
+<%_ } _%>
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 <%_ if (enableTranslation) { _%>
 import { TranslateModule } from '@ngx-translate/core';
@@ -32,11 +33,11 @@ import { AccountService } from 'app/core/auth/account.service';
 import { ProfileService } from 'app/layouts/profiles/profile.service';
 import { LoginService } from 'app/login/login.service';
 
-import NavbarComponent from './navbar.component';
+import Navbar from './navbar';
 
 describe('Navbar Component', () => {
-  let comp: NavbarComponent;
-  let fixture: ComponentFixture<NavbarComponent>;
+  let comp: Navbar;
+  let fixture: ComponentFixture<Navbar>;
   let accountService: AccountService;
   let profileService: ProfileService;
   const account: Account = {
@@ -51,36 +52,36 @@ describe('Navbar Component', () => {
   };
 
   beforeEach(
-    waitForAsync(() => {
+    () => {
       TestBed.configureTestingModule({
-        imports: [
-          NavbarComponent,
-          HttpClientTestingModule,
-          RouterTestingModule.withRoutes([]),
 <%_ if (enableTranslation) { _%>
-          TranslateModule.forRoot(),
+        imports: [TranslateModule.forRoot()],
 <%_ } _%>
+        providers: [
+          {
+            provide: ActivatedRoute,
+            useValue: {}
+          },
+          provideHttpClientTesting(),
+          LoginService
         ],
-        providers: [LoginService],
-      })
-        .overrideTemplate(NavbarComponent, '')
-        .compileComponents();
-    })
+      });
+    }
   );
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(NavbarComponent);
+    fixture = TestBed.createComponent(Navbar);
     comp = fixture.componentInstance;
 <%_ if (applicationTypeGateway && microfrontend) { _%>
-    comp.loadMicrofrontendsEntities = jest.fn();
+    comp.loadMicrofrontendsEntities = <%= clientTestFramework %>.fn();
 <%_ } _%>
     accountService = TestBed.inject(AccountService);
     profileService = TestBed.inject(ProfileService);
   });
 
-  it('Should call profileService.getProfileInfo on init', () => {
+  it('should call profileService.getProfileInfo on init', () => {
     // GIVEN
-    jest.spyOn(profileService, 'getProfileInfo').mockReturnValue(of(new ProfileInfo()));
+    <%= clientTestFramework %>.spyOn(profileService, 'getProfileInfo').mockReturnValue(of(new ProfileInfo()));
 
     // WHEN
     comp.ngOnInit();
@@ -89,27 +90,27 @@ describe('Navbar Component', () => {
     expect(profileService.getProfileInfo).toHaveBeenCalled();
   });
 
-  it('Should hold current authenticated user in variable account', () => {
+  it('should hold current authenticated user in variable account', () => {
     // WHEN
     comp.ngOnInit();
 
     // THEN
-    expect(comp.account).toBeNull();
+    expect(comp.account()).toBeNull();
 
     // WHEN
     accountService.authenticate(account);
 
     // THEN
-    expect(comp.account).toEqual(account);
+    expect(comp.account()).toEqual(account);
 
     // WHEN
     accountService.authenticate(null);
 
     // THEN
-    expect(comp.account).toBeNull();
+    expect(comp.account()).toBeNull();
   });
 
-  it('Should hold current authenticated user in variable account if user is authenticated before page load', () => {
+  it('should hold current authenticated user in variable account if user is authenticated before page load', () => {
     // GIVEN
     accountService.authenticate(account);
 
@@ -117,12 +118,12 @@ describe('Navbar Component', () => {
     comp.ngOnInit();
 
     // THEN
-    expect(comp.account).toEqual(account);
+    expect(comp.account()).toEqual(account);
 
     // WHEN
     accountService.authenticate(null);
 
     // THEN
-    expect(comp.account).toBeNull();
+    expect(comp.account()).toBeNull();
   });
 });

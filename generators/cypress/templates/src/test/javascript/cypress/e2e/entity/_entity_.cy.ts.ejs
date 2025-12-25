@@ -2,14 +2,16 @@ import {
   entityTableSelector,
   entityDetailsButtonSelector,
   entityDetailsBackButtonSelector,
-  <%_ if (!readOnly) { _%>
+<%_ if (!readOnly) { _%>
   entityCreateButtonSelector,
   entityCreateSaveButtonSelector,
   entityCreateCancelButtonSelector,
+  <%_ if (updatableEntity) { _%>
   entityEditButtonSelector,
+  <%_ } _%>
   entityDeleteButtonSelector,
   entityConfirmDeleteButtonSelector,
-  <%_ } _%>
+<%_ } _%>
 } from '../../support/entity';
 <%_
 
@@ -57,13 +59,15 @@ if (workaroundEntityCannotBeEmpty && sampleFields.length === 0) {
 }
 _%>
 
-describe('<%= entityClass %> e2e test', () => {
+describe('<%- entityNameCapitalized %> e2e test', () => {
 
   const <%= entityInstance %>PageUrl = '/<%= entityPage %>';
   const <%= entityInstance %>PageUrlPattern = new RegExp('/<%= entityPage %>(\\?.*)?$');
-  const username = Cypress.env('E2E_USERNAME') ?? 'user';
-  const password = Cypress.env('E2E_PASSWORD') ?? 'user';
-  <% if (skipCreateTest) { %>// <% } %>const <%= entityInstance %>Sample = <%- JSON.stringify(this.generateTestEntity(sampleFields.map(field => field.reference))) %>;
+  const username = Cypress.env('E2E_USERNAME') ?? '<%- adminEntity || fineGrainedPermissions ? 'admin' : 'user' %>';
+  const password = Cypress.env('E2E_PASSWORD') ?? '<%- adminEntity || fineGrainedPermissions ? 'admin' : 'user' %>';
+<%_ if (!readOnly) { _%>
+  <% if (skipCreateTest) { %>// <% } %>const <%= entityInstance %>Sample = <%- JSON.stringify(this.generateTestEntity(sampleFields)) %>;
+<%_ } _%>
 
   let <%= entityInstance %>;
   <%_ if (importUser) { _%>
@@ -98,7 +102,7 @@ describe('<%= entityClass %> e2e test', () => {
     cy.authenticatedRequest({
       method: 'POST',
       url: '/<%= baseApi + otherEntity.entityApiUrl %>',
-      body: <%- JSON.stringify(this.generateTestEntity(otherEntity.fields.filter(f => !f.autoGenerate).map(field => field.reference))).slice(0, -1) + ', ' +
+      body: <%- JSON.stringify(this.generateTestEntity(otherEntity.fields.filter(f => !f.autoGenerate))).slice(0, -1) + ', ' +
     otherEntity.relationships.filter(r => r.id || r.relationshipRequired).map(r => `${r.relationshipName}: ${r.otherEntity.entityInstance}`).join(', ') + '}' %>,
     }).then(({ body }) => {
       <%= otherEntity.entityInstance %> = body;
@@ -139,7 +143,7 @@ describe('<%= entityClass %> e2e test', () => {
     if (<%= entityInstance %>) {
       cy.authenticatedRequest({
         method: 'DELETE',
-        url: `/<%= baseApi + entityApiUrl %>/<% if (primaryKey.fields.length === 1) { %>${<%= entityInstance %>.<%= primaryKey.name %>}<% } else { %><%- primaryKey.fields.map(field => `${field.fieldName}=\${${entityInstance}.${field.fieldNameDotted}}`).join(';') %><% } %>`,
+        url: `/<%= baseApi + entityApiUrl %>/<% if (primaryKey.fields.length === 1) { %>${<%= entityInstance %>.<%= primaryKey.name %>}<% } else { %><%- primaryKey.fields.map(field => `${field.fieldName}=\${${entityInstance}.${field.nameDotted}}`).join(';') %><% } %>`,
       }).then(() => {
         <%= entityInstance %> = undefined;
       });
@@ -155,7 +159,7 @@ describe('<%= entityClass %> e2e test', () => {
     if (<%= otherEntity.entityInstance %>) {
       cy.authenticatedRequest({
         method: 'DELETE',
-        url: `/<%= baseApi + otherEntity.entityApiUrl %>/<% if (otherEntity.primaryKey.fields.length === 1) { %>${<%= otherEntity.entityInstance %>.<%= otherEntity.primaryKey.name %>}<% } else { %><%- otherEntity.primaryKey.fields.map(field => `${field.fieldName}=\${${otherEntity.entityInstance}.${field.fieldNameDotted}}`).join(';') %><% } %>`,
+        url: `/<%= baseApi + otherEntity.entityApiUrl %>/<% if (otherEntity.primaryKey.fields.length === 1) { %>${<%= otherEntity.entityInstance %>.<%= otherEntity.primaryKey.name %>}<% } else { %><%- otherEntity.primaryKey.fields.map(field => `${field.fieldName}=\${${otherEntity.entityInstance}.${field.nameDotted}}`).join(';') %><% } %>`,
       }).then(() => {
         <%= otherEntity.entityInstance %> = undefined;
       });
@@ -168,21 +172,21 @@ describe('<%= entityClass %> e2e test', () => {
 
 <%_ } _%>
 
-  it('<%= entityClassPlural %> menu should load <%= entityClassPlural %> page', () => {
+  it('<%- entityNamePlural %> menu should load <%- entityNamePlural %> page', () => {
     cy.visit('/');
     cy.clickOnEntityMenuItem('<%= entityPage %>');
     cy.wait('@entitiesRequest').then(({ response }) => {
-      if (response.body.length === 0) {
+      if (response?.body.length === 0) {
         cy.get(entityTableSelector).should('not.exist');
       } else {
         cy.get(entityTableSelector).should('exist');
       }
     });;
-    cy.getEntityHeading('<%= entityClass %>').should('exist');
+    cy.getEntityHeading('<%- entityNameCapitalized %>').should('exist');
     cy.url().should('match', <%= entityInstance %>PageUrlPattern);
   });
 
-  describe('<%= entityClass %> page', () => {
+  describe('<%- entityNameCapitalized %> page', () => {
 <%_ if (!readOnly) { _%>
     describe('create button click', () => {
       beforeEach(() => {
@@ -190,14 +194,14 @@ describe('<%= entityClass %> e2e test', () => {
         cy.wait('@entitiesRequest');
       });
 
-      it('should load create <%= entityClass %> page', () => {
+      it('should load create <%- entityNameCapitalized %> page', () => {
         cy.get(entityCreateButtonSelector).click();
         cy.url().should('match', new RegExp('/<%= entityPage %>/new$'));
-        cy.getEntityCreateUpdateHeading('<%= entityClass %>');
+        cy.getEntityCreateUpdateHeading('<%- entityNameCapitalized %>');
         cy.get(entityCreateSaveButtonSelector).should('exist');
         cy.get(entityCreateCancelButtonSelector).click();
         cy.wait('@entitiesRequest').then(({ response }) => {
-          expect(response.statusCode).to.equal(200);
+          expect(response?.statusCode).to.equal(200);
         });
         cy.url().should('match', <%= entityInstance %>PageUrlPattern);
       });
@@ -205,7 +209,7 @@ describe('<%= entityClass %> e2e test', () => {
 
 <%_ } _%>
     describe('with existing value', () => {
-<% if (!readOnly) { %>
+<%_ if (!readOnly) { _%>
   <%_ if (skipCreateTest) { _%>
       /* Disabled due to incompatibility
   <%_ } _%>
@@ -217,7 +221,7 @@ describe('<%= entityClass %> e2e test', () => {
           body: {
             ...<%= entityInstance %>Sample,
     <%_ for (relationship of requiredRelationships) { _%>
-            <%= relationship.relationshipName %>: <%= relationship.otherEntity.entityInstance %>,
+            <%= relationship.propertyName %>: <%= relationship.collection ? '[' : '' %><%= relationship.otherEntity.entityInstance %><%= relationship.collection ? ']' : '' %>,
     <%_ } _%>
           },
   <%_ } else { _%>
@@ -258,46 +262,49 @@ describe('<%= entityClass %> e2e test', () => {
         cy.visit(<%= entityInstance %>PageUrl);
 
         cy.wait('@entitiesRequest').then(({ response }) => {
-          if (response.body.length === 0) {
+          if (response?.body.length === 0) {
             this.skip();
           }
         });
       });
 <%_ } _%>
 
-      it('detail button click should load details <%= entityClass %> page', () => {
+      it('detail button click should load details <%- entityNameCapitalized %> page', () => {
         cy.get(entityDetailsButtonSelector).first().click();
         cy.getEntityDetailsHeading('<%= entityInstance %>');
         cy.get(entityDetailsBackButtonSelector).click();
         cy.wait('@entitiesRequest').then(({ response }) => {
-          expect(response.statusCode).to.equal(200);
+          expect(response?.statusCode).to.equal(200);
         });
         cy.url().should('match', <%= entityInstance %>PageUrlPattern);
       });
 
-<%_ if (!readOnly) { _%>
-      it('edit button click should load edit <%= entityClass %> page and go back', () => {
+<%_ if (!readOnly && updatableEntity) { _%>
+      it('edit button click should load edit <%- entityNameCapitalized %> page and go back', () => {
         cy.get(entityEditButtonSelector).first().click();
-        cy.getEntityCreateUpdateHeading('<%= entityClass %>');
+        cy.getEntityCreateUpdateHeading('<%- entityNameCapitalized %>');
         cy.get(entityCreateSaveButtonSelector).should('exist');
         cy.get(entityCreateCancelButtonSelector).click();
         cy.wait('@entitiesRequest').then(({ response }) => {
-          expect(response.statusCode).to.equal(200);
+          expect(response?.statusCode).to.equal(200);
         });
         cy.url().should('match', <%= entityInstance %>PageUrlPattern);
       });
 
       it('edit button click should load edit <%= entityClass %> page and save', () => {
         cy.get(entityEditButtonSelector).first().click();
-        cy.getEntityCreateUpdateHeading('<%= entityClass %>');
+        cy.getEntityCreateUpdateHeading('<%- entityNameCapitalized %>');
         cy.get(entityCreateSaveButtonSelector).click();
         cy.wait('@entitiesRequest').then(({ response }) => {
-          expect(response.statusCode).to.equal(200);
+          expect(response?.statusCode).to.equal(200);
         });
         cy.url().should('match', <%= entityInstance %>PageUrlPattern);
       });
 
-      it<%= skipCreateTest %>('last delete button click should delete instance of <%= entityClass %>', () => {
+<%_ } _%>
+<%_ if (!readOnly) { _%>
+      <% if (skipCreateTest) { %>// Reason: cannot create a required entity with relationship with required relationships.<% } %>
+      it<%= skipCreateTest %>('last delete button click should delete instance of <%- entityNameCapitalized %>', () => {
   <%_ if (clientFrameworkReact) { _%>
         cy.intercept('GET', '/<%= baseApi + entityApiUrl %>/*').as('dialogDeleteRequest');
   <%_ } _%>
@@ -308,10 +315,10 @@ describe('<%= entityClass %> e2e test', () => {
         cy.getEntityDeleteDialogHeading('<%= entityInstance %>').should('exist');
         cy.get(entityConfirmDeleteButtonSelector).click();
         cy.wait('@deleteEntityRequest').then(({ response }) => {
-          expect(response.statusCode).to.equal(204);
+          expect(response?.statusCode).to.equal(204);
         });
         cy.wait('@entitiesRequest').then(({ response }) => {
-          expect(response.statusCode).to.equal(200);
+          expect(response?.statusCode).to.equal(200);
         });
         cy.url().should('match', <%= entityInstance %>PageUrlPattern);
   <% if (cypressBootstrapEntities) { %>
@@ -323,36 +330,30 @@ describe('<%= entityClass %> e2e test', () => {
   });
 <%_ if (!readOnly) { _%>
 
-  describe('new <%= entityClass %> page', () => {
+  describe('new <%- entityNameCapitalized %> page', () => {
     beforeEach(() => {
-      cy.visit(`${<%= entityInstance %>PageUrl}`);
+      cy.visit(<%= entityInstance %>PageUrl);
       cy.get(entityCreateButtonSelector).click();
-      cy.getEntityCreateUpdateHeading('<%= entityClass %>');
+      cy.getEntityCreateUpdateHeading('<%- entityNameCapitalized %>');
     });
 
-    it<%= skipCreateTest %>('should create an instance of <%= entityClass %>', () => {
-
+    <% if (skipCreateTest) { %>// Reason: cannot create a required entity with relationship with required relationships.<% } %>
+    it<%= skipCreateTest %>('should create an instance of <%- entityNameCapitalized %>', () => {
   <%_ fields.filter(field => (!field.id || !field.autoGenerate) && !field.hidden && !field.readonly).forEach((field) => {
     const fieldName = field.fieldName;
     const fieldIsEnum = field.fieldIsEnum;
-    let fieldValue = undefined;
-    if (field.fieldType === 'LocalDate') {
-      fieldValue = '10/20/2020';
-    } else if (['Instant', 'ZonedDateTime'].includes(field.fieldType)) {
-        fieldValue = '10/20/2020 10:10';
-    } else {
-      fieldValue = !entityFakeData ? field.generateFakeData('cypress') : entityFakeData[field.fieldName];
-    }
+    let fieldValue = !entityFakeData ? field.generateFakeData('cypress') : entityFakeData[field.fieldName];
     if (fieldValue === undefined) {
         this.warning(`Error generating a value for field ${fieldName}`);
         return;
     }
+    fieldValue = typeof fieldValue === 'string' ? fieldValue.replaceAll("'", "\\'") : fieldValue;
   _%>
 
     <%_ if (field.fieldTypeBoolean) { _%>
-      cy.get(`[data-cy="<%= fieldName %>"] > .p-inputswitch-checked`).should('not.exist');
+      cy.get(`[data-cy="<%= fieldName %>"] > [data-p="checked"]`).should('not.exist');
       cy.get(`[data-cy="<%= fieldName %>"]`).click();
-      cy.get(`[data-cy="<%= fieldName %>"] > .p-inputswitch-checked`).should('exist');
+      cy.get(`[data-cy="<%= fieldName %>"] > [data-p="checked"]`).should('exist');
 
     <%_ } else if (field.fieldTypeBinary && !field.blobContentTypeText) { _%>
       cy.setFieldImageAsBytesOfEntity('<%= fieldName %>', 'integration-test.png', 'image/png');
@@ -361,24 +362,22 @@ describe('<%= entityClass %> e2e test', () => {
       cy.setFieldSelectToLastOfEntity('<%= fieldName %>');
 
     <%_ } else if (field.fieldTypeString || field.fieldTypeNumeric) { _%>
-      cy.get(`[data-cy="<%= fieldName %>"]`).type('<%= fieldValue %>');
+      cy.get(`[data-cy="<%= fieldName %>"]`).type('<%- fieldValue %>');
       cy.get(`[data-cy="<%= fieldName %>"]`).should('have.value', '<%= fieldValue %>');
 
     <%_ } else if (field.fieldTypeLocalDate || field.fieldTypeTimed || field.fieldTypeDuration) { _%>
       cy.get(`[data-cy="<%= fieldName %>"] input`).clear();
       cy.get(`[data-cy="<%= fieldName %>"] input`).type('<%= fieldValue %>');
       cy.get(`[data-cy="<%= fieldName %>"] input`).type('{esc}');
-      cy.get(`[data-cy="<%= fieldName %>"] input`).should('have.value', '<%= fieldValue %>');
+      cy.get(`[data-cy="<%= fieldName %>"] input`).should('have.value', '<%- fieldValue %>');
 
     <%_ } else { _%>
-      cy.get(`[data-cy="<%= fieldName %>"]`).type('<%= fieldValue %>');
-      cy.get(`[data-cy="<%= fieldName %>"]`).invoke('val').should('match', new RegExp('<%= fieldValue %>'));
+      cy.get(`[data-cy="<%= fieldName %>"]`).type('<%- fieldValue %>');
+      cy.get(`[data-cy="<%= fieldName %>"]`).invoke('val').should('match', new RegExp('<%- fieldValue %>'));
 
     <%_ } _%>
   <%_ }); _%>
   <%_ for (relationship of requiredRelationships) {
-    const ownerSide = relationship.ownerSide;
-    const relationshipName = relationship.relationshipName;
   _%>
        <%_ relationship.clientFields.forEach(cf => { _%>
       <%_ if (relationship.relationshipManyToOne || relationship.relationshipOneToOne) { _%>
@@ -396,11 +395,11 @@ describe('<%= entityClass %> e2e test', () => {
       cy.get(entityCreateSaveButtonSelector).click();
 
       cy.wait('@postEntityRequest').then(({ response }) => {
-        expect(response.statusCode).to.equal(201);
+        expect(response?.statusCode).to.equal(201);
         <%= entityInstance %> = response.body;
       });
       cy.wait('@entitiesRequest').then(({ response }) => {
-        expect(response.statusCode).to.equal(200);
+        expect(response?.statusCode).to.equal(200);
       });
       cy.url().should('match', <%= entityInstance %>PageUrlPattern);
     });

@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -17,45 +17,35 @@
  limitations under the License.
 -%>
 import { MessageService } from 'primeng/api';
+import { HttpEvent, HttpInterceptorFn, HttpResponse } from '@angular/common/http';
+import { inject } from '@angular/core';
 <%_ if (enableTranslation) { _%>
 import { TranslateService } from '@ngx-translate/core';
 <%_ } _%>
-import { HttpInterceptor, HttpRequest, HttpResponse, HttpHandler, HttpEvent } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-@Injectable()
-export class NotificationInterceptor implements HttpInterceptor {
-  constructor(private messageService: MessageService<% if (enableTranslation) { %>, private translateService: TranslateService<% } %>) {}
+import { getMessageFromHeaders } from 'app/shared/jhipster/headers';
 
-  intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    return next.handle(request).pipe(
-      tap((event: HttpEvent<any>) => {
-        if (event instanceof HttpResponse) {
-          let alert: string | null = null;
-<%_ if (enableTranslation) { _%>
-          let alertParams: string | null = null;
-<%_ } _%>
+export const notificationInterceptor: HttpInterceptorFn = (req, next) => {
+  const messageService = inject(MessageService);
+  const translateService = inject(TranslateService);
 
-          for (const headerKey of event.headers.keys()) {
-            if (headerKey.toLowerCase().endsWith('app-alert')) {
-              alert = event.headers.get(headerKey);
-<%_ if (enableTranslation) { _%>
-            } else if (headerKey.toLowerCase().endsWith('app-params')) {
-              alertParams = decodeURIComponent(event.headers.get(headerKey)!.replace(/\+/g, ' '));
-<%_ } _%>
-            }
-          }
+  return next(req).pipe(
+    tap((event: HttpEvent<any>) => {
+      if (event instanceof HttpResponse) {
+        const headers = Object.fromEntries(event.headers.keys().map(key => [key, event.headers.getAll(key)]));
+        const message = getMessageFromHeaders(headers);
 
-          if (alert) {
 <%_ if (enableTranslation) { _%>
-              this.messageService.add({ severity: 'success', summary: this.translateService.instant(alert, { param: alertParams }) });
-<%_ } else { _%>
-              this.messageService.add({severity:'success', summary: alert});
+        if (message.alertKey) {
+          const translatedMessage = translateService.instant(message.alertKey, { param: message.param });
+          messageService.add({ severity: 'success', summary: translatedMessage });
+        } else
 <%_ } _%>
-          }
+        if (message.alertMessage) {
+          messageService.add({ severity: 'success', summary: message.alertMessage });
         }
-      }));
-  }
-}
+      }
+    }),
+  );
+};

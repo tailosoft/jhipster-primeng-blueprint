@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,22 +16,30 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { HttpClient } from '@angular/common/http';
 import { MissingTranslationHandler, MissingTranslationHandlerParams, TranslateLoader } from '@ngx-translate/core';
-import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+<%_ if (clientBundlerEsbuild) { _%>
+import { loadLocale } from 'i18n';
+import { Observable, from } from 'rxjs';
+<%_ } _%>
 
 export const translationNotFoundMessage = 'translation-not-found';
 
 export class MissingTranslationHandlerImpl implements MissingTranslationHandler {
   handle(params: MissingTranslationHandlerParams): string {
-    const key = params.key;
+    const { key } = params;
     return `${translationNotFoundMessage}[${key}]`;
   }
 }
 
-export function translatePartialLoader(http: HttpClient): TranslateLoader {
-  return new TranslateHttpLoader(http, 'i18n/', `.json?_=${I18N_HASH}`);
+<%_ if (clientBundlerEsbuild) { _%>
+export function translatePartialLoader(): TranslateLoader {
+  return {
+    getTranslation(lang: string): Observable<any> {
+      return from(loadLocale(lang as any));
+    },
+  };
 }
+<%_ } _%>
 
 export function missingTranslationHandler(): MissingTranslationHandler {
   return new MissingTranslationHandlerImpl();

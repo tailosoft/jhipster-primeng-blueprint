@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -18,8 +18,8 @@
 -%>
 {
   "compilerOptions": {
-    "baseUrl": "<%= clientSrcDir %>",
-    "outDir": "./<%= clientDistDir %>",
+    "baseUrl": "<%- this.relativeDir(clientRootDir, clientSrcDir) %>",
+    "outDir": "./<%- this.relativeDir(clientRootDir, temporaryDir) %>out-tsc/root",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "strictNullChecks": true,
@@ -29,15 +29,16 @@
     "declaration": false,
     "downlevelIteration": true,
     "experimentalDecorators": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "importHelpers": true,
+    "isolatedModules": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "useDefineForClassFields": false,
     "target": "es2022",
     "module": "es2020",
     "types": [],
-    "lib": ["es2018", "dom"]
+    "lib": ["es2018", "es2020", "es2021", "dom"]
   },
   "references": [
     {

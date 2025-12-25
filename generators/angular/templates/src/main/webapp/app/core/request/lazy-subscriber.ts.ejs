@@ -1,5 +1,22 @@
 import { HttpResponse } from '@angular/common/http';
-import { catchError, debounceTime, EMPTY, filter, map, Observable, pairwise, startWith, Subject, switchMap, takeUntil, tap } from 'rxjs';
+import { WritableSignal, signal } from '@angular/core';
+
+import {
+  EMPTY,
+  Observable,
+  Subject,
+  catchError,
+  debounceTime,
+  filter,
+  finalize,
+  map,
+  pairwise,
+  startWith,
+  switchMap,
+  takeUntil,
+  tap,
+} from 'rxjs';
+
 import { ITEMS_PER_PAGE } from '../../config/pagination.constants';
 
 type DropdownFilterWithExtras = {
@@ -15,20 +32,26 @@ type QueryParams = {
 };
 
 export class LazySubscriber<T> {
-  options: (T | undefined)[] = [];
+  readonly options: WritableSignal<(T | undefined)[]> = signal([]);
+  readonly loading: WritableSignal<boolean> = signal(false);
   itemsPerPage: number;
   maxItems: number;
-  filterSubject = new Subject<{}>();
+  filterSubject = new Subject<Partial<DropdownFilterWithExtras>>();
 
-  constructor(query: (_: QueryParams) => Observable<HttpResponse<T[]>>, destroy$: Observable<unknown>, itemsPerPage = ITEMS_PER_PAGE, maxItems = 10000) {
+  constructor(
+    query: (_: QueryParams) => Observable<HttpResponse<T[]>>,
+    destroy$: Observable<unknown>,
+    itemsPerPage = ITEMS_PER_PAGE,
+    maxItems = 10000,
+  ) {
     this.itemsPerPage = itemsPerPage;
     this.maxItems = maxItems;
     this.filterSubject
       .pipe(
         takeUntil(destroy$),
         debounceTime(100),
-        startWith({}),
-        map((event: Partial<DropdownFilterWithExtras>) => ({
+        startWith({} as Partial<DropdownFilterWithExtras>),
+        map(event => ({
           ...event,
           first: event.first ?? 0,
           last: event.last && event.last > 0 ? event.last : this.itemsPerPage,
@@ -44,34 +67,41 @@ export class LazySubscriber<T> {
             Object.keys(previousFilters).length !== keys.length ||
             keys.some(k => (previousFilters[k] ?? undefined) !== (filters[k] ?? undefined))
           ) {
-            this.options = [];
+            this.options.set([]);
           }
         }),
         map(([_, newEvent]) => newEvent),
+      )
+      .pipe(
         // at anytime, we would want to have both first and last in options, if any of them is missing we should load it
-        filter(event => this.options[event.first] === undefined || this.options[event.last - 1] === undefined),
+        filter(event => this.options()[event.first] === undefined || this.options()[event.last - 1] === undefined),
+        tap(() => this.loading.set(true)),
         switchMap(event => {
           const { first, last, ...filters } = event;
-          if ((last - first) > this.itemsPerPage) {
-            this.itemsPerPage = (last - first);
+          if (last - first > this.itemsPerPage) {
+            this.itemsPerPage = last - first;
           }
-          const page = this.options[first] === undefined ? Math.floor(first / this.itemsPerPage) : Math.floor(last / this.itemsPerPage);
+          const opts = this.options();
+          const page = opts[first] === undefined ? Math.floor(first / this.itemsPerPage) : Math.floor(last / this.itemsPerPage);
           return query({ ...filters, page, size: this.itemsPerPage }).pipe(
             catchError(() => {
-              this.options = [];
+              this.options.set([]);
+              this.loading.set(false);
               return EMPTY;
             }),
-            map(res => ({ page, res }))
+            map(res => ({ page, res })),
           );
-        })
+        }),
+        finalize(() => this.loading.set(false)),
       )
       .subscribe({
         next: ({ page, res }) => {
-          const options = this.options.length
-            ? [...this.options]
-            : (Array.from({ length: Math.min(Number(res.headers.get('X-Total-Count')), this.maxItems) }) as [T | undefined]);
+          const currentOptions = this.options();
+          const options: (T | undefined)[] = currentOptions.length
+            ? [...currentOptions]
+            : Array.from({ length: Math.min(Number(res.headers.get('X-Total-Count')), this.maxItems) });
           options.splice(page * this.itemsPerPage, res.body!.length, ...res.body!);
-          this.options = options;
+          this.options.set(options);
         },
       });
   }

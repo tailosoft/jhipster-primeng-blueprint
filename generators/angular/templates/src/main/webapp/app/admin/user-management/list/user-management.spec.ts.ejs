@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -17,117 +17,145 @@
  limitations under the License.
 -%>
 <%_
-const tsKeyId = this.generateTestEntityId(user.primaryKey.type);
+const tsKeyId = user.primaryKey.tsSampleValues[0];
 _%>
-jest.mock('app/core/auth/account.service');
-
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+<%_ if (clientTestFrameworkVitest) { _%>
+import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
+<%_ } _%>
+import { ComponentFixture, TestBed, tick } from '@angular/core/testing';
 import { of, BehaviorSubject } from 'rxjs';
-import { HttpResponse } from '@angular/common/http';
-import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { Table } from 'primeng/table';
-import { ConfirmationService, Confirmation, MessageService } from 'primeng/api';
+import { HttpHeaders, HttpResponse } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { Confirmation, ConfirmationService, MessageService } from 'primeng/api';
+import { ActivatedRoute, Router, provideRouter } from '@angular/router';
+<%_ if (enableTranslation) { _%>
 import { TranslateModule } from '@ngx-translate/core';
+<%_ } _%>
+import { Table } from 'primeng/table';
 
+import { AccountService } from 'app/core/auth/account.service';
 import { UserManagementService } from '../service/user-management.service';
 import { User } from '../user-management.model';
-import { AccountService } from 'app/core/auth/account.service';
 
-import UserManagementComponent from './user-management.component';
-import { RouterTestingModule } from '@angular/router/testing';
+import UserManagement from './user-management';
 
 describe('User Management Component', () => {
-  let comp: UserManagementComponent;
-  let fixture: ComponentFixture<UserManagementComponent>;
-  let service: UserManagementService;
-  let mockAccountService: AccountService;
-  let confirmationService: ConfirmationService;
-  let activatedRoute: ActivatedRoute;
-  let router: Router;
+    let comp: UserManagement;
+    let fixture: ComponentFixture<UserManagement>;
+    let service: UserManagementService;
+    let confirmationService: ConfirmationService;
+    let activatedRoute: ActivatedRoute;
+    let router: Router;
 
-  beforeEach(() => {
-      TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule, TranslateModule.forRoot(), RouterTestingModule.withRoutes([]), UserManagementComponent],
-        providers: [
-          ConfirmationService,
-          {
-            provide: ActivatedRoute,
-            useValue: { data: of(), queryParams: new BehaviorSubject({})}
-          },
-          AccountService,
-          MessageService
-        ],
-      })
-        .overrideTemplate(UserManagementComponent, '')
-        .compileComponents();
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            imports: [
+<%_ if (enableTranslation) { _%>
+                TranslateModule.forRoot(),
+<%_ } _%>
+            ],
+            providers: [
+                provideHttpClientTesting(),
+                provideRouter([]),
+                AccountService,
+                ConfirmationService,
+                MessageService,
+                {
+                    provide: ActivatedRoute,
+                    useValue: { data: of(), queryParams: new BehaviorSubject({}) }
+                },
+            ],
+        });
 
-    fixture = TestBed.createComponent(UserManagementComponent);
-    comp = fixture.componentInstance;
-    service = TestBed.inject(UserManagementService);
-    confirmationService = TestBed.inject(ConfirmationService);
-    activatedRoute = TestBed.inject(ActivatedRoute);
-    mockAccountService = TestBed.inject(AccountService);
-    mockAccountService.identity = jest.fn(() => of(null));
-    router = TestBed.inject(Router);
-    jest.spyOn(router, 'navigate').mockImplementation();
+        fixture = TestBed.createComponent(UserManagement);
+        comp = fixture.componentInstance;
+        service = TestBed.inject(UserManagementService);
+        confirmationService = TestBed.inject(ConfirmationService);
+        activatedRoute = TestBed.inject(ActivatedRoute);
+        router = TestBed.inject(Router);
+        <%= clientTestFramework %>.spyOn(router, 'navigate').mockImplementation(() => Promise.resolve(true));
+    });
 
-    comp.userTable = { filters: {}, createLazyLoadMetadata: () => undefined } as Table;
-  });
-
-  it('Should call load all on init', fakeAsync(() => {
+    it('Should call load all on init', () => {
         // GIVEN
-        jest.spyOn(service, 'query').mockReturnValue(
-          of(
-            new HttpResponse({
-          body: [new User(<%- tsKeyId %>)]
-            })
-          )
-        );
+        <%= clientTestFramework %>.spyOn(service, 'query').mockReturnValue(of(new HttpResponse({
+            body: [new User(<%- tsKeyId %>)],
+            headers: new HttpHeaders({
+                'X-Total-Count': '1',
+            }),
+        }) as any));
 
         // WHEN
-    fixture.detectChanges();
+        fixture.detectChanges();
 
         // THEN
         expect(service.query).toHaveBeenCalled();
-    expect(comp.users![0]).toEqual(expect.objectContaining({ id: <%- tsKeyId %> }));
-  }));
+        expect(comp.users()[0]).toEqual(expect.objectContaining({ id: <%- tsKeyId %> }));
+    });
 
-  it('should load a page', fakeAsync(() => {
+    it('should load a page', () => {
         // GIVEN
-        jest.spyOn(service, 'query').mockReturnValue(
-          of(
-            new HttpResponse({
-          body: [new User(<%- tsKeyId %>)]
-            })
-          )
+        <%= clientTestFramework %>.spyOn(service, 'query').mockReturnValue(
+            of(
+                new HttpResponse({
+                    body: [new User(<%- tsKeyId %>)],
+                    headers: new HttpHeaders({
+                        'X-Total-Count': '1',
+                    }),
+                })
+            )
         );
 
         // WHEN
-    fixture.detectChanges();
-    tick(100);
-    (activatedRoute.queryParams as BehaviorSubject<any>).next({ first: 3 });
+        fixture.detectChanges();
+        (activatedRoute.queryParams as BehaviorSubject<any>).next({ first: 3 });
 
         // THEN
         expect(service.query).toHaveBeenCalled();
-    expect(comp.users![0]).toEqual(expect.objectContaining({ id: <%- tsKeyId %> }));
-  }));
+        expect(comp.users()[0]).toEqual(expect.objectContaining({ id: <%- tsKeyId %> }));
+    });
 
-  it('should call delete service using confirmDialog', fakeAsync(() => {
-    // GIVEN
-    jest.spyOn(service, 'delete').mockReturnValue(of({} as any));
-    jest.spyOn(confirmationService, 'confirm').mockImplementation((confirmation: Confirmation) => {
-      if(confirmation.accept) {
-        confirmation.accept()
-      }
-      return confirmationService;
-  });
+    describe('setActive', () => {
+        it('should update user and call load all', () => {
+            // GIVEN
+            const user = new User(<%- tsKeyId %>);
+            <%= clientTestFramework %>.spyOn(service, 'query').mockReturnValue(
+                of(
+                    new HttpResponse({
+                        body: [user],
+                        headers: new HttpHeaders({
+                            'X-Total-Count': '1',
+                        }),
+                    }),
+                ),
+            );
+            <%= clientTestFramework %>.spyOn(service, 'update').mockReturnValue(of(user));
 
-    // WHEN
-    comp.delete('AAAAAAA');
+            // WHEN
+            comp.setActive(user, true);
 
-    // THEN
-    expect(confirmationService.confirm).toHaveBeenCalled();
-    expect(service.delete).toHaveBeenCalledWith('AAAAAAA');
-  }));
+            // THEN
+            expect(service.update).toHaveBeenCalledWith({ ...user, activated: true });
+            expect(service.query).toHaveBeenCalled();
+            expect(comp.users()[0]).toEqual(expect.objectContaining({ id: <%- tsKeyId %> }));
+        });
+    });
+
+    it('should call delete service using confirmDialog', () => {
+        // GIVEN
+        <%= clientTestFramework %>.spyOn(service, 'delete').mockReturnValue(of({} as any));
+        <%= clientTestFramework %>.spyOn(confirmationService, 'confirm').mockImplementation((confirmation: Confirmation) => {
+            if (confirmation.accept) {
+                confirmation.accept();
+            }
+            return confirmationService;
+        });
+
+        // WHEN
+        comp.delete('testLogin');
+
+        // THEN
+        expect(confirmationService.confirm).toHaveBeenCalled();
+        expect(service.delete).toHaveBeenCalledWith('testLogin');
+    });
 });

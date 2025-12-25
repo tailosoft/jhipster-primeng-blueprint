@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,53 +16,56 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
-import { Observable<% if (!authenticationTypeOauth2 && !databaseTypeSql && !databaseTypeMongodb && !databaseTypeCouchbase) { %>, of<% } %> } from 'rxjs';
+import { map, Observable<% if (generateUserManagement && !generateBuiltInAuthorityEntity) { %>, of<% } %> } from 'rxjs';
 
 import { ApplicationConfigService } from 'app/core/config/application-config.service';
 import { createRequestOption } from 'app/core/request/request-util';
 import { IUser } from '../user-management.model';
-<%_ if (!authenticationTypeOauth2 && !databaseTypeSql && !databaseTypeMongodb && !databaseTypeCouchbase) { _%>
+<%_ if (generateUserManagement && !generateBuiltInAuthorityEntity) { _%>
 import { Authority } from 'app/config/authority.constants';
 <%_ } _%>
 
 @Injectable({ providedIn: 'root' })
 export class UserManagementService {
-  private resourceUrl = this.applicationConfigService.getEndpointFor('api/admin/users');
+    protected readonly http = inject(HttpClient);
+    protected readonly applicationConfigService = inject(ApplicationConfigService);
 
-  constructor(private http: HttpClient, private applicationConfigService: ApplicationConfigService) {}
+    protected resourceUrl = this.applicationConfigService.getEndpointFor('api/admin/users');
 
-<%_ if (!authenticationTypeOauth2) { _%>
-  create(user: IUser): Observable<IUser> {
-    return this.http.post<IUser>(this.resourceUrl, user);
-  }
+<%_ if (generateUserManagement) { _%>
+    create(user: IUser): Observable<IUser> {
+        return this.http.post<IUser>(this.resourceUrl, user);
+    }
 
-  update(user: IUser): Observable<IUser> {
-    return this.http.put<IUser>(this.resourceUrl, user);
-  }
+    update(user: IUser): Observable<IUser> {
+        return this.http.put<IUser>(this.resourceUrl, user);
+    }
 
-  find(login: string): Observable<IUser> {
-    return this.http.get<IUser>(`${this.resourceUrl}/${login}`);
-  }
+    find(login: string): Observable<IUser> {
+        return this.http.get<IUser>(`${this.resourceUrl}/${encodeURIComponent(login)}`);
+    }
 <%_ } _%>
 
     query(req?: any): Observable<HttpResponse<IUser[]>> {
-    const options = createRequestOption(req);
-    return this.http.get<IUser[]>(this.resourceUrl, { params: options, observe: 'response' });
-  }
+        const options = createRequestOption(req);
+        return this.http.get<IUser[]>(this.resourceUrl, { params: options, observe: 'response' });
+    }
 
-<%_ if (!authenticationTypeOauth2) { _%>
-  delete(login: string): Observable<{}> {
-    return this.http.delete(`${this.resourceUrl}/${login}`);
-  }
+<%_ if (generateUserManagement) { _%>
+    delete(login: string): Observable<{}> {
+        return this.http.delete(`${this.resourceUrl}/${encodeURIComponent(login)}`);
+    }
 
-  authorities(): Observable<string[]> {
-  <%_ if (databaseTypeSql || databaseTypeMongodb || databaseTypeCouchbase) { _%>
-    return this.http.get<string[]>(this.applicationConfigService.getEndpointFor('api/authorities'));
-  <%_ } else { _%>
-    return of([Authority.ADMIN, Authority.USER]);
-  <%_ } _%>
-  }
+    authorities(): Observable<string[]> {
+<%_ if (generateBuiltInAuthorityEntity) { _%>
+        return this.http
+            .get<{ name: string }[]>(this.applicationConfigService.getEndpointFor('api/authorities'))
+            .pipe(map(authorities => authorities.map(a => a.name)));
+<%_ } else { _%>
+        return of([Authority.ADMIN, Authority.USER]);
+<%_ } _%>
+    }
 <%_ } _%>
 }

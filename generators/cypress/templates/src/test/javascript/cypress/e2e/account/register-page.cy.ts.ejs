@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -122,12 +122,12 @@ describe('<%= registerPage %>', () => {
 
   it('register a valid user', () => {
     const randomEmail = '<%= faker.internet.email() %>';
-    const randomUsername = '<%= faker.internet.userName() %>';
+    const randomUsername = '<%= faker.internet.username() %>';
     cy.get(usernameRegisterSelector).type(randomUsername);
     cy.get(emailRegisterSelector).type(randomEmail);
     cy.get(firstPasswordRegisterSelector).type('jondoe');
     cy.get(secondPasswordRegisterSelector).type('jondoe');
     cy.get(submitRegisterSelector).click();
-    cy.wait('@registerSave').then(({ response }) => expect(response.statusCode).to.equal(201));
+    cy.wait('@registerSave').then(({ response }) => expect(response?.statusCode).to.equal(201));
   });
 });

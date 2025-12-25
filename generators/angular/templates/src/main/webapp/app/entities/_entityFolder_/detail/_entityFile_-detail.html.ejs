@@ -1,0 +1,141 @@
+<%#
+ Copyright 2013-2025 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+@if (<%= entityInstance %>(); as <%= entityInstance %>Ref) {
+<div class="entity-detail">
+    <h2 class="title" data-cy="<%= entityInstance %>DetailsHeading">
+        <span>__jhiTranslateTag__('<%= i18nKeyPrefix %>.detail.title')</span> <%= primaryKey.fields.map(field => `{{ ${entityInstance}Ref.${field.nameDottedAsserted} }}`).join(' / ') %>
+    </h2>
+
+    <dl class="detail-content jh-entity-details">
+<%_ for (const field of fields.filter(field => !field.hidden)) {
+    const fieldName = field.fieldName;
+    const fieldType = field.fieldType;
+_%>
+        <dt><span<% if (field.documentation) { if (enableTranslation) { %> [pTooltip]="'<%= i18nKeyPrefix %>.help.<%= fieldName %>' | translate"<% } else { %> pTooltip="<%= field.documentation %>"<% } } %>>__jhiTranslateTag__('<%= field.fieldTranslationKey %>')</span></dt>
+        <dd>
+    <%_ if (field.fieldIsEnum) { _%>
+            <span<% if (enableTranslation) { %> [<%= jhiPrefix %>Translate]="'<%= frontendAppName %>.<%= fieldType %>.' + <%= entityInstance %>Ref.<%= fieldName %>"<% } %>>{{
+                <%= entityInstance %>Ref.<%= fieldName %> ? <%= fieldType %>[<%= entityInstance %>Ref.<%= fieldName %>] : ''
+            }}</span>
+    <%_ } else if (field.fieldTypeBinary && field.blobContentTypeImage) { _%>
+            @if (<%= entityInstance %>Ref.<%= fieldName %>) {
+                <div>
+                    <a (click)="openFile(<%= entityInstance %>Ref.<%= fieldName %>, <%= entityInstance %>Ref.<%= fieldName %>ContentType)">
+                        <img [src]="'data:' + <%= entityInstance %>Ref.<%= fieldName %>ContentType + ';base64,' + <%= entityInstance %>Ref.<%= fieldName %>" style="max-width: 100%;" alt="<%= entityInstance %> image"/>
+                    </a>
+                    {{ <%= entityInstance %>Ref.<%= fieldName %>ContentType }}, {{ byteSize(<%= entityInstance %>Ref.<%= fieldName %>) }}
+                </div>
+            }
+    <%_ } else if (field.fieldTypeBinary && field.blobContentTypeAny) { _%>
+            @if (<%= entityInstance %>Ref.<%= fieldName %>) {
+                <div>
+                    <a (click)="openFile(<%= entityInstance %>Ref.<%= fieldName %>, <%= entityInstance %>Ref.<%= fieldName %>ContentType)">__jhiTranslateTag__('entity.action.open')</a>
+                    {{ <%= entityInstance %>Ref.<%= fieldName %>ContentType }}, {{ byteSize(<%= entityInstance %>Ref.<%= fieldName %>) }}
+                </div>
+            }
+    <%_ } else if (field.fieldTypeDuration) { _%>
+            <span>{{ <%= entityInstance %>Ref.<%= fieldName %> | duration }} ({{ <%= entityInstance %>Ref.<%= fieldName %> }})</span>
+    <%_ } else if (field.fieldTypeTimed) { _%>
+            <span>{{ <%= entityInstance %>Ref.<%= fieldName %> | date:'medium' }}</span>
+    <%_ } else if (field.fieldTypeLocalDate) { _%>
+            <span>{{ <%= entityInstance %>Ref.<%= fieldName %> | date:'mediumDate' }}</span>
+    <%_ } else { _%>
+            <span>{{ <%= entityInstance %>Ref.<%= fieldName %> }}</span>
+    <%_ } _%>
+        </dd>
+<%_ } _%>
+<%_ for (const relationship of relationships.filter(rel => rel.ownerSide)) {
+    const relationshipType = relationship.relationshipType;
+    const relationshipName = relationship.relationshipName;
+    const relationshipFieldName = relationship.relationshipFieldName;
+    const relationshipFieldNamePlural = relationship.relationshipFieldNamePlural;
+    const otherEntityName = relationship.otherEntityName;
+    const otherEntity = relationship.otherEntity;
+    const instance = relationship.relationshipManyToMany ? relationshipFieldName : `${entityInstance}Ref.${relationshipFieldName}`;
+_%>
+    <%_ if (otherEntityName === 'user') { _%>
+        <dt><span>__jhiTranslateTag__('<%= i18nKeyPrefix %>.<%= relationshipName %>')</span></dt>
+        <%_ if (relationship.relationshipManyToMany) { _%>
+        <dd>
+            @for (<%= relationshipFieldName %> of <%= entityInstance %>Ref.<%= relationshipFieldNamePlural %>; track $index; let last = $last) {
+                <span>{{ <%= instance %>.<%= relationship.otherEntityField %> }}{{ last ? '' : ', ' }}</span>
+            }
+        </dd>
+        <%_ } else { _%>
+        <dd>
+            @if (<%= entityInstance %>Ref.<%= relationshipFieldName %>) {
+                <div>{{ <%= instance %>.<%= relationship.otherEntityField %> }}</div>
+            }
+        </dd>
+        <%_ } _%>
+    <%_ } else { _%>
+        <%_ if (relationship.relationshipManyToMany) { _%>
+            <%_ const manyRelationshipKeys = otherEntity.primaryKey.fields.length === 1 ? `${relationshipFieldName}.${otherEntity.primaryKey.name}!` : `{ ${otherEntity.primaryKey.fields.map(field => `${field.fieldName}: ${relationshipFieldName}.${field.nameDottedAsserted}`).join(', ')} }`; _%>
+        <dt<% if (fineGrainedPermissions) { %> *jhiHasAnyAuthority="'<%= otherEntity.entityNameKebabCase %>.read'"<% } %>><span>__jhiTranslateTag__('<%= i18nKeyPrefix %>.<%= relationshipName %>')</span></dt>
+        <dd<% if (fineGrainedPermissions) { %> *jhiHasAnyAuthority="'<%= otherEntity.entityNameKebabCase %>.read'"<% } %>>
+            @for (<%= relationshipFieldName %> of <%= entityInstance %>Ref.<%= relationshipFieldNamePlural %>; track $index; let last = $last) {
+                <span>
+                    <a [routerLink]="['/<%= otherEntity.entityPage %>', <%= manyRelationshipKeys %>, 'view']">{{ <%= instance %>.<%= relationship.otherEntityField %> }}</a>{{ last ? '' : ', ' }}
+                </span>
+            }
+        </dd>
+        <%_ } else { _%>
+            <%_ if (otherEntity.primaryKey.ownFields.length === 0) {
+                const viewRouterLink = otherEntity.primaryKey.fields.length === 1 ? `${entityInstance}Ref.${otherEntity.primaryKey.name}!` : '{ '+ otherEntity.primaryKey.fields.map(field => `${field.fieldName}: ${entityInstance}Ref.${relationship.relationshipName}.${field.nameDotted}`).join(', ') + ' }';
+            _%>
+        <dt<% if (fineGrainedPermissions) { %>  *jhiHasAnyAuthority="'<%= otherEntity.entityNameKebabCase %>.read'"<% } %>><span>__jhiTranslateTag__('<%= i18nKeyPrefix %>.<%= relationshipName %>')</span></dt>
+        <dd<% if (fineGrainedPermissions) { %>  *jhiHasAnyAuthority="'<%= otherEntity.entityNameKebabCase %>.read'"<% } %>>
+            @if (<%= entityInstance %>Ref.<%= relationship.relationshipName %>) {
+                <div>
+                    <a pButton type="button" [routerLink]="['/<%= otherEntity.entityPage %>', <%- viewRouterLink %>, 'view']"
+                            icon="pi pi-eye" class="p-button-info">
+                    </a>
+                </div>
+            }
+        </dd>
+            <%_ } _%>
+            <%_ relationship.clientFields.forEach(cf => {
+                const relationshipKeys = cf.entity.primaryKey && cf.entity.primaryKey.composite ?
+                    `{ ${cf.routerLinkValues.map(v => `${v.fieldName}: ${entityInstance}Ref.${relationship.relationshipName}.${v.nameDotted}`).join(', ')} }` :
+                    `${cf.routerLinkValues.map(v => `${entityInstance}Ref.${relationship.relationshipName}.${v.nameDotted}`).join('')}`;
+                const cfRouterLink = `[routerLink]="['/${ cf.entity.entityPage }', ${ relationshipKeys }, 'view']"`;
+            _%>
+        <dt<% if (fineGrainedPermissions) { %>  *jhiHasAnyAuthority="'<%= cf.entity.entityNameKebabCase %>.read'"<% } %>><span>__jhiTranslateTag__('<%= cf.translationKey %>')</span></dt>
+        <dd<% if (fineGrainedPermissions) { %>  *jhiHasAnyAuthority="'<%= cf.entity.entityNameKebabCase %>.read'"<% } %>>
+            @if (<%= entityInstance %>Ref.<%= relationship.relationshipName %>) {
+                <div>
+                    <a <%- cfRouterLink %>>{{ <%= instance %>.<%= cf.relatedFieldPath.join('.') %> }}</a>
+                </div>
+            }
+        </dd>
+            <%_ }) _%>
+        <%_ } _%>
+    <%_ } _%>
+<%_ } _%>
+    </dl>
+
+    <div class="detail-buttons">
+        <a pButton type="button" (click)="previousState()" class="p-button-secondary" icon="pi pi-arrow-left" data-cy="entityDetailsBackButton">__jhiTranslateTag__('entity.action.back')</a>
+<%_ if (!readOnly && updatableEntity) { _%>
+    <%_ const editRouterLink = primaryKey.fields.length === 1 ? `${entityInstance}Ref.${primaryKey.name}` : '{ '+ primaryKey.fields.map(field => `${field.fieldName}: ${entityInstance}Ref.${field.nameDottedAsserted}`).join(', ') + ' }'; _%>
+        <a<% if (fineGrainedPermissions) { %> *jhiHasAnyAuthority="'<%= entityStateName %>.update'"<% } %> pButton type="button" icon="pi pi-pencil" [routerLink]="['/<%= entityPage %>', <%= editRouterLink %>, 'edit']">__jhiTranslateTag__('entity.action.edit')</a>
+<%_ } _%>
+    </div>
+</div>
+}

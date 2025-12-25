@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,19 +16,19 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-jest.mock('app/core/auth/state-storage.service');
-
-import { Router } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+<%_ if (clientTestFrameworkVitest) { _%>
+import { Mock, afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
+<%_ } _%>
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
+
 <%_ if (enableTranslation) { _%>
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { of } from 'rxjs';
 <%_ } _%>
 
-import { Account } from 'app/core/auth/account.model';
 import { Authority } from 'app/config/authority.constants';
+import { Account } from 'app/core/auth/account.model';
 import { StateStorageService } from 'app/core/auth/state-storage.service';
 <%_ if (generateUserManagement) { _%>
 import { ApplicationConfigService } from 'app/core/config/application-config.service';
@@ -49,6 +49,8 @@ function accountWithAuthorities(authorities: string[]): Account {
   };
 }
 
+const mockFn = (value: string | null): Mock => <%= clientTestFramework %>.fn(() => value);
+
 describe('Account Service', () => {
   let service: AccountService;
 <%_ if (generateUserManagement) { _%>
@@ -63,15 +65,20 @@ describe('Account Service', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      <%_ if (enableTranslation) { _%>
       imports: [
-        HttpClientTestingModule,
-        RouterTestingModule.withRoutes([]),
-<%_ if (enableTranslation) { _%>
         TranslateModule.forRoot(),
-<%_ } _%>
       ],
+      <%_ } _%>
       providers: [
-        StateStorageService,
+        provideHttpClientTesting(),
+        {
+          provide: StateStorageService,
+          useValue: {
+            clearUrl: <%= clientTestFramework %>.fn(),
+            getUrl: <%= clientTestFramework %>.fn(),
+          },
+        },
       ],
     });
 
@@ -82,11 +89,11 @@ describe('Account Service', () => {
     httpMock = TestBed.inject(HttpTestingController);
     mockStorageService = TestBed.inject(StateStorageService);
     mockRouter = TestBed.inject(Router);
-    jest.spyOn(mockRouter, 'navigateByUrl').mockImplementation(() => Promise.resolve(true));
+    <%= clientTestFramework %>.spyOn(mockRouter, 'navigateByUrl');
 <%_ if (enableTranslation) { _%>
 
     mockTranslateService = TestBed.inject(TranslateService);
-    jest.spyOn(mockTranslateService, 'use').mockImplementation(() => of(''));
+    <%= clientTestFramework %>.spyOn(mockTranslateService, 'use');
 <%_ } _%>
   });
 
@@ -95,20 +102,20 @@ describe('Account Service', () => {
   });
 
 <%_ if (generateUserManagement) { _%>
-describe('save', () => {
-  it('should call account saving endpoint with correct values', () => {
-    // GIVEN
-    const account = accountWithAuthorities([]);
+  describe('save', () => {
+    it('should call account saving endpoint with correct values', () => {
+      // GIVEN
+      const account = accountWithAuthorities([]);
 
-    // WHEN
-    service.save(account).subscribe();
-    const testRequest = httpMock.expectOne({ method: 'POST', url: applicationConfigService.getEndpointFor('api/account') });
-    testRequest.flush({});
+      // WHEN
+      service.save(account).subscribe();
+      const testRequest = httpMock.expectOne({ method: 'POST', url: applicationConfigService.getEndpointFor('api/account') });
+      testRequest.flush({});
 
-    // THEN
-    expect(testRequest.request.body).toEqual(account);
+      // THEN
+      expect(testRequest.request.body).toEqual(account);
+    });
   });
-});
 
 <%_ } _%>
   describe('authenticate', () => {
@@ -147,7 +154,8 @@ describe('save', () => {
       // Once more
       service.identity().subscribe();
       // Then there is only request
-      httpMock.expectOne({ method: 'GET' });
+      const requests = httpMock.match({ method: 'GET' });
+      expect(requests.length).toBe(1);
     });
 
     it('should call /account only once if not logged out after first authentication and should call /account again if user has logged out', () => {
@@ -167,14 +175,15 @@ describe('save', () => {
       service.identity().subscribe();
 
       // Then there is a new request
-      httpMock.expectOne({ method: 'GET' });
+      const requests = httpMock.match({ method: 'GET' });
+      expect(requests.length).toBe(1);
     });
 
 <%_ if (enableTranslation) { _%>
     describe('should change the language on authentication if necessary', () => {
       it('should change language if user has not changed language manually', () => {
         // GIVEN
-        mockStorageService.getLocale = jest.fn(() => null);
+        mockStorageService.getLocale = mockFn(null);
 
         // WHEN
         service.identity().subscribe();
@@ -186,7 +195,7 @@ describe('save', () => {
 
       it('should not change language if user has changed language manually', () => {
         // GIVEN
-        mockStorageService.getLocale = jest.fn(() => 'sessionLang');
+        mockStorageService.getLocale = mockFn('sessionLang');
 
         // WHEN
         service.identity().subscribe();
@@ -201,7 +210,7 @@ describe('save', () => {
     describe('navigateToStoredUrl', () => {
       it('should navigate to the previous stored url post successful authentication', () => {
         // GIVEN
-        mockStorageService.getUrl = jest.fn(() => 'admin/users?page=0');
+        mockStorageService.getUrl = mockFn('admin/users?page=0');
 
         // WHEN
         service.identity().subscribe();
@@ -216,7 +225,7 @@ describe('save', () => {
       it('should not navigate to the previous stored url when authentication fails', () => {
         // WHEN
         service.identity().subscribe();
-        httpMock.expectOne({ method: 'GET' }).error(new ErrorEvent(''));
+        httpMock.expectOne({ method: 'GET' }).error(new ProgressEvent(''));
 
         // THEN
         expect(mockStorageService.getUrl).not.toHaveBeenCalled();
@@ -226,7 +235,7 @@ describe('save', () => {
 
       it('should not navigate to the previous stored url when no such url exists post successful authentication', () => {
         // GIVEN
-        mockStorageService.getUrl = jest.fn(() => null);
+        mockStorageService.getUrl = mockFn(null);
 
         // WHEN
         service.identity().subscribe();

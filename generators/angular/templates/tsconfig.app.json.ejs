@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -19,14 +19,17 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "./<%= clientDistDir %>app",
+    "outDir": "./<%= this.relativeDir(clientRootDir, temporaryDir) %>out-tsc/app",
     "types": ["@angular/localize"]
   },
   "files": [
-<%_ if (communicationSpringWebsocket) { _%>
-    "<%= clientSrcDir %>sockjs-client.polyfill.ts",
+<%_ if (microfrontend && applicationTypeMicroservice) { _%>
+    "<%- this.relativeDir(clientRootDir, clientSrcDir) %>app/entities/entity-navbar-items.ts",
 <%_ } _%>
-    "<%= clientSrcDir %>main.ts"
+<%_ if (communicationSpringWebsocket) { _%>
+    "<%= this.relativeDir(clientRootDir, clientSrcDir) %>sockjs-client.polyfill.ts",
+<%_ } _%>
+    "<%= this.relativeDir(clientRootDir, clientSrcDir) %>main.ts"
   ],
-  "include": ["<%= clientSrcDir %>**/*.d.ts"]
+  "include": ["<%= this.relativeDir(clientRootDir, clientSrcDir) %>**/*.d.ts"]
 }

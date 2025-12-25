@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,26 +16,32 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import SharedModule from 'app/shared/shared.module';
+import { Component, input } from '@angular/core';
+import { DatePipe } from '@angular/common';
 
+import { PRIMENG_MODULES } from 'app/shared/primeng-common.module';
+<%_ if (enableTranslation) { _%>
+import { TranslateDirective } from 'app/shared/language';
+import { TranslateModule } from '@ngx-translate/core';
+<%_ } _%>
 import { User } from '../user-management.model';
 
 @Component({
-  standalone: true,
-  selector: '<%= jhiPrefixDashed %>-user-mgmt-detail',
-  templateUrl: './user-management-detail.component.html',
-  imports: [SharedModule],
+    selector: '<%= jhiPrefixDashed %>-user-mgmt-detail',
+    templateUrl: './user-management-detail.html',
+    imports: [
+        ...PRIMENG_MODULES,
+<%_ if (enableTranslation) { _%>
+        TranslateDirective,
+        TranslateModule,
+<%_ } _%>
+        DatePipe,
+    ],
 })
-export default class UserManagementDetailComponent implements OnInit {
-  user: User | null = null;
+export default class UserManagementDetail {
+    user = input<User | null>(null);
 
-  constructor(private route: ActivatedRoute) {}
-
-  ngOnInit(): void {
-    this.route.data.subscribe(({ user }) => {
-      this.user = user;
-    });
-  }
+    previousState(): void {
+        globalThis.history.back();
+    }
 }

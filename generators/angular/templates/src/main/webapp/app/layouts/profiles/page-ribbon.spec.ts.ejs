@@ -1,36 +1,28 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+<%_ if (clientTestFrameworkVitest) { _%>
+import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
+<%_ } _%>
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
 import { ProfileInfo } from 'app/layouts/profiles/profile-info.model';
 import { ProfileService } from 'app/layouts/profiles/profile.service';
 
-import PageRibbonComponent from './page-ribbon.component';
+import PageRibbon from './page-ribbon';
 
 describe('Page Ribbon Component', () => {
-  let comp: PageRibbonComponent;
-  let fixture: ComponentFixture<PageRibbonComponent>;
+  let comp: PageRibbon;
+  let fixture: ComponentFixture<PageRibbon>;
   let profileService: ProfileService;
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule, PageRibbonComponent],
-      })
-        .overrideTemplate(PageRibbonComponent, '')
-        .compileComponents();
-    })
-  );
-
   beforeEach(() => {
-    fixture = TestBed.createComponent(PageRibbonComponent);
+    fixture = TestBed.createComponent(PageRibbon);
     comp = fixture.componentInstance;
     profileService = TestBed.inject(ProfileService);
   });
 
-  it('Should call profileService.getProfileInfo on init', () => {
+  it('should call profileService.getProfileInfo on init', () => {
     // GIVEN
-    jest.spyOn(profileService, 'getProfileInfo').mockReturnValue(of(new ProfileInfo()));
+    <%= clientTestFramework %>.spyOn(profileService, 'getProfileInfo').mockReturnValue(of(new ProfileInfo()));
 
     // WHEN
     comp.ngOnInit();

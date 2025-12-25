@@ -1,0 +1,188 @@
+<%#
+ Copyright 2013-2025 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+<div class="entity-update">
+    @if (<% if (!primaryKey.autoGenerate || primaryKey.derived) { %>edit<% } else { %>editForm.value.<%= primaryKey.name %> !== null<% } %>) {
+        <h2 class="title" id="<%= jhiPrefixDashed %>-<%= entityFileName %>-heading" data-cy="<%= entityClass %>CreateUpdateHeading">__jhiTranslateTag__('<%= i18nKeyPrefix %>.home.editLabel')</h2>
+    } @else {
+        <h2 class="title" id="<%= jhiPrefixDashed %>-<%= entityFileName %>-heading" data-cy="<%= entityClass %>CreateUpdateHeading">__jhiTranslateTag__('<%= i18nKeyPrefix %>.home.createLabel')</h2>
+    }
+    <form name="editForm" role="form" novalidate (ngSubmit)="save()" [formGroup]="editForm">
+        <div class="form-grid p-fluid update-content">
+<%_ for (const field of fields.filter(f => !f.hidden && !(f.id && f.autoGenerate))) {
+    const fieldName = field.fieldName;
+    const fieldNameCapitalized = field.fieldNameCapitalized;
+    const fieldNameHumanized = field.fieldNameHumanized;
+    const fieldType = field.fieldType;
+    const fieldTypeBlobContent = field.fieldTypeBlobContent;
+    const id = !!field.id;
+    const autoGenerate = field.autoGenerate;
+    const readonly = !!field.id || !!field.readonly;
+    let fieldInputType = 'text';
+    const translationKey = field.fieldTranslationKey;
+    if (field.fieldTypeNumeric) {
+        fieldInputType = 'number';
+    } else if (field.fieldTypeLocalDate) {
+        fieldInputType = 'date';
+    } else if (field.fieldTypeTimed) {
+        fieldInputType = 'datetime-local';
+    } else if (field.fieldTypeBoolean) {
+        fieldInputType = 'checkbox';
+    } else if (field.fieldTypeBinary && !field.blobContentTypeText) {
+        fieldInputType = 'hidden';
+    }
+_%>
+            <% if (field.autoGenerate) { %>@if (editForm.controls.<%= field.fieldName %>.value !== null) {<% } %>
+            <% if (field.fieldValidate) { %>@let <%= fieldName %>Ref = editForm.get('<%= fieldName %>')!;<% } %>
+            <div class="p-field p-grid">
+                <label for="field_<%= fieldName %>" class="p-col-12 p-md-2<% if (field.fieldValidate === true) { %> label-asterisk<% } %>"<% if (field.documentation) { if (enableTranslation) { %> [pTooltip]="'<%= i18nKeyPrefix %>.help.<%= fieldName %>' | translate"<% } else { %> pTooltip="<%= field.documentation %>"<% } } %>>__jhiTranslateTag__('<%= translationKey %>')</label>
+                <div class="p-col-12 p-md-10">
+    <%_ if (field.fieldIsEnum) { _%>
+        <%_ const enumPrefix = frontendAppName + '.'+ fieldType; _%>
+                    <p-select [options]="<%= field.fieldName %>Options!" name="<%= fieldName %>" formControlName="<%= fieldName %>" id="field_<%= fieldName %>" placeholder="Choose" <%_ if(!field.fieldValidateRules || !field.fieldValidateRules.includes('required')){ %> [showClear]="true"<%_ } _%><% if (id) { %> [readonly]="edit"<% } %> data-cy="<%= fieldName %>">
+                        <ng-template let-<%= field.fieldName %> #selectedItem>{{'<%= `${enumPrefix}` %>.' + <%= field.fieldName %>.label | translate}}</ng-template>
+                        <ng-template let-<%= field.fieldName %> #item>{{'<%= `${enumPrefix}` %>.' + <%= field.fieldName %>.label | translate}}</ng-template>
+                    </p-select>
+    <%_ } else { _%>
+        <%_ if (field.fieldTypeLocalDate) { _%>
+                    <p-datepicker id="field_<%= fieldName %>" formControlName="<%= fieldName %>" [showIcon]="true"<% if (readonly) { %> [readonly]="true"<% } %> data-cy="<%= fieldName %>"></p-datepicker>
+        <%_ } else if (field.fieldTypeTimed) { _%>
+                    <p-datepicker id="field_<%= fieldName %>" formControlName="<%= fieldName %>" [showIcon]="true" [showTime]="true"<% if (readonly) { %> [readonly]="true"<% } %> data-cy="<%= fieldName %>"></p-datepicker>
+        <%_ } else if (field.blobContentTypeText) { _%>
+                    <textarea pInputTextarea name="<%= fieldName %>" id="field_<%= fieldName %>"
+                                  formControlName="<%= fieldName %>"<% if (readonly) { %> [readonly]="true"<% } %> data-cy="<%= fieldName %>"></textarea>
+        <%_ } else if (field.fieldTypeBinary && !field.blobContentTypeText) { _%>
+                    <p-fileUpload name="<%= fieldName %>" id="field_<%= fieldName %>" [showUploadButton]="false" (onSelect)="onFileSelect($event, '<%= fieldName %>')"<% if (field.blobContentTypeImage) { %> accept="image/*"<% } %>
+                                      (onClear)="onFileRemove('<%= fieldName %>')" (onRemove)="onFileRemove('<%= fieldName %>')" [files]="<%= fieldName %>File ? [<%= fieldName %>File] : []" data-cy="<%= fieldName %>"></p-fileUpload>
+        <%_ } else if (field.fieldTypeBoolean) { _%>
+                    <p-toggleSwitch name="<%= fieldName %>" id="field_<%= fieldName %>" formControlName="<%= fieldName %>"<% if (readonly) { %> [disabled]="true"<% } %> data-cy="<%= fieldName %>"></p-toggleSwitch>
+        <%_ } else if (field.fieldTypeLocalTime) { _%>
+                    <input pInputText type="time" class="form-control" name="<%= fieldName %>" id="field_<%= fieldName %>" data-cy="<%= fieldName %>"
+                           formControlName="<%= fieldName %>"<% if (readonly) { %> [readonly]="true"<% } %>/>
+        <%_ } else { _%>
+                    <input pInputText type="<%= fieldInputType %>" name="<%= fieldName %>" id="field_<%= fieldName %>" formControlName="<%= fieldName %>"<% if (id) { %> [readonly]="edit"<% } else if (readonly) { %> [readonly]="true"<% } %> data-cy="<%= fieldName %>"/>
+        <%_ } _%>
+    <%_ } _%>
+    <%_ if (field.fieldValidate === true) { _%>
+                @if (<%= fieldName %>Ref.invalid && (<%= fieldName %>Ref.dirty || <%= fieldName %>Ref.touched)) {
+                    <div class="validation-messages">
+        <%_ if (field.fieldValidationRequired) { _%>
+                    @if (editForm.get('<%= fieldName %>')?.errors?.required) {
+                        <p-message severity="error" [text]="'entity.validation.required' | translate"></p-message>
+                    }
+        <%_ } _%>
+        <%_ if (field.fieldValidationMinLength) { _%>
+                    @if (editForm.get('<%= fieldName %>')?.errors?.minlength) {
+                        <p-message severity="error" [text]="'entity.validation.minlength' | translate : { min: <%= field.fieldValidateRulesMinlength %> }"></p-message>
+                    }
+        <%_ } _%>
+        <%_ if (field.fieldValidationMaxLength) { _%>
+                    @if (editForm.get('<%= fieldName %>')?.errors?.maxlength) {
+                        <p-message severity="error" [text]="'entity.validation.maxlength' | translate : { max: <%= field.fieldValidateRulesMaxlength %> }"></p-message>
+                    }
+        <%_ } _%>
+        <%_ if (field.fieldValidationMin) { _%>
+                    @if (editForm.get('<%= fieldName %>')?.errors?.min) {
+                        <p-message severity="error" [text]="'entity.validation.min' | translate : { min: <%= field.fieldValidateRulesMin %> }"></p-message>
+                    }
+        <%_ } _%>
+        <%_ if (field.fieldValidationMax) { _%>
+                    @if (editForm.get('<%= fieldName %>')?.errors?.max) {
+                        <p-message severity="error" [text]="'entity.validation.max' | translate : { max: <%= field.fieldValidateRulesMax %> }"></p-message>
+                    }
+        <%_ } _%>
+        <%_ if (field.fieldValidateRules?.includes('minbytes')) { _%>
+                    @if (editForm.get('<%= fieldName %>')?.errors?.minbytes) {
+                        <p-message severity="error" [text]="'entity.validation.minbytes' | translate : { min: <%= field.fieldValidateRulesMinbytes %> }"></p-message>
+                    }
+        <%_ } _%>
+        <%_ if (field.fieldValidateRules?.includes('maxbytes')) { _%>
+                    @if (editForm.get('<%= fieldName %>')?.errors?.maxbytes) {
+                        <p-message severity="error" [text]="'entity.validation.maxbytes' | translate : { max: <%= field.fieldValidateRulesMaxbytes %> }"></p-message>
+                    }
+        <%_ } _%>
+        <%_ if (field.fieldValidationPattern) { _%>
+                    @if (editForm.get('<%= fieldName %>')?.errors?.pattern) {
+                        <p-message severity="error" [text]="'entity.validation.pattern' | translate : { pattern: '<%= fieldNameHumanized %>' }"></p-message>
+                    }
+        <%_ } _%>
+        <%_ if (field.fieldTypeNumeric || field.fieldTypeDuration) { _%>
+                    @if (editForm.get('<%= fieldName %>')?.errors?.number) {
+                        <p-message severity="error" [text]="'entity.validation.number' | translate"></p-message>
+                    }
+        <%_ } _%>
+        <%_ if (field.fieldTypeTimed) { _%>
+                    @if (editForm.get('<%= fieldName %>')?.errors?.datetimelocal) {
+                        <p-message severity="error" [text]="'entity.validation.datetimelocal' | translate"></p-message>
+                    }
+        <%_ } _%>
+                    </div>
+                }
+    <%_ } _%>
+                </div>
+            </div>
+            <% if (field.autoGenerate) { %>}<% } %>
+<%_ } _%>
+<%_ for (const relationship of relationships.filter(rel => rel.ownerSide && rel.otherEntity.primaryKey)) {
+    const otherEntity = relationship.otherEntity;
+    const relationshipType = relationship.relationshipType;
+    const ownerSide = relationship.ownerSide;
+    const otherEntityName = relationship.otherEntityName;
+    const otherEntityNamePlural = relationship.otherEntityNamePlural;
+    const otherEntityNameCapitalized = relationship.otherEntityNameCapitalized;
+    const relationshipName = relationship.relationshipName;
+    const relationshipNameHumanized = relationship.relationshipNameHumanized;
+    const relationshipFieldName = relationship.relationshipFieldName;
+    const relationshipFieldNamePlural = relationship.relationshipFieldNamePlural;
+    const otherEntityField = relationship.otherEntityField;
+    const otherEntityFieldCapitalized = relationship.otherEntityFieldCapitalized;
+    const relationshipRequired = relationship.relationshipRequired;
+    const translationKey = `${i18nKeyPrefix}.${relationshipName}`;
+_%>
+    <%_ if (relationship.relationshipManyToOne || relationship.relationshipOneToOne) { _%>
+        <%- include('./relationship_form_group_template', {relationship, frontendAppName, path: [], first: true, previousRelationship: null, id: relationship.id}); -%>
+    <%_ } else if (relationship.relationshipManyToMany) { _%>
+            <div class="p-field p-grid">
+                <label for="field_<%= relationshipFieldNamePlural %>" class="p-col-12 p-md-2<% if (relationshipRequired) { %> label-asterisk<% } %>">__jhiTranslateTag__('<%= translationKey %>')</label>
+                <div class="p-col-12 p-md-10">
+                    <p-multiSelect id="field_<%= relationshipFieldNamePlural %>" name="<%= relationshipFieldNamePlural %>" formControlName="<%=relationshipFieldNamePlural %>" dataKey="<%= otherEntity.primaryKey.name %>"<% if(relationship.otherEntity.pagination !== 'no') { %>
+                                       [options]="<%= relationshipName %>OptionsSubscriber!.options()" [lazy]="true" [virtualScroll]="true" [virtualScrollItemSize]="38" [lazySelectedOptions]="<%= relationship.relationshipName %>SelectedOptions!" (onLazyLoad)="on<%= relationship.relationshipNameCapitalized %>LazyLoadEvent($event)"<% } else { %> [options]="<%= relationshipName %>Options!" <% } %>
+                                       optionLabel="<%=otherEntityField %>" data-cy="<%= relationshipFieldNamePlural %>">
+                    </p-multiSelect>
+        <%_ if (relationshipRequired) { _%>
+                @let <%= relationshipFieldNamePlural %>Ref = editForm.get('<%= relationshipFieldNamePlural %>')!;
+                @if (<%= relationshipFieldNamePlural %>Ref.invalid && (<%= relationshipFieldNamePlural %>Ref.dirty || <%= relationshipFieldNamePlural %>Ref.touched)) {
+                    <div class="validation-messages">
+                        @if (<%= relationshipFieldNamePlural %>Ref?.errors?.required) {
+                            <p-message severity="error" [text]="'entity.validation.required' | translate"></p-message>
+                        }
+                    </div>
+                }
+        <%_ } _%>
+                </div>
+            </div>
+    <%_ } _%>
+<%_ } _%>
+        </div>
+
+        <div class="update-buttons">
+            <a pButton type="button" id="cancel-save" icon="pi pi-ban" class="p-button-secondary" (click)="previousState()" data-cy="entityCreateCancelButton">__jhiTranslateTag__('entity.action.cancel')</a>
+            <button pButton type="submit" id="save-entity" icon="pi pi-save" [disabled]="isSaving()" data-cy="entityCreateSaveButton" >__jhiTranslateTag__('entity.action.save')</button>
+        </div>
+    </form>
+</div>

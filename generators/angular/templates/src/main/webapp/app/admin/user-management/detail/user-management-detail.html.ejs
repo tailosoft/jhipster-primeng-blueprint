@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,58 +16,59 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-<div class="d-flex justify-content-center">
-  <div class="col-8">
-    <div *ngIf="user">
-      <h2>
-        <span <%= jhiPrefix %>Translate="userManagement.detail.title"><%- getWebappTranslation('userManagement.detail.title') %></span> [<strong>{{ user.login }}</strong>]
-      </h2>
+@if (user(); as userRef) {
+<div class="entity-detail">
+    <h2 class="title" data-cy="userManagementDetailsHeading">
+        <span>__jhiTranslateTag__('userManagement.detail.title')</span> {{ userRef.login }}
+    </h2>
 
-      <dl class="row-md jh-entity-details">
-        <dt><span <%= jhiPrefix %>Translate="userManagement.login"><%- getWebappTranslation('userManagement.login') %></span></dt>
+    <dl class="detail-content jh-entity-details">
+        <dt><span>__jhiTranslateTag__('userManagement.login')</span></dt>
         <dd>
-          <span>{{ user.login }}</span>
-          <span *ngIf="user.activated" class="badge bg-success" <%= jhiPrefix %>Translate="userManagement.activated"><%- getWebappTranslation('userManagement.activated') %></span>
-          <span *ngIf="!user.activated" class="badge bg-danger" <%= jhiPrefix %>Translate="userManagement.deactivated"><%- getWebappTranslation('userManagement.deactivated') %></span>
+            <span>{{ userRef.login }}</span>
+            @if (userRef.activated) {
+                <p-tag severity="success" [value]="'userManagement.activated' | translate"></p-tag>
+            } @else {
+                <p-tag severity="danger" [value]="'userManagement.deactivated' | translate"></p-tag>
+            }
         </dd>
 
-        <dt><span <%= jhiPrefix %>Translate="userManagement.firstName"><%- getWebappTranslation('userManagement.firstName') %></span></dt>
-        <dd>{{ user.firstName }}</dd>
+        <dt><span>__jhiTranslateTag__('userManagement.firstName')</span></dt>
+        <dd><span>{{ userRef.firstName }}</span></dd>
 
-        <dt><span <%= jhiPrefix %>Translate="userManagement.lastName"><%- getWebappTranslation('userManagement.lastName') %></span></dt>
-        <dd>{{ user.lastName }}</dd>
+        <dt><span>__jhiTranslateTag__('userManagement.lastName')</span></dt>
+        <dd><span>{{ userRef.lastName }}</span></dd>
 
-        <dt><span <%= jhiPrefix %>Translate="userManagement.email"><%- getWebappTranslation('userManagement.email') %></span></dt>
-        <dd>{{ user.email }}</dd>
+        <dt><span>__jhiTranslateTag__('userManagement.email')</span></dt>
+        <dd><span>{{ userRef.email }}</span></dd>
 <%_ if (enableTranslation) { _%>
 
-        <dt><span <%= jhiPrefix %>Translate="userManagement.langKey"><%- getWebappTranslation('userManagement.langKey') %></span></dt>
-        <dd>{{ user.langKey }}</dd>
+        <dt><span>__jhiTranslateTag__('userManagement.langKey')</span></dt>
+        <dd><span>{{ userRef.langKey }}</span></dd>
 <%_ } _%>
 
-        <dt><span <%= jhiPrefix %>Translate="userManagement.createdBy"><%- getWebappTranslation('userManagement.createdBy') %></span></dt>
-        <dd>{{ user.createdBy }}</dd>
+        <dt><span>__jhiTranslateTag__('userManagement.createdBy')</span></dt>
+        <dd><span>{{ userRef.createdBy }}</span></dd>
 
-        <dt><span <%= jhiPrefix %>Translate="userManagement.createdDate"><%- getWebappTranslation('userManagement.createdDate') %></span></dt>
-        <dd>{{ user.createdDate | date: 'dd/MM/yy HH:mm' }}</dd>
+        <dt><span>__jhiTranslateTag__('userManagement.createdDate')</span></dt>
+        <dd><span>{{ userRef.createdDate | date: 'dd/MM/yy HH:mm' }}</span></dd>
 
-        <dt><span <%= jhiPrefix %>Translate="userManagement.lastModifiedBy"><%- getWebappTranslation('userManagement.lastModifiedBy') %></span></dt>
-        <dd>{{ user.lastModifiedBy }}</dd>
+        <dt><span>__jhiTranslateTag__('userManagement.lastModifiedBy')</span></dt>
+        <dd><span>{{ userRef.lastModifiedBy }}</span></dd>
 
-        <dt><span <%= jhiPrefix %>Translate="userManagement.lastModifiedDate"><%- getWebappTranslation('userManagement.lastModifiedDate') %></span></dt>
-        <dd>{{ user.lastModifiedDate | date: 'dd/MM/yy HH:mm' }}</dd>
+        <dt><span>__jhiTranslateTag__('userManagement.lastModifiedDate')</span></dt>
+        <dd><span>{{ userRef.lastModifiedDate | date: 'dd/MM/yy HH:mm' }}</span></dd>
 
-        <dt><span <%= jhiPrefix %>Translate="userManagement.profiles"><%- getWebappTranslation('userManagement.profiles') %></span></dt>
+        <dt><span>__jhiTranslateTag__('userManagement.profiles')</span></dt>
         <dd>
-          <ul class="list-unstyled">
-            <li *ngFor="let authority of user.authorities">
-              <span class="badge badge-info">{{ authority }}</span>
-            </li>
-          </ul>
+            @for (authority of userRef.authorities; track $index; let last = $last) {
+                <p-tag severity="info" [value]="authority"></p-tag>{{ last ? '' : ' ' }}
+            }
         </dd>
-      </dl>
+    </dl>
 
-      <button pButton type="submit" routerLink="../../" icon="pi pi-arrow-left" class="p-button-secondary" [label]="'entity.action.cancel' | translate"></button>
+    <div class="detail-buttons">
+        <a pButton type="button" (click)="previousState()" class="p-button-secondary" icon="pi pi-arrow-left" data-cy="entityDetailsBackButton">__jhiTranslateTag__('entity.action.back')</a>
     </div>
-  </div>
 </div>
+}

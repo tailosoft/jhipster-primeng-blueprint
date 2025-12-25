@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,6 +16,9 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
+<%_ if (clientTestFrameworkVitest) { _%>
+import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
+<%_ } _%>
 import { TestBed } from '@angular/core/testing';
 
 import { ApplicationConfigService } from './application-config.service';
@@ -24,7 +27,6 @@ describe('ApplicationConfigService', () => {
   let service: ApplicationConfigService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
     service = TestBed.inject(ApplicationConfigService);
   });
 

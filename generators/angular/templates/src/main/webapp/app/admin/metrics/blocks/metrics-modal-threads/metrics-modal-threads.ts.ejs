@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,20 +16,23 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+<%_ if (enableTranslation) { _%>
+import { TranslateDirective } from 'app/shared/language';
+import { TranslateModule } from '@ngx-translate/core';
+<%_ } _%>
 
-import SharedModule from 'app/shared/shared.module';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { Thread, ThreadState } from 'app/admin/metrics/metrics.model';
 
 @Component({
-  standalone: true,
   selector: '<%= jhiPrefixDashed %>-thread-modal',
-  templateUrl: './metrics-modal-threads.component.html',
+  templateUrl: './metrics-modal-threads.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SharedModule],
+  imports: [FontAwesomeModule<% if (enableTranslation) { %>, TranslateDirective, TranslateModule<% } %>],
 })
-export class MetricsModalThreadsComponent implements OnInit {
+export class MetricsModalThreads implements OnInit {
   ThreadState = ThreadState;
   threadStateFilter?: ThreadState;
   threads?: Thread[];
@@ -39,20 +42,22 @@ export class MetricsModalThreadsComponent implements OnInit {
   threadDumpTimedWaiting = 0;
   threadDumpWaiting = 0;
 
-  constructor(private activeModal: NgbActiveModal) {}
+  private readonly activeModal = inject(NgbActiveModal);
 
   ngOnInit(): void {
-    this.threads?.forEach(thread => {
-      if (thread.threadState === ThreadState.Runnable) {
-        this.threadDumpRunnable += 1;
-      } else if (thread.threadState === ThreadState.Waiting) {
-        this.threadDumpWaiting += 1;
-      } else if (thread.threadState === ThreadState.TimedWaiting) {
-        this.threadDumpTimedWaiting += 1;
-      } else if (thread.threadState === ThreadState.Blocked) {
-        this.threadDumpBlocked += 1;
+    if (this.threads) {
+      for (const thread of this.threads) {
+        if (thread.threadState === ThreadState.Runnable) {
+          this.threadDumpRunnable += 1;
+        } else if (thread.threadState === ThreadState.Waiting) {
+          this.threadDumpWaiting += 1;
+        } else if (thread.threadState === ThreadState.TimedWaiting) {
+          this.threadDumpTimedWaiting += 1;
+        } else if (thread.threadState === ThreadState.Blocked) {
+          this.threadDumpBlocked += 1;
+        }
       }
-    });
+    }
 
     this.threadDumpAll = this.threadDumpRunnable + this.threadDumpWaiting + this.threadDumpTimedWaiting + this.threadDumpBlocked;
   }

@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,7 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
@@ -25,13 +25,14 @@ import { LoggersResponse, Level } from './log.model';
 
 @Injectable({ providedIn: 'root' })
 export class LogsService {
-  constructor(private http: HttpClient, private applicationConfigService: ApplicationConfigService) {}
+    protected readonly http = inject(HttpClient);
+    protected readonly applicationConfigService = inject(ApplicationConfigService);
 
-  changeLevel(name: string, configuredLevel: Level<%= applicationTypeGateway && serviceDiscoveryAny ? ', service?: string' : '' %>): Observable<{}> {
-    return this.http.post(this.applicationConfigService.getEndpointFor(`management/loggers/${name}`<%= applicationTypeGateway && serviceDiscoveryAny ? ', service' : '' %>), { configuredLevel });
-  }
+    changeLevel(name: string, configuredLevel: Level<%= applicationTypeGateway && gatewayServicesApiAvailable ? ', service?: string' : '' %>): Observable<{}> {
+        return this.http.post(this.applicationConfigService.getEndpointFor(`management/loggers/${name}`<%= applicationTypeGateway && gatewayServicesApiAvailable ? ', service' : '' %>), { configuredLevel });
+    }
 
-  findAll(<%= applicationTypeGateway && serviceDiscoveryAny ? 'service?: string' : '' %>): Observable<LoggersResponse> {
-    return this.http.get<LoggersResponse>(this.applicationConfigService.getEndpointFor('management/loggers'<%= applicationTypeGateway && serviceDiscoveryAny ? ', service' : '' %>));
-  }
+    findAll(<%= applicationTypeGateway && gatewayServicesApiAvailable ? 'service?: string' : '' %>): Observable<LoggersResponse> {
+        return this.http.get<LoggersResponse>(this.applicationConfigService.getEndpointFor('management/loggers'<%= applicationTypeGateway && gatewayServicesApiAvailable ? ', service' : '' %>));
+    }
 }

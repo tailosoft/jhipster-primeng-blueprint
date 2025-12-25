@@ -1,0 +1,97 @@
+<%#
+ Copyright 2013-2025 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+import { Routes } from '@angular/router';
+
+import { UserRouteAccessService } from 'app/core/auth/user-route-access.service';
+<%_ if (!fineGrainedPermissions && (entityAngularReadAuthorities || entityAngularAuthorities)) { _%>
+import { Authority } from 'app/config/authority.constants';
+<%_ } _%>
+import <%= entityAngularName %>Resolve from './route/<%= entityFileName %>-routing-resolve.service';
+
+const <%= entityInstance %>Route: Routes = [
+  {
+    path: '',
+    loadComponent: () => import('./list/<%= entityFileName %>').then(m => m.<%= entityAngularName %>),
+    data: {
+<%_ if (fineGrainedPermissions) { _%>
+      authorities: ['<%= entityStateName %>.read'],
+<%_ } else if (entityAngularReadAuthorities) { _%>
+      authorities: [<%- entityAngularReadAuthorities %>],
+<%_ } _%>
+    },
+    canActivate: [UserRouteAccessService],
+  },
+  {
+        path: '<% if (primaryKey.fields.length === 1) { %>:<%= primaryKey.name %>/<% } %>view',
+    loadComponent: () => import('./detail/<%= entityFileName %>-detail').then(m => m.<%= entityAngularName %>Detail),
+    resolve: {
+      <%= entityInstance %>: <%= entityAngularName %>Resolve
+    },
+<%_ if (fineGrainedPermissions) { _%>
+    data: {
+      authorities: ['<%= entityStateName %>.read'],
+    },
+<%_ } else if (entityAngularReadAuthorities) { _%>
+    data: {
+      authorities: [<%- entityAngularReadAuthorities %>],
+    },
+<%_ } _%>
+    canActivate: [UserRouteAccessService]
+  },
+<%_ if (!readOnly) { _%>
+  {
+    path: 'new',
+    loadComponent: () => import('./update/<%= entityFileName %>-update').then(m => m.<%= entityAngularName %>Update),
+    resolve: {
+      <%= entityInstance %>: <%= entityAngularName %>Resolve
+    },
+<%_ if (fineGrainedPermissions) { _%>
+    data: {
+      authorities: ['<%= entityStateName %>.create'],
+    },
+<%_ } else if (entityAngularAuthorities) { _%>
+    data: {
+      authorities: [<%- entityAngularAuthorities %>],
+    },
+<%_ } _%>
+    canActivate: [UserRouteAccessService]
+  },
+<%_ } _%>
+<%_ if (!readOnly && updatableEntity) { _%>
+  {
+    path: '<% if (primaryKey.fields.length === 1) { %>:<%= primaryKey.name %>/<% } %>edit',
+    loadComponent: () => import('./update/<%= entityFileName %>-update').then(m => m.<%= entityAngularName %>Update),
+    resolve: {
+      <%= entityInstance %>: <%= entityAngularName %>Resolve
+    },
+<%_ if (fineGrainedPermissions) { _%>
+    data: {
+      authorities: ['<%= entityStateName %>.update'],
+    },
+<%_ } else if (entityAngularAuthorities) { _%>
+    data: {
+      authorities: [<%- entityAngularAuthorities %>],
+    },
+<%_ } _%>
+    canActivate: [UserRouteAccessService]
+  },
+<%_ } _%>
+];
+
+export default <%= entityInstance %>Route;

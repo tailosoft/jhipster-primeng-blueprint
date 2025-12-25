@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -17,43 +17,40 @@
  limitations under the License.
 -%>
 <div>
-  <h2 id="session-page-heading" <%= jhiPrefix %>Translate="sessions.title" [translateValues]="{ username: account.login }" *ngIf="account"><%- getWebappTranslation('sessions.title', { username: '{{ account.login }}' }) %></h2>
+@if (account) {
+    <h2 id="session-page-heading">__jhiTranslateTag__('sessions.title', { "username": "account.login" })</h2>
+}
 
-  <div class="alert alert-success" *ngIf="success" <%= jhiPrefix %>Translate="sessions.messages.success">
-    <%- getWebappTranslation('sessions.messages.success') %>
-  </div>
+@if (success) {
+    <p-message severity="success">__jhiTranslateTag__('sessions.messages.success')</p-message>
+}
 
-  <div class="alert alert-danger" *ngIf="error" <%= jhiPrefix %>Translate="sessions.messages.error">
-     <%- getWebappTranslation('sessions.messages.error') %>
-  </div>
+@if (error) {
+    <p-message severity="error">__jhiTranslateTag__('sessions.messages.error')</p-message>
+}
 
-  <div class="table-responsive">
-    <table class="table table-striped" aria-describedby="session-page-heading">
-      <thead>
-        <tr>
-          <th scope="col" <%= jhiPrefix %>Translate="sessions.table.ipaddress"><%- getWebappTranslation('sessions.table.ipaddress') %></th>
-          <th scope="col" <%= jhiPrefix %>Translate="sessions.table.useragent"><%- getWebappTranslation('sessions.table.useragent') %></th>
-          <th scope="col" <%= jhiPrefix %>Translate="sessions.table.date"><%- getWebappTranslation('sessions.table.date') %></th>
-          <th scope="col"></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let session of sessions">
-          <td>{{ session.ipAddress }}</td>
-          <td>{{ session.userAgent }}</td>
-          <td>{{ session.tokenDate | date:'longDate' }}</td>
-          <td>
-            <button
-              type="submit"
-              class="btn btn-primary"
-              (click)="invalidate(session.series)"
-              <%= jhiPrefix %>Translate="sessions.table.button"
-            >
-              <%- getWebappTranslation('sessions.table.button') %>
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    <p-table [value]="sessions" [tableStyle]="{'min-width': '50rem'}">
+        <ng-template #header>
+            <tr>
+                <th scope="col">__jhiTranslateTag__('sessions.table.ipaddress')</th>
+                <th scope="col">__jhiTranslateTag__('sessions.table.useragent')</th>
+                <th scope="col">__jhiTranslateTag__('sessions.table.date')</th>
+                <th scope="col"></th>
+            </tr>
+        </ng-template>
+        <ng-template #body let-session>
+            <tr>
+                <td>{{ session.ipAddress }}</td>
+                <td>{{ session.userAgent }}</td>
+                <td>{{ session.tokenDate | date:'longDate' }}</td>
+                <td>
+                    <button
+                        pButton
+                        type="submit"
+                        (click)="invalidate(session.series)"
+                    >__jhiTranslateTag__('sessions.table.button')</button>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
 </div>

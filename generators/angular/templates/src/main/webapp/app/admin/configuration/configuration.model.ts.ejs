@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -17,42 +17,36 @@
  limitations under the License.
 -%>
 export interface ConfigProps {
-  contexts: Contexts;
+    contexts: Contexts;
 }
 
-export interface Contexts {
-  [key: string]: Context;
-}
+export type Contexts = Record<string, Context>;
 
 export interface Context {
-  beans: Beans;
-  parentId?: any;
+    beans: Beans;
+    parentId?: any;
 }
 
-export interface Beans {
-  [key: string]: Bean;
-}
+export type Beans = Record<string, Bean>;
 
 export interface Bean {
-  prefix: string;
-  properties: any;
+    prefix: string;
+    properties: any;
 }
 
 export interface Env {
-  activeProfiles?: string[];
-  propertySources: PropertySource[];
+    activeProfiles?: string[];
+    propertySources: PropertySource[];
 }
 
 export interface PropertySource {
-  name: string;
-  properties: Properties;
+    name: string;
+    properties: Properties;
 }
 
-export interface Properties {
-  [key: string]: Property;
-}
+export type Properties = Record<string, Property>;
 
 export interface Property {
-  value: string;
-  origin?: string;
+    value: string;
+    origin?: string;
 }

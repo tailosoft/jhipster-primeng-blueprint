@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,42 +16,48 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { Subscription } from 'rxjs';
 
 import { TrackerService } from 'app/core/tracker/tracker.service';
 import { TrackerActivity } from 'app/core/tracker/tracker-activity.model';
-import SharedModule from 'app/shared/shared.module';
+<%_ if (enableTranslation) { _%>
+import { TranslateDirective } from 'app/shared/language';
+import { TranslateModule } from '@ngx-translate/core';
+<%_ } _%>
 
 @Component({
   selector: '<%= jhiPrefixDashed %>-tracker',
-  standalone: true,
-  imports: [SharedModule],
-  templateUrl: './tracker.component.html',
+  imports: [DatePipe<%_ if (enableTranslation) { _%>
+, TranslateDirective, TranslateModule<%_ } _%>],
+  templateUrl: './tracker.html',
 })
-export default class TrackerComponent implements OnInit, OnDestroy {
-  activities: TrackerActivity[] = [];
+export default class Tracker implements OnInit, OnDestroy {
+  activities = signal<TrackerActivity[]>([]);
   subscription?: Subscription;
 
-  constructor(private trackerService: TrackerService) {}
+  private readonly trackerService = inject(TrackerService);
 
   showActivity(activity: TrackerActivity): void {
     let existingActivity = false;
 
-    for (let index = 0; index < this.activities.length; index++) {
-      if (this.activities[index].sessionId === activity.sessionId) {
-        existingActivity = true;
+    this.activities.update(activities => {
+      activities = [...activities];
+      const sessionIndex = activities.findIndex(a => a.sessionId === activity.sessionId);
+      if (sessionIndex > -1) {
+        // Update or remove existing session activity
         if (activity.page === 'logout') {
-          this.activities.splice(index, 1);
+          activities.splice(sessionIndex, 1);
         } else {
-          this.activities[index] = activity;
+          activities[sessionIndex] = activity;
         }
+      } else if (activity.page !== 'logout') {
+        activities.push(activity);
       }
-    }
 
-    if (!existingActivity && activity.page !== 'logout') {
-      this.activities.push(activity);
-    }
+      return activities;
+    });
   }
 
   ngOnInit(): void {
@@ -60,6 +66,7 @@ export default class TrackerComponent implements OnInit, OnDestroy {
         this.showActivity(activity);
       },
     });
+    this.trackerService.sendActivity();
   }
 
   ngOnDestroy(): void {

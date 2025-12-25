@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -33,7 +33,7 @@ import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { lighthouse, pa11y, prepareAudit } from 'cypress-audit';
 <%_ } _%>
 
-export default async (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
+export default <% if (cypressCoverage) { %>async <% } %>(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
   on('before:browser:launch', (browser, launchOptions) => {
 <%_ if (cypressAudit) { _%>
     prepareAudit(launchOptions);
@@ -60,14 +60,35 @@ export default async (on: Cypress.PluginEvents, config: Cypress.PluginConfigOpti
   on('task', {
     lighthouse: lighthouse(async (lighthouseReport) => {
       const { default: ReportGenerator } = await import('lighthouse/report/generator/report-generator');
-      !existsSync('<%= cypressTemporaryDir %>') && mkdirSync('<%= cypressTemporaryDir %>', { recursive: true });
+      if (!existsSync('<%= cypressTemporaryDir %>')) {
+        mkdirSync('<%= cypressTemporaryDir %>', { recursive: true });
+      }
       writeFileSync('<%= cypressTemporaryDir %>lhreport.html', ReportGenerator.generateReport(lighthouseReport.lhr, 'html'));
     }),
     pa11y: pa11y(),
   });
 <%_ } _%>
 <%_ if (cypressCoverage) { _%>
+  <%_ if (cypressCoverageWebpack) { _%>
   (await import('@cypress/code-coverage/task')).default(on, config);
+  <%_ } else { _%>
+  if (config.env.CYPRESS_COVERAGE) {
+    (await import('cypress-monocart-coverage')).default(on, config, {
+      name: 'Cypress Coverage Report',
+      entryFilter: {
+        '**/node_modules/**': false,
+        '**/swagger-ui/**': false,
+        '**/polyfills.js': false,
+        '**/*.js': true,
+      },
+      sourceFilter: {
+        '**/<%- clientSrcDir %>**': true,
+      },
+      outputDir: './<%- temporaryDir %>/cypress-coverage-reports',
+      reports: ['v8', 'console-details'],
+    });
+  }
+  <%_ } _%>
 <%_ } _%>
   return config;
 }

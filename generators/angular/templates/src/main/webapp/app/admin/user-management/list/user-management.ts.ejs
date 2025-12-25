@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,91 +16,84 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { HttpResponse, HttpHeaders, HttpErrorResponse} from '@angular/common/http';
-import { Subscription } from 'rxjs';
-import { switchMap, tap, filter } from 'rxjs/operators';
-import { ActivatedRoute, Router } from '@angular/router';
-import SharedModule from 'app/shared/shared.module';
+import { Component, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { HttpErrorResponse, <%_ if (!databaseTypeCassandra) { _%>HttpHeaders, <% } %>HttpResponse } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { filter, switchMap, tap } from 'rxjs/operators';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { TableLazyLoadEvent } from 'primeng/table';
+import { Table, TableLazyLoadEvent } from 'primeng/table';
+import { DatePipe } from '@angular/common';
+
+import { PRIMENG_MODULES } from 'app/shared/primeng-common.module';
+<%_ if (enableTranslation) { _%>
+import { TranslateDirective } from 'app/shared/language';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+<%_ } _%>
+<%_ if (!databaseTypeCassandra) { _%>
 import { ITEMS_PER_PAGE } from 'app/config/pagination.constants';
-import {
-    lazyLoadEventToServerQueryParams,
-    lazyLoadEventToRouterQueryParams,
-    fillTableFromQueryParams
-} from 'app/core/request/request-util';
+<%_ } _%>
+import { lazyLoadEventToServerQueryParams, lazyLoadEventToRouterQueryParams, fillTableFromQueryParams } from 'app/core/request/request-util';
 import { AccountService } from 'app/core/auth/account.service';
-import { Account } from 'app/core/auth/account.model';
 import { UserManagementService } from '../service/user-management.service';
-import { IUser } from '../user-management.model';
-import { Table } from 'primeng/table';
-import { TranslateService } from '@ngx-translate/core';
+import { User } from '../user-management.model';
 
 @Component({
-  standalone: true,
-  selector: '<%= jhiPrefixDashed %>-user-mgmt',
-  templateUrl: './user-management.component.html',
-  imports: [
-    RouterModule,
-    SharedModule,
-  ],
+    selector: '<%= jhiPrefixDashed %>-user-mgmt',
+    templateUrl: './user-management.html',
+    imports: [
+        RouterModule,
+        ...PRIMENG_MODULES,
+        FormsModule,
+<%_ if (enableTranslation) { _%>
+        TranslateDirective,
+        TranslateModule,
+<%_ } _%>
+        DatePipe,
+    ],
 })
-export default class UserManagementComponent implements OnInit {
-  currentAccount: Account | null = null;
-  users: IUser[] | null = null;
-  eventSubscriber?: Subscription;
+export default class UserManagement implements OnInit {
+    currentAccount = inject(AccountService).trackCurrentAccount();
+    users = signal<User[]>([]);
+    isLoading = signal(false);
+<%_ if (!databaseTypeCassandra) { _%>
+    totalItems = signal(0);
+    itemsPerPage = ITEMS_PER_PAGE;
+<%_ } _%>
 
-  totalItems?: number;
-  itemsPerPage!: number;
-  loading!: boolean;
+    @ViewChild('userTable', { static: true })
+    userTable!: Table;
 
-  @ViewChild('userTable', { static: true })
-  userTable!: Table;
+    protected readonly filtersDetails: Record<string, { type: string }> = {};
 
-  private filtersDetails: { [_: string]: { type: string } } = {};
+    protected readonly userService = inject(UserManagementService);
+    protected readonly messageService = inject(MessageService);
+    protected readonly activatedRoute = inject(ActivatedRoute);
+    protected readonly router = inject(Router);
+    protected readonly confirmationService = inject(ConfirmationService);
+<%_ if (enableTranslation) { _%>
+    protected readonly translateService = inject(TranslateService);
+<%_ } _%>
 
-  constructor(
-    protected userService: UserManagementService,
-    protected messageService: MessageService,
-    protected accountService: AccountService,
-    protected activatedRoute: ActivatedRoute,
-    protected router: Router,
-    protected confirmationService: ConfirmationService,
-    protected translateService: TranslateService
-    ) {
-        this.itemsPerPage = ITEMS_PER_PAGE;
-        this.loading = true;
+    trackId = (_index: number, item: User): string => item.login!;
+
+    ngOnInit(): void {
+        this.activatedRoute.queryParams.pipe(
+            tap(queryParams => fillTableFromQueryParams(this.userTable, queryParams, this.filtersDetails)),
+            tap(() => this.isLoading.set(true)),
+            switchMap(() => this.userService.query(lazyLoadEventToServerQueryParams(this.userTable.createLazyLoadMetadata()))),
+            filter((res: HttpResponse<User[]>) => res.ok)
+        ).subscribe({
+            next: (res: HttpResponse<User[]>) => {
+                this.paginateUsers(res.body!<% if (!databaseTypeCassandra) { %>, res.headers<% } %>);
+                this.isLoading.set(false);
+            },
+            error: (err: HttpErrorResponse) => {
+                this.onError(err.message);
+                this.isLoading.set(false);
+            }
+        });
     }
-
-  ngOnInit(): void {
-        this.accountService.identity().subscribe((account: Account | null) => {
-            this.currentAccount = account;
-    });
-        this.activatedRoute.queryParams
-            .pipe(
-                tap(queryParams => fillTableFromQueryParams(this.userTable, queryParams, this.filtersDetails)),
-                tap(() => (this.loading = true)),
-                switchMap(() =>
-                    this.userService.query(
-                        lazyLoadEventToServerQueryParams(this.userTable.createLazyLoadMetadata())
-                    )
-                ),
-            filter((res: HttpResponse<IUser[]>) => res.ok)
-            )
-      .subscribe(
-                (res: HttpResponse<IUser[]>) => {
-                    this.paginateUsers(res.body!, res.headers);
-                    this.loading = false;
-        },
-                (res: HttpErrorResponse) => {
-                    this.onError(res.message);
-                    this.loading = false;
-                }
-      );
-  }
-
 
     onLazyLoadEvent(event: TableLazyLoadEvent): void {
         const queryParams = lazyLoadEventToRouterQueryParams(event, this.filtersDetails);
@@ -113,28 +106,37 @@ export default class UserManagementComponent implements OnInit {
             message: this.translateService.instant('userManagement.delete.question', { login }),
             accept: () => {
                 this.userService.delete(login).subscribe(() => {
-                    this.router.navigate(['/user'], {queryParams: {r: Date.now()}, queryParamsHandling: 'merge'});
-
+                    this.router.navigate(['/admin/user-management'], { queryParams: { r: Date.now() }, queryParamsHandling: 'merge' });
                 });
             }
         });
     }
 
-    trackId(index: number, item: IUser): string {
-        return item.login!;
+    setActive(user: User, isActivated: boolean): void {
+        this.userService.update({ ...user, activated: isActivated }).subscribe(() => this.loadAll());
     }
 
-    setActive(user: IUser, isActivated: boolean): void {
-        user.activated = isActivated;
-        this.userService.update(user).subscribe();
-  }
+    loadAll(): void {
+        this.isLoading.set(true);
+        this.userService
+            .query(lazyLoadEventToServerQueryParams(this.userTable.createLazyLoadMetadata()))
+            .subscribe({
+                next: (res: HttpResponse<User[]>) => {
+                    this.isLoading.set(false);
+                    this.paginateUsers(res.body!<% if (!databaseTypeCassandra) { %>, res.headers<% } %>);
+                },
+                error: () => this.isLoading.set(false),
+            });
+    }
 
-    protected paginateUsers(data: IUser[], headers: HttpHeaders): void {
-    this.totalItems = Number(headers.get('X-Total-Count'));
-        this.users = data;
+    protected paginateUsers(users: User[]<% if (!databaseTypeCassandra) { %>, headers: HttpHeaders<% } %>): void {
+<%_ if (!databaseTypeCassandra) { _%>
+        this.totalItems.set(Number(headers.get('X-Total-Count')));
+<%_ } _%>
+        this.users.set(users);
     }
 
     protected onError(errorMessage: string): void {
         this.messageService.add({ severity: 'error', summary: errorMessage });
-  }
+    }
 }

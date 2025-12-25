@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,9 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Directive, Input, TemplateRef, ViewContainerRef, OnDestroy } from '@angular/core';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Directive, inject, input, TemplateRef, ViewContainerRef, effect, computed } from '@angular/core';
 
 import { AccountService } from 'app/core/auth/account.service';
 
@@ -34,39 +32,25 @@ import { AccountService } from 'app/core/auth/account.service';
  * ```
  */
 @Directive({
-  standalone: true,
   selector: '[<%= jhiPrefix %>HasAnyAuthority]',
 })
-export default class HasAnyAuthorityDirective implements OnDestroy {
-  private authorities!: string | string[];
+export class HasAnyAuthorityDirective {
+  authorities = input<string | string[]>([], { alias: '<%= jhiPrefix %>HasAnyAuthority' });
 
-  private readonly destroy$ = new Subject<void>();
+  private readonly templateRef = inject(TemplateRef<any>);
+  private readonly viewContainerRef = inject(ViewContainerRef);
 
-  constructor(private accountService: AccountService, private templateRef: TemplateRef<any>, private viewContainerRef: ViewContainerRef) {}
+  constructor() {
+    const accountService = inject(AccountService);
+    const currentAccount = accountService.trackCurrentAccount();
+    const hasPermission = computed(() => currentAccount()?.authorities && accountService.hasAnyAuthority(this.authorities()));
 
-  @Input()
-  set <%= jhiPrefix %>HasAnyAuthority(value: string | string[]) {
-    this.authorities = value;
-    this.updateView();
-    // Get notified each time authentication state changes.
-    this.accountService
-      .getAuthenticationState()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.updateView();
-      });
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  private updateView(): void {
-    const hasAnyAuthority = this.accountService.hasAnyAuthority(this.authorities);
-    this.viewContainerRef.clear();
-    if (hasAnyAuthority) {
-      this.viewContainerRef.createEmbeddedView(this.templateRef);
-    }
+    effect(() => {
+      if (hasPermission()) {
+        this.viewContainerRef.createEmbeddedView(this.templateRef);
+      } else {
+        this.viewContainerRef.clear();
+      }
+    });
   }
 }

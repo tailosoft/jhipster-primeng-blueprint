@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,83 +16,87 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 <%_ if (enableTranslation) { _%>
 import { TranslateService } from '@ngx-translate/core';
+import { TranslateDirective } from 'app/shared/language';
+import { TranslateModule } from '@ngx-translate/core';
 <%_ } _%>
 
-import SharedModule from 'app/shared/shared.module';
 import { AccountService } from 'app/core/auth/account.service';
 import { Account } from 'app/core/auth/account.model';
 <%_ if (enableTranslation) { _%>
 import { LANGUAGES } from 'app/config/language.constants';
 <%_ } _%>
+import { PRIMENG_MODULES } from 'app/shared/primeng-common.module';
 
 const initialAccount: Account = {} as Account;
 
 @Component({
-  selector: '<%= jhiPrefixDashed %>-settings',
-  standalone: true,
-  imports: [SharedModule, FormsModule, ReactiveFormsModule],
-  templateUrl: './settings.component.html',
+    selector: '<%= jhiPrefixDashed %>-settings',
+    imports: [<%_ if (enableTranslation) { _%>TranslateDirective, TranslateModule, <%_ } _%>ReactiveFormsModule, ...PRIMENG_MODULES],
+    templateUrl: './settings.html',
 })
-export default class SettingsComponent implements OnInit {
-  success = false;
+export default class Settings implements OnInit {
+    success = signal(false);
 <%_ if (enableTranslation) { _%>
-  languages = LANGUAGES;
+    languageOptions = LANGUAGES.map(lang => ({ label: lang, value: lang }));
 <%_ } _%>
 
-  settingsForm = new FormGroup({
-    firstName: new FormControl(initialAccount.firstName, {
-      nonNullable: true,
-      validators: [Validators.required, Validators.minLength(1), Validators.maxLength(50)],
-    }),
-    lastName: new FormControl(initialAccount.lastName, {
-      nonNullable: true,
-      validators: [Validators.required, Validators.minLength(1), Validators.maxLength(50)],
-    }),
-    email: new FormControl(initialAccount.email, {
-      nonNullable: true,
-      validators: [Validators.required, Validators.minLength(5), Validators.maxLength(254), Validators.email],
-    }),
-    langKey: new FormControl(initialAccount.langKey, { nonNullable: true }),
+    settingsForm = new FormGroup({
+        firstName: new FormControl(initialAccount.firstName, {
+            nonNullable: true,
+            validators: [Validators.required, Validators.minLength(1), Validators.maxLength(50)],
+        }),
+        lastName: new FormControl(initialAccount.lastName, {
+            nonNullable: true,
+            validators: [Validators.required, Validators.minLength(1), Validators.maxLength(50)],
+        }),
+        email: new FormControl(initialAccount.email, {
+            nonNullable: true,
+            validators: [Validators.required, Validators.minLength(5), Validators.maxLength(254), Validators.email],
+        }),
+        langKey: new FormControl(initialAccount.langKey, { nonNullable: true }),
 
-    activated: new FormControl(initialAccount.activated, { nonNullable: true }),
-    authorities: new FormControl(initialAccount.authorities, { nonNullable: true }),
-    imageUrl: new FormControl(initialAccount.imageUrl, { nonNullable: true }),
-    login: new FormControl(initialAccount.login, { nonNullable: true }),
-  });
-
-  constructor(
-    private accountService: AccountService,
-<%_ if (enableTranslation) { _%>
-    private translateService: TranslateService,
-<%_ } _%>
-  ) {}
-
-  ngOnInit(): void {
-    this.accountService.identity().subscribe(account => {
-      if (account) {
-        this.settingsForm.patchValue(account);
-      }
+        activated: new FormControl(initialAccount.activated, { nonNullable: true }),
+        authorities: new FormControl(initialAccount.authorities, { nonNullable: true }),
+        imageUrl: new FormControl(initialAccount.imageUrl, { nonNullable: true }),
+        login: new FormControl(initialAccount.login, { nonNullable: true }),
     });
-  }
 
-  save(): void {
-    this.success = false;
+    protected readonly accountService = inject(AccountService);
+<%_ if (enableTranslation) { _%>
+    protected readonly translateService = inject(TranslateService);
+<%_ } _%>
 
-    const account = this.settingsForm.getRawValue();
-    this.accountService.save(account).subscribe(() => {
-      this.success = true;
+    ngOnInit(): void {
+        this.accountService.identity().subscribe(account => {
+            if (account) {
+                this.settingsForm.patchValue(account);
+            }
+        });
+    }
 
-      this.accountService.authenticate(account);
+    save(): void {
+        this.success.set(false);
+
+        const account = this.settingsForm.getRawValue();
+        this.accountService.save(account).subscribe({
+            next: () => {
+                this.success.set(true);
+
+                this.accountService.authenticate(account);
 
 <%_ if (enableTranslation) { _%>
-      if (account.langKey !== this.translateService.currentLang) {
-        this.translateService.use(account.langKey);
-      }
+                if (account.langKey !== this.translateService.getCurrentLang()) {
+                    this.translateService.use(account.langKey);
+                }
 <%_ } _%>
-    });
-  }
+            },
+            error() {
+                // Handled by interceptor.
+            },
+        });
+    }
 }

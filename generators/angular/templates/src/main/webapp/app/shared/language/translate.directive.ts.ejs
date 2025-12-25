@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,7 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Input, Directive, ElementRef, OnChanges, OnInit, OnDestroy } from '@angular/core';
+import { inject, input, Directive, ElementRef, OnChanges, OnInit, OnDestroy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -24,19 +24,19 @@ import { takeUntil } from 'rxjs/operators';
 import { translationNotFoundMessage } from 'app/config/translation.config';
 
 /**
- * A wrapper directive on top of the translate pipe as the inbuilt translate directive from ngx-translate is too verbose and buggy
+ * A wrapper directive on top of the translation pipe as the inbuilt translation directive from ngx-translate is too verbose and buggy
  */
 @Directive({
-  standalone: true,
   selector: '[<%= jhiPrefix %>Translate]',
 })
 export default class TranslateDirective implements OnChanges, OnInit, OnDestroy {
-  @Input() <%= jhiPrefix %>Translate!: string;
-  @Input() translateValues?: { [key: string]: unknown };
+  readonly <%= jhiPrefix %>Translate = input.required<string>();
+  readonly translateValues = input<Record<string, unknown>>();
 
   private readonly directiveDestroyed = new Subject();
 
-  constructor(private el: ElementRef, private translateService: TranslateService) {}
+  private readonly el = inject(ElementRef);
+  private readonly translateService = inject(TranslateService);
 
   ngOnInit(): void {
     this.translateService.onLangChange.pipe(takeUntil(this.directiveDestroyed)).subscribe(() => {
@@ -58,13 +58,13 @@ export default class TranslateDirective implements OnChanges, OnInit, OnDestroy 
 
   private getTranslation(): void {
     this.translateService
-      .get(this.<%= jhiPrefix %>Translate, this.translateValues)
+      .get(this.<%= jhiPrefix %>Translate(), this.translateValues())
       .pipe(takeUntil(this.directiveDestroyed))
       .subscribe({
         next: value => {
           this.el.nativeElement.innerHTML = value;
         },
-        error: () => `${translationNotFoundMessage}[${this.<%= jhiPrefix %>Translate}]`
+        error: () => `${translationNotFoundMessage}[${this.<%= jhiPrefix %>Translate()}]`
       });
   }
 }

@@ -1,0 +1,104 @@
+<%#
+ Copyright 2013-2025 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+<%_ if (clientTestFrameworkVitest) { _%>
+import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
+<%_ } _%>
+import { Component, DebugElement, Type } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+
+import { SortDirective } from './sort.directive';
+import { SortState, sortStateSignal } from './sort-state';
+
+@Component({
+  imports: [SortDirective],
+  template: `
+    <table>
+      <thead>
+        <tr <%= jhiPrefix %>Sort [(sortState)]="sortState" (sortChange)="transition($event)"></tr>
+      </thead>
+    </table>
+  `,
+})
+class TestSortDirective {
+  sortState = sortStateSignal({ predicate: 'ID' });
+  transition = <%= clientTestFramework %>.fn().mockImplementation((sortState: SortState) => {
+    this.sortState.set(sortState);
+  });
+}
+
+describe('Directive: SortDirective', () => {
+  let component: TestSortDirective;
+  let fixture: ComponentFixture<TestSortDirective>;
+  let tableRow: DebugElement;
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(TestSortDirective);
+    component = fixture.componentInstance;
+    tableRow = fixture.debugElement.query(By.directive(SortDirective));
+  });
+
+  it('should invoke sortChange function', () => {
+    // GIVEN
+    const sortDirective = tableRow.injector.get(SortDirective as Type<SortDirective>);
+
+    // WHEN
+    fixture.detectChanges();
+    sortDirective.sort('ID');
+
+    // THEN
+    expect(component.transition).toHaveBeenCalledTimes(1);
+    expect(component.transition).toHaveBeenCalledWith({ predicate: 'ID', order: 'asc' });
+  });
+
+  it('should change sort order to descending, neutral when same field is sorted again', () => {
+    // GIVEN
+    const sortDirective = tableRow.injector.get(SortDirective as Type<SortDirective>);
+
+    // WHEN
+    fixture.detectChanges();
+    sortDirective.sort('ID');
+    // sort again
+    sortDirective.sort('ID');
+    // sort again
+    sortDirective.sort('ID');
+
+    // THEN
+    expect(component.transition).toHaveBeenCalledTimes(3);
+    expect(component.transition).toHaveBeenNthCalledWith(1, { predicate: 'ID', order: 'asc' });
+    expect(component.transition).toHaveBeenNthCalledWith(2, { predicate: 'ID', order: 'desc' });
+    expect(component.transition).toHaveBeenNthCalledWith(3, { predicate: 'ID', order: 'asc' });
+  });
+
+  it('should change sort order to ascending when different field is sorted', () => {
+    // GIVEN
+    const sortDirective = tableRow.injector.get(SortDirective as Type<SortDirective>);
+
+    // WHEN
+    fixture.detectChanges();
+    sortDirective.sort('ID');
+    // sort again
+    sortDirective.sort('NAME');
+
+    // THEN
+    expect(component.transition).toHaveBeenCalledTimes(2);
+    expect(component.transition).toHaveBeenNthCalledWith(1, { predicate: 'ID', order: 'asc' });
+    expect(component.transition).toHaveBeenNthCalledWith(2, { predicate: 'NAME', order: 'asc' });
+  });
+});

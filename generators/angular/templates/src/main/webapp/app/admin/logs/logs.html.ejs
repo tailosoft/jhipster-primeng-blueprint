@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,92 +16,120 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-<div class="table-responsive" *ngIf="loggers">
-  <h2 id="logs-page-heading" <%= jhiPrefix %>Translate="logs.title" data-cy="logsPageHeading"><%- getWebappTranslation('logs.title') %></h2>
+@defer (when loggers() && !isLoading()) {
+    <div class="entity-list">
+        <h2 class="title" id="logs-page-heading" data-cy="logsPageHeading">__jhiTranslateTag__('logs.title')</h2>
 
-<%_ if (applicationTypeGateway && serviceDiscoveryAny) { _%>
-  <div class="float-end">
-    <select class="form-select" id="routesSelect" (change)="changeService($event)">
-      <option [ngValue]="null"></option>
-      <option *ngFor="let service of services" [value]="service">
-        {{ service }}
-      </option>
-    </select>
-  </div>
+<%_ if (applicationTypeGateway && gatewayServicesApiAvailable) { _%>
+        <div class="service-select">
+            <p-select
+                id="routesSelect"
+                [options]="serviceOptions"
+                [(ngModel)]="selectedService"
+                (onChange)="changeService($event)"
+                placeholder="Select service"
+            ></p-select>
+        </div>
 <%_ } _%>
 
-  <div class="float-end me-3" *ngIf="isLoading">
-    <div class="spinner-border"></div>
-  </div>
+        <p>__jhiTranslateTag__('logs.nbloggers', { "total": "loggers()?.length" })</p>
 
-  <p <%= jhiPrefix %>Translate="logs.nbloggers" [translateValues]="{ total: loggers.length }"><%- getWebappTranslation('logs.nbloggers', { total: '{{ loggers.length }}' }) %></p>
+        <div class="filter-section">
+            <span>__jhiTranslateTag__('logs.filter')</span>
+            <input pInputText type="text" [ngModel]="filter()" (ngModelChange)="filter.set($event)" />
+        </div>
 
-  <span <%= jhiPrefix %>Translate="logs.filter"><%- getWebappTranslation('logs.filter') %></span>
-  <input type="text" [(ngModel)]="filter" (ngModelChange)="filterAndSort()" class="form-control" />
+        <p-table
+            [value]="filteredLoggers() ?? []"
+            [tableStyle]="{ 'min-width': '50rem' }"
+            styleClass="p-datatable-sm p-datatable-striped"
+            aria-describedby="logs-page-heading"
+            sortMode="multiple"
+        >
+            <ng-template #header>
+                <tr>
+                    <th pSortableColumn="name" scope="col">
+                        <span>__jhiTranslateTag__('logs.table.name')</span>
+                        <p-sortIcon field="name"></p-sortIcon>
+                    </th>
+                    <th pSortableColumn="level" scope="col">
+                        <span>__jhiTranslateTag__('logs.table.level')</span>
+                        <p-sortIcon field="level"></p-sortIcon>
+                    </th>
+                </tr>
+            </ng-template>
+            <ng-template #body let-logger>
+                <tr>
+                    <td>
+                        <small>{{ logger.name | slice: 0 : 140 }}</small>
+                    </td>
+                    <td>
+                        <button
+                          pButton
+                          type="button"
+                          (click)="changeLevel(logger.name, 'TRACE')"
+                          [class]="logger.level === 'TRACE' ? 'p-button-primary' : 'p-button-secondary'"
+                          class="p-button-sm"
+                        >
+                          TRACE
+                        </button>
 
-  <table class="table table-sm table-striped table-bordered" aria-describedby="logs-page-heading">
-    <thead>
-      <tr <%= jhiPrefix %>Sort>
-        <th <%= jhiPrefix %>SortBy="name" scope="col"><span <%= jhiPrefix %>Translate="logs.table.name"><%- getWebappTranslation('logs.table.name') %></span> <fa-icon icon="sort"></fa-icon></th>
-        <th <%= jhiPrefix %>SortBy="level" scope="col"><span <%= jhiPrefix %>Translate="logs.table.level"><%- getWebappTranslation('logs.table.level') %></span> <fa-icon icon="sort"></fa-icon></th>
-      </tr>
-    </thead>
+                        <button
+                          pButton
+                          type="button"
+                          (click)="changeLevel(logger.name, 'DEBUG')"
+                          [class]="logger.level === 'DEBUG' ? 'p-button-success' : 'p-button-secondary'"
+                          class="p-button-sm"
+                        >
+                          DEBUG
+                        </button>
 
-    <tbody>
-      <tr *ngFor="let logger of filteredAndOrderedLoggers">
-        <td>
-          <small>{{ logger.name | slice: 0:140 }}</small>
-        </td>
-        <td>
-          <button
-            (click)="changeLevel(logger.name, 'TRACE')"
-            [ngClass]="logger.level === 'TRACE' ? 'btn-primary' : 'btn-light'"
-            class="btn btn-sm"
-          >
-            TRACE
-          </button>
+                        <button
+                          pButton
+                          type="button"
+                          (click)="changeLevel(logger.name, 'INFO')"
+                          [class]="logger.level === 'INFO' ? 'p-button-info' : 'p-button-secondary'"
+                          class="p-button-sm"
+                        >
+                          INFO
+                        </button>
 
-          <button
-            (click)="changeLevel(logger.name, 'DEBUG')"
-            [ngClass]="logger.level === 'DEBUG' ? 'btn-success' : 'btn-light'"
-            class="btn btn-sm"
-          >
-            DEBUG
-          </button>
+                        <button
+                          pButton
+                          type="button"
+                          (click)="changeLevel(logger.name, 'WARN')"
+                          [class]="logger.level === 'WARN' ? 'p-button-warn' : 'p-button-secondary'"
+                          class="p-button-sm"
+                        >
+                          WARN
+                        </button>
 
-          <button
-            (click)="changeLevel(logger.name, 'INFO')"
-            [ngClass]="logger.level === 'INFO' ? 'btn-info' : 'btn-light'"
-            class="btn btn-sm"
-          >
-            INFO
-          </button>
+                        <button
+                          pButton
+                          type="button"
+                          (click)="changeLevel(logger.name, 'ERROR')"
+                          [class]="logger.level === 'ERROR' ? 'p-button-danger' : 'p-button-secondary'"
+                          class="p-button-sm"
+                        >
+                          ERROR
+                        </button>
 
-          <button
-            (click)="changeLevel(logger.name, 'WARN')"
-            [ngClass]="logger.level === 'WARN' ? 'btn-warning' : 'btn-light'"
-            class="btn btn-sm"
-          >
-            WARN
-          </button>
-
-          <button
-            (click)="changeLevel(logger.name, 'ERROR')"
-            [ngClass]="logger.level === 'ERROR' ? 'btn-danger' : 'btn-light'"
-            class="btn btn-sm"
-          >
-            ERROR
-          </button>
-
-          <button
-            (click)="changeLevel(logger.name, 'OFF')"
-            [ngClass]="logger.level === 'OFF' ? 'btn-secondary' : 'btn-light'"
-            class="btn btn-sm"
-          >
-            OFF
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+                        <button
+                          pButton
+                          type="button"
+                          (click)="changeLevel(logger.name, 'OFF')"
+                          [class]="logger.level === 'OFF' ? 'p-button-contrast' : 'p-button-secondary'"
+                          class="p-button-sm"
+                        >
+                          OFF
+                        </button>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+} @loading {
+    <div class="loading-container">
+        <p-progressSpinner></p-progressSpinner>
+    </div>
+}
