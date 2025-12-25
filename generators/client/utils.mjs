@@ -38,3 +38,7 @@ export const clientAppTestBlock = {
   path: CLIENT_TEMPLATES_APP_TEST_DIR,
   renameTo: testAppRenameTo,
 };
+
+export function prepareFineGrainedPermissions({ application }) {
+  application.fineGrainedPermissions = this.options.blueprints.includes('generator-jhipster-preauthorize');
+}

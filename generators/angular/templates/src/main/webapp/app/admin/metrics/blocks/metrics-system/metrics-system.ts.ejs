@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,28 +16,28 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { DecimalPipe, DatePipe } from '@angular/common';
 
-import SharedModule from 'app/shared/shared.module';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ProcessMetrics } from 'app/admin/metrics/metrics.model';
 
 @Component({
-  standalone: true,
   selector: '<%= jhiPrefixDashed %>-metrics-system',
-  templateUrl: './metrics-system.component.html',
+  templateUrl: './metrics-system.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SharedModule],
+  imports: [NgbModule, DecimalPipe, DatePipe],
 })
-export class MetricsSystemComponent {
+export class MetricsSystem {
   /**
-   * object containing thread related metrics
+   * Object containing thread related metrics
    */
-  @Input() systemMetrics?: ProcessMetrics;
+  systemMetrics = input<ProcessMetrics>();
 
   /**
-   * boolean field saying if the metrics are in the process of being updated
+   * Boolean field saying if the metrics are in the process of being updated
    */
-  @Input() updating?: boolean;
+  updating = input<boolean>();
 
   convertMillisecondsToDuration(ms: number): string {
     const times = {
@@ -55,7 +55,7 @@ export class MetricsSystemComponent {
         if (Math.floor(ms / value) > 1) {
           plural = 's';
         }
-        timeString += `${Math.floor(ms / value).toString()} ${key.toString()}${plural} `;
+        timeString += `${Math.floor(ms / value).toString()} ${key}${plural} `;
         ms = ms - value * Math.floor(ms / value);
       }
     }

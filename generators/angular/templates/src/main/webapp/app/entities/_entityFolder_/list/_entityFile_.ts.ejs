@@ -1,0 +1,367 @@
+<%#
+ Copyright 2013-2025 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+<%_
+const hasPaginationRelationship = relationships.some(r => r.ownerSide && r.clientFields.some(cf => cf.lastRelationship.otherEntity.pagination !== 'no'));
+const componentName = entityAngularName;
+_%>
+import { Component, inject, OnInit, signal, ViewChild<% if (hasPaginationRelationship) { %>, OnDestroy<% } %> } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { HttpErrorResponse, <%_ if (!paginationNo) { _%>HttpHeaders, <% } %>HttpResponse } from '@angular/common/http';
+<%_ if (paginationPagination || paginationInfiniteScroll) { _%>
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+<%_ } else if (searchEngineAny) { _%>
+import { ActivatedRoute, RouterModule } from '@angular/router';
+<%_ } else { _%>
+import { RouterModule } from '@angular/router';
+<%_ } _%>
+<%_ if (hasPaginationRelationship) { _%>
+import { LazySubscriber } from 'app/core/request/lazy-subscriber';
+import { MultiSelectLazyLoadEvent } from 'primeng/multiselect';
+<%_ } _%>
+import { Subscription<% if (hasPaginationRelationship) { %>, ReplaySubject<% } %> } from 'rxjs';
+import { filter<% if (!paginationNo) { %>, tap, switchMap<% } else { %>, map<% } %> } from 'rxjs/operators';
+import { FilterMetadata, MessageService } from 'primeng/api';
+
+import { PRIMENG_MODULES } from 'app/shared/primeng-common.module';
+<%_ if (enableTranslation) { _%>
+import { TranslateDirective } from 'app/shared/language';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+<%_ } _%>
+import { DurationPipe } from 'app/shared/date';
+import { I<%= entityAngularName %>, get<%= entityAngularName %>Identifier } from '../<%= entityFileName %>.model';
+<%_ if (jpaMetamodelFiltering) { _%>
+    <%_ const enumImports = generateEntityClientEnumImports(fields, clientFramework); _%>
+    <%_ enumImports.forEach((importedPath, importedType) => { _%>
+import { <%- importedType %> } from '<%- importedPath %>';
+    <%_ }); _%>
+<%_ } _%>
+import { <%= entityAngularName %>Service } from '../service/<%= entityFileName %>.service';
+<%_ if (!paginationNo) { %>
+import { ITEMS_PER_PAGE } from 'app/config/pagination.constants';
+<%_ } _%>
+<%_ if (searchEngineAny) { _%>
+import { FormsModule } from '@angular/forms';
+<%_ } _%>
+<%_ if (!paginationNo || (jpaMetamodelFiltering && relationships.some(r => r.ownerSide && r.otherEntity.pagination !== 'no'))) { _%>
+<% if (!paginationNo) {%>import { lazyLoadEventToServerQueryParams, lazyLoadEventToRouterQueryParams, fillTableFromQueryParams } from 'app/core/request/request-util';<% } %>
+<%_ } _%>
+<%_ if (!readOnly) { _%>
+import { ConfirmationService } from 'primeng/api';
+<%_ } _%>
+<%_ if (!paginationNo) { _%>
+import { TableLazyLoadEvent } from 'primeng/table';
+<%_ } _%>
+<%_ if (jpaMetamodelFiltering) { _%>
+    <%_ const alreadyImported = new Set([name]) _%>
+    <%_ for (const relationship of relationships) { _%>
+        <%_ if (relationship.ownerSide) { _%>
+            <%_ relationship.otherEntity.primaryKey.fields.forEach(field => { _%>
+                <%_ if (!alreadyImported.has(field.entity.name)) { _%>
+                    <%_ alreadyImported.add(field.entity.name); _%>
+import { I<%= field.entity.entityAngularName %> } from 'app/entities/<%= field.entity.entityFolderName %>/<%= field.entity.entityFileName %>.model';
+import { <%= field.entity.entityAngularName %>Service } from 'app/entities/<%= field.entity.entityFolderName %>/service/<%= field.entity.entityFileName %>.service';
+                <%_ } _%>
+            <%_ }) _%>
+        <%_ } _%>
+    <%_ } _%>
+<%_ } _%>
+import { Table } from 'primeng/table';
+<%_ if (anyFieldIsBlobDerived) { _%>
+import { DataUtils } from 'app/core/util/data-util.service';
+<%_ } _%>
+<%_ if (anyFieldIsDateDerived) { _%>
+import { DatePipe } from '@angular/common';
+<%_ } _%>
+import { HasAnyAuthorityDirective } from 'app/shared/auth/has-any-authority.directive';
+
+@Component({
+    selector: '<%= jhiPrefixDashed %>-<%= entityFileName %>',
+    templateUrl: './<%= entityFileName %>.html',
+    imports: [
+        RouterModule,
+<%_ if (searchEngineAny) { _%>
+        FormsModule,
+<%_ } _%>
+        ...PRIMENG_MODULES,
+        FormsModule,
+<%_ if (enableTranslation) { _%>
+        TranslateDirective,
+        TranslateModule,
+<%_ } _%>
+<%_ if (anyFieldIsDuration) { _%>
+        DurationPipe,
+<%_ } _%>
+<%_ if (anyFieldIsDateDerived) { _%>
+        DatePipe,
+<%_ } _%>
+        HasAnyAuthorityDirective,
+    ],
+})
+export class <%= componentName %> implements OnInit<% if (hasPaginationRelationship) { %>, OnDestroy<% } %> {
+    <%= entityInstancePlural %> = signal<I<%= entityAngularName %>[]>([]);
+    isLoading = signal(false);
+
+<%_ if (jpaMetamodelFiltering) {
+    for (const field of fields) {
+        if (field.fieldIsEnum) { _%>
+    <%= field.fieldName %>Options = Object.entries(<%= field.fieldType %>).map(([k]) => ({ label: k, value: k }));
+        <%_ } _%>
+    <%_ } _%>
+    <%_ for (const relationship of relationships) { _%>
+        <%_ if (relationship.ownerSide) { _%>
+            <%_ relationship.clientFields.forEach(cf => { _%>
+                <%_ if (cf.lastRelationship.otherEntity.pagination !== 'no') { _%>
+    <%= cf.name %>OptionsSubscriber?: LazySubscriber<I<%= cf.entity.name %>>;
+                <%_ } else { _%>
+    <%= cf.name %>Options: I<%= cf.entity.name %>[] | null = null;
+                <%_ } _%>
+                <%_ if ((relationship.relationshipManyToMany && paginationNo && !relationship.otherEntity.primaryKey.composite && relationship.otherEntity.entityClass !== 'User') ||
+                        relationship.relationshipType !== 'many-to-many') { _%>
+    <%= cf.name %>SelectedOptions: I<%= cf.entity.name %>[] | null = null;
+                <%_ } _%>
+            <%_ }) _%>
+        <%_ } _%>
+    <%_ } %>
+<%_ } _%>
+<%_ if (!paginationNo) { _%>
+    totalItems = signal(0);
+    itemsPerPage = signal(ITEMS_PER_PAGE);
+<%_ } _%>
+
+    @ViewChild('<%= entityInstance %>Table', { static: true })
+    <%= entityInstance %>Table!: Table;
+
+    protected filtersDetails: Record<string, { type: string }> = {
+<%_ for (const field of fields) {
+    if (field.fieldIsEnum) { _%>
+        <%= field.fieldName %>: { type: 'string' },
+    <%_ } else if (field.fieldType === 'String') { _%>
+        <%= field.fieldName %>: { type: 'string' },
+    <%_ } else if (['Instant', 'ZonedDateTime'].includes(field.fieldType)) { _%>
+        <%= field.fieldName %>: { type: 'dateTime' },
+    <%_ } else if (field.fieldType === 'LocalDate') { _%>
+        <%= field.fieldName %>: { type: 'date' },
+    <%_ } else if (field.fieldType === 'Boolean') { _%>
+        <%= field.fieldName %>: { type: 'boolean' },
+    <%_ } else if (['Integer', 'Long', 'Float', 'Double', 'BigDecimal', 'Duration'].includes(field.fieldType)) { _%>
+        <%= field.fieldName %>: { type: 'number' },
+    <%_ } _%>
+<%_ } _%>
+<%_ for (const relationship of relationships) { _%>
+    <%_ if (relationship.ownerSide) { _%>
+        <%_ relationship.clientFields.forEach(cf => { _%>
+        ['<%= relationship.relationshipFieldName + cf.id.fieldNameCapitalized %>']: { type: <% if (['Integer', 'Long', 'Float', 'Double', 'BigDecimal', 'Duration'].includes(cf.id.fieldType)) { %>'number'<% } else { %>'string'<% } %> },
+        <%_ }) _%>
+    <%_ } _%>
+<%_ } _%>
+    };
+<%_ if (hasPaginationRelationship) { _%>
+    protected onDestroySubject = new ReplaySubject(1);
+<%_ } _%>
+
+    protected readonly <%= entityInstance %>Service = inject(<%= entityAngularName %>Service);
+    protected readonly messageService = inject(MessageService);
+<%_ if (anyFieldIsBlobDerived) { _%>
+    protected readonly dataUtils = inject(DataUtils);
+<%_ } _%>
+<%_ if (!paginationNo) { _%>
+    protected readonly activatedRoute = inject(ActivatedRoute);
+    protected readonly router = inject(Router);
+<%_ } _%>
+<%_ if (!readOnly) { _%>
+    protected readonly confirmationService = inject(ConfirmationService);
+<%_ } _%>
+<%_ if (enableTranslation) { _%>
+    protected readonly translateService = inject(TranslateService);
+<%_ } _%>
+<%_ if (anyFieldIsDateDerived) { _%>
+    protected readonly datePipe = inject(DatePipe);
+<%_ } _%>
+<%_ if (jpaMetamodelFiltering) { _%>
+    <%_ const alreadyInConstructor = new Set([name]) _%>
+    <%_ for (const relationship of relationships) { _%>
+        <%_ if (relationship.ownerSide) { _%>
+            <%_ relationship.clientFields.forEach(cf => { _%>
+                <%_ if (!alreadyInConstructor.has(cf.entity.name)) { _%>
+                    <%_ alreadyInConstructor.add(cf.entity.name); _%>
+    protected readonly <%= this._.lowerFirst(cf.entity.name) %>Service = inject(<%= cf.entity.entityAngularName %>Service);
+                <%_ } _%>
+            <%_ }) _%>
+        <%_ } _%>
+    <%_ } _%>
+<%_ } _%>
+
+<%_ if (primaryKey) { _%>
+    track<%= primaryKey.nameCapitalized %> = (_index: number, item: I<%= entityAngularName %>): <%= primaryKey.tsType %> => get<%= entityAngularName %>Identifier(item);
+<%_ } _%>
+
+    ngOnInit(): void {
+<%_ if (paginationNo) { %>
+        this.loadAll();
+<%_ } _%>
+<%_ if (jpaMetamodelFiltering) { _%>
+    <%_ for (const relationship of relationships) { _%>
+        <%_ if (relationship.ownerSide) { _%>
+            <%_ relationship.clientFields.forEach((cf) => { _%>
+                <%_ if (cf.lastRelationship.otherEntity.pagination !== 'no') { _%>
+        this.<%= cf.name %>OptionsSubscriber = new LazySubscriber(req => this.<%= this._.lowerFirst(cf.entity.name) %>Service.query(req), this.onDestroySubject);
+                <%_ } else { _%>
+        this.loadAll<%= cf.nameCapitalizedPlural %>();
+                <%_ } _%>
+            <%_ }) _%>
+        <%_ } _%>
+    <%_ } _%>
+<%_ } _%>
+
+<%_ if (!paginationNo) { _%>
+        this.activatedRoute.queryParams.pipe(
+            tap(queryParams => fillTableFromQueryParams(this.<%= entityInstance %>Table, queryParams, this.filtersDetails)),
+            tap(() => this.isLoading.set(true)),
+        <%_ if (searchEngineElasticsearch) { _%>
+            switchMap(() => {
+                if (this.currentSearch()) {
+                    return this.<%= entityInstance %>Service.search({ query: this.currentSearch() });
+                } else {
+                    return this.<%= entityInstance %>Service.query(lazyLoadEventToServerQueryParams(this.<%= entityInstance %>Table.createLazyLoadMetadata(), undefined, this.filtersDetails));
+                }
+            }),
+        <%_ } else { _%>
+            switchMap(() => this.<%= entityInstance %>Service.query(lazyLoadEventToServerQueryParams(this.<%= entityInstance %>Table.createLazyLoadMetadata(), undefined, this.filtersDetails))),
+        <%_ } _%>
+            filter((res: HttpResponse<I<%= entityAngularName %>[]>) => res.ok)
+        ).subscribe({
+            next: (res: HttpResponse<I<%= entityAngularName %>[]>) => {
+                this.paginate<%= entityClassPlural %>(res.body!, res.headers);
+                this.isLoading.set(false);
+            },
+            error: (err: HttpErrorResponse) => {
+                this.onError(err.message);
+                console.error(err);
+                this.isLoading.set(false);
+            }
+        });
+<%_ } _%>
+    }
+<%_ if (hasPaginationRelationship) { _%>
+
+    ngOnDestroy(): void {
+        this.onDestroySubject.next(undefined);
+        this.onDestroySubject.complete();
+    }
+<%_ } _%>
+
+<%_ if (paginationNo) { _%>
+    loadAll(): void {
+    <%_ if (searchEngineElasticsearch) { _%>
+        if (this.currentSearch()) {
+            this.<%= entityInstance %>Service.search({
+                query: this.currentSearch(),
+            }).pipe(
+                filter((res: HttpResponse<I<%= entityAngularName %>[]>) => res.ok),
+                map((res: HttpResponse<I<%= entityAngularName %>[]>) => res.body),
+            ).subscribe({
+                next: (res: I<%= entityAngularName %>[]) => this.<%= entityInstancePlural %>.set(res),
+                error: (res: HttpErrorResponse) => this.onError(res.message)
+            });
+            return;
+        }
+    <%_ } _%>
+        this.<%= entityInstance %>Service.query().pipe(
+            filter((res: HttpResponse<I<%= entityAngularName %>[]>) => res.ok),
+            map((res: HttpResponse<I<%= entityAngularName %>[]>) => res.body!),
+        ).subscribe({
+            next: (<%= entityInstancePlural %>: I<%= entityAngularName %>[]) => {
+                this.<%= entityInstancePlural %>.set(<%= entityInstancePlural %>);
+            <%_ if (searchEngineElasticsearch) { _%>
+                this.currentSearch.set('');
+            <%_ } _%>
+            },
+            error: (res: HttpErrorResponse) => this.onError(res.message)
+        });
+    }
+<%_ } else { _%>
+    onLazyLoadEvent(event: TableLazyLoadEvent): void {
+        const queryParams = lazyLoadEventToRouterQueryParams(event, this.filtersDetails);
+        this.router.navigate(['/<%= entityPage %>'], { queryParams });
+    }
+<%_ } _%>
+<%_ if (!readOnly) { _%>
+
+    delete(<%= entityInstance %>: I<%= entityAngularName %>): void {
+        this.confirmationService.confirm({
+            header: this.translateService.instant('entity.delete.title'),
+            message: this.translateService.instant('<%= i18nKeyPrefix %>.delete.question',
+    { <%= primaryKey.fields.map(field => `${field.fieldName}: ${entityInstance}.${field.nameDotted}`).join(', ') %> }),
+            accept: () => {
+                this.<%= entityInstance %>Service.delete(<%= primaryKey.fields.map(field => `${entityInstance}.${field.nameDotted}`).join(', ') %>).subscribe(() => {
+    <%_ if (!paginationNo) { _%>
+                    this.router.navigate(['/<%= entityUrl %>'], { queryParams: { r: Date.now() }, queryParamsHandling: 'merge' });
+    <%_ } else { _%>
+                    this.loadAll();
+    <%_ } _%>
+                });
+            }
+        });
+    }
+<%_ } _%>
+<%_ if (jpaMetamodelFiltering) { _%>
+    <%_ for (const relationship of relationships) { _%>
+        <%_ if (relationship.ownerSide) { _%>
+            <%_ relationship.clientFields.forEach(cf => { _%>
+                <%_ if (cf.lastRelationship.otherEntity.pagination === 'no') { _%>
+
+    loadAll<%= cf.nameCapitalizedPlural %>(): void {
+        this.<%= cf.lastRelationship.otherEntity.entityInstance %>Service.query()
+            .subscribe((res: HttpResponse<I<%= cf.lastRelationship.otherEntity.entityAngularName %>[]>) => this.<%= cf.name %>Options = res.body);
+    }
+                <%_ } else { _%>
+    on<%= this._.upperFirst(cf.name) %>LazyLoadEvent(event: MultiSelectLazyLoadEvent): void {
+        this.<%= cf.name %>OptionsSubscriber!.filter({ first: event.first, last: event.last, '<%= cf.lastRelationship.relatedField.fieldName %>.<%= cf.relatedFieldMatchMode %>': event.filter });
+    }
+                <%_ } _%>
+            <%_ }) _%>
+        <%_ } _%>
+    <%_ } _%>
+<%_ } _%>
+<%_ if (anyFieldIsBlobDerived) { _%>
+
+    byteSize(base64String: string): string {
+        return this.dataUtils.byteSize(base64String);
+    }
+
+    openFile(base64String: string, contentType: string | null | undefined): void {
+        return this.dataUtils.openFile(base64String, contentType);
+    }
+<%_ } _%>
+
+<%_ if (!paginationNo) { _%>
+    protected paginate<%= entityClassPlural %>(data: I<%= entityAngularName %>[], headers: HttpHeaders): void {
+    <%_ if (databaseTypeCassandra) { _%>
+        this.<%= entityInstancePlural %>.set(data);
+    <%_ } else { _%>
+        this.totalItems.set(Number(headers.get('X-Total-Count')));
+        this.<%= entityInstancePlural %>.set(data);
+    <%_ } _%>
+    }
+
+<%_ } _%>
+    protected onError(errorMessage: string): void {
+        this.messageService.add({ severity: 'error', summary: errorMessage });
+    }
+}

@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -17,21 +17,22 @@
  limitations under the License.
 -%>
 function setupProxy({ tls }) {
-  const conf = [
-    {
-      context: [
-        '/api',
-        '/services',
-        '/management',
-        '/v3/api-docs',
-        '/h2-console',
+  const serverResources = [
+    '/api',
+    '/services',
+    '/management',
+    '/v3/api-docs',
+    '/h2-console',
 <%_ if (authenticationTypeOauth2) { _%>
-        '/oauth2',
-        '/login',
+    '/auth',
+    '/oauth2',
+    '/login',
 <%_ } _%>
-        '/auth',
-        '/health',
-      ],
+    '/health',
+  ];
+  return [
+    {
+      context: serverResources,
       target: `http${tls ? 's' : ''}://localhost:<%= applicationTypeMicroservice ? gatewayServerPort : serverPort %>`,
       secure: false,
       changeOrigin: tls,
@@ -44,7 +45,6 @@ function setupProxy({ tls }) {
     },
 <%_ } _%>
   ];
-  return conf;
 }
 
 module.exports = setupProxy;

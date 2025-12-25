@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -17,49 +17,49 @@
  limitations under the License.
 -%>
 import { inject } from '@angular/core';
-import { ActivatedRouteSnapshot, Routes, ResolveFn } from '@angular/router';
+import { ActivatedRouteSnapshot, ResolveFn, Routes } from '@angular/router';
 import { of } from 'rxjs';
 
 import { IUser } from './user-management.model';
 import { UserManagementService } from './service/user-management.service';
-import UserManagementComponent from './list/user-management.component';
-import UserManagementDetailComponent from './detail/user-management-detail.component';
-import UserManagementUpdateComponent from './update/user-management-update.component';
 
-export const UserManagementResolve: ResolveFn<IUser | null> = (route: ActivatedRouteSnapshot) => {
-  const login = route.paramMap.get('login');
-  if (login) {
-    return inject(UserManagementService).find(login);
-  }
-  return of(null);
+export const userManagementResolve: ResolveFn<IUser | null> = (route: ActivatedRouteSnapshot) => {
+    const login = route.paramMap.get('login');
+    if (login) {
+        return inject(UserManagementService).find(login);
+    }
+    return of(null);
 };
 
 const userManagementRoute: Routes = [
-  {
-    path: '',
-    component: UserManagementComponent,
-  },
-  {
-    path: ':login/view',
-    component: UserManagementDetailComponent,
-    resolve: {
-      user: UserManagementResolve,
+    {
+        path: '',
+        loadComponent: () => import('./list/user-management'),
+        data: {
+            defaultSort: 'id,asc',
+        },
     },
-  },
-  {
-    path: 'new',
-    component: UserManagementUpdateComponent,
-    resolve: {
-      user: UserManagementResolve,
+    {
+        path: ':login/view',
+        loadComponent: () => import('./detail/user-management-detail'),
+        resolve: {
+            user: userManagementResolve,
+        },
     },
-  },
-  {
-    path: ':login/edit',
-    component: UserManagementUpdateComponent,
-    resolve: {
-      user: UserManagementResolve,
+    {
+        path: 'new',
+        loadComponent: () => import('./update/user-management-update'),
+        resolve: {
+            user: userManagementResolve,
+        },
     },
-  },
+    {
+        path: ':login/edit',
+        loadComponent: () => import('./update/user-management-update'),
+        resolve: {
+            user: userManagementResolve,
+        },
+    },
 ];
 
 export default userManagementRoute;

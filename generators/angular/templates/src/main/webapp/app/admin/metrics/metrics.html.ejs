@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -18,52 +18,57 @@
 -%>
 <div>
   <h2>
-    <span id="metrics-page-heading" <%= jhiPrefix %>Translate="metrics.title" data-cy="metricsPageHeading"><%- getWebappTranslation('metrics.title') %></span>
+    <span id="metrics-page-heading" data-cy="metricsPageHeading">__jhiTranslateTag__('metrics.title')</span>
 
     <button class="btn btn-primary float-end" (click)="refresh()">
-      <fa-icon icon="sync"></fa-icon> <span <%= jhiPrefix %>Translate="metrics.refresh.button"><%- getWebappTranslation('metrics["refresh.button"]') %></span>
+      <fa-icon icon="sync" /> <span>__jhiTranslateTag__('metrics.refresh.button')</span>
     </button>
   </h2>
 
-  <h3 <%= jhiPrefix %>Translate="metrics.jvm.title"><%- getWebappTranslation('metrics.jvm.title') %></h3>
+  <h3>__jhiTranslateTag__('metrics.jvm.title')</h3>
 
-  <div class="row" *ngIf="metrics && !updatingMetrics">
-    <<%= jhiPrefixDashed %>-jvm-memory class="col-md-4" [updating]="updatingMetrics" [jvmMemoryMetrics]="metrics.jvm"></<%= jhiPrefixDashed %>-jvm-memory>
+@let metricsRef = metrics();
+@if (metricsRef && !updatingMetrics()) {
+  <div class="row">
+    <<%= jhiPrefixDashed %>-jvm-memory class="col-md-4" [updating]="updatingMetrics()" [jvmMemoryMetrics]="metricsRef.jvm" />
 
-    <<%= jhiPrefixDashed %>-jvm-threads class="col-md-4" [threads]="threads"></<%= jhiPrefixDashed %>-jvm-threads>
+    <<%= jhiPrefixDashed %>-jvm-threads class="col-md-4" [threads]="threads()" />
 
-    <<%= jhiPrefixDashed %>-metrics-system class="col-md-4" [updating]="updatingMetrics" [systemMetrics]="metrics.processMetrics"></<%= jhiPrefixDashed %>-metrics-system>
+    <<%= jhiPrefixDashed %>-metrics-system class="col-md-4" [updating]="updatingMetrics()" [systemMetrics]="metricsRef.processMetrics" />
   </div>
+}
 
+@if (metricsRef?.garbageCollector; as metricsRefGarbageCollector) {
   <<%= jhiPrefixDashed %>-metrics-garbagecollector
-    *ngIf="metrics && metricsKeyExists('garbageCollector')"
-    [updating]="updatingMetrics"
-    [garbageCollectorMetrics]="metrics.garbageCollector"
-  ></<%= jhiPrefixDashed %>-metrics-garbagecollector>
+    [updating]="updatingMetrics()"
+    [garbageCollectorMetrics]="metricsRefGarbageCollector" />
+}
 
-  <div class="well well-lg" *ngIf="updatingMetrics" <%= jhiPrefix %>Translate="metrics.updating"><%- getWebappTranslation('metrics.updating') %></div>
+@if (updatingMetrics()) {
+  <div class="well well-lg">__jhiTranslateTag__('metrics.updating')</div>
+}
 
+@if (metricsRef?.['http.server.requests']; as metricsRefHttpServerRequests) {
   <<%= jhiPrefixDashed %>-metrics-request
-    *ngIf="metrics && metricsKeyExists('http.server.requests')"
-    [updating]="updatingMetrics"
-    [requestMetrics]="metrics['http.server.requests']"
-  ></<%= jhiPrefixDashed %>-metrics-request>
+    [updating]="updatingMetrics()"
+    [requestMetrics]="metricsRefHttpServerRequests" />
+}
 
+@if (metricsRef?.services; as metricsRefServices) {
   <<%= jhiPrefixDashed %>-metrics-endpoints-requests
-    *ngIf="metrics && metricsKeyExists('services')"
-    [updating]="updatingMetrics"
-    [endpointsRequestsMetrics]="metrics.services"
-  ></<%= jhiPrefixDashed %>-metrics-endpoints-requests>
+    [updating]="updatingMetrics()"
+    [endpointsRequestsMetrics]="metricsRefServices" />
+}
 
+@if (metricsRef?.cache; as metricsRefCache) {
   <<%= jhiPrefixDashed %>-metrics-cache
-    *ngIf="metrics && metricsKeyExists('cache')"
-    [updating]="updatingMetrics"
-    [cacheMetrics]="metrics.cache"
-  ></<%= jhiPrefixDashed %>-metrics-cache>
+    [updating]="updatingMetrics()"
+    [cacheMetrics]="metricsRefCache" />
+}
 
+@if (metricsRef && metricsKeyExistsAndObjectNotEmpty('databases')) {
   <<%= jhiPrefixDashed %>-metrics-datasource
-    *ngIf="metrics && metricsKeyExistsAndObjectNotEmpty('databases')"
-    [updating]="updatingMetrics"
-    [datasourceMetrics]="metrics.databases"
-  ></<%= jhiPrefixDashed %>-metrics-datasource>
+    [updating]="updatingMetrics()"
+    [datasourceMetrics]="metricsRef.databases" />
+}
 </div>

@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2022 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -17,9 +17,6 @@
  limitations under the License.
 -%>
 /* eslint-disable @typescript-eslint/no-namespace */
-/* eslint-disable @typescript-eslint/no-use-before-define */
-// eslint-disable-next-line spaced-comment
-/// <reference types="cypress" />
 
 // ***********************************************
 // Begin Specific Selector Attributes for Cypress
@@ -34,64 +31,55 @@ export const entityDetailsButtonSelector = '[data-cy="entityDetailsButton"]'; //
 export const entityDetailsBackButtonSelector = '[data-cy="entityDetailsBackButton"]';
 export const entityEditButtonSelector = '[data-cy="entityEditButton"]';
 export const entityDeleteButtonSelector = '[data-cy="entityDeleteButton"]';
-export const entityConfirmDeleteButtonSelector = 'p-confirmdialog .p-confirm-dialog-accept';
+export const entityConfirmDeleteButtonSelector = '.p-confirmdialog .p-confirmdialog-accept-button';
 
 // ***********************************************
 // End Specific Selector Attributes for Cypress
 // ***********************************************
 
-Cypress.Commands.add('getEntityHeading', (entityName: string) => {
-  return cy.get(`[data-cy="${entityName}Heading"]`);
-});
+Cypress.Commands.add('getEntityHeading', (entityName: string) => cy.get(`[data-cy="${entityName}Heading"]`));
 
-Cypress.Commands.add('getEntityCreateUpdateHeading', (entityName: string) => {
-  return cy.get(`[data-cy="${entityName}CreateUpdateHeading"]`);
-});
+Cypress.Commands.add('getEntityCreateUpdateHeading', (entityName: string) => cy.get(`[data-cy="${entityName}CreateUpdateHeading"]`));
 
-Cypress.Commands.add('getEntityDetailsHeading', (entityInstanceName: string) => {
-  return cy.get(`[data-cy="${entityInstanceName}DetailsHeading"]`);
-});
+Cypress.Commands.add('getEntityDetailsHeading', (entityInstanceName: string) => cy.get(`[data-cy="${entityInstanceName}DetailsHeading"]`));
 
-Cypress.Commands.add('getEntityDeleteDialogHeading', () => {
-  return cy.get(`p-confirmdialog .p-dialog-title`).contains('Confirm delete operation');
-});
+Cypress.Commands.add('getEntityDeleteDialogHeading', () => cy.get(`.p-confirmdialog .p-dialog-title`).contains('Confirm delete operation'));
 
-Cypress.Commands.add('setFieldImageAsBytesOfEntity', (fieldName: string, fileName: string, mimeType: string) => {
-  cy.fixture(fileName).then(fileContent => {
-    cy.get(`[data-cy="${fieldName}"] .p-fileupload-content`).attachFile(
-      { fileContent, fileName, mimeType },
-      { subjectType: 'drag-n-drop' }
-    );
+Cypress.Commands.add('setFieldImageAsBytesOfEntity', (fieldName: string, fileName: string) => {
+  cy.get(`[data-cy="${fieldName}"] [data-pc-section="content"]`).selectFile('src/test/javascript/cypress/fixtures/' + fileName, {
+    action: 'drag-drop',
   });
 });
 
 Cypress.Commands.add('setFieldSelectToLastOfEntity', (fieldName: string, multiSelect = false, filter?: string) => {
-  const typeSelect = multiSelect ? 'multiselect' : 'dropdown';
-  cy.get(`[data-cy="${fieldName}"] > .p-${typeSelect} > .p-${typeSelect}-trigger`).click();
+  const typeSelect = multiSelect ? 'multiselect' : 'select';
+  cy.get(`[data-cy="${fieldName}"] > .p-${typeSelect}-dropdown > [data-pc-section="dropdownicon"]`).click();
   if (filter) {
-    cy.get(`[data-cy="${fieldName}"]`).get(`.p-${typeSelect}-filter`).type(filter);
+    cy.get(`[data-cy="${fieldName}"] .p-${typeSelect}-filter`).type(filter);
   }
-  cy.get(`[data-cy="${fieldName}"]`).find(`.p-${typeSelect}-item`).last().click();
+  cy.get(`[data-cy="${fieldName}"] [data-pc-section="option"]`).last().scrollIntoView();
+  cy.get(`[data-cy="${fieldName}"] [data-pc-section="option"]`).last().should('be.visible');
+  cy.get(`[data-cy="${fieldName}"] [data-pc-section="option"]`).last().click('left');
   if (multiSelect) {
-    cy.get(`[data-cy="${fieldName}"] > .p-${typeSelect} .p-${typeSelect}-close`).click();
+    cy.get(`[data-cy="${fieldName}"] > .p-${typeSelect}-dropdown .p-${typeSelect}-close`).click();
   }
 });
 
 Cypress.Commands.add('setFieldSelectToIndexOfEntity', (index: number, fieldName: string, multiSelect = false, filter?: string) => {
-  const typeSelect = multiSelect ? 'multiselect' : 'dropdown';
-  cy.get(`[data-cy="${fieldName}"] > .p-${typeSelect} > .p-${typeSelect}-trigger`).click();
+  const typeSelect = multiSelect ? 'multiselect' : 'select';
+  cy.get(`[data-cy="${fieldName}"] > .p-${typeSelect}-dropdown > [data-pc-section="dropdownicon"]`).click();
   if (filter) {
-    cy.get(`[data-cy="${fieldName}"]`).get(`.p-${typeSelect}-filter`).type(filter);
+    cy.get(`[data-cy="${fieldName}"] .p-${typeSelect}-filter`).type(filter);
   }
-  cy.get(`[data-cy="${fieldName}"]`).find(`.p-${typeSelect}-item`).eq(index).click();
+  cy.get(`[data-cy="${fieldName}"] [data-pc-section="option"]`).eq(index).click('left');
   if (multiSelect) {
-    cy.get(`[data-cy="${fieldName}"] > .p-${typeSelect} > .p-${typeSelect}-trigger`).click();
+    cy.get(`[data-cy="${fieldName}"] > .p-${typeSelect}-dropdown > [data-pc-section="dropdownicon"]`).click();
   }
 });
 
 declare global {
   namespace Cypress {
-    interface Chainable<> {
+    interface Chainable {
       getEntityHeading(entityName: string): Cypress.Chainable;
       getEntityCreateUpdateHeading(entityName: string): Cypress.Chainable;
       getEntityDetailsHeading(entityInstanceName: string): Cypress.Chainable;
@@ -103,5 +91,5 @@ declare global {
   }
 }
 
-// Convert this to a module instead of script (allows import/export)
+// Convert this to a module instead of a script (allows import/export)
 export {};

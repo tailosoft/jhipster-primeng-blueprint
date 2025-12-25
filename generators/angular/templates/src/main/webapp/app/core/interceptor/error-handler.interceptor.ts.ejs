@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,21 +16,23 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Injectable } from '@angular/core';
-import { AlertErrorService } from 'app/shared/alert/alert-error.service';
-import { HttpInterceptor, HttpRequest, HttpErrorResponse, HttpHandler, HttpEvent } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+
 import { tap } from 'rxjs/operators';
 
-@Injectable()
-export class ErrorHandlerInterceptor implements HttpInterceptor {
-    constructor(private alertErrorService: AlertErrorService) {}
+import { AlertErrorService } from 'app/shared/alert/alert-error.service';
 
-    intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-        return next.handle(request).pipe(tap(null, (err: HttpErrorResponse) => {
-            if (!(err.status === 401 && (err.message === '' || (err.url?.includes('api/account'))))) {
-                this.alertErrorService.displayError(err);
-            }
-        }));
-    }
-}
+export const errorHandlerInterceptor: HttpInterceptorFn = (req, next) => {
+  const alertErrorService = inject(AlertErrorService);
+
+  return next(req).pipe(
+    tap({
+      error(err: HttpErrorResponse) {
+        if (!(err.status === 401 && (err.message === '' || err.url?.includes('api/account')))) {
+          alertErrorService.displayError(err);
+        }
+      },
+    }),
+  );
+};

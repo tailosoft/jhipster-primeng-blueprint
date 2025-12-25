@@ -1,0 +1,57 @@
+<%#
+ Copyright 2013-2025 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+import { Injectable } from '@angular/core';
+import { SortState } from './sort-state';
+
+@Injectable({ providedIn: 'root' })
+export class SortService {
+  private readonly collator = new Intl.Collator(undefined, {
+    numeric: true,
+    sensitivity: 'base',
+  });
+
+  startSort({ predicate, order }: Required<SortState>, fallback?: Required<SortState>): (a: any, b: any) => number {
+    const multiply = order === 'desc' ? -1 : 1;
+    return (a: any, b: any) => {
+      const compare = this.collator.compare(a[predicate], b[predicate]);
+      if (compare === 0 && fallback) {
+        return this.startSort(fallback)(a, b);
+      }
+      return compare * multiply;
+    };
+  }
+
+  parseSortParam(sortParam: string | undefined): SortState {
+    if (sortParam?.includes(',')) {
+      const split = sortParam.split(',');
+      if (split[0]) {
+        return { predicate: split[0], order: split[1] as any };
+      }
+    }
+    return { predicate: sortParam?.length ? sortParam : undefined };
+  }
+
+  buildSortParam({ predicate, order }: SortState, fallback?: string): string[] {
+    const sortParam = predicate && order ? [`${predicate},${order}`] : [];
+    if (fallback && predicate !== fallback) {
+      sortParam.push(`${fallback},asc`);
+    }
+    return sortParam;
+  }
+}

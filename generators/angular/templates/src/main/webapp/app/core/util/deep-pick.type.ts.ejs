@@ -1,0 +1,48 @@
+<%#
+ Copyright 2013-2025 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+/**
+ * Utility type for deep picking nested properties using dot-notation paths.
+ *
+ * @example
+ * type Result = DeepPick<IEmployeeSkillCertificate, 'type.id' | 'skill.name' | 'skill.employee.username'>;
+ * // Results in:
+ * // {
+ * //   type: { id: number };
+ * //   skill: { name: string; employee: { username: string } };
+ * // }
+ *
+ * Performance note: This type is safe for typical use cases (2-4 levels deep, <20 paths).
+ * For very deep nesting or large path unions, consider using manual Pick instead.
+ */
+
+// Extract the first segment of a path (before the first dot)
+type PathHead<P extends string> = P extends `${infer H}.${string}` ? H : P;
+
+// Extract everything after the first segment (after the first dot)
+type PathTail<P extends string> = P extends `${string}.${infer T}` ? T : never;
+
+// From a union of paths, get the tails of paths that start with a specific key
+type SubPaths<Paths extends string, Key extends string> = Paths extends `${Key}.${infer Rest}` ? Rest : never;
+
+// Main DeepPick type
+export type DeepPick<T, Paths extends string> = {
+  [K in PathHead<Paths> & keyof T]: [SubPaths<Paths, K>] extends [never]
+    ? T[K]
+    : DeepPick<NonNullable<T[K]>, SubPaths<Paths, K>>;
+};

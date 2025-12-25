@@ -1,74 +1,65 @@
-import { NgModule } from '@angular/core';
-import { CalendarModule } from 'primeng/calendar';
-import { CheckboxModule } from 'primeng/checkbox';
-import { DropdownModule } from 'primeng/dropdown';
-import { InputSwitchModule } from 'primeng/inputswitch';
-import { InputTextModule } from 'primeng/inputtext';
-import { InputTextareaModule } from 'primeng/inputtextarea';
-import { MultiSelectModule } from 'primeng/multiselect';
-import { TriStateCheckboxModule } from 'primeng/tristatecheckbox';
+import { EnvironmentProviders, makeEnvironmentProviders } from '@angular/core';
+
+import Aura from '@primeuix/themes/aura';
+import { ConfirmationService, FilterMatchMode, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
-import { TableModule } from 'primeng/table';
+import { CheckboxModule } from 'primeng/checkbox';
+import { providePrimeNG } from 'primeng/config';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { MessageModule } from 'primeng/message';
-import { ToastModule } from 'primeng/toast';
-import { TooltipModule } from 'primeng/tooltip';
+import { DatePickerModule } from 'primeng/datepicker';
 import { FileUploadModule } from 'primeng/fileupload';
-import { FilterMatchMode, PrimeNGConfig } from 'primeng/api';
+import { InputTextModule } from 'primeng/inputtext';
+import { MessageModule } from 'primeng/message';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { SelectModule } from 'primeng/select';
+import { TableModule } from 'primeng/table';
+import { TagModule } from 'primeng/tag';
+import { TextareaModule } from 'primeng/textarea';
+import { ToastModule } from 'primeng/toast';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { TooltipModule } from 'primeng/tooltip';
 
-@NgModule({
-  imports: [
-    CalendarModule,
-    CheckboxModule,
-    DropdownModule,
-    InputSwitchModule,
-    InputTextModule,
-    InputTextareaModule,
-    MultiSelectModule,
-    TriStateCheckboxModule,
-    ButtonModule,
-    TableModule,
-    ConfirmDialogModule,
-    MessageModule,
-    ToastModule,
-    TooltipModule,
-    FileUploadModule,
-  ],
-  exports: [
-    CalendarModule,
-    CheckboxModule,
-    DropdownModule,
-    InputSwitchModule,
-    InputTextModule,
-    InputTextareaModule,
-    MultiSelectModule,
-    TriStateCheckboxModule,
-    ButtonModule,
-    TableModule,
-    ConfirmDialogModule,
-    MessageModule,
-    ToastModule,
-    TooltipModule,
-    FileUploadModule,
-  ],
-})
-export class PrimeNGCommonModule {
-  constructor(primeNGConfig: PrimeNGConfig) {
-    // override primengConfigs
+// For standalone component imports
+export const PRIMENG_MODULES = [
+  DatePickerModule,
+  CheckboxModule,
+  SelectModule,
+  ToggleSwitchModule,
+  InputTextModule,
+  TextareaModule,
+  MultiSelectModule,
+  ButtonModule,
+  TableModule,
+  ConfirmDialogModule,
+  MessageModule,
+  TagModule,
+  ToastModule,
+  TooltipModule,
+  FileUploadModule,
+];
 
-    // startsWith and EndsWith are not supported yet server side, so not showing them
-    primeNGConfig.filterMatchModeOptions.text = [
-      // FilterMatchMode.STARTS_WITH,
-      FilterMatchMode.CONTAINS,
-      FilterMatchMode.NOT_CONTAINS,
-      // FilterMatchMode.ENDS_WITH,
-      FilterMatchMode.EQUALS,
-      FilterMatchMode.NOT_EQUALS,
-    ];
-
-    // adding new filters for dateTime
-    (primeNGConfig.filterMatchModeOptions as any).dateTime = [FilterMatchMode.DATE_BEFORE, FilterMatchMode.DATE_AFTER];
-
-    // TODO add translations here
-  }
+export function providePrimeNGConfig(): EnvironmentProviders {
+  return makeEnvironmentProviders([
+    providePrimeNG({
+      theme: {
+        preset: Aura,
+      },
+      filterMatchModeOptions: {
+        // startsWith and EndsWith are not supported yet server side, so not showing them
+        text: [
+          // FilterMatchMode.STARTS_WITH,
+          FilterMatchMode.CONTAINS,
+          FilterMatchMode.NOT_CONTAINS,
+          // FilterMatchMode.ENDS_WITH,
+          FilterMatchMode.EQUALS,
+          FilterMatchMode.NOT_EQUALS,
+        ],
+        // adding new filters for dateTime
+        dateTime: [FilterMatchMode.DATE_BEFORE, FilterMatchMode.DATE_AFTER],
+      },
+      // TODO add translations here
+    }),
+    MessageService,
+    ConfirmationService,
+  ]);
 }

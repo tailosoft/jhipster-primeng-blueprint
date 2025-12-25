@@ -1,0 +1,60 @@
+import I18NGenerator from 'generator-jhipster/generators/client/generators/i18n';
+
+export default class extends I18NGenerator {
+  constructor(args, opts, features) {
+    super(args, opts, {
+      ...features,
+
+      sbsBlueprint: true,
+    });
+  }
+
+  get [I18NGenerator.DEFAULT]() {
+    return this.asDefaultTaskGroup({
+      async updateTranslations({ application, entities }) {
+        const entitiesToWriteTranslationFor = entities.filter(entity => !entity.skipClient && !entity.builtInUser);
+        if (!application.userManagement?.skipClient) {
+          entitiesToWriteTranslationFor.push(application.userManagement);
+        }
+
+        const { clientI18nDir, enableTranslation, languages, frontendAppName, translations } = application;
+        if (!enableTranslation) return;
+
+        this.queueTask({
+          method: async () => {
+            for (const entity of entitiesToWriteTranslationFor) {
+              const { entityTranslationKey, readOnly } = entity;
+              if (!readOnly) {
+                for (const lang of languages) {
+                  console.log({ translations: application.translations });
+                  const translationFile = `${clientI18nDir}${lang}/${entityTranslationKey}.json`;
+                  // this.editFile(translationFile, { assertModified: true },  content => {
+                  //   const json = JSON.parse(content);
+                  //   const home = json[frontendAppName][entityTranslationKey].home;
+                  //   if (lang === 'en') {
+                  //     home.editLabel = home.createOrEditLabel.replace(/Create or /, '');
+                  //     delete home.createOrEditLabel;
+                  //   } else if (lang === 'fr') {
+                  //     home.editLabel = home.createOrEditLabel.replace(/Créer ou éditer/, 'Editer');
+                  //     delete home.createOrEditLabel;
+                  //   }
+                  //   return JSON.stringify(json, null, 2);
+                  // });
+                }
+              }
+            }
+          },
+          // taskName: 'updateTranslations',
+          // queueName: 'jhipster:loadingTranslations',
+          // once: true,
+        });
+      },
+    });
+  }
+
+  get [I18NGenerator.WRITING]() {
+    return this.asDefaultTaskGroup({
+      ...super.writing,
+    });
+  }
+}

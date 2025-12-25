@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -17,13 +17,17 @@
  limitations under the License.
 -%>
 {
-  "extends": "../../../../tsconfig.json",
+<%_ if (clientFrameworkVue) { _%>
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
+<%_ } else { _%>
+  "extends": "<%= this.relativeDir(cypressDir, clientRootDir) %>tsconfig.json",
+<%_ } _%>
   "compilerOptions": {
     "baseUrl": "./",
     "sourceMap": false,
-    "outDir": "../../../../<%= cypressTemporaryDir %>out-tsc",
+    "outDir": "<%- this.relativeDir(cypressDir, temporaryDir) %>cypress/tsc",
     "target": "es2018",
     "types": ["cypress", "node", "cypress-file-upload"]
   },
-  "include": ["./../../../../cypress*.config.ts", "./**/*.ts"]
+  "include": ["./<%= this.relativeDir(cypressDir, clientRootDir) %>cypress*.config.ts", "./**/*.ts"]
 }

@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,106 +16,109 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-jest.mock('app/core/auth/account.service');
-
-import { ComponentFixture, TestBed, inject, tick, fakeAsync } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+<%_ if (clientTestFrameworkVitest) { _%>
+import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
+<%_ } _%>
+import { ComponentFixture, TestBed, inject } from '@angular/core/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of, throwError } from 'rxjs';
 
 import { AccountService } from 'app/core/auth/account.service';
 import { Account } from 'app/core/auth/account.model';
 
 import { Session } from './session.model';
-import SessionsComponent from './sessions.component';
+import Sessions from './sessions';
 import { SessionsService } from './sessions.service';
 
-describe('SessionsComponent', () => {
-  let fixture: ComponentFixture<SessionsComponent>;
-  let comp: SessionsComponent;
-  const sessions: Session[] = [new Session('xxxxxx==', new Date(2015, 10, 15), '0:0:0:0:0:0:0:1', 'Mozilla/5.0')];
-  const account: Account = {
-    firstName: 'John',
-    lastName: 'Doe',
-    activated: true,
-    email: 'john.doe@mail.com',
-    langKey: '<%= nativeLanguage %>',
-    login: 'john',
-    authorities: [],
-    imageUrl: '',
-  };
+describe('Sessions', () => {
+    let fixture: ComponentFixture<Sessions>;
+    let comp: Sessions;
+    const sessions: Session[] = [new Session('xxxxxx==', new Date(2015, 10, 15), '0:0:0:0:0:0:0:1', 'Mozilla/5.0')];
+    const account: Account = {
+        firstName: 'John',
+        lastName: 'Doe',
+        activated: true,
+        email: 'john.doe@mail.com',
+        langKey: '<%= nativeLanguage %>',
+        login: 'john',
+        authorities: [],
+        imageUrl: '',
+    };
 
-  beforeEach(() => {
-    fixture = TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, SessionsComponent],
-      providers: [AccountService],
-    })
-      .overrideTemplate(SessionsComponent, '')
-      .createComponent(SessionsComponent);
-    comp = fixture.componentInstance;
-  });
+    beforeEach(() => {
+        fixture = TestBed.configureTestingModule({
+            imports: [Sessions],
+            providers: [
+                provideHttpClientTesting(),
+                {
+                    provide: AccountService,
+                    useValue: {},
+                },
+            ],
+        })
+            .overrideTemplate(Sessions, '')
+            .createComponent(Sessions);
+        comp = fixture.componentInstance;
+    });
 
-  it('should define its initial state', inject(
-    [AccountService, SessionsService],
-    fakeAsync((mockAccountService: AccountService, service: SessionsService) => {
-      mockAccountService.identity = jest.fn(() => of(account));
-      jest.spyOn(service, 'findAll').mockReturnValue(of(sessions));
+    it('should define its initial state', inject(
+        [AccountService, SessionsService],
+        (mockAccountService: AccountService, service: SessionsService) => {
+            mockAccountService.identity = <%= clientTestFramework %>.fn(() => of(account));
+            <%= clientTestFramework %>.spyOn(service, 'findAll').mockReturnValue(of(sessions));
 
-      comp.ngOnInit();
-      tick();
+            comp.ngOnInit();
 
-      expect(mockAccountService.identity).toHaveBeenCalled();
-      expect(service.findAll).toHaveBeenCalled();
-      expect(comp.success).toBe(false);
-      expect(comp.error).toBe(false);
-      expect(comp.account).toEqual(account);
-      expect(comp.sessions).toEqual(sessions);
-    })
-  ));
+            expect(mockAccountService.identity).toHaveBeenCalled();
+            expect(service.findAll).toHaveBeenCalled();
+            expect(comp.success).toBe(false);
+            expect(comp.error).toBe(false);
+            expect(comp.account).toEqual(account);
+            expect(comp.sessions).toEqual(sessions);
+        },
+    ));
 
-  it('should call delete on Sessions to invalidate a session', inject(
-    [AccountService, SessionsService],
-    fakeAsync((mockAccountService: AccountService, service: SessionsService) => {
-      mockAccountService.identity = jest.fn(() => of(account));
-      jest.spyOn(service, 'findAll').mockReturnValue(of(sessions));
-      jest.spyOn(service, 'delete').mockReturnValue(of({} as any));
+    it('should call delete on Sessions to invalidate a session', inject(
+        [AccountService, SessionsService],
+        (mockAccountService: AccountService, service: SessionsService) => {
+            mockAccountService.identity = <%= clientTestFramework %>.fn(() => of(account));
+            <%= clientTestFramework %>.spyOn(service, 'findAll').mockReturnValue(of(sessions));
+            <%= clientTestFramework %>.spyOn(service, 'delete').mockReturnValue(of({}));
 
-      comp.ngOnInit();
-      comp.invalidate('xyz');
-      tick();
+            comp.ngOnInit();
+            comp.invalidate('xyz');
 
-      expect(service.delete).toHaveBeenCalledWith('xyz');
-    })
-  ));
+            expect(service.delete).toHaveBeenCalledWith('xyz');
+        },
+    ));
 
-  it('should call delete on Sessions and notify of error', inject(
-    [AccountService, SessionsService],
-    fakeAsync((mockAccountService: AccountService, service: SessionsService) => {
-      mockAccountService.identity = jest.fn(() => of(account));
-      jest.spyOn(service, 'findAll').mockReturnValue(of(sessions));
-      jest.spyOn(service, 'delete').mockReturnValue(throwError({}));
+    it('should call delete on Sessions and notify of error', inject(
+        [AccountService, SessionsService],
+        (mockAccountService: AccountService, service: SessionsService) => {
+            mockAccountService.identity = <%= clientTestFramework %>.fn(() => of(account));
+            <%= clientTestFramework %>.spyOn(service, 'findAll').mockReturnValue(of(sessions));
+            <%= clientTestFramework %>.spyOn(service, 'delete').mockReturnValue(throwError(Error));
 
-      comp.ngOnInit();
-      comp.invalidate('xyz');
-      tick();
+            comp.ngOnInit();
+            comp.invalidate('xyz');
 
-      expect(comp.success).toBe(false);
-      expect(comp.error).toBe(true);
-    })
-  ));
+            expect(comp.success).toBe(false);
+            expect(comp.error).toBe(true);
+        },
+    ));
 
-  it('should call notify of success upon session invalidation', inject(
-    [AccountService, SessionsService],
-    fakeAsync((mockAccountService: AccountService, service: SessionsService) => {
-      mockAccountService.identity = jest.fn(() => of(account));
-      jest.spyOn(service, 'findAll').mockReturnValue(of(sessions));
-      jest.spyOn(service, 'delete').mockReturnValue(of({} as any));
+    it('should call notify of success upon session invalidation', inject(
+        [AccountService, SessionsService],
+        (mockAccountService: AccountService, service: SessionsService) => {
+            mockAccountService.identity = <%= clientTestFramework %>.fn(() => of(account));
+            <%= clientTestFramework %>.spyOn(service, 'findAll').mockReturnValue(of(sessions));
+            <%= clientTestFramework %>.spyOn(service, 'delete').mockReturnValue(of({}));
 
-      comp.ngOnInit();
-      comp.invalidate('xyz');
-      tick();
+            comp.ngOnInit();
+            comp.invalidate('xyz');
 
-      expect(comp.error).toBe(false);
-      expect(comp.success).toBe(true);
-    })
-  ));
+            expect(comp.error).toBe(false);
+            expect(comp.success).toBe(true);
+        },
+    ));
 });

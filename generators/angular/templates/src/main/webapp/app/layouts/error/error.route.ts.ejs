@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -18,17 +18,15 @@
 -%>
 import { Routes } from '@angular/router';
 
-import ErrorComponent from './error.component';
-
 export const errorRoute: Routes = [
   {
     path: 'error',
-    component: ErrorComponent,
+    loadComponent: () => import('./error'),
     title: 'error.title',
   },
   {
     path: 'accessdenied',
-    component: ErrorComponent,
+    loadComponent: () => import('./error'),
     data: {
       errorMessage: 'error.http.403',
     },
@@ -36,7 +34,7 @@ export const errorRoute: Routes = [
   },
   {
     path: '404',
-    component: ErrorComponent,
+    loadComponent: () => import('./error'),
     data: {
       errorMessage: 'error.http.404',
     },

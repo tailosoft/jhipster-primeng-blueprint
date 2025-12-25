@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -23,11 +23,11 @@
     </div>
 
     <div class="col-md-8">
-      <h1 <%= jhiPrefix %>Translate="error.title"><%- getWebappTranslation('error.title') %></h1>
+      <h1>__jhiTranslateTag__('error.title')</h1>
 
-      <div *ngIf="errorMessage">
-        <div class="alert alert-danger">{{ errorMessage }}</div>
-      </div>
+      @if (errorMessage(); as errMessage) {
+        <div class="alert alert-danger">{{ errMessage }}</div>
+      }
     </div>
   </div>
 </div>

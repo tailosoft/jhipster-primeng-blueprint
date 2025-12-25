@@ -1,0 +1,193 @@
+<%#
+ Copyright 2013-2025 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+<%_
+const entityArrayOptionalChainSymbol = paginationInfiniteScroll ? '' : '?.';
+const testEntityPrimaryKey = tsPrimaryKeySamples[0];
+const testEntityPrimaryKey2 = tsPrimaryKeySamples[1];
+let datePipe = false;
+if (jpaMetamodelFiltering && fields.some(f => ['LocalDate', 'Instant', 'ZonedDateTime'].includes(f.fieldType))) {
+    datePipe = true;
+} else if (jpaMetamodelFiltering) {
+    for (const relationship of relationships) {
+        if (relationship.otherEntity.fields.some(f => ['LocalDate', 'Instant', 'ZonedDateTime'].includes(f.fieldType))) {
+            datePipe = true;
+        }
+        break;
+    }
+}
+_%>
+<%_ if (clientTestFrameworkVitest) { _%>
+import { MockInstance, afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
+<%_ } _%>
+
+import { ComponentFixture, TestBed<%_ if (!paginationNo) { _%>, tick<%_ } _%> } from '@angular/core/testing';
+import { of<%_ if (!paginationNo || searchEngineAny) { _%>, BehaviorSubject<%_ } _%> } from 'rxjs';
+import { HttpHeaders, HttpResponse } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { <% if (!readOnly) { %>Confirmation, ConfirmationService, <% } %>MessageService } from 'primeng/api';
+<%_ if (!paginationNo) { _%>
+import { ActivatedRoute, Router, provideRouter } from '@angular/router';
+<%_ } else if (searchEngineAny) { _%>
+import { ActivatedRoute } from '@angular/router';
+<%_ } _%>
+<%_ if (enableTranslation) { _%>
+import { TranslateModule } from '@ngx-translate/core';
+<%_ } _%>
+<%_ if (!paginationNo) { _%>
+import { Table } from 'primeng/table';
+<%_ } _%>
+<%_ if (datePipe) { _%>
+import { DatePipe } from '@angular/common';
+<%_ } _%>
+
+<%_ if (!readOnly) { _%>
+import { sampleWithRequiredData } from '../<%= entityFileName %>.test-samples';
+<%_ } _%>
+import { <%= entityAngularName %> } from './<%= entityFileName %>';
+import { <%= entityAngularName %>Service } from '../service/<%= entityFileName %>.service';
+
+describe('<%= entityAngularName %> Management Component', () => {
+    let comp: <%= entityAngularName %>;
+    let fixture: ComponentFixture<<%= entityAngularName %>>;
+    let service: <%= entityAngularName %>Service;
+<%_ if (!readOnly) { _%>
+    let confirmationService: ConfirmationService;
+<%_ } _%>
+<%_ if (!paginationNo) { _%>
+    let activatedRoute: ActivatedRoute;
+    let router: Router;
+<%_ } _%>
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            imports: [
+<%_ if (enableTranslation) { _%>
+                TranslateModule.forRoot(),
+<%_ } _%>
+            ],
+            providers: [
+                provideHttpClientTesting(),
+<%_ if (!paginationNo) { _%>
+                provideRouter([]),
+<%_ } _%>
+<%_ if (!readOnly) { _%>
+                ConfirmationService,
+<%_ } _%>
+                MessageService,
+<%_ if (!paginationNo) { _%>
+                {
+                    provide: ActivatedRoute,
+                    useValue: { data: of(), queryParams: new BehaviorSubject({}) }
+                },
+<%_ } else if (searchEngineAny) { _%>
+                {
+                    provide: ActivatedRoute,
+                    useValue: { data: of(), queryParams: new BehaviorSubject({}) }
+                },
+<%_ } _%>
+<%_ if (datePipe) { _%>
+                DatePipe,
+<%_ } _%>
+            ]
+        })
+        .overrideTemplate(<%= entityAngularName %>, '')
+        .compileComponents();
+
+        fixture = TestBed.createComponent(<%= entityAngularName %>);
+        comp = fixture.componentInstance;
+        service = TestBed.inject(<%= entityAngularName %>Service);
+<%_ if (!readOnly) { _%>
+        confirmationService = TestBed.inject(ConfirmationService);
+<%_ } _%>
+<%_ if (!paginationNo) { _%>
+        activatedRoute = TestBed.inject(ActivatedRoute);
+        router = TestBed.inject(Router);
+        <%= clientTestFramework %>.spyOn(router, 'navigate').mockImplementation(() => Promise.resolve(true));
+<%_ } _%>
+
+<%_ if (!paginationNo) { _%>
+        comp.<%= entityInstance %>Table = { filters: {}, createLazyLoadMetadata: () => undefined } as Table;
+<%_ } _%>
+    });
+
+    it('Should call load all on init', () => {
+        // GIVEN
+        <%= clientTestFramework %>.spyOn(service, 'query').mockReturnValue(of(new HttpResponse({
+            body: [<%- testEntityPrimaryKey %>],
+            headers: new HttpHeaders({
+                'X-Total-Count': '1',
+            }),
+        }) as any));
+
+        // WHEN
+        fixture.detectChanges();
+
+        // THEN
+        expect(service.query).toHaveBeenCalled();
+        expect(comp.<%= entityInstancePlural %>()[0]).toEqual(expect.objectContaining(<%- testEntityPrimaryKey %>));
+    });
+
+<%_ if (!paginationNo) { _%>
+    it('should load a page', () => {
+        // GIVEN
+        <%= clientTestFramework %>.spyOn(service, 'query').mockReturnValue(
+            of(
+                new HttpResponse({
+                    body: [<%- testEntityPrimaryKey %>],
+                    headers: new HttpHeaders({
+                        'X-Total-Count': '1',
+                    }),
+                })
+            )
+        );
+
+        // WHEN
+        fixture.detectChanges();
+        (activatedRoute.queryParams as BehaviorSubject<any>).next({ first: 3 });
+
+        // THEN
+        expect(service.query).toHaveBeenCalled();
+        expect(comp.<%= entityInstancePlural %>()[0]).toEqual(expect.objectContaining(<%- testEntityPrimaryKey %>));
+    });
+<%_ } _%>
+<%_ if (!readOnly) { _%>
+
+    it('should call delete service using confirmDialog', () => {
+        // GIVEN
+        <%= clientTestFramework %>.spyOn(service, 'delete').mockReturnValue(of({} as any));
+        <%= clientTestFramework %>.spyOn(confirmationService, 'confirm').mockImplementation((confirmation: Confirmation) => {
+            if (confirmation.accept) {
+                confirmation.accept();
+            }
+            return confirmationService;
+        });
+
+        // WHEN
+        comp.delete(sampleWithRequiredData);
+
+        // THEN
+        expect(confirmationService.confirm).toHaveBeenCalled();
+    <%_ if (primaryKey.fields.length === 1) { _%>
+        expect(service.delete).toHaveBeenCalledWith(sampleWithRequiredData.<%= primaryKey.name %>);
+    <%_ } else { _%>
+        expect(service.delete).toHaveBeenCalledWith(<%= primaryKey.fields.map(field => `sampleWithRequiredData.${field.nameDotted}`).join(', ') %>);
+    <%_ } _%>
+    });
+<%_ } _%>
+});

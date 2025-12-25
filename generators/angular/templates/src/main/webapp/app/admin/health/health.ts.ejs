@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,25 +16,30 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
+import { KeyValuePipe } from '@angular/common';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
-import SharedModule from 'app/shared/shared.module';
+<%_ if (enableTranslation) { _%>
+import { TranslateDirective } from 'app/shared/language';
+import { TranslateModule } from '@ngx-translate/core';
+<%_ } _%>
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { HealthService } from './health.service';
-import { Health, HealthDetails, HealthStatus } from './health.model';
-import HealthModalComponent from './modal/health-modal.component';
+import { HealthModel, HealthDetails, HealthStatus } from './health.model';
+import HealthModal from './modal/health-modal';
 
 @Component({
-  standalone: true,
   selector: '<%= jhiPrefixDashed %>-health',
-  templateUrl: './health.component.html',
-  imports: [SharedModule, HealthModalComponent],
+  templateUrl: './health.html',
+  imports: [<%_ if (enableTranslation) { _%>TranslateDirective, TranslateModule, <%_ } _%>FontAwesomeModule, KeyValuePipe],
 })
-export default class HealthComponent implements OnInit {
-  health?: Health;
+export default class Health implements OnInit {
+  health?: HealthModel;
 
-  constructor(private modalService: NgbModal, private healthService: HealthService) {}
+  private readonly modalService = inject(NgbModal);
+  private readonly healthService = inject(HealthService);
 
   ngOnInit(): void {
     this.refresh();
@@ -54,12 +59,12 @@ export default class HealthComponent implements OnInit {
         if (error.status === 503) {
           this.health = error.error;
         }
-      }
+      },
     });
   }
 
   showHealth(health: { key: string; value: HealthDetails }): void {
-    const modalRef = this.modalService.open(HealthModalComponent);
+    const modalRef = this.modalService.open(HealthModal);
     modalRef.componentInstance.health = health;
   }
 }

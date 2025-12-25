@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,29 +16,33 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { mergeMap } from 'rxjs/operators';
+<%_ if (enableTranslation) { _%>
+import { TranslateDirective } from 'app/shared/language';
+import { TranslateModule } from '@ngx-translate/core';
+<%_ } _%>
 
-import SharedModule from 'app/shared/shared.module';
+import { PRIMENG_MODULES } from 'app/shared/primeng-common.module';
 import { ActivateService } from './activate.service';
 
 @Component({
-  selector: '<%= jhiPrefixDashed %>-activate',
-  standalone: true,
-  imports: [SharedModule, RouterModule],
-  templateUrl: './activate.component.html',
+    selector: '<%= jhiPrefixDashed %>-activate',
+    imports: [RouterLink, ...PRIMENG_MODULES<% if (enableTranslation) { %>, TranslateDirective, TranslateModule<% } %>],
+    templateUrl: './activate.html',
 })
-export default class ActivateComponent implements OnInit {
-  error = false;
-  success = false;
+export default class Activate implements OnInit {
+    error = signal(false);
+    success = signal(false);
 
-  constructor(private activateService: ActivateService, private route: ActivatedRoute) {}
+    protected readonly activateService = inject(ActivateService);
+    protected readonly route = inject(ActivatedRoute);
 
-  ngOnInit(): void {
-    this.route.queryParams.pipe(mergeMap(params => this.activateService.get(params.key))).subscribe({
-      next: () => this.success = true,
-      error: () => this.error = true
-    });
-  }
+    ngOnInit(): void {
+        this.route.queryParams.pipe(mergeMap(params => this.activateService.get(params.key))).subscribe({
+            next: () => this.success.set(true),
+            error: () => this.error.set(true),
+        });
+    }
 }

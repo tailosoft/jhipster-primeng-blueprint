@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,42 +16,53 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Component, OnInit } from '@angular/core';
-
-import SharedModule from 'app/shared/shared.module';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { KeyValuePipe, JsonPipe } from '@angular/common';
+<%_ if (enableTranslation) { _%>
+import { TranslateDirective } from 'app/shared/language';
+import { TranslateModule } from '@ngx-translate/core';
+<%_ } _%>
+
+import { PRIMENG_MODULES } from 'app/shared/primeng-common.module';
 import { ConfigurationService } from './configuration.service';
 import { Bean, PropertySource } from './configuration.model';
 
 @Component({
-  standalone: true,
-  selector: '<%= jhiPrefixDashed %>-configuration',
-  templateUrl: './configuration.component.html',
-  imports: [SharedModule, FormsModule],
+    selector: '<%= jhiPrefixDashed %>-configuration',
+    templateUrl: './configuration.html',
+    imports: [
+        ...PRIMENG_MODULES,
+        FormsModule,
+        KeyValuePipe,
+        JsonPipe,
+<%_ if (enableTranslation) { _%>
+        TranslateDirective,
+        TranslateModule,
+<%_ } _%>
+    ],
 })
-export default class ConfigurationComponent implements OnInit {
-  allBeans!: Bean[];
-  beans: Bean[] = [];
-  beansFilter = '';
-  beansAscending = true;
-  propertySources: PropertySource[] = [];
+export default class Configuration implements OnInit {
+    allBeans = signal<Bean[] | undefined>(undefined);
+    beansFilter = signal<string>('');
+    propertySources = signal<PropertySource[]>([]);
 
-  constructor(private configurationService: ConfigurationService) {}
-
-  ngOnInit(): void {
-    this.configurationService.getBeans().subscribe(beans => {
-      this.allBeans = beans;
-      this.filterAndSortBeans();
+    beans = computed(() => {
+        let data = this.allBeans() ?? [];
+        const beansFilter = this.beansFilter();
+        if (beansFilter) {
+            data = data.filter(bean => bean.prefix.toLowerCase().includes(beansFilter.toLowerCase()));
+        }
+        return data;
     });
 
-    this.configurationService.getPropertySources().subscribe(propertySources => (this.propertySources = propertySources));
-  }
+    protected readonly configurationService = inject(ConfigurationService);
 
-  filterAndSortBeans(): void {
-    const beansAscendingValue = this.beansAscending ? -1 : 1;
-    const beansAscendingValueReverse = this.beansAscending ? 1 : -1;
-    this.beans = this.allBeans
-      .filter(bean => !this.beansFilter || bean.prefix.toLowerCase().includes(this.beansFilter.toLowerCase()))
-      .sort((a, b) => (a.prefix < b.prefix ? beansAscendingValue : beansAscendingValueReverse));
-  }
+    ngOnInit(): void {
+        this.configurationService.getBeans().subscribe(beans => {
+            this.allBeans.set(beans);
+        });
+
+        this.configurationService.getPropertySources().subscribe(propertySources => this.propertySources.set(propertySources));
+    }
 }

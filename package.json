@@ -1,60 +1,62 @@
 {
-  "name": "generator-jhipster-primeng-blueprint",
-  "version": "8.0.0",
+  "name": "generator-jhipster-generator-jhipster-primeng-blueprint",
+  "version": "9.0.0",
   "description": "This blueprint generated code that uses primeng components instead of bootstrap ones",
   "keywords": [
     "yeoman-generator",
     "jhipster-blueprint",
     "jhipster-8"
   ],
-  "license": "Apache-2.0",
-  "type": "module",
-  "imports": {
-    "#test-utils": "./test/utils.mjs"
-  },
   "homepage": "https://github.com/tailosoft/jhipster-primeng-blueprint",
+  "license": "Apache-2.0",
   "author": {
     "name": "Youssef El Houti",
     "email": "youssef.elhouti@tailosoft.com",
     "url": "https://tailosoft.com"
   },
+  "type": "module",
+  "imports": {
+    "#test-utils": "./test/utils.mjs"
+  },
   "files": [
-    "generators"
+    "generators",
+    "!**/__*",
+    "!**/*.snap",
+    "!**/*.spec.?(c|m)js"
   ],
   "scripts": {
-    "ejslint": "ejslint generators/**/*.ejs && ejslint generators/**/*.ejs -d '&'",
-    "esmocha": "esmocha generators --no-insight --forbid-only",
+    "ejslint": "ejslint generators/**/*.ejs",
     "lint": "eslint .",
     "lint-fix": "npm run ejslint && npm run lint -- --fix",
-    "prettier:check": "prettier --check \"{,src/**/}*.{md,json,yml,html,js,ts,tsx,css,scss,vue,java}\"",
-    "prettier:format": "prettier --write \"{,src/**/}*.{md,json,yml,html,js,ts,tsx,css,scss,vue,java}\"",
-    "pretest": "npm run prettier:check && npm run lint",
-    "test": "npm run esmocha",
-    "update-snapshot": "npm run esmocha -- --update-snapshot"
+    "prepare": "husky",
+    "prettier-check": "prettier --check \"{,**/}*.{md,json,yml,html,cjs,mjs,js,cts,mts,ts,tsx,css,scss,vue,java}\"",
+    "prettier-format": "prettier --write \"{,**/}*.{md,json,yml,html,cjs,mjs,js,cts,mts,ts,tsx,css,scss,vue,java}\"",
+    "pretest": "npm run prettier-check && npm run lint",
+    "test": "vitest run",
+    "update-snapshot": "vitest run --update",
+    "vitest": "vitest"
   },
   "dependencies": {
-    "chalk": "4.1.2",
-    "generator-jhipster": "8.0.0-beta.1",
+    "generator-jhipster": "9.0.0-beta.0",
     "lodash": "^4.17.21",
     "pluralize": "^8.0.0"
   },
   "devDependencies": {
-    "ejs-lint": "2.0.0",
-    "eslint": "8.44.0",
-    "eslint-config-airbnb-base": "15.0.0",
-    "eslint-config-prettier": "8.8.0",
-    "eslint-plugin-import": "2.27.5",
-    "eslint-plugin-prettier": "4.2.1",
-    "esmocha": "1.0.1",
-    "prettier": "2.8.8",
-    "prettier-plugin-java": "",
-    "prettier-plugin-packagejson": "",
-    "yeoman-test": "8.0.0-rc.1"
+    "ejs-lint": "2.0.1",
+    "eslint": "9.39.2",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-prettier": "5.5.4",
+    "globals": "16.5.0",
+    "husky": "9.1.7",
+    "jiti": "2.6.1",
+    "lint-staged": "16.2.7",
+    "prettier": "3.7.4",
+    "prettier-plugin-packagejson": "2.5.20",
+    "vitest": "4.0.16",
+    "yeoman-test": ">=10"
   },
   "engines": {
-    "node": ">=^18.13.0 || >= 20.2.0"
-  },
-  "cacheDirectories": [
-    "node_modules"
-  ]
+    "generator-jhipster": "9.0.0-beta.0",
+    "node": "^20.18.3 || >=22.12.0"
+  }
 }

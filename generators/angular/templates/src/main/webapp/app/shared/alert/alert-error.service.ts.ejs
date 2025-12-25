@@ -16,7 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 <%_ if (enableTranslation) { _%>
 import { TranslateService } from '@ngx-translate/core';
 <%_ } _%>
@@ -25,9 +25,10 @@ import { HttpErrorResponse } from '@angular/common/http';
 
 @Injectable({providedIn: 'root'})
 export class AlertErrorService {
-
-
-    constructor(private messageService: MessageService<% if (enableTranslation) { %>, private translateService: TranslateService<% } %>) {}
+    private messageService = inject(MessageService);
+<%_ if (enableTranslation) { _%>
+    private translateService = inject(TranslateService);
+<%_ } _%>
 
     displayError(httpErrorResponse: HttpErrorResponse): void {
         let i;

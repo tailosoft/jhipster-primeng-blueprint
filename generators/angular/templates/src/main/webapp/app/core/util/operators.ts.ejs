@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,13 +16,12 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-
 /*
  * Function used to workaround https://github.com/microsoft/TypeScript/issues/16069
  * es2019 alternative `const filteredArr = myArr.flatMap((x) => x ? x : []);`
  */
-export function isPresent<T>(t: T | undefined | null | void): t is T {
+export function isPresent<T>(t: T | undefined | null): t is T {
   return t !== undefined && t !== null;
 }
 
-export const filterNaN = (input: number): number => isNaN(input) ? 0 : input;
+export const filterNaN = (input: number): number => (Number.isNaN(input) ? 0 : input);

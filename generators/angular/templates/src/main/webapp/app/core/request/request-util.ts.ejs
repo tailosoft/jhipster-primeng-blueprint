@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,17 +16,18 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { HttpParams } from '@angular/common/http';
-import { FilterMatchMode, FilterMetadata } from 'primeng/api';
-import { TableLazyLoadEvent } from 'primeng/table';
-import { ITEMS_PER_PAGE } from 'app/config/pagination.constants';
-import { flatten, unflatten } from 'flat';
-import { Params } from '@angular/router';
-import { Table } from 'primeng/table';
 import { DatePipe } from '@angular/common';
-import { DATE_FORMAT } from 'app/config/input.constants';
+import { HttpParams } from '@angular/common/http';
+import { Params } from '@angular/router';
 
-type FiltersDetails = { [_: string]: { type: string } | undefined };
+import { flatten, unflatten } from 'flat';
+import { FilterMatchMode, FilterMetadata } from 'primeng/api';
+import { Table, TableLazyLoadEvent } from 'primeng/table';
+
+import { DATE_FORMAT } from 'app/config/input.constants';
+import { ITEMS_PER_PAGE } from 'app/config/pagination.constants';
+
+type FiltersDetails = Record<string, { type: string } | undefined>;
 
 const datePipe = new DatePipe('en');
 
@@ -34,18 +35,12 @@ export const createRequestOption = (req?: any): HttpParams => {
   let options: HttpParams = new HttpParams();
 
   if (req) {
-    Object.keys(req).forEach(key => {
-      if (key !== 'sort' && req[key] != null) {
-        for (const value of [].concat(req[key]).filter(v => v !== '')) {
+    for (const [key, val] of Object.entries(req)) {
+      if (val !== undefined && val !== null) {
+        for (const value of [req[key]].flat().filter(v => v !== '')) {
           options = options.append(key, value);
         }
       }
-    });
-
-    if (req.sort) {
-      req.sort.forEach((val: string) => {
-        options = options.append('sort', val);
-      });
     }
   }
 
@@ -55,17 +50,17 @@ export const createRequestOption = (req?: any): HttpParams => {
 export const lazyLoadEventToServerQueryParams = (
   event?: TableLazyLoadEvent,
   globalFilter = 'globalFilter',
-  filtersDetails: FiltersDetails = {}
-): { [_: string]: any } => {
-  const params: { [index: string]: any } = {};
+  filtersDetails: FiltersDetails = {},
+): Record<string, any> => {
+  const params: Record<string, any> = {};
   if (event) {
     if (event.filters) {
       for (const filterName of Object.keys(event.filters)) {
         let filters: FilterMetadata[];
         if (!Array.isArray(event.filters[filterName])) {
-          filters = [event.filters[filterName]! as FilterMetadata];
+          filters = [event.filters[filterName]!];
         } else {
-          filters = event.filters[filterName] as FilterMetadata[];
+          filters = event.filters[filterName];
         }
         filters.forEach(filter => {
           if (filter.value !== undefined && filter.value !== null) {
@@ -86,23 +81,23 @@ export const lazyLoadEventToServerQueryParams = (
       params[globalFilter] = event.globalFilter;
     }
     if (event.multiSortMeta) {
-      params['sort'] = event.multiSortMeta.map(s => s.field + (s.order === -1 ? ',desc' : ',asc'));
+      params.sort = event.multiSortMeta.map(s => s.field + (s.order === -1 ? ',desc' : ',asc'));
     }
-    params['page'] = (event.first ?? 0) / (event.rows ?? ITEMS_PER_PAGE);
-    params['size'] = event.rows ?? ITEMS_PER_PAGE;
+    params.page = (event.first ?? 0) / (event.rows ?? ITEMS_PER_PAGE);
+    params.size = event.rows ?? ITEMS_PER_PAGE;
   } else {
-    params['size'] = ITEMS_PER_PAGE;
+    params.size = ITEMS_PER_PAGE;
   }
   return params;
 };
 
 export const fillTableFromQueryParams = (table: Table, queryParams: Params, filtersDetails: FiltersDetails): void => {
   const params: any = unflatten(queryParams);
-  table.first = +queryParams.first || 0;
-  table.multiSortMeta = (params['msm'] || []).map((sm: any) => ({ field: sm.field, order: +sm.order }));
-  const filters: { [_: string]: FilterMetadata | FilterMetadata[] | undefined } = {};
-  if (params['f']) {
-    Object.entries((flatten as any)(params['f'], { safe: true })).forEach(([field, value]) => {
+  table.first = +(queryParams.first ?? 0);
+  table.multiSortMeta = (params.msm ?? []).map((sm: any) => ({ field: sm.field, order: +sm.order }));
+  const filters: Record<string, FilterMetadata | FilterMetadata[] | undefined> = {};
+  if (params.f) {
+    Object.entries((flatten as any)(params.f, { safe: true })).forEach(([field, value]) => {
       let filterName = field;
       let filterValue = value;
       if (filterName === 'globalFilter') {
@@ -122,9 +117,7 @@ export const fillTableFromQueryParams = (table: Table, queryParams: Params, filt
         } else {
           filterValue = deserializeFilter(filterValue as string, filtersDetails[filterName]?.type);
         }
-        if (!filters[filterName]) {
-          filters[filterName] = [];
-        }
+        filters[filterName] ??= [];
         (filters[filterName] as FilterMetadata[]).push({
           value: filterValue,
           matchMode,
@@ -136,12 +129,12 @@ export const fillTableFromQueryParams = (table: Table, queryParams: Params, filt
   Object.keys(table.filters).forEach(k => {
     if (!Array.isArray(table.filters[k])) {
       if (!filters[k]) {
-        table.filters[k] = { ...(table.filters[k] as FilterMetadata), value: null };
+        table.filters[k] = { ...table.filters[k], value: null };
       } else {
-        table.filters[k] = { ...(table.filters[k] as FilterMetadata), ...filters[k] };
+        table.filters[k] = { ...table.filters[k], ...filters[k] };
       }
     } else {
-      const tableFilter = table.filters[k] as FilterMetadata[];
+      const tableFilter = table.filters[k];
       if (!filters[k]) {
         tableFilter.splice(1);
         tableFilter[0].value = null;
@@ -160,18 +153,20 @@ export const fillTableFromQueryParams = (table: Table, queryParams: Params, filt
   // starting from primeng 16, filters are initialized only after page is loaded, therefore if a filter is not find in the table we need to add it manually
   // the thing is, we don't know if the filter display is row or menu, for now we suppose it is menu, if this behavior changes, we can use filters details to specify which ones are row
   // we check that filter is present in filter details to avoid adding in the filters something that is not supposed to be there
-  Object.keys(filters).filter(k => !table.filters[k] as any && (filtersDetails[k] || k === 'globalFilter')).forEach(k => {
-    table.filters[k] = filters[k]!;
-  })
+  Object.keys(filters)
+    .filter(k => (!table.filters[k] as any) && (filtersDetails[k] ?? k === 'globalFilter'))
+    .forEach(k => {
+      table.filters[k] = filters[k]!;
+    });
 };
 
 export const lazyLoadEventToRouterQueryParams = (event: TableLazyLoadEvent, filtersDetails: FiltersDetails): Params => {
-  const queryParams: { [_: string]: any } = {};
+  const queryParams: Record<string, any> = {};
   if (event.first) {
-    queryParams['first'] = event.first;
+    queryParams.first = event.first;
   }
   if (event.multiSortMeta?.length) {
-    queryParams['msm'] = event.multiSortMeta;
+    queryParams.msm = event.multiSortMeta;
   }
   if (event.filters) {
     Object.entries(event.filters).forEach(([field, filterMetas]) => {

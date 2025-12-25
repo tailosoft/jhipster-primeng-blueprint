@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,25 +16,29 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
+import { KeyValuePipe, DecimalPipe } from '@angular/common';
+<%_ if (enableTranslation) { _%>
+import { TranslateDirective } from 'app/shared/language';
+import { TranslateModule } from '@ngx-translate/core';
+<%_ } _%>
 
-import SharedModule from 'app/shared/shared.module';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { JvmMetrics } from 'app/admin/metrics/metrics.model';
 
 @Component({
-  standalone: true,
   selector: '<%= jhiPrefixDashed %>-jvm-memory',
-  templateUrl: './jvm-memory.component.html',
-  imports: [SharedModule],
+  templateUrl: './jvm-memory.html',
+  imports: [NgbModule, KeyValuePipe, DecimalPipe<% if (enableTranslation) { %>, TranslateDirective, TranslateModule<% } %>],
 })
-export class JvmMemoryComponent {
+export class JvmMemory {
   /**
-   * object containing all jvm memory metrics
+   * Object containing all jvm memory metrics
    */
-  @Input() jvmMemoryMetrics?: { [key: string]: JvmMetrics };
+  jvmMemoryMetrics = input<Record<string, JvmMetrics>>();
 
   /**
-   * boolean field saying if the metrics are in the process of being updated
+   * Boolean field saying if the metrics are in the process of being updated
    */
-  @Input() updating?: boolean;
+  updating = input<boolean>();
 }

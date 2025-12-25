@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -17,10 +17,15 @@
  limitations under the License.
 -%>
 import { Component } from '@angular/core';
+<%_ if (enableTranslation) { _%>
+import { TranslateDirective } from 'app/shared/language';
+<%_ } _%>
 
 @Component({
-  standalone: true,
   selector: '<%= jhiPrefixDashed %>-footer',
-  templateUrl: './footer.component.html',
+  templateUrl: './footer.html',
+<%_ if (enableTranslation) { _%>
+  imports: [TranslateDirective],
+<%_ } _%>
 })
-export default class FooterComponent {}
+export default class Footer {}

@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,90 +16,93 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+<%_ if (clientTestFrameworkVitest) { _%>
+import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
+<%_ } _%>
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of } from 'rxjs';
 
-import LogsComponent from './logs.component';
+import Logs from './logs';
 import { LogsService } from './logs.service';
 import { Log, LoggersResponse } from './log.model';
-<%_ if (applicationTypeGateway && serviceDiscoveryAny) { _%>
+<%_ if (applicationTypeGateway && gatewayServicesApiAvailable) { _%>
 import { GatewayRoutesService } from '../gateway/gateway-routes.service';
 <%_ } _%>
 
-describe('LogsComponent', () => {
-  let comp: LogsComponent;
-  let fixture: ComponentFixture<LogsComponent>;
-  let service: LogsService;
+describe('Logs', () => {
+    let comp: Logs;
+    let fixture: ComponentFixture<Logs>;
+    let service: LogsService;
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        imports: [HttpClientTestingModule, LogsComponent],
-        providers: [LogsService<%= applicationTypeGateway && serviceDiscoveryAny ? ', GatewayRoutesService' : '' %>],
-      })
-        .overrideTemplate(LogsComponent, '')
-        .compileComponents();
-    })
-  );
-
-  beforeEach(() => {
-    fixture = TestBed.createComponent(LogsComponent);
-    comp = fixture.componentInstance;
-    service = TestBed.inject(LogsService);
-  });
-
-  describe('OnInit', () => {
-    it('should set all default values correctly', () => {
-      expect(comp.filter).toBe('');
-      expect(comp.orderProp).toBe('name');
-      expect(comp.ascending).toBe(true);
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [Logs],
+            providers: [
+                provideHttpClientTesting(),
+                LogsService,
+<%_ if (applicationTypeGateway && gatewayServicesApiAvailable) { _%>
+                GatewayRoutesService,
+<%_ } _%>
+            ],
+        }).compileComponents();
     });
 
-    it('Should call load all on init', () => {
-      // GIVEN
-      const log = new Log('main', 'WARN');
-      jest.spyOn(service, 'findAll').mockReturnValue(
-        of({
-          loggers: {
-            main: {
-              effectiveLevel: 'WARN',
-            },
-          },
-        } as unknown as LoggersResponse)
-      );
-
-      // WHEN
-      comp.ngOnInit();
-
-      // THEN
-      expect(service.findAll).toHaveBeenCalled();
-      expect(comp.loggers?.[0]).toEqual(expect.objectContaining(log));
+    beforeEach(() => {
+        fixture = TestBed.createComponent(Logs);
+        comp = fixture.componentInstance;
+        service = TestBed.inject(LogsService);
     });
-  });
 
-  describe('change log level', () => {
-    it('should change log level correctly', () => {
-      // GIVEN
-      const log = new Log('main', 'ERROR');
-      jest.spyOn(service, 'changeLevel').mockReturnValue(of({} as any));
-      jest.spyOn(service, 'findAll').mockReturnValue(
-        of({
-          loggers: {
-            main: {
-              effectiveLevel: 'ERROR',
-            },
-          },
-        } as unknown as LoggersResponse)
-      );
+    describe('OnInit', () => {
+        it('should set all default values correctly', () => {
+            expect(comp.filter()).toBe('');
+        });
 
-      // WHEN
-      comp.changeLevel('main', 'ERROR');
+        it('should call load all on init', () => {
+            // GIVEN
+            const log = new Log('main', 'WARN');
+            <%= clientTestFramework %>.spyOn(service, 'findAll').mockReturnValue(
+                of({
+                    loggers: {
+                        main: {
+                            effectiveLevel: 'WARN',
+                        },
+                    },
+                } as unknown as LoggersResponse),
+            );
 
-      // THEN
-      expect(service.changeLevel).toHaveBeenCalled();
-      expect(service.findAll).toHaveBeenCalled();
-      expect(comp.loggers?.[0]).toEqual(expect.objectContaining(log));
+            // WHEN
+            comp.ngOnInit();
+
+            // THEN
+            expect(service.findAll).toHaveBeenCalled();
+            expect(comp.loggers()?.[0]).toEqual(expect.objectContaining(log));
+        });
     });
-  });
+
+    describe('change log level', () => {
+        it('should change log level correctly', () => {
+            // GIVEN
+            const log = new Log('main', 'ERROR');
+            <%= clientTestFramework %>.spyOn(service, 'changeLevel').mockReturnValue(of({}));
+            <%= clientTestFramework %>.spyOn(service, 'findAll').mockReturnValue(
+                of({
+                    loggers: {
+                        main: {
+                            effectiveLevel: 'ERROR',
+                        },
+                    },
+                } as unknown as LoggersResponse),
+            );
+
+            // WHEN
+            comp.changeLevel('main', 'ERROR');
+
+            // THEN
+            expect(service.changeLevel).toHaveBeenCalled();
+            expect(service.findAll).toHaveBeenCalled();
+            expect(comp.loggers()?.[0]).toEqual(expect.objectContaining(log));
+        });
+    });
 });

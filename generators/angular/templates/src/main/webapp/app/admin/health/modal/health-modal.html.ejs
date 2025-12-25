@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2023 the original author or authors from the JHipster project.
+ Copyright 2013-2025 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -17,40 +17,42 @@
  limitations under the License.
 -%>
 <div class="modal-header">
-  <h4 class="modal-title" id="showHealthLabel" *ngIf="health">
-    <%_ if (enableTranslation) { _%>
-    {{ 'health.indicator.' + health.key | translate }}
-    <%_ } else { _%>
-    <span class="text-capitalize">{{ health.key }}</span>
-    <%_ } _%>
+@if (health) {
+  <h4 class="modal-title" id="showHealthLabel">
+    __jhiTranslateTagEnum__('health.indicator', { "value": "health.key", "fallback": "health.key" })
   </h4>
+}
 
   <button aria-label="Close" data-dismiss="modal" class="btn-close" type="button" (click)="dismiss()">
-    <span aria-hidden="true">&times;</span>
+    <span aria-hidden="true">&nbsp;</span>
   </button>
 </div>
 
 <div class="modal-body pad">
-  <div *ngIf="health">
-    <h5 <%= jhiPrefix %>Translate="health.details.properties"><%- getWebappTranslation('health.details.properties') %></h5>
+@if (health) {
+  <div>
+    <h5>__jhiTranslateTag__('health.details.properties')</h5>
 
     <div class="table-responsive">
       <table class="table table-striped" aria-describedby="showHealthLabel">
         <thead>
           <tr>
-            <th scope="col" class="text-start" <%= jhiPrefix %>Translate="health.details.name"><%- getWebappTranslation('health.details.name') %></th>
-            <th scope="col" class="text-start" <%= jhiPrefix %>Translate="health.details.value"><%- getWebappTranslation('health.details.value') %></th>
+            <th scope="col" class="text-start">__jhiTranslateTag__('health.details.name')</th>
+            <th scope="col" class="text-start">__jhiTranslateTag__('health.details.value')</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let healthDetail of health.value.details! | keyvalue">
+        @for (healthDetail of health.value.details! | keyvalue; track healthDetail.key) {
+          <tr>
             <td class="text-start">{{ healthDetail.key }}</td>
             <td class="text-start">{{ readableValue(healthDetail.value) }}</td>
           </tr>
+        }
         </tbody>
       </table>
     </div>
   </div>
+}
 </div>
 
 <div class="modal-footer">
