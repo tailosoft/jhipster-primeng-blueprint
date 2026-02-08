@@ -75,7 +75,7 @@ _%>
 <%_ if (jpaMetamodelFiltering) { _%>
     <%_ if (['byte[]', 'ByteBuffer'].includes(fieldType) && field.fieldTypeBlobContent !== 'text') { _%>
     <%_ } else if (fieldType === 'Boolean') { _%>
-                        <p-columnFilter type="boolean" matchMode="equals" field="<%= field.fieldName %>" display="menu" [showOperator]="false" class="p-ml-auto"></p-columnFilter>
+                        <p-columnFilter type="boolean" matchMode="equals" field="<%= field.fieldName %>" display="menu" [showOperator]="false" [showAddButton]="false" class="p-ml-auto"></p-columnFilter>
     <%_ } else if (field.fieldIsEnum) { _%>
                         <p-columnFilter field="<%= field.fieldName %>" matchMode="in" display="menu" [showOperator]="false" [showMatchModes]="false" [showAddButton]="false" class="p-ml-auto">
                             <ng-template #filter let-value let-filter="filterCallback">
