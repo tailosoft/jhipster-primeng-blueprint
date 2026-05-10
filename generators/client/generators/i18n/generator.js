@@ -9,36 +9,6 @@ export default class extends BaseApplicationGenerator {
     });
   }
 
-  get [BaseApplicationGenerator.DEFAULT]() {
-    return this.asDefaultTaskGroup({
-      async updateTranslations({ application, entities }) {
-        const entitiesToWriteTranslationFor = entities.filter(entity => !entity.skipClient && !entity.builtInUser);
-        if (application.userManagement && !application.userManagement?.skipClient) {
-          entitiesToWriteTranslationFor.push(application.userManagement);
-        }
-
-        const { enableTranslation, languages, frontendAppName } = application;
-        if (!enableTranslation) return;
-
-        this.queueTask({
-          method: async () => {
-            for (const entity of entitiesToWriteTranslationFor) {
-              const { entityTranslationKey, readOnly } = entity;
-              if (!readOnly) {
-                for (const lang of languages) {
-                  this.editEntityTranslation(application.translations, frontendAppName, entityTranslationKey, lang);
-                }
-              }
-            }
-          },
-          taskName: 'updateTranslations',
-          queueName: 'jhipster:loadingTranslations',
-          once: true,
-        });
-      },
-    });
-  }
-
   get [BaseApplicationGenerator.WRITING_ENTITIES]() {
     return this.asWritingEntitiesTaskGroup({
       async updateTranslations({ application, entities }) {
@@ -62,10 +32,9 @@ export default class extends BaseApplicationGenerator {
             }
           }
         }
-      }
+      },
     });
   }
-
 
   editEntityTranslation(json, frontendAppName, entityTranslationKey, lang) {
     const home = json[frontendAppName][entityTranslationKey].home;
