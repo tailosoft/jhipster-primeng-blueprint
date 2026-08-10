@@ -1,0 +1,75 @@
+{
+  "name": "primeng-blueprint",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "VARIANT": "21-bookworm",
+      "NODE_VERSION": "22"
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "java.jdt.ls.java.home": "/docker-java-home"
+      },
+      "extensions": [
+        "angular.ng-template",
+        "christian-kohler.npm-intellisense",
+        "dbaeumer.vscode-eslint",
+        "vscjava.vscode-java-pack",
+        "pivotal.vscode-boot-dev-pack",
+        "esbenp.prettier-vscode",
+        "ms-playwright.playwright",
+        "anthropic.claude-code"
+      ]
+    }
+  },
+
+  // Sandbox: full workspace mounted including .git — local commits are allowed.
+  // No ~/.kube, ~/.aws, ~/.ssh exist here, and no stored git credentials — BUT the IDE
+  // (JetBrains Gateway) forwards the host ssh-agent, which the container cannot block: the
+  // socket is owned by the container user, so any process can USE your keys with it. The
+  // host-side initializeCommand (host-guard.sh) refuses to start unless every forwarded key
+  // requires interactive confirmation, and agent-guard.sh re-checks in every shell. Push from the host.
+  // Mounted at the SAME path as on the host so git worktrees (which store absolute paths in
+  // .git files and gitdir pointers) work on both sides.
+  "workspaceMount": "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind,consistency=cached",
+  "workspaceFolder": "${localWorkspaceFolder}",
+  // Relocate all Claude state into the persistent volume below. Claude resolves its config as
+  // join(CLAUDE_CONFIG_DIR ?? homedir(), ".claude.json"), so this also lands ~/.claude.json in the volume.
+  "containerEnv": {
+    "CLAUDE_CONFIG_DIR": "/home/vscode/.claude"
+  },
+  "mounts": [
+    // mount .devcontainer read-only over the writable workspace mount: a prompt-injected
+    // agent must not be able to rewrite devcontainer.json / Dockerfile, since the host
+    // re-executes them with the host Docker daemon on the next rebuild (container-escape vector)
+    "source=${localWorkspaceFolder}/.devcontainer,target=${localWorkspaceFolder}/.devcontainer,type=bind,readonly",
+    // Container-owned, fully persistent Claude state (login, transcripts, settings, .claude.json).
+    // Survives rebuilds, isolated from the host — no host creds/keys/history exposed, and nothing
+    // mounted read-only for Claude to choke on. First launch only: run `claude` and /login once.
+    "source=primeng-blueprint-claude,target=/home/vscode/.claude,type=volume"
+  ],
+
+  // Runs on the HOST before the container starts. Aborts start unless every key in the
+  // ssh-agent that would be forwarded in requires interactive confirmation (see the script).
+  // Build-time can't do this — it has no access to your host agent; the host pre-start hook is
+  // the only place. NOTE: VS Code aborts on a non-zero initializeCommand; verify JetBrains does too.
+  "initializeCommand": "bash '${localWorkspaceFolder}/.devcontainer/host-guard.sh'",
+
+  // --name gives the container a stable, predictable name (single shared container for all worktrees).
+  "runArgs": [
+    "--name=primeng-blueprint-dev",
+    "--cap-drop=ALL",
+    "--security-opt=no-new-privileges",
+    "--add-host=host.docker.internal:host-gateway"
+  ],
+
+  // No port forward, or else the container monopolises these ports.
+  // To exercise a generated app, run its e2e inside the container.
+  // frontend, backend
+  //  "forwardPorts": [9000, 8080],
+
+  "remoteUser": "vscode"
+}
