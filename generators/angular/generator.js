@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+
 import AngularGenerator from 'generator-jhipster/generators/angular';
 import _ from 'lodash';
 import pluralize from 'pluralize';
@@ -5,6 +7,20 @@ import pluralize from 'pluralize';
 import { writeEntitiesFiles } from './entity-files-angular.js';
 import { writeFiles } from './files-angular.js';
 import { prepareFineGrainedPermissions } from '../client/utils.mjs';
+
+const blueprintPackageJson = JSON.parse(readFileSync(new URL('../../package.json', import.meta.url), 'utf8'));
+
+/**
+ * The toolchain a generated project must depend on, taken from this blueprint's own manifest so there is a
+ * single place to bump it. Needed because the `package.json` template rewrites the file wholesale: a pin kept
+ * only in the project is lost on the first regeneration, taking with it the generators the *next* one needs.
+ */
+const REQUIRED_GENERATORS = {
+  'generator-jhipster': blueprintPackageJson.dependencies['generator-jhipster'],
+  // Switch to `blueprintPackageJson.version` once this blueprint is published to npm; until then a
+  // bare version would not resolve, so point at the branch consumers actually install from.
+  [blueprintPackageJson.name]: 'github:tailosoft/jhipster-primeng-blueprint#feat/pin-generators',
+};
 
 export default class extends AngularGenerator {
   constructor(args, opts, features) {
@@ -247,6 +263,11 @@ export default class extends AngularGenerator {
     return this.asEndTaskGroup({
       ...super.end,
       async endTemplateTask() {},
+      // At END, after every generator has contributed to package.json -- notably jhipster's own
+      // addJHipsterDependencies, which would otherwise leave a bare version npm resolves to the registry.
+      forceGeneratorVersions() {
+        this.packageJson.merge({ devDependencies: REQUIRED_GENERATORS });
+      },
     });
   }
 

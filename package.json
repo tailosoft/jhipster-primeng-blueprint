@@ -37,7 +37,7 @@
     "vitest": "vitest"
   },
   "dependencies": {
-    "generator-jhipster": "9.0.0-beta.0",
+    "generator-jhipster": "github:yelhouti/generator-jhipster#composite-key-9",
     "lodash": "^4.17.21",
     "pluralize": "^8.0.0"
   },
