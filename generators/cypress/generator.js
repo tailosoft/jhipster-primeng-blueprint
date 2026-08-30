@@ -1,5 +1,7 @@
 import CypressGenerator from 'generator-jhipster/generators/cypress';
 
+import { patchFakeDataForPrimeng } from '../e2e-utils.mjs';
+
 export default class extends CypressGenerator {
   constructor(args, opts, features) {
     super(args, opts, {
@@ -96,15 +98,7 @@ export default class extends CypressGenerator {
     return this.asPreparingEachEntityFieldTaskGroup({
       ...super.preparingEachEntityField,
       customizeFakeData({ field }) {
-        const originalGenerateFakeData = field.generateFakeData;
-        field.generateFakeData = (type = 'csv') => {
-          const data = originalGenerateFakeData(type);
-          // Only transform for cypress and date/datetime types
-          if (type === 'cypress' && data && this.isDateField(field)) {
-            return this.formatDateForCypress(data);
-          }
-          return data;
-        };
+        patchFakeDataForPrimeng(field);
       },
     });
   }
@@ -184,23 +178,5 @@ export default class extends CypressGenerator {
       ...super.end,
       async endTemplateTask() {},
     });
-  }
-
-  isDateField(field) {
-    return ['Instant', 'ZonedDateTime', 'LocalDate'].includes(field.fieldType);
-  }
-
-  formatDateForCypress(isoDate) {
-    // Input format: "2025-12-28T09:54" (current cypress format)
-    // Output format: "12/28/2025 09:54" (primeng format)
-
-    if (isoDate.includes('T')) {
-      const [datePart, timePart] = isoDate.split('T');
-      const [year, month, day] = datePart.split('-');
-      return `${month}/${day}/${year} ${timePart}`;
-    }
-    // LocalDate: "2025-12-28" -> "12/28/2025"
-    const [year, month, day] = isoDate.split('-');
-    return `${month}/${day}/${year}`;
   }
 }

@@ -1,0 +1,73 @@
+<%#
+ Copyright 2013-2025 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+import type { Page } from '@playwright/test';
+
+import type { Api } from './api';
+<%_ if (authenticationTypeOauth2) { _%>
+import { getOauth2Data, oauthLogin } from './oauth2';
+<%_ } _%>
+
+<%_ if (authenticationTypeJwt) { _%>
+export const authenticationUrl = '/api/authenticate';
+export const jwtStorageName = '<%= jhiPrefixDashed %>-authenticationToken';
+<%_ } else if (authenticationTypeSession) { _%>
+export const authenticationUrl = '/api/authentication';
+<%_ } _%>
+
+/**
+ * Authenticate through the API instead of the login form: the specs that assert on the
+ * login page drive the form themselves, everything else just needs a session.
+ */
+export async function login(page: Page, <%= authenticationTypeOauth2 ? '_api' : 'api' %>: Api, username: string, password: string): Promise<void> {
+<%_ if (authenticationTypeOauth2) { _%>
+  const oauth2Data = await getOauth2Data(page);
+  await oauthLogin(page, oauth2Data, username, password);
+<%_ } else if (authenticationTypeSession) { _%>
+  // Unauthenticated call, only issued so that the backend hands out the XSRF cookie.
+  await page.request.get('/api/account', { failOnStatusCode: false });
+  await api.authenticatedRequest({
+    method: 'POST',
+    url: authenticationUrl,
+    form: { username, password },
+  });
+<%_ } else { _%>
+  const response = await page.request.post(authenticationUrl, { data: { username, password } });
+  if (!response.ok()) {
+    throw new Error(`Authentication of '${username}' failed with ${response.status()}: ${await response.text()}`);
+  }
+  const { id_token: idToken } = (await response.json()) as { id_token: string };
+  api.bearerToken = idToken;
+
+  <%_ if (clientFrameworkVue) { _%>
+  const storedToken = idToken;
+  <%_ } else { _%>
+  // The webapp reads the token back with JSON.parse, so it has to be stored JSON encoded.
+  const storedToken = JSON.stringify(idToken);
+  <%_ } _%>
+  const storeToken = ([name, value]: [string, string]) => window.sessionStorage.setItem(name, value);
+  const tokenEntry: [string, string] = [jwtStorageName, storedToken];
+
+  // Replayed on every navigation so the application boots already authenticated.
+  await page.addInitScript(storeToken, tokenEntry);
+  if (!page.url().startsWith('about:')) {
+    // A page is already open: seed it too, addInitScript only applies to the next navigation.
+    await page.evaluate(storeToken, tokenEntry);
+  }
+<%_ } _%>
+}

@@ -1,0 +1,131 @@
+<%#
+ Copyright 2013-2025 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+import { expect, type Locator, type Page } from '@playwright/test';
+
+// ***********************************************
+// Entity selectors
+// ***********************************************
+
+export const entityTableSelector = '[data-cy="entityTable"]';
+export const entityCreateButtonSelector = '[data-cy="entityCreateButton"]';
+export const entityCreateSaveButtonSelector = '[data-cy="entityCreateSaveButton"]';
+export const entityCreateCancelButtonSelector = '[data-cy="entityCreateCancelButton"]';
+export const entityDetailsButtonSelector = '[data-cy="entityDetailsButton"]'; // can return multiple elements
+export const entityDetailsBackButtonSelector = '[data-cy="entityDetailsBackButton"]';
+export const entityEditButtonSelector = '[data-cy="entityEditButton"]';
+export const entityDeleteButtonSelector = '[data-cy="entityDeleteButton"]';
+export const entityConfirmDeleteButtonSelector = '.p-confirmdialog .p-confirmdialog-accept-button';
+
+/** Fixture images live next to the specs, paths are resolved from the repository root. */
+const fixturesDir = '<%= playwrightDir %>fixtures/';
+
+/**
+ * Interactions with the primeng widgets the entity forms are built from.
+ *
+ * The plain `[data-cy="…"]` element is the primeng *component*, not the native control, which
+ * is why most helpers reach one level deeper (`input`, `[data-pc-section="…"]`, …).
+ */
+export class EntityHelper {
+  constructor(private readonly page: Page) {}
+
+  getEntityHeading(entityName: string): Locator {
+    return this.page.locator(`[data-cy="${entityName}Heading"]`);
+  }
+
+  getEntityCreateUpdateHeading(entityName: string): Locator {
+    return this.page.locator(`[data-cy="${entityName}CreateUpdateHeading"]`);
+  }
+
+  getEntityDetailsHeading(entityInstanceName: string): Locator {
+    return this.page.locator(`[data-cy="${entityInstanceName}DetailsHeading"]`);
+  }
+
+  getEntityDeleteDialogHeading(): Locator {
+    return this.page.locator('.p-confirmdialog .p-dialog-title', { hasText: 'Confirm delete operation' });
+  }
+
+  field(fieldName: string): Locator {
+    return this.page.locator(`[data-cy="${fieldName}"]`);
+  }
+
+  /** The `checked` marker only exists in the DOM while a p-checkbox is on. */
+  checkedMarker(fieldName: string): Locator {
+    return this.page.locator(`[data-cy="${fieldName}"] > [data-p="checked"]`);
+  }
+
+  /**
+   * Types character by character: the primeng inputs (number, mask, date) reformat on every
+   * keystroke, so setting the value in one go would bypass their parsing.
+   */
+  async typeInField(fieldName: string, value: string | number): Promise<void> {
+    await this.field(fieldName).pressSequentially(String(value));
+  }
+
+  /** p-datepicker keeps its popup open while typing, Escape closes it before the assertion. */
+  async typeInDateField(fieldName: string, value: string): Promise<void> {
+    const input = this.field(fieldName).locator('input');
+    await input.clear();
+    await input.pressSequentially(value);
+    await input.press('Escape');
+  }
+
+  async setFieldImageAsBytesOfEntity(fieldName: string, fileName: string): Promise<void> {
+    // p-fileupload hides its native input behind the drop zone; setInputFiles drives it directly.
+    await this.field(fieldName).locator('input[type="file"]').setInputFiles(`${fixturesDir}${fileName}`);
+  }
+
+  async setFieldSelectToLastOfEntity(fieldName: string, multiSelect = false, filter?: string): Promise<void> {
+    const options = await this.openSelect(fieldName, multiSelect, filter);
+    const lastOption = options.last();
+    await lastOption.scrollIntoViewIfNeeded();
+    await expect(lastOption).toBeVisible();
+    await clickOnLeft(lastOption);
+    await this.closeSelect(fieldName, multiSelect);
+  }
+
+  async setFieldSelectToIndexOfEntity(index: number, fieldName: string, multiSelect = false, filter?: string): Promise<void> {
+    const options = await this.openSelect(fieldName, multiSelect, filter);
+    await clickOnLeft(options.nth(index));
+    await this.closeSelect(fieldName, multiSelect);
+  }
+
+  private async openSelect(fieldName: string, multiSelect: boolean, filter?: string): Promise<Locator> {
+    const typeSelect = multiSelect ? 'multiselect' : 'select';
+    await this.page.locator(`[data-cy="${fieldName}"] > .p-${typeSelect}-dropdown > [data-pc-section="dropdownicon"]`).click();
+    if (filter) {
+      await this.page.locator(`[data-cy="${fieldName}"] .p-${typeSelect}-filter`).pressSequentially(filter);
+    }
+    return this.page.locator(`[data-cy="${fieldName}"] [data-pc-section="option"]`);
+  }
+
+  private async closeSelect(fieldName: string, multiSelect: boolean): Promise<void> {
+    // A single select closes on pick, a multiselect stays open for the next one.
+    if (!multiSelect) return;
+    await this.page.locator(`[data-cy="${fieldName}"] > .p-multiselect-dropdown .p-multiselect-close`).click();
+  }
+}
+
+/**
+ * Clicks the left edge instead of the centre: long option labels are often overlapped by the
+ * scrollbar or by a neighbouring overlay, which makes a centre click land on the wrong element.
+ */
+const clickOnLeft = async (locator: Locator): Promise<void> => {
+  const box = await locator.boundingBox();
+  await locator.click({ position: { x: 1, y: (box?.height ?? 2) / 2 } });
+};

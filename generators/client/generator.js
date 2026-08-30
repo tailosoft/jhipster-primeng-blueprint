@@ -1,4 +1,12 @@
+import { fileURLToPath } from 'node:url';
+
 import ClientGenerator from 'generator-jhipster/generators/client';
+
+import { PLAYWRIGHT } from '../e2e-utils.mjs';
+
+// Composed by path rather than by namespace: the yeoman namespace of a blueprint is derived
+// from the folder it was installed in, which is not stable during local development.
+const PLAYWRIGHT_GENERATOR = fileURLToPath(new URL('../playwright/index.js', import.meta.url));
 
 export default class extends ClientGenerator {
   constructor(args, opts, features) {
@@ -39,7 +47,13 @@ export default class extends ClientGenerator {
   get [ClientGenerator.COMPOSING]() {
     return this.asComposingTaskGroup({
       ...super.composing,
-      async composingTemplateTask() {},
+      // jhipster core only knows about `cypress`, playwright is provided by this blueprint.
+      async composePlaywright() {
+        const { testFrameworks } = this.jhipsterConfigWithDefaults;
+        if (Array.isArray(testFrameworks) && testFrameworks.includes(PLAYWRIGHT)) {
+          await this.composeWithJHipster(PLAYWRIGHT_GENERATOR);
+        }
+      },
     });
   }
 

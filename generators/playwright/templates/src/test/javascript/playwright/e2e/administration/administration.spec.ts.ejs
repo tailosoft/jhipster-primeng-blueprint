@@ -1,0 +1,106 @@
+<%#
+ Copyright 2013-2025 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+import { expect, test } from '../../support/fixtures';
+import {
+<%_ if (withAdminUi) { _%>
+  configurationPageHeadingSelector,
+  healthPageHeadingSelector,
+  logsPageHeadingSelector,
+  metricsPageHeadingSelector,
+<%_ } _%>
+  swaggerFrameSelector,
+  swaggerPageSelector,
+<%_ if (generateUserManagement) { _%>
+  userManagementPageHeadingSelector,
+<%_ } _%>
+} from '../../support/selectors';
+
+const username = process.env.E2E_USERNAME ?? 'admin';
+const password = process.env.E2E_PASSWORD ?? 'admin';
+
+test.describe('/admin', () => {
+  test.beforeEach(async ({ page, login }) => {
+    await login(username, password);
+    await page.goto('');
+  });
+
+<%_ if (generateUserManagement) { _%>
+  test.describe('/user-management', () => {
+    test('should load the page', async ({ page, navbar }) => {
+      await navbar.clickOnAdminMenuItem('user-management');
+      await expect(page.locator(userManagementPageHeadingSelector)).toBeVisible();
+    });
+  });
+
+<%_ } _%>
+<%_ if (withAdminUi) { _%>
+  test.describe('/metrics', () => {
+    test('should load the page', async ({ page, navbar }) => {
+      await navbar.clickOnAdminMenuItem('metrics');
+      await expect(page.locator(metricsPageHeadingSelector)).toBeVisible();
+    });
+  });
+
+  test.describe('/health', () => {
+    test('should load the page', async ({ page, navbar }) => {
+      await navbar.clickOnAdminMenuItem('health');
+      await expect(page.locator(healthPageHeadingSelector)).toBeVisible();
+    });
+  });
+
+  test.describe('/logs', () => {
+    test('should load the page', async ({ page, navbar }) => {
+      await navbar.clickOnAdminMenuItem('logs');
+      await expect(page.locator(logsPageHeadingSelector)).toBeVisible();
+    });
+  });
+
+  test.describe('/configuration', () => {
+    test('should load the page', async ({ page, navbar }) => {
+      await navbar.clickOnAdminMenuItem('configuration');
+      await expect(page.locator(configurationPageHeadingSelector)).toBeVisible();
+    });
+  });
+
+<%_ } _%>
+  test.describe('/docs', () => {
+    test('should load the page', async ({ page, navbar, management }) => {
+      const info = await management.getManagementInfo();
+      test.skip(!info.activeProfiles.includes('api-docs'), 'the api-docs profile is not active');
+
+      await navbar.clickOnAdminMenuItem('docs');
+      await expect(page.locator(swaggerFrameSelector)).toBeVisible();
+
+      const swagger = page.frameLocator(swaggerFrameSelector);
+      await expect(swagger.locator(swaggerPageSelector)).toBeVisible({ timeout: 15_000 });
+      await expect(swagger.locator('[id="select"] > option').first()).toBeAttached();
+      await expect(swagger.locator(`${swaggerPageSelector} .information-container`).first()).toBeAttached();
+    });
+  });
+<%_ if (communicationSpringWebsocket) { _%>
+
+  test.describe('/tracker', () => {
+    test('should load the page', async ({ page, navbar }) => {
+      await navbar.clickOnAdminMenuItem('tracker');
+      await expect(page.locator('[data-cy="trackerPageHeading"]')).toBeVisible();
+      await expect(page.locator('[data-cy="trackerTable"] > tbody > tr')).toHaveCount(1);
+    });
+  });
+<%_ } _%>
+});

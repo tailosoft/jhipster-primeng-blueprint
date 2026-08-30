@@ -1,0 +1,113 @@
+<%#
+ Copyright 2013-2025 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+import { expect, type Page } from '@playwright/test';
+
+export type Oauth2Data = {
+  /** Authorization endpoint of the identity provider, with the challenge parameters. */
+  url: string;
+};
+
+const AUTHORIZATION_URL = '/oauth2/authorization/oidc';
+
+export async function getOauth2Data(page: Page): Promise<Oauth2Data> {
+  const response = await page.request.get(AUTHORIZATION_URL, { maxRedirects: 0 });
+  const location = response.headers().location;
+  if (!location) {
+    throw new Error(`${AUTHORIZATION_URL} did not redirect to the identity provider (status ${response.status()})`);
+  }
+  return { url: location };
+}
+
+export async function oauthLogin(page: Page, oauth2Data: Oauth2Data, username: string, password: string): Promise<void> {
+  const { origin } = new URL(oauth2Data.url);
+  if (origin.includes('okta')) {
+    await oktaLogin(page, oauth2Data, username, password);
+  } else if (origin.includes('auth0')) {
+    await auth0Login(page, oauth2Data, username, password);
+  } else {
+    await keycloakLogin(page, oauth2Data, username, password);
+  }
+}
+
+export async function keycloakLogin(page: Page, oauth2Data: Oauth2Data, username: string, password: string): Promise<void> {
+  const loginPage = await (await page.request.get(oauth2Data.url, { maxRedirects: 0 })).text();
+  const action = decodeHtmlEntities(matchOrThrow(loginPage, /<form[^>]+action="([^"]+)"/i, 'the keycloak login form action'));
+
+  await page.request.post(action, { form: { username, password }, maxRedirects: 0 });
+  await completeLogin(page);
+}
+
+export async function auth0Login(page: Page, oauth2Data: Oauth2Data, username: string, password: string): Promise<void> {
+  const loginPage = await (await page.request.get(oauth2Data.url)).text();
+  const state = decodeHtmlEntities(matchOrThrow(loginPage, /<input[^>]+name="state"[^>]+value="([^"]+)"/i, 'the auth0 state'));
+
+  await page.request.post(`${new URL(oauth2Data.url).origin}/u/login`, {
+    form: { state, action: 'default', username, password },
+  });
+  await completeLogin(page);
+}
+
+export async function oktaLogin(page: Page, oauth2Data: Oauth2Data, username: string, password: string): Promise<void> {
+  const { origin } = new URL(oauth2Data.url);
+  const response = await page.request.post(`${origin}/api/v1/authn`, {
+    data: { username, password },
+    maxRedirects: 0,
+  });
+  const { sessionToken } = (await response.json()) as { sessionToken: string };
+
+  await page.request.get(`${oauth2Data.url}&sessionToken=${sessionToken}`);
+  await completeLogin(page);
+}
+
+export async function oauthLogout(page: Page): Promise<void> {
+  const csrfCookie = (await page.context().cookies()).find(cookie => cookie.name === 'XSRF-TOKEN');
+  const response = await page.request.post('api/logout', {
+    headers: {
+      ...(csrfCookie ? { 'X-XSRF-TOKEN': decodeURIComponent(csrfCookie.value) } : {}),
+      origin: new URL(page.url()).origin,
+    },
+  });
+  expect(response.status()).toBe(200);
+
+  const { logoutUrl } = (await response.json()) as { logoutUrl: string };
+  expect((await page.request.get(logoutUrl)).status()).toBe(200);
+  await page.goto('/');
+}
+
+/** Replays the authorization request so the application picks the identity provider session up. */
+const completeLogin = async (page: Page): Promise<void> => {
+  await page.request.get(AUTHORIZATION_URL);
+  await page.goto('/');
+};
+
+const matchOrThrow = (html: string, pattern: RegExp, what: string): string => {
+  const matched = pattern.exec(html)?.[1];
+  if (!matched) {
+    throw new Error(`Could not find ${what} in the identity provider response`);
+  }
+  return matched;
+};
+
+const decodeHtmlEntities = (value: string): string =>
+  value
+    .replaceAll('&amp;', '&')
+    .replaceAll('&quot;', '"')
+    .replaceAll('&#39;', "'")
+    .replaceAll('&lt;', '<')
+    .replaceAll('&gt;', '>');

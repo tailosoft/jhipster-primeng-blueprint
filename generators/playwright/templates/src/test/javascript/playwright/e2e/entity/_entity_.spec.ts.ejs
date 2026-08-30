@@ -1,0 +1,374 @@
+import { expect, test } from '../../support/fixtures';
+import type { ResponseWatcher } from '../../support/network';
+import {
+  entityTableSelector,
+  entityDetailsButtonSelector,
+  entityDetailsBackButtonSelector,
+<%_ if (!readOnly) { _%>
+  entityCreateButtonSelector,
+  entityCreateSaveButtonSelector,
+  entityCreateCancelButtonSelector,
+  <%_ if (updatableEntity) { _%>
+  entityEditButtonSelector,
+  <%_ } _%>
+  entityDeleteButtonSelector,
+  entityConfirmDeleteButtonSelector,
+<%_ } _%>
+} from '../../support/entity';
+<%_
+
+const baseApi = entityApi + 'api/';
+
+// The `cypress` flavour of the fake data is the "typed in the form" one, it is what the
+// primeng widgets expect here too.
+const entityFakeData = generateFakeData('cypress');
+const requiredRelationships = relationships.filter(rel => rel.relationshipRequired || rel.id);
+let requiredOtherEntities = this._.uniq(requiredRelationships.flatMap(rel => rel.otherEntity.primaryKey.composite ? [...rel.otherEntity.primaryKey.fields.map(f => (f.originalField ?? f).entity).reverse(), rel.otherEntity] : [rel.otherEntity]));
+let newEntities;
+do {
+  newEntities = requiredOtherEntities.flatMap(e => e.relationships.filter(rel => (rel.relationshipRequired || rel.id) && !requiredOtherEntities.includes(rel.otherEntity)).flatMap(rel => rel.otherEntity.primaryKey.composite ? [...rel.otherEntity.primaryKey.fields.map(f => (f.originalField ?? f).entity).reverse(), rel.otherEntity] : [rel.otherEntity])).filter(e => !requiredOtherEntities.includes(e));
+  requiredOtherEntities.unshift(...newEntities);
+} while (newEntities.length > 0);
+const otherEntities = this._.uniq(Object.values(differentRelationships).filter(rels => rels.length > 0).map(rels => rels[0].otherEntity));
+const importUser = requiredOtherEntities.some(e => e.name === 'User');
+if (importUser) {
+    requiredOtherEntities.splice(requiredOtherEntities.findIndex(e => e.name === 'User'), 1);
+    if (newEntities.some(e => e.name === 'User')) {
+        newEntities.splice(newEntities.findIndex(e => e.name === 'User'), 1);
+    }
+}
+// We cannot generate a required entity with relationship with required relationships.
+const skipCreateTest =
+  // (
+  //   !playwrightBootstrapEntities ||
+  //   requiredRelationships.some(rel => rel.otherEntity.primaryKey && rel.otherEntity.primaryKey.derived) ||
+  //   requiredRelationships.some(rel => rel.otherEntity.builtInUser || rel.otherEntity === this.entity) ||
+  //   requiredRelationships.map(rel => rel.otherEntity.relationships).flat().some(rel => rel.relationshipRequired) ||
+  //   !entityFakeData
+  // ) ? '.skip' : '';
+'';
+
+const sampleFields = fields.filter(f => !f.autoGenerate && (f.id || !f.nullable));
+
+if (workaroundEntityCannotBeEmpty && sampleFields.length === 0) {
+  const sample = fields.find(f => !f.autoGenerate);
+  if (sample) {
+    sampleFields.push(sample);
+  }
+} else if (workaroundInstantReactiveMariaDB) {
+  const samples = fields.filter(f => !f.autoGenerate && f.nullable && f.fieldType === 'Instant');
+  if (samples.length > 0) {
+    sampleFields.push(...samples);
+  }
+}
+
+// Escapes an api path so it can be embedded in a `new RegExp('…')` of the generated spec.
+const escapeForRegExp = path => path.replace(/[.*+?^${}()|[\]\\]/g, '\\\\$&');
+// `/<api url>` optionally followed by a query string, and `/<api url>/<id>`.
+const entitiesApiPattern = `new RegExp('^${escapeForRegExp('/' + baseApi + entityApiUrl)}(\\\\?.*)?$')`;
+const entityApiPattern = `new RegExp('^${escapeForRegExp('/' + baseApi + entityApiUrl)}/[^/?]+$')`;
+const otherEntitiesApiPattern = otherEntity => `new RegExp('^${escapeForRegExp('/' + baseApi + otherEntity.entityApiUrl)}$')`;
+
+// Built without template literals so that the `${…}` of the generated code survives EJS.
+const idPath = (primaryKey, instance) =>
+  primaryKey.fields.length === 1
+    ? '${' + instance + '.' + primaryKey.name + '}'
+    : primaryKey.fields.map(field => field.fieldName + '=${' + instance + '.' + field.nameDotted + '}').join(';');
+_%>
+
+const <%= entityInstance %>PageUrl = '/<%= entityPage %>';
+const <%= entityInstance %>PageUrlPattern = new RegExp('/<%= entityPage %>(\\?.*)?$');
+const username = process.env.E2E_USERNAME ?? '<%- adminEntity || fineGrainedPermissions ? 'admin' : 'user' %>';
+const password = process.env.E2E_PASSWORD ?? '<%- adminEntity || fineGrainedPermissions ? 'admin' : 'user' %>';
+<%_ if (!readOnly) { _%>
+<% if (skipCreateTest) { %>// <% } %>const <%= entityInstance %>Sample = <%- JSON.stringify(this.generateTestEntity(sampleFields)) %>;
+<%_ } _%>
+
+const entitiesApi = <%- entitiesApiPattern %>;
+const entityApiPath = <%- entityApiPattern %>;
+
+test.describe('<%- entityNameCapitalized %> e2e test', () => {
+  let <%= entityInstance %>: any;
+  <%_ if (importUser) { _%>
+  let user: any;
+  <%_ } _%>
+<%_ for (otherEntity of requiredOtherEntities) { _%>
+  <% if (skipCreateTest) { %>// <% } %>let <%= otherEntity.entityInstance %>: any;
+<%_ } _%>
+
+  let entitiesRequest: ResponseWatcher;
+<%_ if (!readOnly) { _%>
+  let postEntityRequest: ResponseWatcher;
+  let deleteEntityRequest: ResponseWatcher;
+<%_ } _%>
+
+  test.beforeEach(async ({ login }) => {
+    await login(username, password);
+  });
+
+<%_ if (requiredOtherEntities.length > 0 || importUser) { _%>
+  <%_ if (skipCreateTest) { _%>
+  /* Disabled due to incompatibility
+  <%_ } _%>
+
+  // create an instance at the required relationship entities
+  <%_ if (importUser) { _%>
+  test.beforeEach(async ({ api }) => {
+    user = await api.get('/api/account');
+  });
+  <%_ } _%>
+  <%_ for (otherEntity of requiredOtherEntities) { _%>
+  test.beforeEach(async ({ api }) => {
+    <%= otherEntity.entityInstance %> = await api.post('/<%= baseApi + otherEntity.entityApiUrl %>', <%- JSON.stringify(this.generateTestEntity(otherEntity.fields.filter(f => !f.autoGenerate))).slice(0, -1) + ', ' +
+    otherEntity.relationships.filter(r => r.id || r.relationshipRequired).map(r => `${r.relationshipName}: ${r.otherEntity.entityInstance}`).join(', ') + '}' %>);
+  });
+  <%_ } _%>
+  <%_ if (skipCreateTest) { _%>
+   */
+  <%_ } _%>
+
+<%_ } _%>
+  test.beforeEach(({ network }) => {
+    entitiesRequest = network.watch('GET', entitiesApi);
+<%_ if (!readOnly) { _%>
+    postEntityRequest = network.watch('POST', entitiesApi);
+    deleteEntityRequest = network.watch('DELETE', entityApiPath);
+<%_ } _%>
+  });
+
+<%_ if (requiredOtherEntities.length > 0) { _%>
+  <%_ if (skipCreateTest) { _%>
+  /* Disabled due to incompatibility
+  <%_ } _%>
+  // Simulate relationships api for better performance and reproducibility.
+  test.beforeEach(async ({ network }) => {
+  <%_ for (otherEntity of otherEntities) { _%>
+    await network.stub('GET', <%- otherEntitiesApiPattern(otherEntity) %>, {
+      body: [<%= (requiredOtherEntities.includes(otherEntity) || otherEntity.name === 'User') ? otherEntity.entityInstance : '' %>],
+    });
+  <%_ } _%>
+  });
+  <%_ if (skipCreateTest) { _%>
+   */
+  <%_ } _%>
+
+<%_ } _%>
+  test.afterEach(async ({ api }) => {
+    if (<%= entityInstance %>) {
+      await api.delete(`/<%= baseApi + entityApiUrl %>/<%- idPath(primaryKey, entityInstance) %>`);
+      <%= entityInstance %> = undefined;
+    }
+  });
+
+<%_ if (requiredOtherEntities.length > 0) { _%>
+  <%_ if (skipCreateTest) { _%>
+  /* Disabled due to incompatibility
+  <%_ } _%>
+  test.afterEach(async ({ api }) => {
+  <%_ for (otherEntity of [...requiredOtherEntities].reverse()) { _%>
+    if (<%= otherEntity.entityInstance %>) {
+      await api.delete(`/<%= baseApi + otherEntity.entityApiUrl %>/<%- idPath(otherEntity.primaryKey, otherEntity.entityInstance) %>`);
+      <%= otherEntity.entityInstance %> = undefined;
+    }
+  <%_ } _%>
+  });
+  <%_ if (skipCreateTest) { _%>
+   */
+  <%_ } _%>
+
+<%_ } _%>
+  test('<%- entityNamePlural %> menu should load <%- entityNamePlural %> page', async ({ page, navbar, entity }) => {
+    await page.goto('/');
+    await navbar.clickOnEntityMenuItem('<%= entityPage %>');
+
+    const response = await entitiesRequest.next();
+    if (((await response.json()) as unknown[]).length === 0) {
+      await expect(page.locator(entityTableSelector)).toHaveCount(0);
+    } else {
+      await expect(page.locator(entityTableSelector).first()).toBeAttached();
+    }
+
+    await expect(entity.getEntityHeading('<%- entityNameCapitalized %>')).toBeAttached();
+    await expect(page).toHaveURL(<%= entityInstance %>PageUrlPattern);
+  });
+
+  test.describe('<%- entityNameCapitalized %> page', () => {
+<%_ if (!readOnly) { _%>
+    test.describe('create button click', () => {
+      test.beforeEach(async ({ page }) => {
+        await page.goto(<%= entityInstance %>PageUrl);
+        await entitiesRequest.next();
+      });
+
+      test('should load create <%- entityNameCapitalized %> page', async ({ page, entity }) => {
+        await page.locator(entityCreateButtonSelector).click();
+        await expect(page).toHaveURL(new RegExp('/<%= entityPage %>/new$'));
+        await expect(entity.getEntityCreateUpdateHeading('<%- entityNameCapitalized %>')).toBeAttached();
+        await expect(page.locator(entityCreateSaveButtonSelector)).toBeAttached();
+        await page.locator(entityCreateCancelButtonSelector).click();
+        expect((await entitiesRequest.next()).status()).toBe(200);
+        await expect(page).toHaveURL(<%= entityInstance %>PageUrlPattern);
+      });
+    });
+
+<%_ } _%>
+    test.describe('with existing value', () => {
+<%_ if (!readOnly) { _%>
+  <%_ if (skipCreateTest) { _%>
+      /* Disabled due to incompatibility
+  <%_ } _%>
+      test.beforeEach(async ({ page, api, network }) => {
+        <%= entityInstance %> = await api.post('/<%= baseApi + entityApiUrl %>', <% if (requiredRelationships.length > 0) { %>{
+          ...<%= entityInstance %>Sample,
+    <%_ for (relationship of requiredRelationships) { _%>
+          <%= relationship.propertyName %>: <%= relationship.collection ? '[' : '' %><%= relationship.otherEntity.entityInstance %><%= relationship.collection ? ']' : '' %>,
+    <%_ } _%>
+        }<% } else { %><%= entityInstance %>Sample<% } %>);
+
+        await network.stubOnce('GET', entitiesApi, {
+  <%_ if (!paginationNo) { _%>
+          headers: {
+            link: '<http://localhost/<%= baseApi + entityApiUrl %>?page=0&size=20>; rel="last",<http://localhost/<%= baseApi + entityApiUrl %>?page=0&size=20>; rel="first"',
+          },
+  <%_ } _%>
+          body: [<%= entityInstance %>],
+        });
+
+        await page.goto(<%= entityInstance %>PageUrl);
+        await entitiesRequest.next();
+      });
+  <%_ if (skipCreateTest) { _%>
+       */
+
+  <%_ } _%>
+<%_ } _%>
+<%_ if (readOnly || skipCreateTest) { _%>
+      test.beforeEach(async ({ page }) => {
+        await page.goto(<%= entityInstance %>PageUrl);
+
+        const response = await entitiesRequest.next();
+        test.skip(((await response.json()) as unknown[]).length === 0, 'no <%- entityNamePlural %> to display');
+      });
+<%_ } _%>
+
+      test('detail button click should load details <%- entityNameCapitalized %> page', async ({ page, entity }) => {
+        await page.locator(entityDetailsButtonSelector).first().click();
+        await expect(entity.getEntityDetailsHeading('<%= entityInstance %>')).toBeAttached();
+        await page.locator(entityDetailsBackButtonSelector).click();
+        expect((await entitiesRequest.next()).status()).toBe(200);
+        await expect(page).toHaveURL(<%= entityInstance %>PageUrlPattern);
+      });
+
+<%_ if (!readOnly && updatableEntity) { _%>
+      test('edit button click should load edit <%- entityNameCapitalized %> page and go back', async ({ page, entity }) => {
+        await page.locator(entityEditButtonSelector).first().click();
+        await expect(entity.getEntityCreateUpdateHeading('<%- entityNameCapitalized %>')).toBeAttached();
+        await expect(page.locator(entityCreateSaveButtonSelector)).toBeAttached();
+        await page.locator(entityCreateCancelButtonSelector).click();
+        expect((await entitiesRequest.next()).status()).toBe(200);
+        await expect(page).toHaveURL(<%= entityInstance %>PageUrlPattern);
+      });
+
+      test('edit button click should load edit <%- entityNameCapitalized %> page and save', async ({ page, entity }) => {
+        await page.locator(entityEditButtonSelector).first().click();
+        await expect(entity.getEntityCreateUpdateHeading('<%- entityNameCapitalized %>')).toBeAttached();
+        await page.locator(entityCreateSaveButtonSelector).click();
+        expect((await entitiesRequest.next()).status()).toBe(200);
+        await expect(page).toHaveURL(<%= entityInstance %>PageUrlPattern);
+      });
+
+<%_ } _%>
+<%_ if (!readOnly) { _%>
+      <% if (skipCreateTest) { %>// Reason: cannot create a required entity with relationship with required relationships.<% } %>
+      test<%= skipCreateTest %>('last delete button click should delete instance of <%- entityNameCapitalized %>', async ({ page, entity<% if (clientFrameworkReact) { %>, network<% } %> }) => {
+  <%_ if (clientFrameworkReact) { _%>
+        const dialogDeleteRequest = network.watch('GET', entityApiPath);
+  <%_ } _%>
+        await page.locator(entityDeleteButtonSelector).last().click();
+  <%_ if (clientFrameworkReact) { _%>
+        await dialogDeleteRequest.next();
+  <%_ } _%>
+        await expect(entity.getEntityDeleteDialogHeading()).toBeAttached();
+        await page.locator(entityConfirmDeleteButtonSelector).click();
+        expect((await deleteEntityRequest.next()).status()).toBe(204);
+        expect((await entitiesRequest.next()).status()).toBe(200);
+        await expect(page).toHaveURL(<%= entityInstance %>PageUrlPattern);
+
+        <%= entityInstance %> = undefined;
+      });
+<%_ } _%>
+    });
+  });
+<%_ if (!readOnly) { _%>
+
+  test.describe('new <%- entityNameCapitalized %> page', () => {
+    test.beforeEach(async ({ page, entity }) => {
+      await page.goto(<%= entityInstance %>PageUrl);
+      await page.locator(entityCreateButtonSelector).click();
+      await expect(entity.getEntityCreateUpdateHeading('<%- entityNameCapitalized %>')).toBeAttached();
+    });
+
+    <% if (skipCreateTest) { %>// Reason: cannot create a required entity with relationship with required relationships.<% } %>
+    test<%= skipCreateTest %>('should create an instance of <%- entityNameCapitalized %>', async ({ page, entity }) => {
+  <%_ fields.filter(field => (!field.id || !field.autoGenerate) && !field.hidden && !field.readonly).forEach((field) => {
+    const fieldName = field.fieldName;
+    const fieldIsEnum = field.fieldIsEnum;
+    let fieldValue = !entityFakeData ? field.generateFakeData('cypress') : entityFakeData[field.fieldName];
+    if (fieldValue === undefined) {
+        this.log.warn(`Error generating a value for field ${fieldName}`);
+        return;
+    }
+    fieldValue = typeof fieldValue === 'string' ? fieldValue.replaceAll("'", "\\'") : fieldValue;
+  _%>
+
+    <%_ if (field.fieldTypeBoolean) { _%>
+      await expect(entity.checkedMarker('<%= fieldName %>')).toHaveCount(0);
+      await entity.field('<%= fieldName %>').click();
+      await expect(entity.checkedMarker('<%= fieldName %>')).toHaveCount(1);
+
+    <%_ } else if (field.fieldTypeBinary && !field.blobContentTypeText) { _%>
+      await entity.setFieldImageAsBytesOfEntity('<%= fieldName %>', 'integration-test.png');
+
+    <%_ } else if (fieldIsEnum) { _%>
+      await entity.setFieldSelectToLastOfEntity('<%= fieldName %>');
+
+    <%_ } else if (field.fieldTypeString || field.fieldTypeNumeric) { _%>
+      await entity.typeInField('<%= fieldName %>', '<%- fieldValue %>');
+      await expect(entity.field('<%= fieldName %>')).toHaveValue('<%= fieldValue %>');
+
+    <%_ } else if (field.fieldTypeLocalDate || field.fieldTypeTimed || field.fieldTypeDuration) { _%>
+      await entity.typeInDateField('<%= fieldName %>', '<%= fieldValue %>');
+      await expect(entity.field('<%= fieldName %>').locator('input')).toHaveValue('<%- fieldValue %>');
+
+    <%_ } else { _%>
+      await entity.typeInField('<%= fieldName %>', '<%- fieldValue %>');
+      await expect(entity.field('<%= fieldName %>')).toHaveValue(new RegExp('<%- fieldValue %>'));
+
+    <%_ } _%>
+  <%_ }); _%>
+  <%_ for (relationship of requiredRelationships) { _%>
+    <%_ relationship.clientFields.forEach(cf => { _%>
+      <%_ if (relationship.relationshipManyToOne || relationship.relationshipOneToOne) { _%>
+      await entity.setFieldSelectToLastOfEntity('<%= cf.fullPath[cf.fullPath.length -2] %>');
+      <%_ } else if (relationship.relationshipManyToMany) { _%>
+      await entity.setFieldSelectToLastOfEntity('<%= cf.fullPath[cf.fullPath.length -2] %>', true, ' ');
+      <%_ } _%>
+    <%_ }) _%>
+  <%_ } _%>
+
+  <%_ if (anyFieldIsBlobDerived) { _%>
+      // the save button is clicked before the blob fields finished validating
+      await page.waitForTimeout(200);
+  <%_ } _%>
+      await page.locator(entityCreateSaveButtonSelector).click();
+
+      const postResponse = await postEntityRequest.next();
+      expect(postResponse.status()).toBe(201);
+      <%= entityInstance %> = await postResponse.json();
+
+      expect((await entitiesRequest.next()).status()).toBe(200);
+      await expect(page).toHaveURL(<%= entityInstance %>PageUrlPattern);
+    });
+  });
+<%_ } _%>
+});

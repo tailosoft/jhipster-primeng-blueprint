@@ -1,0 +1,57 @@
+<%#
+ Copyright 2013-2025 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+<%#
+ This is a fragment file, it will be merged into the root template if available.
+ EJS fragments will process % delimiter tags in the template and & delimiter tags during the merge process.
+-%>
+<&_ if (fragment.testingSection) { -&>
+#### Playwright E2E tests
+
+UI end-to-end tests are also powered by [Playwright][]. They're located in [<%= playwrightDir %>](<%= playwrightDir %>).
+
+Install the browsers once:
+
+```
+npx playwright install --with-deps <%- playwrightBrowsers.join(' ') %>
+```
+
+Then start Spring Boot in one terminal (`<%= nodePackageManagerCommand %> run app:start`) and run the tests
+(`<%= nodePackageManagerCommand %> run e2e:playwright`) in a second one.
+
+| Script                                                  | Description                                  |
+| ------------------------------------------------------- | -------------------------------------------- |
+| `<%= nodePackageManagerCommand %> run playwright`               | Open the Playwright UI mode                  |
+| `<%= nodePackageManagerCommand %> run e2e:playwright`           | Run the suite headless                       |
+| `<%= nodePackageManagerCommand %> run e2e:playwright:headed`    | Run the suite with a visible browser         |
+| `<%= nodePackageManagerCommand %> run e2e:playwright:debug`     | Run the suite with the Playwright inspector  |
+| `<%= nodePackageManagerCommand %> run e2e:playwright:report`    | Open the HTML report of the last run         |
+
+User credentials and the target server can be overridden with environment variables:
+
+```
+export E2E_USERNAME="<your-username>"
+export E2E_PASSWORD="<your-password>"
+export E2E_BASE_URL="http://localhost:<%= gatewayServerPort || serverPort %>/"
+```
+
+Traces, screenshots and the HTML report are written to `<%= playwrightTemporaryDir %>`.
+<&_ } -&>
+<&_ if (fragment.referenceSection) { -&>
+[Playwright]: https://playwright.dev/
+<&_ } -&>

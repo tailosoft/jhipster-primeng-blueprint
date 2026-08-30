@@ -1,0 +1,72 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SubGenerator playwright of generator-jhipster-primeng-blueprint JHipster blueprint > run > should succeed 1`] = `
+{
+  ".yo-rc.json": {
+    "stateCleared": "modified",
+  },
+  "package.json": {
+    "stateCleared": "modified",
+  },
+  "playwright.config.ts": {
+    "stateCleared": "modified",
+  },
+  "src/test/javascript/playwright/e2e/account/login-page.spec.ts": {
+    "stateCleared": "modified",
+  },
+  "src/test/javascript/playwright/e2e/account/logout.spec.ts": {
+    "stateCleared": "modified",
+  },
+  "src/test/javascript/playwright/e2e/account/password-page.spec.ts": {
+    "stateCleared": "modified",
+  },
+  "src/test/javascript/playwright/e2e/account/register-page.spec.ts": {
+    "stateCleared": "modified",
+  },
+  "src/test/javascript/playwright/e2e/account/reset-password-page.spec.ts": {
+    "stateCleared": "modified",
+  },
+  "src/test/javascript/playwright/e2e/account/settings-page.spec.ts": {
+    "stateCleared": "modified",
+  },
+  "src/test/javascript/playwright/e2e/administration/administration.spec.ts": {
+    "stateCleared": "modified",
+  },
+  "src/test/javascript/playwright/e2e/entity/authority.spec.ts": {
+    "stateCleared": "modified",
+  },
+  "src/test/javascript/playwright/fixtures/integration-test.png": {
+    "stateCleared": "modified",
+  },
+  "src/test/javascript/playwright/support/account.ts": {
+    "stateCleared": "modified",
+  },
+  "src/test/javascript/playwright/support/api.ts": {
+    "stateCleared": "modified",
+  },
+  "src/test/javascript/playwright/support/auth.ts": {
+    "stateCleared": "modified",
+  },
+  "src/test/javascript/playwright/support/entity.ts": {
+    "stateCleared": "modified",
+  },
+  "src/test/javascript/playwright/support/fixtures.ts": {
+    "stateCleared": "modified",
+  },
+  "src/test/javascript/playwright/support/management.ts": {
+    "stateCleared": "modified",
+  },
+  "src/test/javascript/playwright/support/navbar.ts": {
+    "stateCleared": "modified",
+  },
+  "src/test/javascript/playwright/support/network.ts": {
+    "stateCleared": "modified",
+  },
+  "src/test/javascript/playwright/support/selectors.ts": {
+    "stateCleared": "modified",
+  },
+  "src/test/javascript/playwright/tsconfig.json": {
+    "stateCleared": "modified",
+  },
+}
+`;

@@ -1,0 +1,128 @@
+<%#
+ Copyright 2013-2025 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+import type { Page, Response } from '@playwright/test';
+
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+
+export type StubbedResponse = {
+  status?: number;
+  headers?: Record<string, string>;
+  body: unknown;
+};
+
+const DEFAULT_TIMEOUT = 30_000;
+
+/**
+ * Queue of responses matching a request, the equivalent of a cypress intercept alias.
+ *
+ * Watching starts as soon as the watcher is created — typically in a `beforeEach`, before the
+ * action that triggers the request — and `next()` consumes the responses in arrival order,
+ * exactly like repeated `cy.wait('@alias')` calls do.
+ */
+export class ResponseWatcher {
+  private readonly received: Response[] = [];
+  private readonly waiting: ((response: Response) => void)[] = [];
+
+  constructor(
+    page: Page,
+    private readonly description: string,
+    matches: (response: Response) => boolean,
+  ) {
+    page.on('response', response => {
+      if (!matches(response)) return;
+      const resolve = this.waiting.shift();
+      if (resolve) {
+        resolve(response);
+      } else {
+        this.received.push(response);
+      }
+    });
+  }
+
+  /** Resolves with the next matching response, including one already received. */
+  async next(timeout: number = DEFAULT_TIMEOUT): Promise<Response> {
+    const buffered = this.received.shift();
+    if (buffered) return buffered;
+
+    return new Promise<Response>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        const index = this.waiting.indexOf(onResponse);
+        if (index !== -1) this.waiting.splice(index, 1);
+        reject(new Error(`Timed out after ${timeout}ms waiting for ${this.description}`));
+      }, timeout);
+      const onResponse = (response: Response) => {
+        clearTimeout(timer);
+        resolve(response);
+      };
+      this.waiting.push(onResponse);
+    });
+  }
+}
+
+/** Request watching and stubbing, scoped to a single page. */
+export class Network {
+  constructor(private readonly page: Page) {}
+
+  /**
+   * Start collecting the responses of the requests matching `method` and `pattern`.
+   * `pattern` is tested against the path and query string, e.g. `/api/blogs?page=0`.
+   */
+  watch(method: HttpMethod, pattern: RegExp): ResponseWatcher {
+    return new ResponseWatcher(
+      this.page,
+      `${method} ${pattern.source}`,
+      response => response.request().method() === method && pattern.test(pathAndQuery(response.url())),
+    );
+  }
+
+  /** Answer every matching request locally, without hitting the backend. */
+  async stub(method: HttpMethod, pattern: RegExp, response: StubbedResponse): Promise<void> {
+    await this.route(method, pattern, response, false);
+  }
+
+  /** Answer the first matching request locally, then let the backend serve the next ones. */
+  async stubOnce(method: HttpMethod, pattern: RegExp, response: StubbedResponse): Promise<void> {
+    await this.route(method, pattern, response, true);
+  }
+
+  private async route(method: HttpMethod, pattern: RegExp, response: StubbedResponse, once: boolean): Promise<void> {
+    let served = false;
+    await this.page.route(
+      url => pattern.test(pathAndQuery(url.toString())),
+      async route => {
+        if (route.request().method() !== method || (once && served)) {
+          await route.fallback();
+          return;
+        }
+        served = true;
+        await route.fulfill({
+          status: response.status ?? 200,
+          headers: response.headers,
+          contentType: 'application/json',
+          body: JSON.stringify(response.body),
+        });
+      },
+    );
+  }
+}
+
+const pathAndQuery = (url: string): string => {
+  const parsed = new URL(url);
+  return `${parsed.pathname}${parsed.search}`;
+};

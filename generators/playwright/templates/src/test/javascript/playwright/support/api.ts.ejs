@@ -1,0 +1,89 @@
+<%#
+ Copyright 2013-2025 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+import type { APIResponse, Page } from '@playwright/test';
+
+export type RequestOptions = {
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  url: string;
+  /** JSON payload. */
+  data?: unknown;
+  /** Form encoded payload, mutually exclusive with `data`. */
+  form?: Record<string, string | number | boolean>;
+  headers?: Record<string, string>;
+  /** Set to false to inspect the response of a request that is expected to fail. */
+  failOnStatusCode?: boolean;
+};
+
+/**
+ * Backend calls issued outside of the UI, the equivalent of cypress `cy.authenticatedRequest`.
+ *
+ * Requests go through `page.request`, which shares the browser context cookie jar, so the
+ * session and CSRF cookies the application already holds are reused as-is. Note that these
+ * requests are *not* seen by `page.on('response')`, so they never disturb the response
+ * watchers used by the specs.
+ */
+export class Api {
+<%_ if (authenticationTypeJwt) { _%>
+  /** Captured at login time; sessionStorage is not readable before the app has loaded. */
+  bearerToken?: string;
+<%_ } _%>
+
+  constructor(private readonly page: Page) {}
+
+  async authenticatedRequest({
+    method = 'GET',
+    url,
+    data,
+    form,
+    headers = {},
+    failOnStatusCode = true,
+  }: RequestOptions): Promise<APIResponse> {
+    const response = await this.page.request.fetch(url, {
+      method,
+      headers: { ...headers, ...(await this.authHeaders()) },
+      ...(data === undefined ? {} : { data }),
+      ...(form === undefined ? {} : { form }),
+    });
+    if (failOnStatusCode && !response.ok()) {
+      throw new Error(`${method} ${url} responded ${response.status()}: ${await response.text()}`);
+    }
+    return response;
+  }
+
+  async get<T = any>(url: string): Promise<T> {
+    return (await this.authenticatedRequest({ method: 'GET', url })).json() as Promise<T>;
+  }
+
+  async post<T = any>(url: string, data?: unknown): Promise<T> {
+    return (await this.authenticatedRequest({ method: 'POST', url, data })).json() as Promise<T>;
+  }
+
+  async delete(url: string): Promise<APIResponse> {
+    return this.authenticatedRequest({ method: 'DELETE', url });
+  }
+
+  private async authHeaders(): Promise<Record<string, string>> {
+<%_ if (authenticationTypeJwt) { _%>
+    return this.bearerToken ? { Authorization: `Bearer ${this.bearerToken}` } : {};
+<%_ } else { _%>
+    const csrfCookie = (await this.page.context().cookies()).find(cookie => cookie.name === 'XSRF-TOKEN');
+    return csrfCookie ? { 'X-XSRF-TOKEN': decodeURIComponent(csrfCookie.value) } : {};
+<%_ } _%>
+  }
+}

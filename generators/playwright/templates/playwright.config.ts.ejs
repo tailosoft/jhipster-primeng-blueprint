@@ -1,0 +1,61 @@
+<%#
+ Copyright 2013-2025 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+<%_
+  const playwrightRelativeDir = this.relativeDir(clientRootDir, playwrightDir);
+  const playwrightRelativeTemporaryDir = this.relativeDir(clientRootDir, playwrightTemporaryDir);
+  const browserProject = browser => ({
+    chromium: `{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }`,
+    firefox: `{ name: 'firefox', use: { ...devices['Desktop Firefox'] } }`,
+    webkit: `{ name: 'webkit', use: { ...devices['Desktop Safari'] } }`,
+  })[browser];
+-%>
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './<%= playwrightRelativeDir %>e2e',
+  outputDir: './<%= playwrightRelativeTemporaryDir %>test-results',
+  // The whole suite talks to a single backend and mutates shared data (accounts, entities),
+  // so it runs sequentially — same execution model as the cypress suite.
+  fullyParallel: false,
+  workers: 1,
+  forbidOnly: !!process.env.CI,
+  retries: 2,
+  timeout: 60_000,
+  expect: {
+    timeout: 10_000,
+  },
+  reporter: [['list'], ['html', { outputFolder: './<%= playwrightRelativeTemporaryDir %>report', open: 'never' }]],
+  use: {
+    baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:<%= gatewayServerPort || serverPort %>/',
+    viewport: { width: 1200, height: 720 },
+    trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
+    video: 'off',
+    // CI images and hardened containers usually run without user namespaces, where the
+    // chromium sandbox cannot start. Nothing untrusted is loaded here.
+    launchOptions: {
+      chromiumSandbox: false,
+    },
+  },
+  projects: [
+<%_ for (const browser of playwrightBrowsers) { _%>
+    <%- browserProject(browser) %>,
+<%_ } _%>
+  ],
+});

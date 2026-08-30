@@ -1,0 +1,93 @@
+<%#
+ Copyright 2013-2025 the original author or authors from the JHipster project.
+
+ This file is part of the JHipster project, see https://www.jhipster.tech/
+ for more information.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-%>
+import { type Browser, expect, type Page, test as base } from '@playwright/test';
+
+<%_ if (generateUserManagement) { _%>
+import { AccountHelper } from './account';
+<%_ } _%>
+import { Api } from './api';
+import { login as apiLogin } from './auth';
+import { EntityHelper } from './entity';
+import { ManagementHelper } from './management';
+import { Navbar } from './navbar';
+import { Network } from './network';
+
+export type JhipsterFixtures = {
+  /** Backend calls that reuse the credentials of the current browser context. */
+  api: Api;
+  /** Authenticates through the API, the equivalent of cypress `cy.login`. */
+  login: (username: string, password: string) => Promise<void>;
+  /** Request watching and stubbing, the equivalent of cypress `cy.intercept`. */
+  network: Network;
+  navbar: Navbar;
+  entity: EntityHelper;
+  management: ManagementHelper;
+<%_ if (generateUserManagement) { _%>
+  account: AccountHelper;
+<%_ } _%>
+};
+
+export const test = base.extend<JhipsterFixtures>({
+  api: async ({ page }, use) => {
+    await use(new Api(page));
+  },
+  login: async ({ page, api }, use) => {
+    await use((username: string, password: string) => apiLogin(page, api, username, password));
+  },
+  network: async ({ page }, use) => {
+    await use(new Network(page));
+  },
+  navbar: async ({ page }, use) => {
+    await use(new Navbar(page));
+  },
+  entity: async ({ page }, use) => {
+    await use(new EntityHelper(page));
+  },
+  management: async ({ api }, use) => {
+    await use(new ManagementHelper(api));
+  },
+<%_ if (generateUserManagement) { _%>
+  account: async ({ api }, use) => {
+    await use(new AccountHelper(api));
+  },
+<%_ } _%>
+});
+
+/**
+ * Authenticated session for `beforeAll` / `afterAll` hooks, where the `page` fixture does not
+ * exist yet. The context is disposed of before returning, so it never leaks into the tests.
+ */
+export async function withApiSession<T>(
+  browser: Browser,
+  username: string,
+  password: string,
+  body: (session: { page: Page; api: Api }) => Promise<T>,
+): Promise<T> {
+  const context = await browser.newContext({ baseURL: base.info().project.use.baseURL });
+  try {
+    const page = await context.newPage();
+    const api = new Api(page);
+    await apiLogin(page, api, username, password);
+    return await body({ page, api });
+  } finally {
+    await context.close();
+  }
+}
+
+export { expect };

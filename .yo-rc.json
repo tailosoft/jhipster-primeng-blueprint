@@ -1,6 +1,6 @@
 {
   "generator-jhipster": {
-    "additionalSubGenerators": "",
+    "additionalSubGenerators": "playwright",
     "baseName": "primeng-blueprint",
     "cli": false,
     "entities": [],
@@ -95,6 +95,20 @@
         "sbs": true,
         "written": true
       },
+      "playwright": {
+        "command": true,
+        "priorities": [
+          "loading",
+          "preparing",
+          "preparingEachEntityField",
+          "postPreparingEachEntity",
+          "writing",
+          "writingEntities",
+          "postWriting"
+        ],
+        "sbs": false,
+        "written": true
+      },
       "cypress": {
         "command": false,
         "priorities": [
@@ -129,6 +143,6 @@
     "jhipsterVersion": "9.0.0-beta.0",
     "localBlueprint": false,
     "sampleWritten": true,
-    "subGenerators": ["angular", "cypress", "client", "client:i18n"]
+    "subGenerators": ["angular", "cypress", "playwright", "client", "client:i18n"]
   }
 }
